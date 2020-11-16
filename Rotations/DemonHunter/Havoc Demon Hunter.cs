@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace HyperElk.Core
 {
-    public class HacocDemonHunter : CombatRoutine
+    public class HavocDemonHunter : CombatRoutine
     {
         //Toggles
         private bool IsPause => API.ToggleIsEnabled("Pause");
