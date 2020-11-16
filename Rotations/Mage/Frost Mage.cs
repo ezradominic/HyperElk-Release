@@ -9,10 +9,6 @@ namespace HyperElk.Core
 {
     public class FrostMage : CombatRoutine
     {
-        //Toggles
-
-        private bool IsPause => API.ToggleIsEnabled("Pause");
-
 
         //General
         private int PlayerLevel => API.PlayerLevel;
@@ -81,7 +77,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
             {
                 //Cooldowns
                 if (IsCooldowns)
@@ -97,22 +92,6 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-                if ((!API.PlayerIsInCombat || API.PlayerIsInCombat) && (!API.TargetIsIncombat || API.TargetIsIncombat) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
-                {
-                    CombatPulse();
-                }
-
-                if (!API.PlayerIsMounted)
-                {
-                    if (!API.PlayerIsInCombat)
-                    {
-                        OutOfCombatPulse();
-                    }
-
-                    rotation();
-                    return;
-
-                }
             }
         }
 
@@ -122,7 +101,6 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
             {
                 //ARCANE INTELLECT
                 if (API.CanCast(Flury) && API.PlayerHasBuff(BrainFreeze) && API.PlayerLevel >= 32)
@@ -193,12 +171,6 @@ namespace HyperElk.Core
                     return;
                 }
             }
-        }
-
-        // ROTATION
-        private void rotation()
-        {
-
         }
     }
 }
