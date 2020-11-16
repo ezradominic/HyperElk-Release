@@ -1,45 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 
 
 namespace HyperElk.Core
 {
-    public class VengeanceDH : CombatRoutine
+    public class VengeanceDemonHunter : CombatRoutine
     {
         //Toggles
-        private bool IsAOE => API.ToggleIsEnabled("AOE");
         private bool IsPause => API.ToggleIsEnabled("Pause");
-        private bool IsCooldowns => API.ToggleIsEnabled("Cooldowns");
 
         //General
         private int PlayerLevel => API.PlayerLevel;
-        private bool IsMelee => API.TargetRange < 6;
+        private bool IsMelee => API.TargetRange < 8;
 
-        //DH specific 
+
+        //CBProperties
+        private int SoulCleavePercentProc => numbList[CombatRoutine.GetPropertyInt(SoulCleave)];
+
+        private bool KICK => CombatRoutine.GetPropertyBool("KICK");
+        private int KICKTime => CombatRoutine.GetPropertyInt("KICKTime");
         private bool UseSIS => (bool)CombatRoutine.GetProperty("UseSIS");
+        private bool UseCF => (bool)CombatRoutine.GetProperty("UseCF");
+        private bool UseHoR => (bool)CombatRoutine.GetProperty("UseHoR");
+
+        private int SoulFragmentNumner => CombatRoutine.GetPropertyInt("SoulFragmentNumner");
 
 
+
+
+        int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+
+
+        //Spells,Buffs,Debuffs
+        private string InfernalStrike = "Infernal Strike";
+        private string ThrowGlaive = "Throw Glaive";
+        private string Shear = "Shear";
+        private string DemonSpikes = "Demon Spikes";
+        private string Metamorphosis = "Metamorphosis";
+        private string FieryBrand = "Fiery Brand";
+        private string SoulCleave = "Soul Cleave";
+        private string ImmolationAura = "Immolation Aura";
+        private string SigilofFlame = "Sigil of Flame";
+        private string FelDevastation = "Fel Devastation";
+        private string Fracture = "Fracture";
+        private string SpiritBomb = "Spirit Bomb";
+        private string Disrupt = "Disrupt";
+        private string SigilofChains = "Sigil of Chains";
+        private string SoulBarrier = "Soul Barrier";
+        private string BulkExtraction = "Bulk Extraction";
+        private string ConcentratedFlame = "Concentrated Flame";
+        private string Frailty = "Frailty";
+        private string SoulFragments = "Soul Fragments";
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Vengeance DH @Mufflon12";
-            API.WriteLog("Welcome to Vengeance DH rotation @ Mufflon12");
-            API.WriteLog("Self Infernal Strike : /cast [@player] Infernal Strike");
-            API.WriteLog("Sigil of Flame : /cast [@player] Sigil of Flame");
-            API.WriteLog("Sigil of Misery : /cast [@player] Sigil of Misery");
-            API.WriteLog("Sigil of Silence : /cast [@player] Sigil of Silence");
-            API.WriteLog("Sigil of Silence : /cast [@player] Sigil of Chains");
+            CombatRoutine.Name = "Vengeance DemonHunter @Mufflon12";
+            API.WriteLog("Welcome to Vengeance DemonHunter rotation @ Mufflon12");
 
-            CombatRoutine.AddProp("UseSIS", "Use SIS", true, "Should the rotation use Self Infernal Strike");
+            //Concentrated Flame
+            CombatRoutine.AddProp("UseCF", "Use CF", true, "Should the rotation use Concentrated Flame");
+            //Self Infernal Strike
+            CombatRoutine.AddProp("UseSIS", "Use SIS", true, "Should the rotation use Self Infernal Strike", "Generic");
+            //Soul Cleave Heal
+            CombatRoutine.AddProp(SoulCleave, "Soul Cleave", numbList, "Life percent at which " + SoulCleave + " is used, set to 0 to disable", "Healing", 9);
+            //Soul Fragments to use Spirit Bomb
+            CombatRoutine.AddProp("SoulFragmentNumner", "Soul Fragments", 4, "How many Soul Fragments to use Spirit Bomb", "Talents");
 
 
             //Spells
             CombatRoutine.AddSpell("Infernal Strike", "NumPad2");
             CombatRoutine.AddSpell("Throw Glaive", "D6");
             CombatRoutine.AddSpell("Shear", "D2");
-            CombatRoutine.AddSpell("Demon Spikes", "NumPad1");
+            CombatRoutine.AddSpell("Demon Spikes", "NumPad3");
             CombatRoutine.AddSpell("Metamorphosis", "D8");
             CombatRoutine.AddSpell("Fiery Brand", "D9");
             CombatRoutine.AddSpell("Soul Cleave", "D3");
@@ -48,132 +83,177 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Fel Devastation", "D5");
             CombatRoutine.AddSpell("Fracture", "D2");
             CombatRoutine.AddSpell("Spirit Bomb", "Oem6");
-            CombatRoutine.AddSpell("Disrupt", "Oem6");
-            CombatRoutine.AddSpell("Sigil of Chains", "NumPad10");
-            CombatRoutine.AddSpell("Soul Barrier", "NumPad11");
-            CombatRoutine.AddSpell("Bulk Extraction", "NumPad12");
-            
+            CombatRoutine.AddSpell("Disrupt", "NumPad1");
+            CombatRoutine.AddSpell("Sigil of Chains", "F1");
+            CombatRoutine.AddSpell("Soul Barrier", "F2");
+            CombatRoutine.AddSpell("Bulk Extraction", "F3");
+            CombatRoutine.AddSpell("Concentrated Flame", "NumPad4");
+
             //Buffs
             CombatRoutine.AddBuff("Demon Spikes");
-             CombatRoutine.AddBuff("Soul Fragments");
+            CombatRoutine.AddBuff("Soul Fragments");
+            CombatRoutine.AddBuff("Concentrated Flame");
+            CombatRoutine.AddBuff("Hour of Reaping");
+
 
             //Debuffs
             CombatRoutine.AddDebuff("Frailty");
 
 
 
-            CombatRoutine.AddToggle("Pause");
-            CombatRoutine.AddToggle("AOE");
-            CombatRoutine.AddToggle("Cooldowns");
+            //Debuffs
+
+
         }
 
         public override void Pulse()
         {
             if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
             {
+                if ((!API.PlayerIsInCombat || API.PlayerIsInCombat) && (!API.TargetIsIncombat || API.TargetIsIncombat) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                {
+                    CombatPulse();
+                }
+
+                if (!API.PlayerIsMounted)
+                {
+                    if (!API.PlayerIsInCombat)
+                    {
+                        OutOfCombatPulse();
+                    }
+
+                    rotation();
+                    return;
+
+                }
+            }
+         }
+
+        public override void CombatPulse()
+        {
+            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
+            {
                 //Cooldowns
                 if (IsCooldowns)
                 {
-                    if (API.CanCast("Metamorphosis", true, true))
+                    if (API.CanCast(Metamorphosis) && PlayerLevel >= 12)
                     {
-                        API.CastSpell("Metamorphosis");
+                        API.CastSpell(Metamorphosis);
                         return;
                     }
-                    if (API.CanCast("Fiery Brand", true, true))
+                    if (API.CanCast(FieryBrand) && PlayerLevel >= 14)
                     {
-                        API.CastSpell("Fiery Brand");
+                        API.CastSpell(FieryBrand);
                         return;
                     }
-
                 }
-                if (PlayerLevel <= 50)
+                //KICK
+                if (KICK && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < KICKTime && !API.SpellISOnCooldown(Disrupt) && IsMelee)
                 {
-                    rotation();
+                    API.CastSpell(Disrupt);
                     return;
                 }
+
+                rotation();
+                return;
+
             }
+        }
+        public override void OutOfCombatPulse()
+        {
 
         }
-
-
-
 
         // ROTATION
         private void rotation()
         {
-            if (UseSIS)
+            //Concentrated Flame
+            if (UseCF)
             {
-                if (API.SpellCharges("Infernal Strike") > 1 && IsMelee && !API.PlayerIsChanneling)
+                if (API.CanCast(ConcentratedFlame) && API.TargetRange <= 40)
                 {
-                    API.CastSpell("Infernal Strike");
+                    API.CastSpell(ConcentratedFlame);
                     return;
                 }
             }
-            if (API.CanCast("Throw Glaive", true, true) && !IsMelee && API.TargetRange <= 30)
+            // Soul Cleave
+            if (API.PlayerHealthPercent <= SoulCleavePercentProc && API.CanCast(SoulCleave) && API.PlayerBuffStacks(SoulFragments) > 2 && API.PlayerFury > 30 && PlayerLevel >= 1)
             {
-               API.CastSpell("Throw Glaive");
-                return;
-           }
-            if (!API.SpellISOnCooldown("Shear") && !API.PlayerIsTalentSelected(4, 3) && IsMelee)
-            {
-                API.CastSpell("Shear");
+                API.CastSpell(SoulCleave);
                 return;
             }
-            if (API.CanCast("Demon Spikes", true, true) && API.PlayerBuffTimeRemaining("Demon Spikes") < 100)
+            //Infernal Strike
+            if (UseSIS)
             {
-                API.CastSpell("Demon Spikes");
+                if (API.SpellCharges(InfernalStrike) > 1 && IsMelee && !API.PlayerIsChanneling && PlayerLevel >= 10)
+                {
+                    API.CastSpell(InfernalStrike);
+                    return;
+                }
+            }
+            //Fracture
+            if (API.PlayerIsTalentSelected(4, 3) && !API.SpellISOnCooldown(Fracture) && IsMelee)
+            {
+                API.CastSpell(Fracture);
                 return;
             }
-            if (API.PlayerFury > 65 && API.PlayerHealthPercent < 90)
+            //Fel Devastation
+            if (!API.SpellISOnCooldown(FelDevastation) && IsMelee && API.PlayerFury > 50 && PlayerLevel >= 11)
             {
-                API.CastSpell("Soul Cleave");
+                API.CastSpell(FelDevastation);
                 return;
             }
-            if (!API.SpellISOnCooldown("Immolation Aura"))
+            //Spirit Bomb
+            if (API.PlayerIsTalentSelected(3, 3) && IsMelee && API.PlayerHealthPercent > 90 && API.PlayerBuffStacks(SoulFragments) >= SoulFragmentNumner)
             {
-                API.CastSpell("Immolation Aura");
+                API.CastSpell(SpiritBomb);
                 return;
             }
-            if (!API.SpellISOnCooldown("Sigil of Flame") && IsMelee)
+            //Throw Glaive
+            if (API.CanCast(ThrowGlaive) && !IsMelee && API.TargetRange <= 30 && PlayerLevel >= 19)
             {
-                API.CastSpell("Sigil of Flame");
+                API.CastSpell(ThrowGlaive);
                 return;
             }
-            if (!API.SpellISOnCooldown("Fel Devastation") && IsMelee && API.PlayerFury > 50)
+            //Shear
+            if (!API.SpellISOnCooldown(Shear) && !API.PlayerIsTalentSelected(4, 3) && IsMelee)
             {
-                API.CastSpell("Fel Devastation");
+                API.CastSpell(Shear);
+                return;
+            }
+            //Demon Spikes
+            if (API.CanCast(DemonSpikes) && API.PlayerBuffTimeRemaining(DemonSpikes) < 100 && PlayerLevel >= 14)
+            {
+                API.CastSpell(DemonSpikes);
+                return;
+            }
+            //Immolation Aura
+            if (!API.SpellISOnCooldown(ImmolationAura) && PlayerLevel >= 14)
+            {
+                API.CastSpell(ImmolationAura);
+                return;
+            }
+            //Sigil of Flames
+            if (!API.SpellISOnCooldown(SigilofFlame) && IsMelee && PlayerLevel >= 12)
+            {
+                API.CastSpell(SigilofFlame);
                 return;
             }
 
             //Talents
-            if (API.PlayerIsTalentSelected(4, 3) && !API.SpellISOnCooldown("Fracture") && IsMelee)
+            if (API.PlayerIsTalentSelected(5, 3) && API.CanCast(SigilofChains) && !IsMelee)
             {
-                API.CastSpell("Fracture");
+                API.CastSpell(SigilofChains);
                 return;
             }
-            if (API.PlayerIsTalentSelected(3, 3) && API.TargetDebuffRemainingTime("Frailty") < 100 && IsMelee && API.PlayerHealthPercent > 90 && API.PlayerBuffStacks("Soul Fragments") > 3)
+            if (API.PlayerIsTalentSelected(6, 3) && API.CanCast(SoulBarrier) && API.PlayerBuffTimeRemaining(SoulBarrier) < 100)
             {
-                API.CastSpell("Spirit Bomb");
+                API.CastSpell(SoulBarrier);
                 return;
             }
-            if (IsMelee && API.TargetIsCasting && API.TargetCanInterrupted)
+            if (API.PlayerIsTalentSelected(7, 3) && API.CanCast(BulkExtraction))
             {
-                API.CastSpell("Disrupt");
-                return;
-            }
-            if (API.PlayerIsTalentSelected(5, 3) && API.CanCast("Sigil of Chains", true, true) && !IsMelee)
-            {
-                API.CastSpell("Sigil of Chains");
-                return;
-            }
-            if (API.PlayerIsTalentSelected(6, 3) && API.CanCast("Soul Barrier", true, true) && API.PlayerBuffTimeRemaining("Soul Barrier") < 100)
-            {
-                API.CastSpell("Soul Barrier");
-                return;
-            }
-            if (API.PlayerIsTalentSelected(7, 3) && API.CanCast("Bulk Extraction", true, true))
-            {
-                API.CastSpell("Bulk Extraction");
+                API.CastSpell(BulkExtraction);
                 return;
             }
         }
