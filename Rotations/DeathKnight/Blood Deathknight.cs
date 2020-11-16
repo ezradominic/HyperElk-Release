@@ -9,6 +9,7 @@ namespace HyperElk.Core
         //General
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
+        int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
 
         //DK specific 
 
@@ -17,7 +18,45 @@ namespace HyperElk.Core
         private bool UseDND => (bool)CombatRoutine.GetProperty("UseDND");
         private bool UseAMZ => (bool)CombatRoutine.GetProperty("UseAMZ");
         private bool UseCF => (bool)CombatRoutine.GetProperty("UseCF");
-        private bool Healthstone => (bool)CombatRoutine.GetProperty("Healthstone");
+        private bool KICK => CombatRoutine.GetPropertyBool("KICK");
+        private int KICKTime => CombatRoutine.GetPropertyInt("KICKTime");
+        private int DeathStrikePercentProc => numbList[CombatRoutine.GetPropertyInt(DeathStrike)];
+        private int RuneTap1PercentProc => numbList[CombatRoutine.GetPropertyInt(RuneTap)];
+        private int RuneTap2PercentProc => numbList[CombatRoutine.GetPropertyInt(RuneTap2)];
+        private int AOEUnitNumner => CombatRoutine.GetPropertyInt("AOEUnitNumner");
+
+
+        //Spells//Buffs/Debuffs
+        private string Marrowrend = "Marrowrend";
+        private string BloodBoil = "Blood Boil";
+        private string DeathStrike = "Death Strike";
+        private string HeartStrike = "Heart Strike";
+        private string AntiMagicShell = "Anti-Magic-Shell";
+        private string VampiricBlood = "Vampiric Blood";
+        private string IceboundFortitude = "Icebound Fortitude";
+        private string DancingRuneWeapon = "Dancing Rune Weapon";
+        private string DeathandDecay = "Death and Decay";
+        private string MindFreez = "Mind Freez";
+        private string Blooddrinker = "Blooddrinker";
+        private string DeathsCaress = "Death's Caress";
+        private string Healthstone = "Healthstone";
+        private string RuneTap = "Rune Tap";
+        private string RuneTap2 = "Rune Tap2";
+        private string RaiseDead = "Raise Dead";
+        private string ConcentratedFlame = "Concentrated Flame";
+        private string AntiMagicZone = "Anti-Magic Zone";
+        private string Tombstone = "Tombstone";
+        private string Consumption = "Consumption";
+        private string BloodTap = "Blood Tap";
+        private string MarkofBlood = "Mark of Blood";
+        private string DeathPact = "Death Pact";
+        private string Bonestorm = "Bonestorm";
+        private string BoneShield = "Bone Shield";
+        private string CrimsonScourge = "Crimson Scourge";
+        private string Ossuary = "Ossuary";
+        private string Haemostasis = "Haemostasis";
+        private string BloodShield = "Blood Shield";
+        private string BloodPlague = "Blood Plague";
 
 
 
@@ -30,7 +69,12 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseDND", "Use DND", true, "Should the rotation use Death and Decay");
             CombatRoutine.AddProp("UseAMZ", "Use AMZ", true, "Should the rotation use Anti-Magic Zone");
             CombatRoutine.AddProp("UseCF", "Use CF", true, "Should the rotation use Concentrated Flame");
-            CombatRoutine.AddProp("Healthstone", "Healthstone", true, "Should the rotation use Healthstone");
+
+            CombatRoutine.AddProp(DeathStrike, "Death Strike", numbList, "Life percent at which " + DeathStrike + " is used, set to 0 to disable", "Healing", 9);
+            CombatRoutine.AddProp(RuneTap, "Rune Tap 1st charge", numbList, "Life percent at which 1st " + RuneTap + " charge is used, set to 0 to disable", "Healing", 8);
+            CombatRoutine.AddProp(RuneTap2, "Rune Tap 2nd charge", numbList, "Life percent at which 2nd " + RuneTap2 + " charge is used, set to 0 to disable", "Healing", 5);
+
+
 
             CombatRoutine.AddSpell("Marrowrend", "D1");
             CombatRoutine.AddSpell("Blood Boil", "D2");
@@ -73,58 +117,61 @@ namespace HyperElk.Core
             {
                 if (UseAMZ)
                 {
-                    if (API.CanCast("Anti-Magic Zone", true, true) && API.TargetIsCasting)
+                    if (API.CanCast(AntiMagicZone, true, true) && API.TargetIsCasting)
                     {
-                        API.CastSpell("Anti-Magic Zone");
+                        API.CastSpell(AntiMagicZone);
                         return;
                     }
                 }
-                if (UseCF)
+                //KICK
+                if (KICK && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < KICKTime && !API.SpellISOnCooldown(MindFreez) && IsMelee && PlayerLevel >= 7)
                 {
-                    if (API.CanCast("Concentrated Flame", true, true) && IsMelee && API.TargetRange <= 40 && API.PlayerBuffTimeRemaining("Concentrated Flame") < 300)
-                    {
-                        API.CastSpell("Concentrated Flame");
-                        return;
-                    }
+                    API.CastSpell(MindFreez);
+                    return;
                 }
-                if (UseDND)
+                //Death Strike
+                if (CurrentRP >= 45 && API.PlayerHealthPercent <= DeathStrikePercentProc && !API.SpellISOnCooldown(DeathStrike) && IsMelee && PlayerLevel >= 4)
                 {
-                    if (API.PlayerUnitInMeleeRangeCount >= 2 && CurrentRune >= 1 && API.CanCast("Death and Decay", true, true) && IsMelee)
-                    {
-                        API.CastSpell("Death and Decay");
-                        return;
-                    }
+                    API.CastSpell(DeathStrike);
+                    return;
                 }
                 if (IsCooldowns)
                 {
-                    if (PlayerLevel >= 12 && API.CanCast("Raise Dead", true, true))
+
+                    //Raise Dead
+                    if (PlayerLevel >= 12 && API.CanCast(RaiseDead))
                     {
-                        API.CastSpell("Raise Dead");
+                        API.CastSpell(RaiseDead);
                         return;
                     }
-                    if (PlayerLevel >= 34 && API.CanCast("Dancing Rune Weapon", true, true))
+                    //Dancing Rune Weapon
+                    if (PlayerLevel >= 34 && API.CanCast(DancingRuneWeapon))
                     {
-                        API.CastSpell("Dancing Rune Weapon");
+                        API.CastSpell(DancingRuneWeapon);
                         return;
                     }
-                    if (API.CanCast("Icebound Fortitude", true, true))
+                    //Icebound Fortitude
+                    if (API.CanCast(IceboundFortitude) && PlayerLevel >= 38)
                     {
-                        API.CastSpell("Icebound Fortitude");
+                        API.CastSpell(IceboundFortitude);
                         return;
                     }
-                    if (API.CanCast("Vampiric Blood", true, true))
+                    //Vampiric Blood
+                    if (API.CanCast(VampiricBlood) && PlayerLevel >= 29)
                     {
-                        API.CastSpell("Vampiric Blood");
+                        API.CastSpell(VampiricBlood);
                         return;
                     }
-                    if (API.CanCast("Rune Tap", true, true) && API.PlayerHealthPercent < 85)
+                    //Rune Tap 1st charge
+                    if (API.CanCast(RuneTap) && API.PlayerHealthPercent <= RuneTap1PercentProc && PlayerLevel >= 19)
                     {
-                        API.CastSpell("Rune Tap");
+                        API.CastSpell(RuneTap);
                         return;
                     }
-                    if (API.CanCast("Rune Tap", true, true) && API.PlayerHealthPercent < 50)
+                    //Rune Tap 2nd charge
+                    if (API.CanCast(RuneTap) && API.PlayerHealthPercent <= RuneTap2PercentProc && PlayerLevel >= 19)
                     {
-                        API.CastSpell("Rune Tap");
+                        API.CastSpell(RuneTap);
                         return;
                     }
                 }
@@ -149,85 +196,112 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (CurrentRune >= 2 && API.CanCast("Marrowrend", true, true) && API.PlayerBuffStacks("Bone Shield") < 6)
+
+            //Concentrated Flame
+            if (UseCF)
             {
-                API.CastSpell("Marrowrend");
+                if (API.CanCast(ConcentratedFlame) && IsMelee && API.TargetRange <= 40)
+                {
+                    API.CastSpell(ConcentratedFlame);
+                    return;
+                }
+            }
+            //Death and Decay
+            if (UseDND)
+            {
+                if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumner && CurrentRune >= 1 && API.CanCast(DeathandDecay) && IsMelee && PlayerLevel >= 3)
+                {
+                    API.CastSpell(DeathandDecay);
+                    return;
+                }
+            }
+            //Death's Caress
+            if ( API.CanCast(DeathsCaress) && PlayerLevel >= 28 && API.TargetRange <= 30)
+            {
+                API.CastSpell(Marrowrend);
                 return;
             }
-            if (CurrentRune >= 2 && API.CanCast("Marrowrend", true, true) && API.PlayerBuffTimeRemaining("Bone Shield") < 300)
+            //Marrowrend
+            if (CurrentRune >= 2 && API.CanCast(Marrowrend) && API.PlayerBuffStacks(BoneShield) < 6 && PlayerLevel >= 11)
             {
-                API.CastSpell("Marrowrend");
+                API.CastSpell(Marrowrend);
                 return;
             }
-            if (API.CanCast("Blood Boil", true, true) && IsMelee && API.TargetDebuffRemainingTime("Blood Plague") < 300)
+            if (CurrentRune >= 2 && API.CanCast(Marrowrend) && API.PlayerBuffTimeRemaining(Marrowrend) < 300 && PlayerLevel >= 11)
             {
-                API.CastSpell("Blood Boil");
+                API.CastSpell(Marrowrend);
                 return;
             }
-            if (CurrentRune >= 3 && API.CanCast("Death and Decay", true, true) && API.PlayerHasBuff("Crimson Scourge"))
+            //Blood Boil
+            if (API.CanCast(BloodBoil) && IsMelee && API.TargetDebuffRemainingTime(BloodBoil) < 300 && PlayerLevel >= 17)
             {
-                API.CastSpell("Death and Decay");
+                API.CastSpell(BloodBoil);
                 return;
             }
-            if (CurrentRune >= 3 && API.CanCast("Heart Strike", true, true))
+            //Death and Decay on Crimson Scourge
+            if (CurrentRune >= 3 && API.CanCast(DeathandDecay) && API.PlayerHasBuff(CrimsonScourge) && PlayerLevel >= 3)
             {
-                API.CastSpell("Heart Strike");
+                API.CastSpell(DeathandDecay);
                 return;
             }
-            if (CurrentRune >= 3 && API.CanCast("Blood Boil", true, true) && API.TargetUnitInRangeCount > 2)
+            //Hearth Strike
+            if (CurrentRune >= 3 && API.CanCast(HeartStrike) && PlayerLevel >= 10)
             {
-                API.CastSpell("Blood Boil");
+                API.CastSpell(HeartStrike);
                 return;
             }
-            if (CurrentRP >= 45 && API.CanCast("Death Strike", true, true) && IsMelee)
+            //Blood Boil
+            if (CurrentRune >= 3 && API.CanCast(BloodBoil) && API.TargetUnitInRangeCount > 2 && PlayerLevel >= 17)
             {
-                API.CastSpell("Death Strike");
+                API.CastSpell(BloodBoil);
                 return;
             }
-            if (API.CanCast("Mind Freeze", true, true) && API.TargetIsCasting && IsMelee && API.TargetRange <= 15)
+            //Death Strike to Dumpe RP
+            if (CurrentRP >= 45 && API.CanCast(DeathStrike) && IsMelee && PlayerLevel >= 4)
             {
-                API.CastSpell("Mind Freeze");
+                API.CastSpell(DeathStrike);
                 return;
             }
-            if (API.CanCast("Anti-Magic-Shell", true, true) && API.TargetIsCasting)
+            //Anti-Magic-Shell
+            if (API.CanCast(AntiMagicShell) && API.TargetIsCasting && PlayerLevel >= 9)
             {
-                API.CastSpell("Anti-Magic-Shell");
+                API.CastSpell(AntiMagicShell);
                 return;
             }
             //TALENTS
-            if (API.PlayerIsTalentSelected(1, 2) && API.CanCast("Blooddrinker", true, true) && IsMelee && API.TargetRange <= 40)
+            if (API.PlayerIsTalentSelected(1, 2) && API.CanCast(Blooddrinker) && IsMelee && API.TargetRange <= 40)
             {
-                API.CastSpell("Blooddrinker");
+                API.CastSpell(Blooddrinker);
                 return;
             }
-            if (API.PlayerIsTalentSelected(1, 3) && API.CanCast("Tombstone", true, true) && IsMelee && API.PlayerHasBuff("Bone Shield") && API.PlayerHealthPercent > 80)
+            if (API.PlayerIsTalentSelected(1, 3) && API.CanCast(Tombstone) && IsMelee && API.PlayerHasBuff(BoneShield) && API.PlayerHealthPercent > 80)
             {
-                API.CastSpell("Tombstone");
+                API.CastSpell(Tombstone);
                 return;
             }
-            if (API.PlayerIsTalentSelected(2, 3) && API.CanCast("Consumption", true, true) && IsMelee)
+            if (API.PlayerIsTalentSelected(2, 3) && API.CanCast(Consumption) && IsMelee)
             {
-                API.CastSpell("Consumption");
+                API.CastSpell(Consumption);
                 return;
             }
-            if (API.PlayerIsTalentSelected(3, 3) && CurrentRune >= 6 && API.CanCast("Blood Tap", true, true))
+            if (API.PlayerIsTalentSelected(3, 3) && CurrentRune >= 6 && API.CanCast(BloodTap))
             {
-                API.CastSpell("Blood Tap");
+                API.CastSpell(BloodTap);
                 return;
             }
-            if (API.PlayerIsTalentSelected(4, 3) && API.CanCast("Mark of Blood", true, true))
+            if (API.PlayerIsTalentSelected(4, 3) && API.CanCast(MarkofBlood))
             {
-                API.CastSpell("Mark of Blood");
+                API.CastSpell(MarkofBlood);
                 return;
             }
-            if (API.PlayerIsTalentSelected(6, 2) && API.PlayerHealthPercent < 50 && API.CanCast("Death Pact", true, true))
+            if (API.PlayerIsTalentSelected(6, 2) && API.PlayerHealthPercent < 50 && API.CanCast(DeathPact))
             {
-                API.CastSpell("Death Pact");
+                API.CastSpell(DeathPact);
                 return;
             }
-            if (API.PlayerIsTalentSelected(7, 3) && CurrentRP >= 100 && API.CanCast("Bonestorm", true, true) && IsMelee)
+            if (API.PlayerIsTalentSelected(7, 3) && CurrentRP >= 100 && API.CanCast(Bonestorm) && IsMelee)
             {
-                API.CastSpell("Bonestorm");
+                API.CastSpell(Bonestorm);
                 return;
             }
         }
