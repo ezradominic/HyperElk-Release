@@ -10,9 +10,9 @@ namespace HyperElk.Core
     public class FrostMage : CombatRoutine
     {
         //Toggles
-        private bool IsAOE => API.ToggleIsEnabled("AOE");
+
         private bool IsPause => API.ToggleIsEnabled("Pause");
-        private bool IsCooldowns => API.ToggleIsEnabled("Cooldowns");
+
 
         //General
         private int PlayerLevel => API.PlayerLevel;
@@ -97,88 +97,108 @@ namespace HyperElk.Core
                         return;
                     }
                 }
+                if ((!API.PlayerIsInCombat || API.PlayerIsInCombat) && (!API.TargetIsIncombat || API.TargetIsIncombat) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                {
+                    CombatPulse();
+                }
 
-                rotation();
-                return;
+                if (!API.PlayerIsMounted)
+                {
+                    if (!API.PlayerIsInCombat)
+                    {
+                        OutOfCombatPulse();
+                    }
 
+                    rotation();
+                    return;
+
+                }
             }
-
         }
 
+        public override void OutOfCombatPulse()
+        {
 
+        }
+        public override void CombatPulse()
+        {
+            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
+            {
+                //ARCANE INTELLECT
+                if (API.CanCast(Flury) && API.PlayerHasBuff(BrainFreeze) && API.PlayerLevel >= 32)
+                {
+                    API.CastSpell(Flury);
+                    return;
+                }
 
+                //FROZEN ORB
+                if (API.CanCast(FrozenOrb) && API.PlayerLevel >= 38)
+                {
+                    API.CastSpell(FrozenOrb);
+                    return;
+                }
+
+                //ACANE INTELLECT
+                if (API.CanCast(ArcaneIntellect) && !API.PlayerHasBuff(ArcaneIntellect) && API.TargetUnitInRangeCount > 2 && API.PlayerLevel >= 3)
+                {
+                    API.CastSpell(ArcaneIntellect);
+                    return;
+                }
+
+                //FROST NOVA
+                if (UseFN)
+                {
+                    if (!API.SpellISOnCooldown(FrostNova) && PlayerLevel >= 3 && API.TargetRange < 10)
+                    {
+                        API.CastSpell(FrostNova);
+                        return;
+                    }
+                }
+
+                //FIREBLAST
+                if (UseFB)
+                {
+                    if (!API.SpellISOnCooldown(FireBlast) && PlayerLevel >= 3 && !API.TargetHasDebuff(FrostNova))
+                    {
+                        API.CastSpell(FireBlast);
+                        return;
+                    }
+                }
+
+                //ICE LANCE FINGERS OF FROST
+                if (API.CanCast(IceLance) && PlayerLevel >= 13 && API.PlayerHasBuff(Icicles) && API.PlayerHasBuff(FingersofFrost) && API.TargetRange < 40)
+                {
+                    API.CastSpell(IceLance);
+                    return;
+                }
+
+                //ICE LANCE FROST NOVA
+                if (API.CanCast(IceLance) && PlayerLevel >= 10 && API.TargetHasDebuff(FrostNova) && API.PlayerHasBuff(Icicles) && API.TargetRange < 40)
+                {
+                    API.CastSpell(IceLance);
+                    return;
+                }
+
+                //Cone of Cold
+                if (API.CanCast(ConeOfCold) && API.TargetRange < 10 && PlayerLevel >= 18)
+                {
+                    API.CastSpell(ConeOfCold);
+                    return;
+                }
+
+                //FROSTBOLT
+                if (API.CanCast(Frostbolt) && !API.PlayerIsMoving && API.TargetRange < 40)
+                {
+                    API.CastSpell(Frostbolt);
+                    return;
+                }
+            }
+        }
 
         // ROTATION
         private void rotation()
         {
-            //ARCANE INTELLECT
-            if (API.CanCast(Flury) && API.PlayerHasBuff(BrainFreeze) && API.PlayerLevel >= 32)
-            {
-                API.CastSpell(Flury);
-                return;
-            }
 
-            //FROZEN ORB
-            if (API.CanCast(FrozenOrb) && API.PlayerLevel >= 38)
-            {
-                API.CastSpell(FrozenOrb);
-                return;
-            }
-
-            //ACANE INTELLECT
-            if (API.CanCast(ArcaneIntellect) && !API.PlayerHasBuff(ArcaneIntellect) && API.TargetUnitInRangeCount > 2 && API.PlayerLevel >= 3)
-            {
-                API.CastSpell(ArcaneIntellect);
-                return;
-            }
-
-            //FROST NOVA
-            if (UseFN)
-            {
-                if (!API.SpellISOnCooldown(FrostNova) && PlayerLevel >= 3 && API.TargetRange < 10)
-                {
-                    API.CastSpell(FrostNova);
-                    return;
-                }
-            }
-
-            //FIREBLAST
-            if (UseFB)
-            {
-                if (!API.SpellISOnCooldown(FireBlast) && PlayerLevel >= 3 && !API.TargetHasDebuff(FrostNova))
-                {
-                    API.CastSpell(FireBlast);
-                    return;
-                }
-            }
-
-            //ICE LANCE FINGERS OF FROST
-            if (API.CanCast(IceLance) && PlayerLevel >= 13 && API.PlayerHasBuff(Icicles) && API.PlayerHasBuff(FingersofFrost) && API.TargetRange < 40)
-            {
-                API.CastSpell(IceLance);
-                return;
-            }
-
-            //ICE LANCE FROST NOVA
-            if (API.CanCast(IceLance) && PlayerLevel >= 10 && API.TargetHasDebuff(FrostNova) && API.PlayerHasBuff(Icicles) && API.TargetRange < 40)
-            {
-                API.CastSpell(IceLance);
-                return;
-            }
-
-            //Cone of Cold
-            if (API.CanCast(ConeOfCold) && API.TargetRange < 10 && PlayerLevel >= 18)
-            {
-                API.CastSpell(ConeOfCold);
-                return;
-            }
-
-            //FROSTBOLT
-            if (API.CanCast(Frostbolt) && !API.PlayerIsMoving && API.TargetRange < 40)
-            {
-                API.CastSpell(Frostbolt);
-                return;
-            }
         }
     }
 }
