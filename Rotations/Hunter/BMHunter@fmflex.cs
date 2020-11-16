@@ -45,7 +45,7 @@ namespace HyperElk.Core
         private bool isCallPet => CombatRoutine.GetPropertyBool("CallPet");
 
         private float FocusRegen => 10f * (1f + API.PlayerGetHaste);
-        private float FocusTimeToMax => (API.PlayerMaxFocus - API.PlayerFocus) * 1000f / FocusRegen;
+        private float FocusTimeToMax => (API.PlayerMaxFocus - API.PlayerFocus) * 100f / FocusRegen;
 
         public override void Initialize()
         {
@@ -204,7 +204,8 @@ namespace HyperElk.Core
                 return;
             }
             //if=(focus-cost+focus.regen*(cooldown.kill_command.remains-1)>action.kill_command.cost|cooldown.kill_command.remains>1+gcd&cooldown.bestial_wrath.remains_guess>focus.time_to_max|buff.memory_of_lucid_dreams.up)&cooldown.kill_command.remains>1|target.time_to_die<3" );
-            if (((((API.PlayerFocus - 35 + FocusRegen * (API.SpellCDDuration(KillCommand) - 100)) > 30 || (API.SpellCDDuration(KillCommand) > 100 + API.SpellGCDTotalDuration && API.SpellCDDuration(BestialWrath) / 2 > (int)FocusTimeToMax)) && API.SpellCDDuration(KillCommand) > 100)
+            if (((((API.PlayerFocus - 35 + FocusRegen * (API.SpellCDDuration(KillCommand) - 100)) > 30 || (API.SpellCDDuration(KillCommand) > 100 + API.SpellGCDTotalDuration && API.SpellCDDuration(BestialWrath) / 2 > (int)FocusTimeToMax)) 
+                && API.SpellCDDuration(KillCommand) > 100)
                     || API.TargetTimeToDie < 300)
                     && API.PlayerFocus >= 35
                     && (!IsAOE || API.TargetUnitInRangeCount <= AOEUnitNumber)
