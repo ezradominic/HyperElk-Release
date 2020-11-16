@@ -127,7 +127,7 @@ namespace HyperElk.Core
 
                 }
             }
-         }
+        }
 
         public override void CombatPulse()
         {

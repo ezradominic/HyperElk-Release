@@ -143,7 +143,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-           
+
         }
 
 
@@ -179,7 +179,7 @@ namespace HyperElk.Core
                 API.CastSpell("Blood Boil");
                 return;
             }
-            if (CurrentRP >= 45 && API.CanCast ("Death Strike", true, true) && IsMelee)
+            if (CurrentRP >= 45 && API.CanCast("Death Strike", true, true) && IsMelee)
             {
                 API.CastSpell("Death Strike");
                 return;
@@ -200,7 +200,7 @@ namespace HyperElk.Core
                 API.CastSpell("Blooddrinker");
                 return;
             }
-            if (API.PlayerIsTalentSelected(1, 3) && API.CanCast("Tombstone", true, true) && IsMelee && API.PlayerHasBuff("Bone Shield") && API.PlayerHealthPercent >80)
+            if (API.PlayerIsTalentSelected(1, 3) && API.CanCast("Tombstone", true, true) && IsMelee && API.PlayerHasBuff("Bone Shield") && API.PlayerHealthPercent > 80)
             {
                 API.CastSpell("Tombstone");
                 return;
