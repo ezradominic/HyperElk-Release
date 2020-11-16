@@ -19,13 +19,11 @@ namespace HyperElk.Core
 
 
         //CLASS SPECIFIC
-        private int Vify => numbList[CombatRoutine.GetPropertyInt("FOLOOCPCT")];
 
         //CBProperties
         private int VivifyLifePercentProc => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
         private int CelestialBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
-        private int PurifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(PurifyingBrew)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
 
@@ -34,6 +32,8 @@ namespace HyperElk.Core
 
         private bool KICK => CombatRoutine.GetPropertyBool("KICK");
         private int KICKTime => CombatRoutine.GetPropertyInt("KICKTime");
+        private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
+
 
 
 
@@ -65,9 +65,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Vivify, "Vivify", numbList, "Life percent at which " + Vivify + " is used, set to 0 to disable", "Healing", 5);
             CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 10);
             CombatRoutine.AddProp(CelestialBrew, "Celestial Brew", numbList, "Life percent at which " + CelestialBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 5);
-            CombatRoutine.AddProp(PurifyingBrew, "Purifying Brew", numbList, "Life percent at which " + PurifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 10);
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
             CombatRoutine.AddProp(HealingElixir, "Healing Elixir", numbList, "Life percent at which " + HealingElixir + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 8);
+            CombatRoutine.AddProp("PurifyingBrewStaggerPercentProc", "PurifyingBrew", 4, "Use PurifyingBrew, compared to max life. On 1000 HP 20% means Cast if stagger is higher than 200", "Healing");
 
 
             //Spells
@@ -135,7 +135,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //Touch of Death
-                    if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10)
+                    if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetMaxHealth <= API.PlayerMaxHealth && PlayerLevel >= 10)
                     {
                         API.CastSpell(TouchofDeath);
                         return;
@@ -172,7 +172,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Purifying Brew
-                if (API.PlayerHealthPercent <= PurifyingBrewLifePercentProc && !API.SpellISOnCooldown(PurifyingBrew) && PlayerLevel >= 23)
+                if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23)
                 {
                     API.CastSpell(PurifyingBrew);
                     return;
