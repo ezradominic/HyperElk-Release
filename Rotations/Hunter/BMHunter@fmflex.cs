@@ -3,8 +3,6 @@ namespace HyperElk.Core
 {
     public class BMHunter : CombatRoutine
     {
-
-
         //Spells,Buffs,Debuffs
         private string SteadyShot = "Steady Shot";
         private string ArcaneShot = "Arcane Shot";
@@ -22,6 +20,13 @@ namespace HyperElk.Core
         private string Exhilaration = "Exhilaration";
         private string CounterShot = "Counter Shot";
 
+        private string DireBeast = "Dire Beast";
+        private string ChimaeraShot = "Chimaera Shot";
+        private string AMurderofCrows = "A Murder of Crows";
+        private string Barrage = "Barrage";
+        private string Stampede = "Stampede";
+        private string Bloodshed = "Bloodshed";
+
         private string Frenzy = "Frenzy";
         private string BeastCleave = "Beast Cleave";
         private string AspectoftheTurtle = "Aspect of the Turtle";
@@ -32,8 +37,13 @@ namespace HyperElk.Core
 
 
         //Talents
-        private bool CrusaderJudgment = API.PlayerIsTalentSelected(2, 2);
-
+        private bool TalentDireBeast => API.PlayerIsTalentSelected(1, 3);
+        private bool TalentScentOfBlood => API.PlayerIsTalentSelected(2, 1);
+        private bool TalentChimaeraShot => API.PlayerIsTalentSelected(2, 3);
+        private bool TalentAMurderOfCrows => API.PlayerIsTalentSelected(4, 3);
+        private bool TalentBarrage => API.PlayerIsTalentSelected(6, 2);
+        private bool TalentStampede => API.PlayerIsTalentSelected(6, 3);
+        private bool TalentBloodshed => API.PlayerIsTalentSelected(7, 3);
         //CBProperties
 
         string[] MisdirectionList = new string[] { "Off", "On AOE", "On" };
@@ -69,6 +79,13 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(CounterShot, "F");
             CombatRoutine.AddSpell(Exhilaration, "F9");
             CombatRoutine.AddSpell(Misdirection, "D4");
+
+            CombatRoutine.AddSpell(DireBeast, "D1");
+            CombatRoutine.AddSpell(ChimaeraShot, "D1");
+            CombatRoutine.AddSpell(AMurderofCrows, "D1");
+            CombatRoutine.AddSpell(Barrage, "D1");
+            CombatRoutine.AddSpell(Stampede, "D1");
+            CombatRoutine.AddSpell(Bloodshed, "D1");
 
             //Buffs
             CombatRoutine.AddBuff(Frenzy);
@@ -141,17 +158,17 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (!API.SpellISOnCooldown(BarbedShot) &&
+            if (API.PlayerHasPet && !API.SpellISOnCooldown(BarbedShot) &&
                 (!API.PetHasBuff(Frenzy) ||
                 API.SpellCharges(BarbedShot) >= 2 ||
                 (API.SpellChargeCD(BarbedShot) <= API.SpellGCDTotalDuration && API.SpellCharges(BarbedShot) >= 1) ||
-                (API.SpellCharges(BarbedShot) > 0 && API.PlayerIsTalentSelected(2, 1) && IsCooldowns && !API.SpellISOnCooldown(BestialWrath)))
+                (API.SpellCharges(BarbedShot) > 0 && TalentScentOfBlood && IsCooldowns && !API.SpellISOnCooldown(BestialWrath)))
                 && InRange && PlayerLevel >= 12)
             {
                 API.CastSpell(BarbedShot);
                 return;
             }
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && API.TargetUnitInRangeCount >= 3)
+            if (IsAOE && API.PlayerHasPet && API.TargetUnitInRangeCount >= AOEUnitNumber && API.TargetUnitInRangeCount >= 3)
             {
                 if (API.SpellGCDTotalDuration - API.PlayerDebuffRemainingTime(BeastCleave) > 25 && !API.SpellISOnCooldown(MultiShot) && API.PlayerFocus >= 40 && InRange && PlayerLevel >= 32)
                 {
@@ -159,22 +176,40 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (IsCooldowns && API.PlayerHasPet)
+            if (API.PlayerHasPet)
             {
-                if (!API.SpellISOnCooldown(BestialWrath) && InRange && PlayerLevel >= 20 && PlayerLevel < 38)
+                if (IsCooldowns && !API.SpellISOnCooldown(BestialWrath) && InRange && PlayerLevel >= 20 && PlayerLevel < 38)
                 {
                     API.CastSpell(BestialWrath);
                     return;
                 }
-                if (!API.SpellISOnCooldown(BestialWrath) && (API.SpellCDDuration(AspectoftheWild) > 1500 || !API.SpellISOnCooldown(AspectoftheWild)) && InRange && PlayerLevel >= 38)
+                if (IsCooldowns && !API.SpellISOnCooldown(BestialWrath) && (API.SpellCDDuration(AspectoftheWild) > 1500 || !API.SpellISOnCooldown(AspectoftheWild)) && InRange && PlayerLevel >= 38)
                 {
                     API.CastSpell(BestialWrath);
                     return;
                 }
-                if (!API.SpellISOnCooldown(AspectoftheWild) && (API.SpellCDDuration(BestialWrath) < 500 || API.PlayerHasBuff(BestialWrath)) && InRange && PlayerLevel >= 38)
+                if (TalentBloodshed && !API.SpellISOnCooldown(Bloodshed) && (API.SpellCDDuration(BestialWrath) >= 5000|| !IsCooldowns || API.PlayerHasBuff(BestialWrath)) && InRange)
+                {
+                    API.CastSpell(Bloodshed);
+                    return;
+                }
+                if (IsCooldowns && !API.SpellISOnCooldown(AspectoftheWild) && (API.SpellCDDuration(BestialWrath) < 500 || API.PlayerHasBuff(BestialWrath)) && InRange && PlayerLevel >= 38)
                 {
                     API.CastSpell(AspectoftheWild);
                     return;
+                }
+                if (TalentStampede && IsCooldowns && !API.SpellISOnCooldown(Stampede) && API.TargetRange <= 30)
+                {
+                    if ((API.PlayerHasBuff(AspectoftheWild) && API.PlayerHasBuff(BestialWrath)) || API.TargetTimeToDie < 1500)
+                    {
+                        API.CastSpell(Stampede);
+                        return;
+                    }
+                }
+                if (TalentAMurderOfCrows && !API.SpellISOnCooldown(AMurderofCrows) && InRange && API.PlayerFocus >= 30)
+                {
+                        API.CastSpell(AMurderofCrows);
+                        return;
                 }
             }
             if (API.TargetHealthPercent <= 20 && !API.SpellISOnCooldown(KillShot) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
@@ -187,6 +222,17 @@ namespace HyperElk.Core
                 API.CastSpell(KillCommand);
                 return;
             }
+
+            if (TalentChimaeraShot && !API.SpellISOnCooldown(ChimaeraShot) && API.PlayerFocus <=60 && InRange)
+            {
+                API.CastSpell(ChimaeraShot);
+                return;
+            }
+            if (TalentDireBeast && !API.SpellISOnCooldown(DireBeast) && InRange)
+            {
+                API.CastSpell(DireBeast);
+                return;
+            }
             if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)
             {
                 if (API.SpellCDDuration(KillCommand) >= 200 && !API.SpellISOnCooldown(MultiShot) && API.PlayerFocus >= 40 && InRange && PlayerLevel >= 23 && PlayerLevel < 32)
@@ -195,12 +241,16 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
             if (!API.SpellISOnCooldown(BarbedShot) &&
                 API.PetBuffTimeRemaining(Frenzy) - API.SpellGCDTotalDuration > API.SpellChargeCD(BarbedShot)
                 && InRange && PlayerLevel >= 12)
             {
                 API.CastSpell(BarbedShot);
+                return;
+            }
+            if (TalentBarrage && !API.SpellISOnCooldown(Barrage) && InRange)
+            {
+                API.CastSpell(Barrage);
                 return;
             }
             //if=(focus-cost+focus.regen*(cooldown.kill_command.remains-1)>action.kill_command.cost|cooldown.kill_command.remains>1+gcd&cooldown.bestial_wrath.remains_guess>focus.time_to_max|buff.memory_of_lucid_dreams.up)&cooldown.kill_command.remains>1|target.time_to_die<3" );
