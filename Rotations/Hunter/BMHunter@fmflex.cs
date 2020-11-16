@@ -206,6 +206,11 @@ namespace HyperElk.Core
                         return;
                     }
                 }
+                if (TalentAMurderOfCrows && !API.SpellISOnCooldown(AMurderofCrows) && InRange && API.PlayerFocus >= 30)
+                {
+                        API.CastSpell(AMurderofCrows);
+                        return;
+                }
             }
             if (API.TargetHealthPercent <= 20 && !API.SpellISOnCooldown(KillShot) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
             {
