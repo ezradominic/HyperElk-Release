@@ -66,7 +66,6 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(DarkPact, "Dark Pact", numbList, "Life percent at which " + DarkPact + " is used, set to 0 to disable", "Healing", 2);
 
 
-
             //Spells
             CombatRoutine.AddSpell("Shadow Bolt", "D1");
             CombatRoutine.AddSpell("Drain Soul", "D1");
@@ -101,6 +100,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Corruption");
             CombatRoutine.AddDebuff("Agony");
             CombatRoutine.AddDebuff("Unstable Affliction");
+            CombatRoutine.AddDebuff("Siphon Life");
 
             //Debuffs
 
@@ -144,26 +144,27 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             {
+                //Unstable Affliction
+                if (UseUA)
+                {
+                    if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 1000 && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 13)
+                    {
+                        API.CastSpell(UnstableAffliction);
+                        return;
+                    }
+                }
                 //Cooldowns
                 if (IsCooldowns)
                 {
 
                 }
                 //SiphonLife
-                if (API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) < 1000 && NotCasting && IsRange && NotChanneling && TalentSiphonLife)
+                if (API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) <= 1000 && NotCasting && IsRange && NotChanneling && TalentSiphonLife)
                 {
                     API.CastSpell(UnstableAffliction);
                     return;
                 }
-                //Unstable Affliction
-                if (UseUA)
-            { 
-                if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 1000 && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 13)
-                {
-                    API.CastSpell(UnstableAffliction);
-                    return;
-                }
-            }
+
                 if (API.CanCast(VileTaint) && API.PlayerCurrentSoulShards >= 1 && NotMoving && NotCasting && IsRange && NotChanneling && TalentVileTaint)
                 {
                     API.CastSpell(VileTaint);
@@ -174,7 +175,7 @@ namespace HyperElk.Core
                     API.CastSpell(PhantomSingularity);
                     return;
                 }
-                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 1 && API.TargetHasDebuff(Corruption) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 1 && API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
