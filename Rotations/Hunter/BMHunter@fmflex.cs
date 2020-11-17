@@ -170,7 +170,7 @@ namespace HyperElk.Core
             }
             if (IsAOE && API.PlayerHasPet && API.TargetUnitInRangeCount >= AOEUnitNumber && API.TargetUnitInRangeCount >= 3)
             {
-                if (API.SpellGCDTotalDuration - API.PlayerDebuffRemainingTime(BeastCleave) > 25 && !API.SpellISOnCooldown(MultiShot) && API.PlayerFocus >= 40 && InRange && PlayerLevel >= 32)
+                if (API.SpellGCDTotalDuration - API.PlayerBuffTimeRemaining(BeastCleave) > 25 && !API.SpellISOnCooldown(MultiShot) && API.PlayerFocus >= 40 && InRange && PlayerLevel >= 32)
                 {
                     API.CastSpell(MultiShot);
                     return;
