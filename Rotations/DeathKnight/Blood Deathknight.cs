@@ -219,7 +219,7 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (CurrentRune >= 2 && API.CanCast(Marrowrend) && IsMelee && API.PlayerBuffTimeRemaining(Marrowrend) < 300 && PlayerLevel >= 11)
+            if (CurrentRune >= 2 && API.CanCast(Marrowrend) && IsMelee && API.PlayerBuffTimeRemaining(BoneShield) < 300 && PlayerLevel >= 11)
             {
                 API.CastSpell(Marrowrend);
                 return;
