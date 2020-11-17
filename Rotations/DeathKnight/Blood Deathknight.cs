@@ -38,7 +38,7 @@ namespace HyperElk.Core
         private string IceboundFortitude = "Icebound Fortitude";
         private string DancingRuneWeapon = "Dancing Rune Weapon";
         private string DeathandDecay = "Death and Decay";
-        private string MindFreez = "Mind Freez";
+        private string MindFreeze = "Mind Freeze";
         private string Blooddrinker = "Blooddrinker";
         private string DeathsCaress = "Death's Caress";
         private string Healthstone = "Healthstone";
@@ -129,9 +129,9 @@ namespace HyperElk.Core
             if (!API.PlayerIsCasting)
             {
                 //KICK
-                if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(MindFreez) && IsMelee && PlayerLevel >= 7)
+                if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(MindFreeze) && IsMelee && PlayerLevel >= 7)
                 {
-                    API.CastSpell(MindFreez);
+                    API.CastSpell(MindFreeze);
                     return;
                 }
                 if (IsCooldowns)
