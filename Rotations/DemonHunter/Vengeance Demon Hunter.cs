@@ -16,9 +16,6 @@ namespace HyperElk.Core
 
         //CBProperties
         private int SoulCleavePercentProc => numbList[CombatRoutine.GetPropertyInt(SoulCleave)];
-
-        private bool KICK => CombatRoutine.GetPropertyBool("KICK");
-        private int KICKTime => CombatRoutine.GetPropertyInt("KICKTime");
         private bool UseSIS => (bool)CombatRoutine.GetProperty("UseSIS");
         private bool UseCF => (bool)CombatRoutine.GetProperty("UseCF");
         private bool UseHoR => (bool)CombatRoutine.GetProperty("UseHoR");
@@ -107,7 +104,7 @@ namespace HyperElk.Core
         {
             {
                 //KICK
-                if (KICK && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < KICKTime && !API.SpellISOnCooldown(Disrupt) && IsMelee)
+                if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(Disrupt) && IsMelee && PlayerLevel >= 7)
                 {
                     API.CastSpell(Disrupt);
                     return;
