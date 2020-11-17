@@ -241,7 +241,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //st->add_action("aimed_shot,if=buff.precise_shots.down|(!talent.chimaera_shot.enabled|ca_active)&buff.trueshot.up|buff.trick_shots.remains>execute_time&(active_enemies>1|runeforge.serpentstalkers_trickery.equipped)");
-                if (API.CanCast(AimedShot) && InRange &&
+                if (API.CanCast(AimedShot) && InRange && (API.PlayerHasBuff(LockandLoad) || !API.PlayerIsMoving) &&
                     (!API.PlayerHasBuff(PreciseShots, false, false) || ((!TalentChimaeraShot || TalentCarefulAim) && API.PlayerHasBuff(TrueShot)))
                     && API.PlayerFocus >= (API.PlayerHasBuff(LockandLoad) ? 0 : 35))
                 {
@@ -327,7 +327,7 @@ namespace HyperElk.Core
                 }
                 //trickshots->add_action("aimed_shot,if=(buff.trick_shots.remains>=execute_time)&(buff.precise_shots.down|full_recharge_time<cast_time+gcd|buff.trueshot.up)");
 
-                if (API.CanCast(AimedShot) && InRange && API.PlayerBuffTimeRemaining(TrickShots) >= API.TargetTimeToExec && 
+                if (API.CanCast(AimedShot) && InRange && API.PlayerBuffTimeRemaining(TrickShots) >= API.TargetTimeToExec && (API.PlayerHasBuff(LockandLoad) || !API.PlayerIsMoving) &&
                  (!API.PlayerHasBuff(PreciseShots, false, false) || API.PlayerFocus + FocusRegen * (2 +API.SpellGCDTotalDuration/100) < API.PlayerMaxFocus|| API.PlayerHasBuff(TrueShot))
                  && API.PlayerFocus >= (API.PlayerHasBuff(LockandLoad) ? 0 : 35))
                 {
