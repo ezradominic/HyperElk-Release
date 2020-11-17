@@ -9,23 +9,13 @@ namespace HyperElk.Core
 {
     public class HavocDemonHunter : CombatRoutine
     {
-        //Toggles
-        private bool IsPause => API.ToggleIsEnabled("Pause");
-
         //General
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
-
-
-
-        //CLASS SPECIFIC
-        private int Vify => numbList[CombatRoutine.GetPropertyInt("FOLOOCPCT")];
-
-        //CBProperties
-
         private bool UseCF => (bool)CombatRoutine.GetProperty("UseCF");
-        private bool KICK => CombatRoutine.GetPropertyBool("KICK");
-        private int KICKTime => CombatRoutine.GetPropertyInt("KICKTime");
+
+
+
 
 
 
@@ -83,104 +73,74 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
-            {
-                if ((!API.PlayerIsInCombat || API.PlayerIsInCombat) && (!API.TargetIsIncombat || API.TargetIsIncombat) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
-                {
-                    CombatPulse();
-                }
+            
 
-                if (!API.PlayerIsMounted)
-                {
-                    if (!API.PlayerIsInCombat)
-                    {
-                        OutOfCombatPulse();
-                    }
 
-                    rotation();
-                    return;
-
-                }
-            }
+            
         }
         public override void CombatPulse()
         {
-            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
             {
                 //Cooldowns
+                if (IsCooldowns)
+                {
+                    if (!API.SpellISOnCooldown(Metamorphosis))
+                {
+                    API.CastSpell(Metamorphosis);
+                    return;
+                }
+            }
 
                 //AOE
                 if (IsAOE)
                 {
 
                 }
+                //Concentrated Flame
+                if (UseCF)
+                {
+                    if (API.CanCast(ConcentratedFlame) && API.TargetRange <= 40)
+                    {
+                        API.CastSpell(ConcentratedFlame);
+                        return;
+                    }
+                }
+                if (!API.SpellISOnCooldown(ImmolationAura))
+                {
+                    API.CastSpell(ImmolationAura);
+                }
+                if (!API.SpellISOnCooldown(DemonsBite) && API.PlayerFury < 40)
+                {
+                    API.CastSpell(DemonsBite);
+                }
+                if (!API.SpellISOnCooldown(Felblade))
+                {
+                    API.CastSpell(Felblade);
+                }
+                if (!API.SpellISOnCooldown(ChaosStrike) && API.PlayerFury > 40)
+                {
+                    API.CastSpell(ChaosStrike);
+                }
+                if (!API.SpellISOnCooldown(EyeBeam) && API.PlayerFury > 30)
+                {
+                    API.CastSpell(EyeBeam);
+                }
+                if (!API.SpellISOnCooldown(BladeDance) && API.PlayerFury > 15)
+                {
+                    API.CastSpell(BladeDance);
+                }
 
                 //KICK
-                if (KICK && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < KICKTime && !API.SpellISOnCooldown(Disrupt) && IsMelee && PlayerLevel >= 18)
+                if (isInterrupt && !API.SpellISOnCooldown(Disrupt) && IsMelee && PlayerLevel >= 18)
                 {
                     API.CastSpell(Disrupt);
                     return;
                 }
-
-                rotation();
-                return;
-
             }
         }
         public override void OutOfCombatPulse()
         {
 
-        }
-
-        // ROTATION
-        private void rotation()
-        {
-            //Concentrated Flame
-            if (UseCF)
-            {
-                if (API.CanCast(ConcentratedFlame) && API.TargetRange <= 40)
-                {
-                    API.CastSpell(ConcentratedFlame);
-                    return;
-                }
-            }
-            {
-                if (!API.SpellISOnCooldown(Metamorphosis))
-                {
-                    API.CastSpell(Metamorphosis);
-                    return;
-                }
-            }
-            if (!API.SpellISOnCooldown(ImmolationAura))
-            {
-                API.CastSpell(ImmolationAura);
-
-            }
-            if (!API.SpellISOnCooldown(DemonsBite) && API.PlayerFury < 40)
-            {
-                API.CastSpell(DemonsBite);
-
-            }
-            if (!API.SpellISOnCooldown(Felblade))
-            {
-                API.CastSpell(Felblade);
-
-            }
-            if (!API.SpellISOnCooldown(ChaosStrike) && API.PlayerFury > 40)
-            {
-                API.CastSpell(ChaosStrike);
-
-            }
-            if (!API.SpellISOnCooldown(EyeBeam) && API.PlayerFury > 30)
-            {
-                API.CastSpell(EyeBeam);
-
-            }
-            if (!API.SpellISOnCooldown(BladeDance) && API.PlayerFury > 15)
-            {
-                API.CastSpell(BladeDance);
-
-            }
         }
     }
 }

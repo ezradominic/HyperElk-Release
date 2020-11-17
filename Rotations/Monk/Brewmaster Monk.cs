@@ -27,11 +27,6 @@ namespace HyperElk.Core
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
 
-
-        private int AOEUnitNumner => CombatRoutine.GetPropertyInt("AOEUnitNumner");
-
-        private bool KICK => CombatRoutine.GetPropertyBool("KICK");
-        private int KICKTime => CombatRoutine.GetPropertyInt("KICKTime");
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
 
 
@@ -101,107 +96,72 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
+            //Cooldowns
+            if (IsCooldowns)
             {
-                if ((!API.PlayerIsInCombat || API.PlayerIsInCombat) && (!API.TargetIsIncombat || API.TargetIsIncombat) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                //BlackOxBrew
+                if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerIsTalentSelected(3, 3))
                 {
-                    CombatPulse();
-                }
-
-                if (!API.PlayerIsMounted)
-                {
-                    if (!API.PlayerIsInCombat)
-                    {
-                        OutOfCombatPulse();
-                    }
-
-                    rotation();
+                    API.CastSpell(BlackOxBrew);
                     return;
-
                 }
+                //Touch of Death
+                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetMaxHealth <= API.PlayerMaxHealth && PlayerLevel >= 10)
+                {
+                    API.CastSpell(TouchofDeath);
+                    return;
+                }
+            }
+            //AOE
+            if (IsAOE)
+            {
+
+            }
+
+            //KICK
+            if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
+            {
+                API.CastSpell(SpearHandStrike);
+                return;
+            }
+            //Healing Elixir
+            if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2))
+            {
+                API.CastSpell(HealingElixir);
+                return;
+            }
+            //Expel Harm
+            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && API.PlayerEnergy > 30 && PlayerLevel >= 8)
+            {
+                API.CastSpell(ExpelHarm);
+                return;
+            }
+            //Celestial Brew
+            if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27)
+            {
+                API.CastSpell(CelestialBrew);
+                return;
+            }
+            //Purifying Brew
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23)
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //Fortifying Brew
+            if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && !API.SpellISOnCooldown(FortifyingBrew) && PlayerLevel >= 28)
+            {
+                API.CastSpell(FortifyingBrew);
+                return;
+            }
+            //Vivify
+            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
+            {
+                API.CastSpell(Vivify);
+                return;
             }
         }
         public override void CombatPulse()
-        {
-            if (!IsPause && API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
-            {
-                //Cooldowns
-                if (IsCooldowns)
-                {
-                    //BlackOxBrew
-                    if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerIsTalentSelected(3, 3))
-                    {
-                        API.CastSpell(BlackOxBrew);
-                        return;
-                    }
-                    //Touch of Death
-                    if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetMaxHealth <= API.PlayerMaxHealth && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(TouchofDeath);
-                        return;
-                    }
-                }
-                //AOE
-                if (IsAOE)
-                {
-
-                }
-
-                //KICK
-                if (KICK && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < KICKTime && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
-                {
-                    API.CastSpell(SpearHandStrike);
-                    return;
-                }
-                //Healing Elixir
-                if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2))
-                {
-                    API.CastSpell(HealingElixir);
-                    return;
-                }
-                //Expel Harm
-                if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && API.PlayerEnergy > 30 && PlayerLevel >= 8)
-                {
-                    API.CastSpell(ExpelHarm);
-                    return;
-                }
-                //Celestial Brew
-                if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27)
-                {
-                    API.CastSpell(CelestialBrew);
-                    return;
-                }
-                //Purifying Brew
-                if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23)
-                {
-                    API.CastSpell(PurifyingBrew);
-                    return;
-                }
-                //Fortifying Brew
-                if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && !API.SpellISOnCooldown(FortifyingBrew) && PlayerLevel >= 28)
-                {
-                    API.CastSpell(FortifyingBrew);
-                    return;
-                }
-                //Vivify
-                if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
-                {
-                    API.CastSpell(Vivify);
-                    return;
-                }
-
-                rotation();
-                return;
-
-            }
-        }
-        public override void OutOfCombatPulse()
-        {
-
-        }
-
-        // ROTATION
-        private void rotation()
         {
             //Keg Smash
             if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
@@ -228,11 +188,15 @@ namespace HyperElk.Core
                 return;
             }
             //Spinning Crane Kick
-            if (API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumner && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
+            if (API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
             }
+        }
+        public override void OutOfCombatPulse()
+        {
+
         }
     }
 }

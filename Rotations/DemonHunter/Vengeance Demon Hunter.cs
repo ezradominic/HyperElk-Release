@@ -104,7 +104,7 @@ namespace HyperElk.Core
         {
             {
                 //KICK
-                if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(Disrupt) && IsMelee && PlayerLevel >= 7)
+                if (isInterrupt && !API.SpellISOnCooldown(Disrupt) && IsMelee && PlayerLevel >= 7)
                 {
                     API.CastSpell(Disrupt);
                     return;
