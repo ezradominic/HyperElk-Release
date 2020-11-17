@@ -168,7 +168,7 @@ namespace HyperElk.Core
 
             if (!API.PlayerHasBuff(AspectoftheTurtle))
             {
-                if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && API.CanCast(CounterShot) && InRange && PlayerLevel >= 18)
+                if (isInterrupt && API.CanCast(CounterShot) && InRange && PlayerLevel >= 18)
                 {
                     API.CastSpell(CounterShot);
                     return;

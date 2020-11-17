@@ -144,8 +144,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (isInterrupt && API.TargetRange <= 30 && API.TargetCanInterrupted && API.TargetIsCasting &&
-                API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(MindFreeze) && PlayerLevel >= 27)
+            if (isInterrupt && !API.SpellISOnCooldown(MindFreeze) && PlayerLevel >= 27)
             {
                 API.CastSpell(MindFreeze);
                 return;

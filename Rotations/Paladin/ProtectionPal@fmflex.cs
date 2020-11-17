@@ -140,7 +140,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(Rebuke) && IsMelee && PlayerLevel >= 27)
+            if (isInterrupt && !API.SpellISOnCooldown(Rebuke) && IsMelee && PlayerLevel >= 27)
             {
                 API.CastSpell(Rebuke);
                 return;

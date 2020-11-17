@@ -159,7 +159,7 @@ namespace HyperElk.Core
             if (!API.PlayerIsCasting)
             {
 
-                if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(Kick) && IsMelee)
+                if (isInterrupt && !API.SpellISOnCooldown(Kick) && IsMelee)
                 {
                     API.CastSpell(Kick);
                     return;
