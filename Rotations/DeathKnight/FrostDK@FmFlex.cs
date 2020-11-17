@@ -267,7 +267,7 @@ namespace HyperElk.Core
                     API.CastSpell(FrostStrike);
                     return;
                 }
-                if (API.CanCast(EmpowerRuneWeapon) && IsMelee && !TalentBreathOfSindra)
+                if (IsCooldowns&& API.CanCast(EmpowerRuneWeapon)&& API.PlayerHasBuff(PillarofFrost)&& CurrentRune <5 && CurrentRP<=90 && IsMelee && !TalentBreathOfSindra)
                 {
                     API.CastSpell(EmpowerRuneWeapon);
                     return;

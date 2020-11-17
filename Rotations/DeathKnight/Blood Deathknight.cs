@@ -18,13 +18,9 @@ namespace HyperElk.Core
         private bool UseDND => (bool)CombatRoutine.GetProperty("UseDND");
         private bool UseAMZ => (bool)CombatRoutine.GetProperty("UseAMZ");
         private bool UseCF => (bool)CombatRoutine.GetProperty("UseCF");
-        private bool KICK => CombatRoutine.GetPropertyBool("KICK");
-        private int KICKTime => CombatRoutine.GetPropertyInt("KICKTime");
         private int DeathStrikePercentProc => numbList[CombatRoutine.GetPropertyInt(DeathStrike)];
         private int RuneTap1PercentProc => numbList[CombatRoutine.GetPropertyInt(RuneTap)];
         private int RuneTap2PercentProc => numbList[CombatRoutine.GetPropertyInt(RuneTap2)];
-        private int AOEUnitNumner => CombatRoutine.GetPropertyInt("AOEUnitNumner");
-
 
         //Spells//Buffs/Debuffs
         private string Marrowrend = "Marrowrend";
@@ -124,7 +120,7 @@ namespace HyperElk.Core
                     }
                 }
                 //KICK
-                if (KICK && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < KICKTime && !API.SpellISOnCooldown(MindFreez) && IsMelee && PlayerLevel >= 7)
+                if (isInterrupt && API.TargetCanInterrupted && API.TargetIsCasting && API.TargetCurrentCastTimeRemaining < interruptDelay && !API.SpellISOnCooldown(MindFreez) && IsMelee && PlayerLevel >= 7)
                 {
                     API.CastSpell(MindFreez);
                     return;
@@ -185,7 +181,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            throw new NotImplementedException();
+
         }
 
         public override void Pulse()
@@ -209,7 +205,7 @@ namespace HyperElk.Core
             //Death and Decay
             if (UseDND)
             {
-                if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumner && CurrentRune >= 1 && API.CanCast(DeathandDecay) && IsMelee && PlayerLevel >= 3)
+                if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && CurrentRune >= 1 && API.CanCast(DeathandDecay) && IsMelee && PlayerLevel >= 3)
                 {
                     API.CastSpell(DeathandDecay);
                     return;
