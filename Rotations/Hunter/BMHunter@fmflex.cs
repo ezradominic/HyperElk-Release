@@ -13,7 +13,7 @@ namespace HyperElk.Core
         private string BestialWrath = "Bestial Wrath";
         private string AspectoftheWild = "Aspect of the Wild";
         private string KillShot = "Kill Shot";
-        private string MultiShot = " Multi-Shot";
+        private string MultiShot = "Multi-Shot";
         private string Misdirection = "Misdirection";
 
 
@@ -33,7 +33,7 @@ namespace HyperElk.Core
 
         //Misc
         private int PlayerLevel => API.PlayerLevel;
-        private bool InRange => API.TargetRange < 40;
+        private bool InRange => API.TargetRange <= 40;
 
 
         //Talents
@@ -254,7 +254,7 @@ namespace HyperElk.Core
                 return;
             }
             //if=(focus-cost+focus.regen*(cooldown.kill_command.remains-1)>action.kill_command.cost|cooldown.kill_command.remains>1+gcd&cooldown.bestial_wrath.remains_guess>focus.time_to_max|buff.memory_of_lucid_dreams.up)&cooldown.kill_command.remains>1|target.time_to_die<3" );
-            if (((((API.PlayerFocus - 35 + FocusRegen * (API.SpellCDDuration(KillCommand) - 100)) > 30 || (API.SpellCDDuration(KillCommand) > 100 + API.SpellGCDTotalDuration && API.SpellCDDuration(BestialWrath) / 2 > (int)FocusTimeToMax)) 
+            if (((((API.PlayerFocus - 35 + FocusRegen /100 * (API.SpellCDDuration(KillCommand) - 100)) > 30 || (API.SpellCDDuration(KillCommand) > 100 + API.SpellGCDTotalDuration && API.SpellCDDuration(BestialWrath) / 2 > (int)FocusTimeToMax)) 
                 && API.SpellCDDuration(KillCommand) > 100)
                     || API.TargetTimeToDie < 300)
                     && API.PlayerFocus >= 35
