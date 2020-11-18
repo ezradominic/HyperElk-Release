@@ -385,7 +385,7 @@ namespace HyperElk.Core
                 if (IsUseVamp && !API.SpellISOnCooldown(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
                 {
                     if (API.MouseoverDebuffRemainingTime(VampiricTouch) <= 630 ||
-                        (TalentMisery && API.MouseoverDebuffRemainingTime(SWPain) <= 360) || API.PlayerHasBuff(UnfurlingDarkness))
+                        (TalentMisery && API.MouseoverDebuffRemainingTime(SWPain) <= 360))
                     {
                         API.CastSpell(VampiricTouch + "MO");
                         return;
