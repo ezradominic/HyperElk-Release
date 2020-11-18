@@ -2,6 +2,7 @@ namespace HyperElk.Core
 {
     public class LevelingPriest : CombatRoutine
     {
+
         //Speel,Auras
         private string Shadowform = "Shadowform";
         private string PWFortitude = "Power Word: Fortitude";
@@ -50,6 +51,7 @@ namespace HyperElk.Core
 
         //CBProperties
 
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool IsShieldSpeed => CombatRoutine.GetPropertyBool("SHIELDSPEED");
         private bool IsUseVamp => (bool)CombatRoutine.GetProperty("UseVampiric");
         private bool IsSWDeathMoving => (bool)CombatRoutine.GetProperty(SWDeath);
@@ -81,6 +83,9 @@ namespace HyperElk.Core
         {
             CombatRoutine.Name = "Shadow Priest Rotation @FmFlex";
             API.WriteLog("Welcome to Shadow Priest rotation @ FmFlex");
+            API.WriteLog("Create the following mouseover macro and assigned to the bind:");
+            API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
+            API.WriteLog("VampiricTouchMO - /cast [@mouseover] Vampiric Touch");
 
             //Buff
             CombatRoutine.AddBuff(Shadowform);
@@ -120,11 +125,15 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DesperatePrayer, "S");
             CombatRoutine.AddSpell(PWFortitude, "F6");
             CombatRoutine.AddSpell(PWShield, "F7");
+
+            CombatRoutine.AddSpell(SWPain+"MO", "D2");
+            CombatRoutine.AddSpell(VampiricTouch+"MO", "D6");
             //Prop
 
             CombatRoutine.AddProp("SHIELDSPEED", "Use PWS for speed", true, "Use powerword shield for speed boost", "Generic");
             CombatRoutine.AddProp("UseVampiric", "Use Vampiric", true, "Should the rotation use Vampiric Aura", "Generic");
             CombatRoutine.AddProp(SWDeath, "Use SW:Death when moving", true, "Should the rotation use "+SWDeath+ " when moving even above 20% life", "Generic");
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
 
             CombatRoutine.AddProp(PWShield, PWShield + " Life Percent", percentListProp, "Life percent at which" + PWShield + "is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(ShadowMend, ShadowMend + " Life Percent", percentListProp, "Life percent at which" + ShadowMend + "is used, set to 0 to disable", "Defense", 2);
@@ -147,8 +156,8 @@ namespace HyperElk.Core
                     API.CastSpell(PWFortitude);
                     return;
                 }
-            }
 
+            }
         }
         public override void CombatPulse()
         {
@@ -243,7 +252,7 @@ namespace HyperElk.Core
                 }
             }
 
-            if (!API.SpellISOnCooldown(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if ((!API.PlayerIsCasting || ChannelingMindFlay) && !API.SpellISOnCooldown(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) && API.SpellISOnCooldown(Shadowfiend))
                 {
@@ -282,7 +291,6 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
             //actions.main+=/void_bolt,if=spell_targets.mind_sear<(4+conduit.dissonant_echoes.enabled)&insanity<=85
             if (!API.SpellISOnCooldown(VoidBolt) && API.PlayerHasBuff(Voidform))
             {
@@ -292,7 +300,6 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
             //actions.main+=/shadow_word_death,target_if=(target.health.pct<20&spell_targets.mind_sear<4)|(pet.fiend.active&runeforge.shadowflame_prism.equipped)
             if (!API.SpellISOnCooldown(SWDeath) && PlayerLevel >= 14)
             {
@@ -355,7 +362,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,if=buff.dark_thoughts.up&variable.dots_up,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if (!API.SpellISOnCooldown(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if ((!API.PlayerIsCasting || ChannelingMindSear) && !API.SpellISOnCooldown(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 if (API.PlayerHasBuff(DarkThoughts))
                 {
@@ -373,7 +380,28 @@ namespace HyperElk.Core
                     return;
                 }
             }
+            if (IsAOE && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetUnitInRangeCount >= AOEUnitNumber && API.TargetUnitInRangeCount <= 9 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+            {
+                if (IsUseVamp && !API.SpellISOnCooldown(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
+                {
+                    if (API.MouseoverDebuffRemainingTime(VampiricTouch) <= 630 ||
+                        (TalentMisery && API.MouseoverDebuffRemainingTime(SWPain) <= 360) || API.PlayerHasBuff(UnfurlingDarkness))
+                    {
+                        API.CastSpell(VampiricTouch + "MO");
+                        return;
+                    }
+                }
 
+                //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
+                if (IsAOE && !API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
+                {
+                    if (API.MouseoverDebuffRemainingTime(SWPain) <= 360 && !TalentMisery && (!TalentPsychicLink || (TalentPsychicLink && API.TargetUnitInRangeCount <= 2)))
+                    {
+                        API.CastSpell(SWPain + "MO");
+                        return;
+                    }
+                }
+            }
             //actions.main+=/vampiric_touch,target_if=refreshable&target.time_to_die>6|(talent.misery.enabled&dot.shadow_word_pain.refreshable)|buff.unfurling_darkness.up
             if (IsUseVamp && !API.SpellISOnCooldown(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
             {
@@ -388,7 +416,7 @@ namespace HyperElk.Core
             //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
             if (IsAOE && !API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
             {
-                if (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetTimeToDie > 400 && !TalentMisery && TalentPsychicLink && API.TargetUnitInRangeCount > 2)
+                if (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetTimeToDie > 400 && !TalentSearingNightmare && !TalentMisery && TalentPsychicLink && API.TargetUnitInRangeCount > 2)
                 {
                     API.CastSpell(SWPain);
                     return;
@@ -408,7 +436,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_sear,target_if=spell_targets.mind_sear>variable.mind_sear_cutoff,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2
-            if (IsAOE && !API.SpellISOnCooldown(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if ((!API.PlayerIsCasting ||ChannelingMindFlay) && IsAOE && !API.SpellISOnCooldown(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (API.TargetUnitInRangeCount > 1)
                 {
@@ -418,7 +446,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if (!API.PlayerIsCasting && !API.SpellISOnCooldown(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if ((!API.PlayerIsCasting) && !API.SpellISOnCooldown(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 API.CastSpell(MindFlay);
                 return;

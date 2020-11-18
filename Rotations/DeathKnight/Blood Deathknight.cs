@@ -8,7 +8,7 @@ namespace HyperElk.Core
     {
         //General
         private int PlayerLevel => API.PlayerLevel;
-        private bool IsMelee => API.TargetRange < 6;
+        private bool IsMelee => API.TargetRange <= 6;
 
         private bool IsDefensive => API.ToggleIsEnabled("Defensive");
 
