@@ -215,7 +215,7 @@ namespace HyperElk.Core
         {
             //actions+=/call_action_list,name=cwc
             //actions.cwc=searing_nightmare,use_while_casting=1,target_if=(variable.searing_nightmare_cutoff&!variable.pi_or_vf_sync_condition)|(dot.shadow_word_pain.refreshable&spell_targets.mind_sear>1)
-            if (TalentSearingNightmare && !API.SpellISOnCooldown(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
+            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && !API.SpellISOnCooldown(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
             {
                 if (IsAOE && (searing_nightmare_cutoff && !pi_or_vf_sync_condition) || (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 1))
                 {
@@ -225,9 +225,9 @@ namespace HyperElk.Core
             }
 
             //actions.cwc+=/searing_nightmare,use_while_casting=1,target_if=talent.searing_nightmare.enabled&dot.shadow_word_pain.refreshable&spell_targets.mind_sear>2
-            if (TalentSearingNightmare && !API.SpellISOnCooldown(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
+            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && !API.SpellISOnCooldown(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
             {
-                if (TalentSearingNightmare && API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 2)
+                if (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 2)
                 {
                     API.CastSpell(SearingNightmare);
                     return;
@@ -406,7 +406,7 @@ namespace HyperElk.Core
             if (IsUseVamp && !API.SpellISOnCooldown(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
             {
                 if (API.TargetDebuffRemainingTime(VampiricTouch) <= 630 && API.TargetTimeToDie > 600 ||
-                    (TalentMisery && API.TargetDebuffRemainingTime(SWPain) <= 360) || API.PlayerHasBuff(UnfurlingDarkness))
+                    (TalentMisery && API.TargetDebuffRemainingTime(SWPain) <= 360))
                 {
                     API.CastSpell(VampiricTouch);
                     return;
