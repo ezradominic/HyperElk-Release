@@ -16,7 +16,7 @@ namespace HyperElk.Core
 
         private int CurrentRune => API.PlayerCurrentRunes;
         private int CurrentRP => API.PlayerRunicPower;
-        private bool UseCF => (bool)CombatRoutine.GetProperty("UseCF");
+        private bool UseCF => CombatRoutine.GetPropertyBool("UseCF");
         private int DeathStrikePercentLife => percentListProp[CombatRoutine.GetPropertyInt(DeathStrike)];
         private int VampiricBloodPercentLife => percentListProp[CombatRoutine.GetPropertyInt(VampiricBlood)];
         private int AntiMagicShellPercentLife => percentListProp[CombatRoutine.GetPropertyInt(AntiMagicShell)];
