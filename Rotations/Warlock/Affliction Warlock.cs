@@ -108,6 +108,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Vile Taint", "D9");
             CombatRoutine.AddSpell("Haunt", "F1");
             CombatRoutine.AddSpell("Dark Soul Misery", "F2");
+            CombatRoutine.AddSpell(Agony+"MO", "F1");
+            CombatRoutine.AddSpell(Corruption+"MO", "F2");
+            CombatRoutine.AddSpell(SiphonLife + "MO", "F3");
 
 
 
@@ -156,25 +159,25 @@ namespace HyperElk.Core
                     //Dark Soul Misery
                     if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
                     {
-                        API.CastSpell(Haunt);
+                        API.CastSpell(DarkSoulMisery);
                         return;
                     }
                 }
                 if (IsMouseover)
                 {
-                    if (API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(Agony);
-                        return;
-                    }
                     if (API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && IsRange && PlayerLevel >= 2)
                     {
-                        API.CastSpell(Corruption);
+                        API.CastSpell(Corruption + "MO");
                         return;
                     }
-                    if (API.CanCast(SiphonLife) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && TalentSiphonLife)
+                    if (API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
                     {
-                        API.CastSpell(SiphonLife);
+                        API.CastSpell(Agony + "MO");
+                        return;
+                    }
+                    if (API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
+                    {
+                        API.CastSpell(Agony + "MO");
                         return;
                     }
 
