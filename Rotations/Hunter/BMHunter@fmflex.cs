@@ -183,7 +183,7 @@ namespace HyperElk.Core
                     API.CastSpell(BestialWrath);
                     return;
                 }
-                if (IsCooldowns && !API.SpellISOnCooldown(BestialWrath) && (API.SpellCDDuration(AspectoftheWild) > 1500 || !API.SpellISOnCooldown(AspectoftheWild)) && InRange && PlayerLevel >= 38)
+                if (!API.SpellISOnCooldown(BestialWrath) && (!IsCooldowns || IsCooldowns && (API.SpellCDDuration(AspectoftheWild) > 1500 || !API.SpellISOnCooldown(AspectoftheWild))) && InRange && PlayerLevel >= 38)
                 {
                     API.CastSpell(BestialWrath);
                     return;
