@@ -275,7 +275,7 @@ namespace HyperElk.Core
             //actions.main+=/devouring_plague,target_if=(refreshable|insanity>75)&!variable.pi_or_vf_sync_condition&(!talent.searing_nightmare.enabled|(talent.searing_nightmare.enabled&!variable.searing_nightmare_cutoff))
             if (!API.SpellISOnCooldown(DevouringPlague) && API.SpellIsCanbeCast(DevouringPlague) && PlayerLevel >= 10)
             {
-                if ((API.TargetDebuffRemainingTime(DevouringPlague) <= 180 || API.PlayerInsanity > 75) && !pi_or_vf_sync_condition &&
+                if ((API.TargetDebuffRemainingTime(DevouringPlague) <= 180 || API.PlayerInsanity > 75) && !IsCooldowns ||  !pi_or_vf_sync_condition &&
                     (!TalentSearingNightmare || (IsAOE && TalentSearingNightmare && !searing_nightmare_cutoff)))
                 {
                     API.CastSpell(DevouringPlague);
