@@ -7,174 +7,179 @@ using System.Threading;
 
 namespace HyperElk.Core
 {
-    public class FrostMage : CombatRoutine
+    public class AfflictionWarlock : CombatRoutine
     {
-        //General
-        private int PlayerLevel => API.PlayerLevel;
-
-
-        //CLASS SPECIFIC
-        private bool UseFB => (bool)CombatRoutine.GetProperty("UseFB");
-        private bool UseFN => (bool)CombatRoutine.GetProperty("UseFN");
-
-
-
         //Spells,Buffs,Debuffs
-        private string Frostbolt = "Frostbolt";
-        private string FireBlast = "Fire Blast";
-        private string ArcaneIntellect = "Arcane Intellect";
         private string Fireball = "Fireball";
+        private string Fireblast = "Fire blast";
         private string Pyroblast = "Pyroblast";
-        private string HotStreak = "Hot Streak!";
-        private string Scorch = "Scorch";
-        private string FlameStrike = "Flame Strike";
-        private string Combustion = "Combustion";
-        private string FrostNova = "Frost Nova";
-        private string DragonsBreath = "Dragon's Breath";
+        private string Flamestrike = "Flamestrike";
         private string PhoenixFlames = "Phoenix Flames";
+        private string Combustion = "Combustion";
+        private string HotSreak = "Hot Streak!";
+        private string BlazingBarrier = "Blazing Barrier";
+        private string Scorch = "Scorch";
+        private string DragonsBreath = "Dragon's Breath";
+        private string HeatingUp  = "Heating Up";
+        private string ArcaneIntellect = "Arcane Intellect";
+        private string ArcaneExplosion = "Arcane Explosion";
+        private string MirrorImage = "Mirror Image";
+
+
+        //Talents
+
+        //Misc
+        private bool IsRange => API.TargetRange < 40;
+        private int PlayerLevel => API.PlayerLevel;
+        private bool NotMoving => !API.PlayerIsMoving;
+        private bool NotCasting => !API.PlayerIsCasting;
+        private bool NotChanneling => !API.PlayerIsChanneling;
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+
+
+
+
+        //CBProperties
+        int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
 
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Frost Mage @Mufflon12";
-            API.WriteLog("Welcome to Frost Mage rotation @ Mufflon12");
-            API.WriteLog("Use /cast [@Player] Arcane Intellect to buff Arcane Intellect");
-            API.WriteLog("Use /cast [@cursor] Flame Strike for Flame Strike AEO");
+            CombatRoutine.Name = "Fire Mage @Mufflon12";
+            API.WriteLog("Welcome to Fire Mage rotation @ Mufflon12");
+            API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
+            API.WriteLog("Use /cast [@cursor] Flamestrike macro");
+            API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
-            CombatRoutine.AddProp("UseFB", "Use Fire Blast", true, "Should the rotation use Fire Blast");
-            CombatRoutine.AddProp("UseFN", "Use Frost Nova", true, "Should the rotation use Frost Nova if target range is below 10 Yards");
+            API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
+            //Options
 
 
             //Spells
-            CombatRoutine.AddSpell("Frostbolt", "D1");
-            CombatRoutine.AddSpell("Fireball", "D2");
-            CombatRoutine.AddSpell("Pyroblast", "D3");
-            CombatRoutine.AddSpell("Scorch", "D4");
-            CombatRoutine.AddSpell("Dragon's Breath", "D4");
-            CombatRoutine.AddSpell("Phoenix Flames", "D5");
+            CombatRoutine.AddSpell(Fireball, "D1");
+            CombatRoutine.AddSpell(Fireblast, "D2");
+            CombatRoutine.AddSpell(Pyroblast, "D3");
+            CombatRoutine.AddSpell(DragonsBreath, "D4");
+
+            CombatRoutine.AddSpell(Scorch, "D5");
 
 
 
-            CombatRoutine.AddSpell("Fire Blast", "NumPad1");
-            CombatRoutine.AddSpell("Frost Nova", "NumPad2");
-            CombatRoutine.AddSpell("Arcane Intellect", "NumPad3");
-            CombatRoutine.AddSpell("Flame Strike", "NumPad4");
-            CombatRoutine.AddSpell("Combustion", "NumPad5");
 
+            CombatRoutine.AddSpell(BlazingBarrier, "D9");
+
+
+
+            CombatRoutine.AddSpell(ArcaneExplosion, "NumPad3");
+            CombatRoutine.AddSpell(Flamestrike, "NumPad4");
+            CombatRoutine.AddSpell(PhoenixFlames, "NumPad5");
+            CombatRoutine.AddSpell(Combustion, "NumPad6");
+            CombatRoutine.AddSpell(MirrorImage, "NumPad7");
+
+
+            CombatRoutine.AddSpell(ArcaneIntellect, "NumPad9");
 
 
 
             //Buffs
-            CombatRoutine.AddBuff("Arcane Intellect");
-            CombatRoutine.AddBuff("Hot Streak!");
-
+            CombatRoutine.AddBuff(HotSreak);
+            CombatRoutine.AddBuff(BlazingBarrier);
+            CombatRoutine.AddBuff(Combustion);
+            CombatRoutine.AddBuff(HeatingUp);
+            CombatRoutine.AddBuff(ArcaneIntellect);
 
 
             //Debuffs
-            CombatRoutine.AddDebuff("Frost Nova");
+
+
+            //Debuffs
+
+
         }
 
         public override void Pulse()
         {
-           {
-                //Cooldowns
-                if (IsCooldowns)
-                {
-                    if (API.CanCast(Combustion) && API.PlayerLevel >= 28)
-                    {
-                        API.CastSpell(Combustion);
-                        return;
-                    }
-                }
-                //AOE
-                if (IsAOE)
-                {
-                    if (API.CanCast(FlameStrike) && API.PlayerLevel >= 16)
-                    {
-                        API.CastSpell(FlameStrike);
-                        return;
-                    }
-                }
-            }
-        }
-
-        public override void OutOfCombatPulse()
-        {
 
         }
+
         public override void CombatPulse()
         {
-            if (API.PlayerIsInCombat && !API.PlayerIsCasting && !API.PlayerIsMounted)
+            //Fireblast on HeatingUp
+            if (API.CanCast(Fireblast) && API.SpellCharges(Fireblast) >= 1 && !API.PlayerHasBuff(HeatingUp) && NotMoving && NotCasting && IsRange && NotChanneling)
             {
-                //ACANE INTELLECT
-                if (API.CanCast(ArcaneIntellect) && !API.PlayerHasBuff(ArcaneIntellect) && API.TargetUnitInRangeCount > 2 && API.PlayerLevel >= 3)
-                {
-                    API.CastSpell(ArcaneIntellect);
-                    return;
-                }
-
-                //FROST NOVA
-                if (UseFN)
-                {
-                    if (!API.SpellISOnCooldown(FrostNova) && PlayerLevel >= 3 && API.TargetRange < 10)
-                    {
-                        API.CastSpell(FrostNova);
-                        return;
-                    }
-                }
-
-                //PYROBLAST ON HOT STREAK
-                if (API.CanCast(Pyroblast) && API.PlayerHasBuff(HotStreak) && !API.PlayerIsMoving && API.TargetRange < 40 && PlayerLevel >= 14)
-                {
-                    API.CastSpell(Pyroblast);
-                    return;
-                }
-
-                //PHOENIX FLAMES
-                if (API.CanCast(PhoenixFlames) && API.TargetRange < 40 && PlayerLevel >= 19)
-                {
-                    API.CastSpell(PhoenixFlames);
-                    return;
-                }
-
-                //DRAGONS BREATH
-                if (API.CanCast(DragonsBreath) && API.TargetRange < 10 && PlayerLevel >= 27)
-                {
-                    API.CastSpell(DragonsBreath);
-                    return;
-                }
-
-                //FIREBLAST
-                if (UseFB)
-                {
-                    if (!API.SpellISOnCooldown(FireBlast) && PlayerLevel >= 3)
-                    {
-                        API.CastSpell(FireBlast);
-                        return;
-                    }
-                }
-
-                //SNORCH BELOW 30%
-                if (API.CanCast(Scorch) && API.PlayerIsMoving && API.TargetRange < 40 && PlayerLevel >= 14 && API.TargetHealthPercent < 30)
-                {
-                    API.CastSpell(Scorch);
-                    return;
-                }
-
-                //FIREBALL
-                if (API.CanCast(Fireball) && !API.PlayerIsMoving && API.TargetRange < 40 && PlayerLevel >= 9)
-                {
-                    API.CastSpell(Fireball);
-                    return;
-                }
-
-                //FROSTBOLT
-                if (API.CanCast(Frostbolt) && !API.PlayerIsMoving && API.TargetRange < 40 && PlayerLevel <= 10)
-                {
-                    API.CastSpell(Frostbolt);
-                    return;
-                }
+                API.CastSpell(Fireblast);
+                return;
+            }
+            //PhoenixFlames on Heating up
+            if (API.CanCast(PhoenixFlames) && API.SpellCharges(PhoenixFlames) >= 1 && IsRange && API.PlayerHasBuff(HeatingUp) && API.PlayerHasBuff(Combustion))
+            {
+                API.CastSpell(PhoenixFlames);
+                return;
+            }
+            //Pyroblast on HotSreak
+            if (API.CanCast(Pyroblast) && API.PlayerHasBuff(HotSreak) && NotCasting && IsRange && NotChanneling)
+            {
+                API.CastSpell(Pyroblast);
+                return;
+            }
+            //BlazingBarrier
+            if (API.CanCast(BlazingBarrier) && !API.PlayerHasBuff(BlazingBarrier) && NotCasting && NotChanneling)
+            {
+                API.CastSpell(BlazingBarrier);
+                return;
+            }
+            //Combustion
+            if (IsCooldowns && API.CanCast(Combustion))
+            {
+                API.CastSpell(Combustion);
+                return;
+            }
+            //MirrorImage
+            if (IsCooldowns && API.CanCast(MirrorImage))
+            {
+                API.CastSpell(MirrorImage);
+                return;
+            }
+            //Scorch on Combustion
+            if (API.PlayerHasBuff(Combustion) && IsRange && API.CanCast(Scorch))
+            {
+                API.CastSpell(Scorch);
+                return;
+            }
+            //Flamestrike
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && API.CanCast(Flamestrike) && IsRange && API.TargetRange > 10 && API.PlayerHasBuff(HotSreak))
+            {
+                API.CastSpell(Flamestrike);
+                return;
+            }
+            //DragonsBreath
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.CanCast(DragonsBreath) && API.TargetRange <= 10)
+            {
+                API.CastSpell(DragonsBreath);
+                return;
+            }
+            //ArcaneExplosion
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.CanCast(ArcaneExplosion) && API.TargetRange <= 10)
+            {
+                API.CastSpell(ArcaneExplosion);
+                return;
+            }
+            //Fireball
+            if (API.CanCast(Fireball) && !API.PlayerHasBuff(HotSreak) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 1)
+            {
+                API.CastSpell(Fireball);
+                return;
+            }
+        }
+        public override void OutOfCombatPulse()
+        {
+            //ArcaneIntellect
+            if (API.CanCast(ArcaneIntellect) && !API.PlayerHasBuff(ArcaneIntellect))
+            {
+                API.CastSpell(ArcaneIntellect);
+                return;
             }
         }
     }
