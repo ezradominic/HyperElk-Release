@@ -56,6 +56,7 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int ShoulShardNumberMaleficRapture => CombatRoutine.GetPropertyInt("SoulShardNumberMaleficRapture");
         private int ShoulShardNumberDrainSoul => CombatRoutine.GetPropertyInt("SoulShardNumberDrainSoul");
+        bool LastSeed => API.CurrentCastSpellID("player") == 27243;
 
 
 
@@ -66,6 +67,10 @@ namespace HyperElk.Core
         string[] MisdirectionList = new string[] { "Imp", "Voidwalker", "Succubus", "Felhunter", "Darkglare" };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private bool UseUA => (bool)CombatRoutine.GetProperty("UseUA");
+        private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
+        private bool UseCO => (bool)CombatRoutine.GetProperty("UseCO");
+        private bool UseSL => (bool)CombatRoutine.GetProperty("UseSL");
+
         private int DarkPactPercentProc => numbList[CombatRoutine.GetPropertyInt(DarkPact)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
 
@@ -93,6 +98,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("SoulShardNumberMaleficRapture", "Soul Shards Malefic Rapture", 2, "How many Soul Shards to use Malefic Rapture", "Class specific");
             CombatRoutine.AddProp("SoulShardNumberDrainSoul", "Soul Shards Drain Shoul", 1, "How many Soul Shards to use Drain Shoul", "Class specific");
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("UseAG", "Use Agony", true, "Use Agony for mouseover Multidots", "MultiDOTS");
+            CombatRoutine.AddProp("UseCO", "Use Corruption", true, "Use Corruption for mouseover Multidots", "MultiDOTS");
+            CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
 
 
             //Spells
@@ -165,27 +173,36 @@ namespace HyperElk.Core
                 }
                 if (IsMouseover)
                 {
-                    if (API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && IsRange && PlayerLevel >= 2)
+                    if (UseCO)
                     {
-                        API.CastSpell(Corruption + "MO");
-                        return;
+                        if (API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                        {
+                            API.CastSpell(Corruption + "MO");
+                            return;
+                        }
                     }
-                    if (API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                    if (UseAG)
+                { 
+                        if (API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                        {
+                            API.CastSpell(Agony + "MO");
+                            return;
+                        }
+                }
+                    if (UseSL)
                     {
-                        API.CastSpell(Agony + "MO");
-                        return;
-                    }
-                    if (API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(Agony + "MO");
-                        return;
+                        if (API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
+                        {
+                            API.CastSpell(Agony + "MO");
+                            return;
+                        }
                     }
 
                 }
                 //Seed of Corruption
-                if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasBuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange)
+                if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >=1)
                 {
-                    API.CanCast(SeedofCorruption);
+                    API.CastSpell(SeedofCorruption);
                     return;
                 }
                 //Agony
@@ -195,7 +212,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Corruption
-                if (API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && PlayerLevel >= 2)
+                if (!LastSeed && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                 {
                     API.CastSpell(Corruption);
                     return;
@@ -252,13 +269,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //Malefic Rapture
-                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards > ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //Drain Soul
-                if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards < ShoulShardNumberDrainSoul)
+                if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
                 {
                     API.CastSpell(DrainSoul);
                     return;
