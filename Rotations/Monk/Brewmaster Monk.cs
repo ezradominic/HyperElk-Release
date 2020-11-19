@@ -96,6 +96,10 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+
+        }
+        public override void CombatPulse()
+        {
             //Cooldowns
             if (IsCooldowns)
             {
@@ -131,7 +135,7 @@ namespace HyperElk.Core
                 return;
             }
             //Expel Harm
-            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && API.PlayerEnergy > 30 && PlayerLevel >= 8)
+            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) &&  !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8)
             {
                 API.CastSpell(ExpelHarm);
                 return;
@@ -160,9 +164,6 @@ namespace HyperElk.Core
                 API.CastSpell(Vivify);
                 return;
             }
-        }
-        public override void CombatPulse()
-        {
             //Keg Smash
             if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
             {
