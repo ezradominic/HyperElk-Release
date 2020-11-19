@@ -110,7 +110,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Touch of Death
-                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetMaxHealth <= API.PlayerMaxHealth && PlayerLevel >= 10)
+                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth <= API.PlayerMaxHealth && PlayerLevel >= 10)
                 {
                     API.CastSpell(TouchofDeath);
                     return;
