@@ -2,7 +2,7 @@ namespace HyperElk.Core
 {
     public class LevelingPriest : CombatRoutine
     {
-
+        private bool isMouseover = API.ToggleIsEnabled("Mouseover");
         //Speel,Auras
         private string Shadowform = "Shadowform";
         private string PWFortitude = "Power Word: Fortitude";
@@ -87,6 +87,7 @@ namespace HyperElk.Core
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
             API.WriteLog("VampiricTouchMO - /cast [@mouseover] Vampiric Touch");
 
+            CombatRoutine.AddToggle("Mouseover");
             //Buff
             CombatRoutine.AddBuff(Shadowform);
             CombatRoutine.AddBuff(PWFortitude);
@@ -380,7 +381,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (IsAOE && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetUnitInRangeCount >= AOEUnitNumber && API.TargetUnitInRangeCount <= 9 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+            if (isMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetUnitInRangeCount >= AOEUnitNumber && API.TargetUnitInRangeCount <= 9 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
             {
                 if (IsUseVamp && !API.SpellISOnCooldown(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
                 {
@@ -393,7 +394,7 @@ namespace HyperElk.Core
                 }
 
                 //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
-                if (IsAOE && !API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
+                if (isMouseover && !API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
                 {
                     if (API.MouseoverDebuffRemainingTime(SWPain) <= 360 && !TalentMisery && (!TalentPsychicLink || (TalentPsychicLink && API.TargetUnitInRangeCount <= 2)))
                     {
