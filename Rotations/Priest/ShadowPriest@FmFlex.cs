@@ -2,7 +2,7 @@ namespace HyperElk.Core
 {
     public class LevelingPriest : CombatRoutine
     {
-        private bool isMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Speel,Auras
         private string Shadowform = "Shadowform";
         private string PWFortitude = "Power Word: Fortitude";
@@ -76,9 +76,9 @@ namespace HyperElk.Core
         bool searing_nightmare_cutoff => API.TargetUnitInRangeCount > 3;
 
         //actions+=/variable,name=pi_or_vf_sync_condition,op=set,value=(priest.self_power_infusion|runeforge.twins_of_the_sun_priestess.equipped)&level>=58&cooldown.power_infusion.up|(level<58|!priest.self_power_infusion&!runeforge.twins_of_the_sun_priestess.equipped)&cooldown.void_eruption.up
-        bool pi_or_vf_sync_condition => !API.SpellISOnCooldown(VoidEruption);
+        bool pi_or_vf_sync_condition => API.CanCast(VoidEruption);
 
-
+        
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest Rotation @FmFlex";
@@ -165,27 +165,27 @@ namespace HyperElk.Core
         {
             if (API.PlayerIsCasting && !ChannelingMindFlay && !ChannelingMindSear)
                 return;
-            if (isInterrupt && !API.SpellISOnCooldown(Silence) && PlayerLevel >= 27)
+            if (isInterrupt && API.CanCast(Silence) && PlayerLevel >= 27)
             {
                 API.CastSpell(Silence);
                 return;
             }
-            if (API.PlayerHealthPercent <= PWShieldLifePercent && !API.SpellISOnCooldown(PWShield) && !API.PlayerHasBuff(PWShield, false, false) && !API.PlayerHasDebuff(WeakenedSoul, false, false))
+            if (API.PlayerHealthPercent <= PWShieldLifePercent && API.CanCast(PWShield) && !API.PlayerHasBuff(PWShield, false, false) && !API.PlayerHasDebuff(WeakenedSoul, false, false))
             {
                 API.CastSpell(PWShield);
                 return;
             }
-            if (API.PlayerHealthPercent <= DesperatePrayerLifePercent && !API.SpellISOnCooldown(DesperatePrayer))
+            if (API.PlayerHealthPercent <= DesperatePrayerLifePercent && API.CanCast(DesperatePrayer))
             {
                 API.CastSpell(DesperatePrayer);
                 return;
             }
-            if (API.PlayerHealthPercent <= VampiricEmbraceLifePercent && !API.SpellISOnCooldown(VampiricEmbrace))
+            if (API.PlayerHealthPercent <= VampiricEmbraceLifePercent && API.CanCast(VampiricEmbrace))
             {
                 API.CastSpell(VampiricEmbrace);
                 return;
             }
-            if (API.PlayerHealthPercent <= ShadowMendLifePercent && !API.PlayerIsMoving && !API.SpellISOnCooldown(ShadowMend) && API.SpellIsCanbeCast(ShadowMend))
+            if (API.PlayerHealthPercent <= ShadowMendLifePercent && !API.PlayerIsMoving && API.CanCast(ShadowMend) && API.SpellIsCanbeCast(ShadowMend))
             {
                 API.CastSpell(ShadowMend);
                 return;
@@ -200,12 +200,12 @@ namespace HyperElk.Core
         public override void OutOfCombatPulse()
         {
 
-            if (IsShieldSpeed && API.PlayerIsTalentSelected(2, 1) && API.PlayerIsMoving && !API.SpellISOnCooldown(PWShield) && !API.PlayerHasDebuff(WeakenedSoul, false, false))
+            if (IsShieldSpeed && API.PlayerIsTalentSelected(2, 1) && API.PlayerIsMoving && API.CanCast(PWShield) && !API.PlayerHasDebuff(WeakenedSoul, false, false))
             {
                 API.CastSpell(PWShield);
                 return;
             }
-            if (API.PlayerHealthPercent <= ShadowMendOOCLifePercent && !API.PlayerIsMoving && !API.SpellISOnCooldown(ShadowMend) && API.SpellIsCanbeCast(ShadowMend))
+            if (API.PlayerHealthPercent <= ShadowMendOOCLifePercent && !API.PlayerIsMoving && API.CanCast(ShadowMend) && API.SpellIsCanbeCast(ShadowMend))
             {
                 API.CastSpell(ShadowMend);
                 return;
@@ -217,7 +217,7 @@ namespace HyperElk.Core
         {
             //actions+=/call_action_list,name=cwc
             //actions.cwc=searing_nightmare,use_while_casting=1,target_if=(variable.searing_nightmare_cutoff&!variable.pi_or_vf_sync_condition)|(dot.shadow_word_pain.refreshable&spell_targets.mind_sear>1)
-            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && !API.SpellISOnCooldown(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
+            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && API.CanCast(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
             {
                 if (IsAOE && (searing_nightmare_cutoff && !pi_or_vf_sync_condition) || (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 1))
                 {
@@ -227,7 +227,7 @@ namespace HyperElk.Core
             }
 
             //actions.cwc+=/searing_nightmare,use_while_casting=1,target_if=talent.searing_nightmare.enabled&dot.shadow_word_pain.refreshable&spell_targets.mind_sear>2
-            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && !API.SpellISOnCooldown(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
+            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && API.CanCast(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
             {
                 if (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 2)
                 {
@@ -237,7 +237,7 @@ namespace HyperElk.Core
             }
 
             //actions.cwc+=/mind_blast,only_cwc=1
-            if (!API.SpellISOnCooldown(MindBlast) && (ChannelingMindFlay || ChannelingMindSear) && !API.PlayerIsMoving && PlayerLevel >= 5)
+            if (API.CanCast(MindBlast) && (ChannelingMindFlay || ChannelingMindSear) && !API.PlayerIsMoving && PlayerLevel >= 5)
             {
                 API.CastSpell(MindBlast);
                 return;
@@ -245,7 +245,7 @@ namespace HyperElk.Core
 
             //actions+=/run_action_list,name=main
             //actions.main=void_eruption,if=variable.pi_or_vf_sync_condition&insanity>=40
-            if (IsCooldowns && !API.SpellISOnCooldown(VoidEruption) && !API.PlayerIsMoving && PlayerLevel >= 23)
+            if (IsCooldowns && API.CanCast(VoidEruption) && !API.PlayerIsMoving && PlayerLevel >= 23)
             {
                 if (pi_or_vf_sync_condition && API.PlayerInsanity >= 40)
                 {
@@ -254,7 +254,7 @@ namespace HyperElk.Core
                 }
             }
 
-            if ((!API.PlayerIsCasting || ChannelingMindFlay) && !API.SpellISOnCooldown(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if ((!API.PlayerIsCasting || ChannelingMindFlay) && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) && API.SpellISOnCooldown(Shadowfiend))
                 {
@@ -264,7 +264,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/damnation,target_if=!variable.all_dots_up
-            if (TalentDamnation && !API.SpellISOnCooldown(Damnation))
+            if (TalentDamnation && API.CanCast(Damnation))
             {
                 if (!all_dots_up)
                 {
@@ -274,7 +274,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_bolt,if=insanity<=85&((talent.hungering_void.enabled&spell_targets.mind_sear<5)|spell_targets.mind_sear=1)
-            if (!API.SpellISOnCooldown(VoidBolt) && API.PlayerHasBuff(Voidform))
+            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(Voidform))
             {
                 if (API.PlayerInsanity <= 85 && ((TalentHungeringVoid && API.TargetUnitInRangeCount < 5) || API.TargetUnitInRangeCount == 1))
                 {
@@ -284,7 +284,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/devouring_plague,target_if=(refreshable|insanity>75)&!variable.pi_or_vf_sync_condition&(!talent.searing_nightmare.enabled|(talent.searing_nightmare.enabled&!variable.searing_nightmare_cutoff))
-            if (!API.SpellISOnCooldown(DevouringPlague) && API.SpellIsCanbeCast(DevouringPlague) && PlayerLevel >= 10)
+            if (API.CanCast(DevouringPlague) && API.SpellIsCanbeCast(DevouringPlague) && PlayerLevel >= 10)
             {
                 if ((API.TargetDebuffRemainingTime(DevouringPlague) <= 180 || API.PlayerInsanity > 75) && (!IsCooldowns ||  !pi_or_vf_sync_condition || API.PlayerInsanity >= 85) &&
                     (!TalentSearingNightmare|| !IsAOE || (IsAOE && TalentSearingNightmare && !searing_nightmare_cutoff)))
@@ -294,7 +294,7 @@ namespace HyperElk.Core
                 }
             }
             //actions.main+=/void_bolt,if=spell_targets.mind_sear<(4+conduit.dissonant_echoes.enabled)&insanity<=85
-            if (!API.SpellISOnCooldown(VoidBolt) && API.PlayerHasBuff(Voidform))
+            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(Voidform))
             {
                 if (API.TargetUnitInRangeCount < (4) && API.PlayerInsanity <= 85)
                 {
@@ -303,7 +303,7 @@ namespace HyperElk.Core
                 }
             }
             //actions.main+=/shadow_word_death,target_if=(target.health.pct<20&spell_targets.mind_sear<4)|(pet.fiend.active&runeforge.shadowflame_prism.equipped)
-            if (!API.SpellISOnCooldown(SWDeath) && PlayerLevel >= 14)
+            if (API.CanCast(SWDeath) && PlayerLevel >= 14)
             {
                 if ((API.TargetHealthPercent <= 20 && (!IsAOE || API.TargetUnitInRangeCount < 4)))
                 {
@@ -313,7 +313,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/surrender_to_madness,target_if=target.time_to_die<25&buff.voidform.down
-            if (TalentSurrenderToMadness && !API.SpellISOnCooldown("Surrender to Madness") && !API.PlayerIsMoving)
+            if (TalentSurrenderToMadness && API.CanCast("Surrender to Madness") && !API.PlayerIsMoving)
             {
                 if (IsCooldowns && API.TargetTimeToDie < 250 && !API.PlayerHasBuff(Voidform))
                 {
@@ -323,7 +323,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mindbender,if=dot.vampiric_touch.ticking&((talent.searing_nightmare.enabled&spell_targets.mind_sear>(variable.mind_sear_cutoff+1))|dot.shadow_word_pain.ticking)
-            if (IsCooldowns && !API.SpellISOnCooldown(Shadowfiend) && !API.PlayerIsMoving && PlayerLevel >= 20)
+            if (IsCooldowns && API.CanCast(Shadowfiend) && !API.PlayerIsMoving && PlayerLevel >= 20)
             {
                 if ((API.TargetHasDebuff(VampiricTouch, true) || !IsUseVamp) &&
                     ((IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > (2)) || API.TargetHasDebuff(SWPain, true)))
@@ -334,7 +334,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_torrent,target_if=variable.dots_up&target.time_to_die>4&buff.voidform.down&spell_targets.mind_sear<(5+(6*talent.twist_of_fate.enabled))
-            if (TalentVoidTorrent && !API.SpellISOnCooldown(VoidTorrent) && !API.PlayerIsMoving)
+            if (TalentVoidTorrent && API.CanCast(VoidTorrent) && !API.PlayerIsMoving)
             {
                 if (dots_up && API.TargetTimeToDie > 400 && !API.PlayerHasBuff(Voidform) && (!IsAOE || API.TargetUnitInRangeCount < (5 + (6 * (TalentTwistOfFate ? 1 : 0)))))
                 {
@@ -344,7 +344,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/shadow_crash,if=spell_targets.shadow_crash=1&(cooldown.shadow_crash.charges=3|debuff.shadow_crash_debuff.up|action.shadow_crash.in_flight|target.time_to_die<cooldown.shadow_crash.full_recharge_time)&raid_event.adds.in>30
-            if (TalentShadowCrash && !API.SpellISOnCooldown(ShadowCrash))
+            if (TalentShadowCrash && API.CanCast(ShadowCrash))
             {
                 if (API.TargetUnitInRangeCount == 1 && (API.SpellCharges(ShadowCrash) == 3 || API.TargetHasDebuff(ShadowCrash, true)))
                 {
@@ -354,7 +354,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/shadow_crash,if=raid_event.adds.in>30&spell_targets.shadow_crash>1
-            if (TalentShadowCrash && !API.SpellISOnCooldown(ShadowCrash))
+            if (TalentShadowCrash && API.CanCast(ShadowCrash))
             {
                 if (API.TargetUnitInRangeCount > 1)
                 {
@@ -364,7 +364,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,if=buff.dark_thoughts.up&variable.dots_up,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if ((!API.PlayerIsCasting || ChannelingMindSear) && !API.SpellISOnCooldown(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if ((!API.PlayerIsCasting || ChannelingMindSear) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 if (API.PlayerHasBuff(DarkThoughts))
                 {
@@ -374,7 +374,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_blast,if=variable.dots_up&raid_event.movement.in>cast_time+0.5&spell_targets.mind_sear<4
-            if (!API.SpellISOnCooldown(MindBlast) && !API.PlayerIsMoving && PlayerLevel >= 5)
+            if (API.CanCast(MindBlast) && !API.PlayerIsMoving && PlayerLevel >= 5)
             {
                 if ((dots_up || API.TargetTimeToDie <= 600 || !IsUseVamp) && (!IsAOE || API.TargetUnitInRangeCount < 4))
                 {
@@ -382,9 +382,9 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (isMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetUnitInRangeCount <= 9 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetUnitInRangeCount <= 9 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
             {
-                if (IsUseVamp && !API.SpellISOnCooldown(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
+                if (IsUseVamp && API.CanCast(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
                 {
                     if (API.MouseoverDebuffRemainingTime(VampiricTouch) <= 630 ||
                         (TalentMisery && API.MouseoverDebuffRemainingTime(SWPain) <= 360))
@@ -395,7 +395,7 @@ namespace HyperElk.Core
                 }
 
                 //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
-                if (!API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
+                if (API.CanCast(SWPain) && PlayerLevel >= 2)
                 {
                     if (API.MouseoverDebuffRemainingTime(SWPain) <= 360 && !TalentMisery && (!TalentPsychicLink || (TalentPsychicLink && API.TargetUnitInRangeCount <= 2)))
                     {
@@ -405,7 +405,7 @@ namespace HyperElk.Core
                 }
             }
             //actions.main+=/vampiric_touch,target_if=refreshable&target.time_to_die>6|(talent.misery.enabled&dot.shadow_word_pain.refreshable)|buff.unfurling_darkness.up
-            if (IsUseVamp && !API.SpellISOnCooldown(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
+            if (IsUseVamp && API.CanCast(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
             {
                 if (API.TargetDebuffRemainingTime(VampiricTouch) <= 630 && API.TargetTimeToDie > 600 ||
                     (TalentMisery && API.TargetDebuffRemainingTime(SWPain) <= 360))
@@ -416,7 +416,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
-            if (IsAOE && !API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
+            if (IsAOE && API.CanCast(SWPain) && PlayerLevel >= 2)
             {
                 if (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetTimeToDie > 400 && !TalentSearingNightmare && !TalentMisery && TalentPsychicLink && API.TargetUnitInRangeCount > 2)
                 {
@@ -426,7 +426,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/shadow_word_pain,target_if=refreshable&target.time_to_die>4&!talent.misery.enabled&!(talent.searing_nightmare.enabled&spell_targets.mind_sear>(variable.mind_sear_cutoff+1))&(!talent.psychic_link.enabled|(talent.psychic_link.enabled&spell_targets.mind_sear<=2))
-            if (!API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
+            if (API.CanCast(SWPain) && PlayerLevel >= 2)
             {
                 if (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetTimeToDie > 400 && !TalentMisery &&
                     (!IsAOE || API.TargetUnitInRangeCount <= 1 || !(TalentSearingNightmare && API.TargetUnitInRangeCount > 2)) &&
@@ -438,7 +438,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_sear,target_if=spell_targets.mind_sear>variable.mind_sear_cutoff,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2
-            if ((!API.PlayerIsCasting ||ChannelingMindFlay) && IsAOE && !API.SpellISOnCooldown(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if ((!API.PlayerIsCasting ||ChannelingMindFlay) && IsAOE && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (API.TargetUnitInRangeCount > 1)
                 {
@@ -448,30 +448,30 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if ((!API.PlayerIsCasting) && !API.SpellISOnCooldown(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if (API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 API.CastSpell(MindFlay);
                 return;
             }
 
             //actions.main+=/shadow_word_death
-            if (IsSWDeathMoving && !API.SpellISOnCooldown(SWDeath) && API.PlayerIsMoving && PlayerLevel >= 14)
+            if (IsSWDeathMoving && API.CanCast(SWDeath) && API.PlayerIsMoving && PlayerLevel >= 14)
             {
                 API.CastSpell(SWDeath);
                 return;
             }
 
-            if (isMouseover && API.PlayerIsMoving && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+            if (IsMouseover && API.PlayerIsMoving && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
             {
                 //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
-                if (!API.SpellISOnCooldown(SWPain) && PlayerLevel >= 2)
+                if (API.CanCast(SWPain) && PlayerLevel >= 2)
                 {
                         API.CastSpell(SWPain + "MO");
                         return;
                 }
             }
             //actions.main+=/shadow_word_pain
-            if (!API.SpellISOnCooldown(SWPain) && API.PlayerIsMoving && PlayerLevel >= 2)
+            if (API.CanCast(SWPain) && API.PlayerIsMoving && PlayerLevel >= 2)
             {
                 API.CastSpell(SWPain);
                 return;
