@@ -18,6 +18,7 @@ namespace HyperElk.Core
         private string SurrendertoMadness = "Surrender to Madness";
         private string Damnation = "Damnation";
         private string Silence = "Silence";
+        private string Mindbender = "Mindbender";
 
         private string Smite = "Smite";
         private string MindFlay = "Mind Flay";
@@ -120,6 +121,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SurrendertoMadness, "D1");
             CombatRoutine.AddSpell(Damnation, "D1");
             CombatRoutine.AddSpell(Silence, "F");
+            CombatRoutine.AddSpell(Mindbender, "D7");
 
             CombatRoutine.AddSpell(VampiricEmbrace, "E");
             CombatRoutine.AddSpell(DesperatePrayer, "S");
@@ -256,7 +258,8 @@ namespace HyperElk.Core
 
             if ((!API.PlayerIsCasting || ChannelingMindFlay) && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
-                if (IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) && API.SpellISOnCooldown(Shadowfiend))
+                if (IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) &&
+                    (TalentMindbender ? API.SpellISOnCooldown(Mindbender):API.SpellISOnCooldown(Shadowfiend)))
                 {
                     API.CastSpell(MindSear);
                     return;
@@ -321,14 +324,17 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
+            
             //actions.main+=/mindbender,if=dot.vampiric_touch.ticking&((talent.searing_nightmare.enabled&spell_targets.mind_sear>(variable.mind_sear_cutoff+1))|dot.shadow_word_pain.ticking)
-            if (IsCooldowns && API.CanCast(Shadowfiend) && !API.PlayerIsMoving && PlayerLevel >= 20)
+            if (IsCooldowns && (TalentMindbender?API.CanCast(Mindbender): API.CanCast(Shadowfiend)) && !API.PlayerIsMoving && PlayerLevel >= 20)
             {
                 if ((API.TargetHasDebuff(VampiricTouch, true) || !IsUseVamp) &&
                     ((IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > (2)) || API.TargetHasDebuff(SWPain, true)))
                 {
-                    API.CastSpell(Shadowfiend);
+                    if(TalentMindbender)
+                        API.CastSpell(Mindbender);
+                    else
+                        API.CastSpell(Shadowfiend);
                     return;
                 }
             }
@@ -448,7 +454,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if (API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if ((!API.PlayerIsCasting) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 API.CastSpell(MindFlay);
                 return;
