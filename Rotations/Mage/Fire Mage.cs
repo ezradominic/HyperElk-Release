@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace HyperElk.Core
 {
-    public class AfflictionWarlock : CombatRoutine
+    public class FireMage : CombatRoutine
     {
         //Spells,Buffs,Debuffs
         private string Fireball = "Fireball";
@@ -24,9 +24,19 @@ namespace HyperElk.Core
         private string ArcaneIntellect = "Arcane Intellect";
         private string ArcaneExplosion = "Arcane Explosion";
         private string MirrorImage = "Mirror Image";
+        private string Meteor = "Meteor";
+        private string BlastWave = "BlastWave";
+        private string RuneOfPower = "Rune of Power";
+        private string LivingBomb = "Living Bomb";
 
 
         //Talents
+        bool TalentBlastWave = API.PlayerIsTalentSelected(2, 3);
+        bool TalentFocusMagic = API.PlayerIsTalentSelected(3, 2);
+        bool TalentRuneOfPower = API.PlayerIsTalentSelected(3, 3);
+        bool TalentRingOfFrost = API.PlayerIsTalentSelected(5, 3);
+        bool TalentLivingBomb = API.PlayerIsTalentSelected(6, 3);
+        bool TalentMeteor = API.PlayerIsTalentSelected(7, 3);
 
         //Misc
         private bool IsRange => API.TargetRange < 40;
@@ -50,6 +60,7 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Fire Mage rotation @ Mufflon12");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("Use /cast [@cursor] Flamestrike macro");
+            API.WriteLog("Use /cast [@cursor] Meteor macro");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
@@ -62,8 +73,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Fireblast, "D2");
             CombatRoutine.AddSpell(Pyroblast, "D3");
             CombatRoutine.AddSpell(DragonsBreath, "D4");
-
             CombatRoutine.AddSpell(Scorch, "D5");
+            CombatRoutine.AddSpell(Meteor, "D6");
+            CombatRoutine.AddSpell(BlastWave, "D7");
+            CombatRoutine.AddSpell(RuneOfPower, "D7");
+            CombatRoutine.AddSpell(LivingBomb, "D7");
 
 
 
@@ -106,6 +120,18 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            //RuneofPower
+            if (API.CanCast(RuneOfPower) && TalentRuneOfPower)
+            {
+                API.CastSpell(RuneOfPower);
+                return;
+            }
+            //Meteor
+            if (API.CanCast(Meteor) && TalentMeteor && NotCasting && IsRange && NotChanneling)
+            {
+                API.CastSpell(Meteor);
+                return;
+            }
             //Fireblast on HeatingUp
             if (API.CanCast(Fireblast) && API.SpellCharges(Fireblast) >= 1 && !API.PlayerHasBuff(HeatingUp) && NotMoving && NotCasting && IsRange && NotChanneling)
             {
@@ -119,7 +145,7 @@ namespace HyperElk.Core
                 return;
             }
             //Pyroblast on HotSreak
-            if (API.CanCast(Pyroblast) && API.PlayerHasBuff(HotSreak) && NotCasting && IsRange && NotChanneling)
+            if (API.CanCast(Pyroblast) && API.PlayerHasBuff(HotSreak) && IsRange && NotChanneling)
             {
                 API.CastSpell(Pyroblast);
                 return;
@@ -161,13 +187,25 @@ namespace HyperElk.Core
                 return;
             }
             //ArcaneExplosion
-            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.CanCast(ArcaneExplosion) && API.TargetRange <= 10)
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.CanCast(ArcaneExplosion) && API.SpellISOnCooldown(DragonsBreath) && API.TargetRange <= 10)
             {
                 API.CastSpell(ArcaneExplosion);
                 return;
             }
+            //BlastWave
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.CanCast(BlastWave) && TalentBlastWave && API.TargetRange <= 7)
+            {
+                API.CastSpell(BlastWave);
+                return;
+            }
+            //BlastWave
+            if (API.CanCast(LivingBomb) && TalentLivingBomb)
+            {
+                API.CastSpell(LivingBomb);
+                return;
+            }
             //Fireball
-            if (API.CanCast(Fireball) && !API.PlayerHasBuff(HotSreak) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 1)
+            if (API.CanCast(Fireball) && !API.PlayerHasBuff(HotSreak) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 9)
             {
                 API.CastSpell(Fireball);
                 return;

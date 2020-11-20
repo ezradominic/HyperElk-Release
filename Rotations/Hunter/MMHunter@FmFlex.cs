@@ -50,7 +50,7 @@ namespace HyperElk.Core
         private bool TalentCarefulAim => API.PlayerIsTalentSelected(2, 1);
         private bool TalentBarrage => API.PlayerIsTalentSelected(2, 2);
         private bool TalentExplosiveShot => API.PlayerIsTalentSelected(2, 3);
-        private bool TalentChimaeraShot => API.PlayerIsTalentSelected(3, 3);
+        private bool TalentChimaeraShot => API.PlayerIsTalentSelected(4, 3);
         private bool TalentSteadyFocus => API.PlayerIsTalentSelected(4, 1);
         private bool TalentDeadEye => API.PlayerIsTalentSelected(6, 2);
         private bool TalentDoubleTap => API.PlayerIsTalentSelected(6, 3);
