@@ -1,5 +1,6 @@
 //Changelog test@test.de
 // v1.0 First release
+// v1.1 small fix
 
 namespace HyperElk.Core
 {
@@ -59,8 +60,8 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Arms Warrior v1.0 by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v1.0");
+            CombatRoutine.Name = "Arms Warrior v1.1 by smartie";
+            API.WriteLog("Welcome to smartie`s Arms Warrior v1.1");
             API.WriteLog("All Talents are supported and auto detected");
 
             //Spells
@@ -122,7 +123,7 @@ namespace HyperElk.Core
                 API.CastSpell(Pummel);
                 return;
             }
-            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush))
+            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(VictoryRush))
             {
                 API.CastSpell(VictoryRush);
                 return;

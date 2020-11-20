@@ -1,5 +1,6 @@
 // Changelog
 // v1.0 First release
+// v1.1 small fix
 
 namespace HyperElk.Core
 {
@@ -119,7 +120,7 @@ namespace HyperElk.Core
                 API.CastSpell(EnragedRegeneration);
                 return;
             }
-            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush))
+            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(VictoryRush))
             {
                 API.CastSpell(VictoryRush);
                 return;
