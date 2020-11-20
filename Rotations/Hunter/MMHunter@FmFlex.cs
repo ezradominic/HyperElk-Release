@@ -193,7 +193,7 @@ namespace HyperElk.Core
                 //st->add_action("steady_shot,if=talent.steady_focus.enabled&prev_gcd.1.steady_shot&buff.steady_focus.remains<5");
                 if (TalentSteadyFocus &&  API.CanCast(SteadyShot) && API.LastSpellCastInGame == SteadyShot && API.PlayerHasBuff(SteadyFocus,false,false) 
                     && API.PlayerBuffTimeRemaining(SteadyFocus) < 500
-                    && InRange && PlayerLevel < 10)
+                    && InRange)
                 {
                     API.CastSpell(SteadyShot);
                     return;
@@ -282,7 +282,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //st->add_action("steady_shot");
-                if (API.CanCast(SteadyShot) && InRange && PlayerLevel < 10)
+                if (API.CanCast(SteadyShot) && InRange)
                 {
                     API.CastSpell(SteadyShot);
                     return;
@@ -372,7 +372,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //trickshots->add_action("steady_shot");
-                if (API.CanCast(SteadyShot) && InRange && PlayerLevel < 10)
+                if (API.CanCast(SteadyShot) && InRange)
                 {
                     API.CastSpell(SteadyShot);
                     return;
