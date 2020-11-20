@@ -139,7 +139,7 @@ namespace HyperElk.Core
                     }
                 }
                 // Soul Cleave
-                if (API.PlayerHealthPercent <= SoulCleavePercentProc && API.CanCast(SoulCleave) && API.PlayerBuffStacks(SoulFragments) > 2 && API.PlayerFury > 30 && PlayerLevel >= 1)
+                if (API.PlayerHealthPercent <= SoulCleavePercentProc && API.CanCast(SoulCleave) && (API.PlayerIsTalentSelected(3, 3)?!API.PlayerHasBuff(SoulFragments):API.PlayerBuffStacks(SoulFragments) > 2) && API.PlayerFury > 30 && PlayerLevel >= 1)
                 {
                     API.CastSpell(SoulCleave);
                     return;
