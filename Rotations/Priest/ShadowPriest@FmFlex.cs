@@ -126,8 +126,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(PWFortitude, "F6");
             CombatRoutine.AddSpell(PWShield, "F7");
 
-            CombatRoutine.AddSpell(SWPain+"MO", "D2");
-            CombatRoutine.AddSpell(VampiricTouch+"MO", "D6");
+            CombatRoutine.AddMacro(SWPain+"MO", "D2");
+            CombatRoutine.AddMacro(VampiricTouch+"MO", "D6");
 
             CombatRoutine.AddToggle("Mouseover");
             //Prop
@@ -219,7 +219,7 @@ namespace HyperElk.Core
             //actions.cwc=searing_nightmare,use_while_casting=1,target_if=(variable.searing_nightmare_cutoff&!variable.pi_or_vf_sync_condition)|(dot.shadow_word_pain.refreshable&spell_targets.mind_sear>1)
             if (TalentSearingNightmare && API.PlayerInsanity >= 30 && API.CanCast(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
             {
-                if (IsAOE && (searing_nightmare_cutoff && !pi_or_vf_sync_condition) || (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 1))
+                if ( (searing_nightmare_cutoff && !pi_or_vf_sync_condition) || (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 1))
                 {
                     API.CastSpell(SearingNightmare);
                     return;
