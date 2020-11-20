@@ -114,11 +114,13 @@ namespace HyperElk.Core
             {
                 return;
             }
+            API.WriteLog("test " + API.TargetUnitInRangeCount);
             if (!API.PlayerHasPet)
             {
                 API.CastSpell(MendPet);
                 return;
             }
+  
             if (API.PlayerHasPet && API.PetHealthPercent <= MendPetLifePercent && !API.SpellISOnCooldown(MendPet))
             {
                 API.CastSpell(MendPet);
