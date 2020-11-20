@@ -67,6 +67,7 @@ namespace HyperElk.Core
         {
             CombatRoutine.Name = "RetributionPal@fmflex";
             API.WriteLog("Welcome to Paladin Retribution rotation @ FmFlex");
+            API.WriteLog("Macro required: /cast [@player] Final Reckoning");
 
 
             //Spells
@@ -225,7 +226,7 @@ namespace HyperElk.Core
             }
 
             if (API.PlayerIsTalentSelected(7, 3) && !API.SpellISOnCooldown(FinalReckoning) && API.TargetRange < 30 && API.PlayerCurrentHolyPower >= 3
-                && (API.PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) >= 1000) &&
+                && (API.PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) >= 1000) && IsMelee &&
                 (!API.PlayerIsTalentSelected(1, 3) || (API.PlayerIsTalentSelected(1, 3) && API.SpellCDDuration(ExecutionSentence) <= 2 * API.SpellGCDTotalDuration)))
             {
                 API.CastSpell(FinalReckoning);
