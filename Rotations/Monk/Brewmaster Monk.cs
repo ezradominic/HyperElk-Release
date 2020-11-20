@@ -51,6 +51,7 @@ namespace HyperElk.Core
         private string TouchofDeath = "Touch of Death";
         private string BlackOxBrew = "Black Ox Brew";
         private string HealingElixir = "Healing Elixir";
+        private string ChiBurst = "Chi Burst";
 
         public override void Initialize()
         {
@@ -66,23 +67,24 @@ namespace HyperElk.Core
 
 
             //Spells
-            CombatRoutine.AddSpell("Tiger Palm", "D1");
-            CombatRoutine.AddSpell("Blackout Kick", "D2");
-            CombatRoutine.AddSpell("Spinning Crane Kick", "D3");
-            CombatRoutine.AddSpell("Spear Hand Strike", "D4");
-            CombatRoutine.AddSpell("Breath of Fire", "D5");
-            CombatRoutine.AddSpell("Keg Smash", "D6");
-            CombatRoutine.AddSpell("Touch of Death", "D7");
+            CombatRoutine.AddSpell(TigerPalm, "D1");
+            CombatRoutine.AddSpell(BlackOutKick, "D2");
+            CombatRoutine.AddSpell(SpinningCraneKick, "D3");
+            CombatRoutine.AddSpell(SpearHandStrike, "D4");
+            CombatRoutine.AddSpell(BreathOfFire, "D5");
+            CombatRoutine.AddSpell(KegSmash, "D6");
+            CombatRoutine.AddSpell(TouchofDeath, "D7");
+            CombatRoutine.AddSpell(ChiBurst, "D8");
 
 
 
-            CombatRoutine.AddSpell("Vivify", "NumPad1");
-            CombatRoutine.AddSpell("Expel Harm", "NumPad2");
-            CombatRoutine.AddSpell("Purifying Brew", "NumPad3");
-            CombatRoutine.AddSpell("Celestial Brew", "NumPad4");
-            CombatRoutine.AddSpell("Fortifying Brew", "NumPad5");
-            CombatRoutine.AddSpell("Black Ox Brew", "NumPad6");
-            CombatRoutine.AddSpell("Healing Elixir", "NumPad7");
+            CombatRoutine.AddSpell(Vivify, "NumPad1");
+            CombatRoutine.AddSpell(ExpelHarm, "NumPad2");
+            CombatRoutine.AddSpell(PurifyingBrew, "NumPad3");
+            CombatRoutine.AddSpell(CelestialBrew, "NumPad4");
+            CombatRoutine.AddSpell(FortifyingBrew, "NumPad5");
+            CombatRoutine.AddSpell(BlackOxBrew, "NumPad6");
+            CombatRoutine.AddSpell(HealingElixir, "NumPad7");
 
             //Buffs
 
@@ -104,7 +106,7 @@ namespace HyperElk.Core
             if (IsCooldowns)
             {
                 //BlackOxBrew
-                if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerIsTalentSelected(3, 3))
+                if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && API.PlayerIsTalentSelected(3, 3))
                 {
                     API.CastSpell(BlackOxBrew);
                     return;
@@ -116,12 +118,6 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            //AOE
-            if (IsAOE)
-            {
-
-            }
-
             //KICK
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
             {
@@ -182,6 +178,12 @@ namespace HyperElk.Core
                 API.CastSpell(BlackOutKick);
                 return;
             }
+            //Blackout Kick
+            if (API.CanCast(ChiBurst) && API.PlayerIsTalentSelected(1, 3))
+            {
+                API.CastSpell(ChiBurst);
+                return;
+            }
             //Tiger Palm
             if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 50)
             {
@@ -189,7 +191,7 @@ namespace HyperElk.Core
                 return;
             }
             //Spinning Crane Kick
-            if (API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
+            if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
@@ -197,7 +199,12 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-
+            //Vivify
+            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
+            {
+                API.CastSpell(Vivify);
+                return;
+            }
         }
     }
 }
