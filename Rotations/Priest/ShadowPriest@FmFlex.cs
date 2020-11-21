@@ -66,7 +66,7 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         bool ChannelingMindFlay => API.CurrentCastSpellID("player") == 15407;
         bool ChannelingMindSear => API.CurrentCastSpellID("player") == 48045;
-        bool CastingVT => API.PlayerLastSpell == VampiricTouch;
+        bool CastingVT => API.CurrentCastSpellID("player") == 34914;
         //actions+=/variable,name=dots_up,op=set,value=dot.shadow_word_pain.ticking&dot.vampiric_touch.ticking
         bool dots_up => API.TargetHasDebuff(SWPain, true) && API.TargetHasDebuff(VampiricTouch, true);
 
@@ -411,9 +411,9 @@ namespace HyperElk.Core
                 }
             }
             //actions.main+=/vampiric_touch,target_if=refreshable&target.time_to_die>6|(talent.misery.enabled&dot.shadow_word_pain.refreshable)|buff.unfurling_darkness.up
-            if (IsUseVamp && API.CanCast(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
+            if (IsUseVamp && API.CanCast(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || (!CastingVT && !API.PlayerIsMoving)) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
             {
-                if (API.TargetDebuffRemainingTime(VampiricTouch) <= 630 && API.TargetTimeToDie > 600 ||
+                if (API.TargetDebuffRemainingTime(VampiricTouch) <= 630 && API.TargetTimeToDie > 600 || API.PlayerHasBuff(UnfurlingDarkness) ||
                     (TalentMisery && API.TargetDebuffRemainingTime(SWPain) <= 360))
                 {
                     API.CastSpell(VampiricTouch);
