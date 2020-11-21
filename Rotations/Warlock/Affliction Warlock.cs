@@ -24,8 +24,8 @@ namespace HyperElk.Core
         private string SummonSuccubus = "Summon Succubus";
         private string SiphonLife = "Siphon Life";
         private string DarkPact = "Dark Pact";
-        private string PhantomSingularity = "Dark Pact";
-        private string VileTaint = "Dark Pact";
+        private string PhantomSingularity = "Phantom Singularity";
+        private string VileTaint = "Vile Taint";
         private string SummonFelhunter = "Summon Felhunter";
         private string SummonDarkglare = "Summon Darkglare";
         private string Haunt = "Haunt";
@@ -56,11 +56,16 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int ShoulShardNumberMaleficRapture => CombatRoutine.GetPropertyInt("SoulShardNumberMaleficRapture");
         private int ShoulShardNumberDrainSoul => CombatRoutine.GetPropertyInt("SoulShardNumberDrainSoul");
-        bool LastSeed => API.CurrentCastSpellID("player") == 27243;
-
 
 
         //CBProperties
+        bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
+        bool CastingAgony => API.PlayerLastSpell == Agony;
+        bool CastingCorruption => API.PlayerLastSpell == Corruption;
+        bool CastingSL => API.PlayerLastSpell == SiphonLife;
+        bool LastSeed => API.CurrentCastSpellID("player") == 27243;
+
+
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         private int DrainLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
@@ -112,10 +117,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Unstable Affliction", "D5");
             CombatRoutine.AddSpell("Seed of Corruption", "D6");
             CombatRoutine.AddSpell("Siphon Life", "D7");
+            CombatRoutine.AddSpell("Vile Taint", "D8");
             CombatRoutine.AddSpell("Phantom Singularity", "D8");
-            CombatRoutine.AddSpell("Vile Taint", "D9");
-            CombatRoutine.AddSpell("Haunt", "F1");
-            CombatRoutine.AddSpell("Dark Soul Misery", "F2");
+
+
             CombatRoutine.AddSpell(Agony+"MO", "F1");
             CombatRoutine.AddSpell(Corruption+"MO", "F2");
             CombatRoutine.AddSpell(SiphonLife + "MO", "F3");
@@ -125,7 +130,6 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Drain Life", "NumPad1");
             CombatRoutine.AddSpell("Health Funnel", "NumPad2");
             CombatRoutine.AddSpell("Dark Pact", "NumPad3");
-            CombatRoutine.AddSpell("Shadow Bulwark", "NumPad4");
 
 
             CombatRoutine.AddSpell("Summon Darkglare", "NumPad5");
@@ -145,6 +149,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Unstable Affliction");
             CombatRoutine.AddDebuff("Siphon Life");
             CombatRoutine.AddDebuff("Seed of Corruption");
+            CombatRoutine.AddDebuff("Vile Taint");
+            CombatRoutine.AddDebuff("Phantom Singularity");
 
             //Debuffs
 
@@ -162,20 +168,11 @@ namespace HyperElk.Core
         {
             {
                 //Cooldowns
-                if (IsCooldowns)
-                {
-                    //Dark Soul Misery
-                    if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
-                    {
-                        API.CastSpell(DarkSoulMisery);
-                        return;
-                    }
-                }
                 if (IsMouseover)
                 {
                     if (UseCO)
                     {
-                        if (API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                        if (!CastingCorruption && API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                         {
                             API.CastSpell(Corruption + "MO");
                             return;
@@ -183,7 +180,7 @@ namespace HyperElk.Core
                     }
                     if (UseAG)
                 { 
-                        if (API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                        if (!CastingAgony && API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
                         {
                             API.CastSpell(Agony + "MO");
                             return;
@@ -191,7 +188,7 @@ namespace HyperElk.Core
                 }
                     if (UseSL)
                     {
-                        if (API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
+                        if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                         {
                             API.CastSpell(Agony + "MO");
                             return;
@@ -200,25 +197,37 @@ namespace HyperElk.Core
 
                 }
                 //Seed of Corruption
-                if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >=1)
+                if (IsAOE && !LastSeed && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >=1)
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
                 }
+                //VileTaint
+                if (IsAOE && TalentVileTaint && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //PhantomSingularity
+                if (IsAOE && TalentPhantomSingularity && API.TargetUnitInRangeCount >= AOEUnitNumber && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && IsRange)
+                {
+                    API.CastSpell(PhantomSingularity);
+                    return;
+                }
                 //Agony
-                if (API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                if (!CastingAgony && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
                 {
                     API.CastSpell(Agony);
                     return;
                 }
                 //Corruption
-                if (!LastSeed && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                if (!CastingCorruption && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                 {
                     API.CastSpell(Corruption);
                     return;
                 }
                 //SiphonLife
-                if (API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && TalentSiphonLife)
+                if (!CastingSL && API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && TalentSiphonLife)
                 {
                     API.CastSpell(SiphonLife);
                     return;
@@ -249,24 +258,6 @@ namespace HyperElk.Core
                         API.CastSpell(UnstableAffliction);
                         return;
                     }
-                }
-                //Haunt
-                if (API.CanCast(Haunt) && NotMoving && NotCasting && IsRange && NotChanneling && TalentHaunt)
-                {
-                    API.CastSpell(Haunt);
-                    return;
-                }
-                //Vile Taint
-                if (API.CanCast(VileTaint) && API.PlayerCurrentSoulShards >= 2 && NotMoving && NotCasting && IsRange && NotChanneling && TalentVileTaint)
-                {
-                    API.CastSpell(VileTaint);
-                    return;
-                }
-                //Phantom Singularity
-                if (API.CanCast(PhantomSingularity) && NotCasting && IsRange && NotChanneling && TalentPhantomSingularity)
-                {
-                    API.CastSpell(PhantomSingularity);
-                    return;
                 }
                 //Malefic Rapture
                 if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
