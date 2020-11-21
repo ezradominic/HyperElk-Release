@@ -1,4 +1,3 @@
-
 namespace HyperElk.Core
 {
     public class BMHunter : CombatRoutine
@@ -114,7 +113,6 @@ namespace HyperElk.Core
             {
                 return;
             }
-            API.WriteLog("test " + API.TargetUnitInRangeCount);
             if (!API.PlayerHasPet)
             {
                 API.CastSpell(MendPet);

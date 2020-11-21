@@ -20,7 +20,7 @@ namespace HyperElk.Core
         private string Seraphim = "Seraphim";
         private string ExecutionSentence = "Execution Sentence";
         private string Crusade = "Crusade";
-
+        private string HolyAvenger = "Holy Avenger";
         private string Rebuke = "Rebuke";
 
         private string WordOfGlory = "Word of Glory";
@@ -45,7 +45,7 @@ namespace HyperElk.Core
         private bool HasDefenseBuff => API.PlayerHasBuff(ShieldofVengeance, false, false) || API.PlayerHasBuff(DivineShield, false, false);
 
         //Talents
-        private bool CrusaderJudgment = API.PlayerIsTalentSelected(2, 2);
+        private bool TalentHolyAvenger = API.PlayerIsTalentSelected(5, 2);
 
         //CBProperties
 
@@ -54,7 +54,6 @@ namespace HyperElk.Core
         private bool FLashofLightOutofCombat => CombatRoutine.GetPropertyBool("FOLOOC");
 
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("AURASWITCH");
-        private bool IsAvengingWrath => CombatRoutine.GetPropertyBool(AvengingWrath);
 
         private int LayOnHandsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands)];
         private int ShieldofVengeanceLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ShieldofVengeance)];
@@ -82,6 +81,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Seraphim, "D3");
             CombatRoutine.AddSpell(ExecutionSentence, "D3");
             CombatRoutine.AddSpell(Crusade, "D3");
+            CombatRoutine.AddSpell(HolyAvenger, "D3");
 
             CombatRoutine.AddSpell(Rebuke, "F");
 
@@ -125,7 +125,6 @@ namespace HyperElk.Core
 
 
             CombatRoutine.AddProp("AURASWITCH", "Auto Aura Switch", true, "Auto Switch Aura between Crusader Aura|Devotion Aura", "Generic");
-            CombatRoutine.AddProp(AvengingWrath, "Use Avenging Wrath", true, "Use Avenging Wrath with cooldowns", "Generic");
 
             CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(ShieldofVengeance, ShieldofVengeance + " Life Percent", percentListProp, "Life percent at which" + ShieldofVengeance + "is used, set to 0 to disable", "Defense", 6);
@@ -176,21 +175,27 @@ namespace HyperElk.Core
                     API.CastSpell(LayOnHands);
                     return;
                 }
-                if (IsAvengingWrath && !API.SpellISOnCooldown(AvengingWrath) && API.PlayerCurrentHolyPower >= 3 && PlayerLevel >= 37)
+
+                if (!API.SpellISOnCooldown(AvengingWrath) && API.PlayerCurrentHolyPower >= 3 && PlayerLevel >= 37)
                 {
                     API.CastSpell(AvengingWrath);
                     return;
                 }
-                if (API.PlayerHealthPercent <= DivineShieldLifePercent && !API.SpellISOnCooldown(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forearance, false, false))
+                if (TalentHolyAvenger && !API.SpellISOnCooldown(HolyAvenger) && API.PlayerCurrentHolyPower == 0)
                 {
-                    API.CastSpell(DivineShield);
+                    API.CastSpell(HolyAvenger);
                     return;
                 }
-                if (API.PlayerHealthPercent <= ShieldofVengeanceLifePercent && !API.SpellISOnCooldown(ShieldofVengeance) && PlayerLevel >= 26 && !HasDefenseBuff)
-                {
-                    API.CastSpell(ShieldofVengeance);
-                    return;
-                }
+            }
+            if (API.PlayerHealthPercent <= DivineShieldLifePercent && !API.SpellISOnCooldown(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forearance, false, false))
+            {
+                API.CastSpell(DivineShield);
+                return;
+            }
+            if (API.PlayerHealthPercent <= ShieldofVengeanceLifePercent && !API.SpellISOnCooldown(ShieldofVengeance) && PlayerLevel >= 26 && !HasDefenseBuff)
+            {
+                API.CastSpell(ShieldofVengeance);
+                return;
             }
 
             if (API.SpellIsCanbeCast(WordOfGlory) && API.PlayerHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)

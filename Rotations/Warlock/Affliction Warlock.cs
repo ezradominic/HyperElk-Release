@@ -24,13 +24,13 @@ namespace HyperElk.Core
         private string SummonSuccubus = "Summon Succubus";
         private string SiphonLife = "Siphon Life";
         private string DarkPact = "Dark Pact";
-        private string PhantomSingularity = "Dark Pact";
-        private string VileTaint = "Dark Pact";
+        private string PhantomSingularity = "Phantom Singularity";
+        private string VileTaint = "Vile Taint";
         private string SummonFelhunter = "Summon Felhunter";
         private string SummonDarkglare = "Summon Darkglare";
         private string Haunt = "Haunt";
         private string DarkSoulMisery = "Dark Soul Misery";
-        private string ShadowBulwark = "Shadow Bulwark";
+        private string GrimoireOfSacrifice = "Grimoire Of Sacrifice";
 
 
         private string Misdirection = "Misdirection";
@@ -41,8 +41,6 @@ namespace HyperElk.Core
         private bool TalentDarkPact => API.PlayerIsTalentSelected(3, 3);
         private bool TalentPhantomSingularity => API.PlayerIsTalentSelected(4, 2);
         private bool TalentVileTaint => API.PlayerIsTalentSelected(4, 3);
-        private bool TalentMortalCoil => API.PlayerIsTalentSelected(5, 2);
-        private bool TalentHowlOfTerror => API.PlayerIsTalentSelected(5, 3);
         private bool TalentHaunt => API.PlayerIsTalentSelected(6, 2);
         private bool TalentGrimoireOfSacrifice => API.PlayerIsTalentSelected(6, 3);
         private bool TalentDarkSoulMisery => API.PlayerIsTalentSelected(7, 3);
@@ -56,11 +54,16 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int ShoulShardNumberMaleficRapture => CombatRoutine.GetPropertyInt("SoulShardNumberMaleficRapture");
         private int ShoulShardNumberDrainSoul => CombatRoutine.GetPropertyInt("SoulShardNumberDrainSoul");
-        bool LastSeed => API.CurrentCastSpellID("player") == 27243;
-
 
 
         //CBProperties
+        bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
+        bool CastingAgony => API.PlayerLastSpell == Agony;
+        bool CastingCorruption => API.PlayerLastSpell == Corruption;
+        bool CastingSL => API.PlayerLastSpell == SiphonLife;
+        bool LastSeed => API.CurrentCastSpellID("player") == 27243;
+
+
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         private int DrainLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
@@ -112,10 +115,12 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Unstable Affliction", "D5");
             CombatRoutine.AddSpell("Seed of Corruption", "D6");
             CombatRoutine.AddSpell("Siphon Life", "D7");
+            CombatRoutine.AddSpell("Vile Taint", "D8");
             CombatRoutine.AddSpell("Phantom Singularity", "D8");
-            CombatRoutine.AddSpell("Vile Taint", "D9");
-            CombatRoutine.AddSpell("Haunt", "F1");
-            CombatRoutine.AddSpell("Dark Soul Misery", "F2");
+            CombatRoutine.AddSpell("Haunt", "D8");
+            CombatRoutine.AddSpell("Dark Soul Misery", "D8");
+
+
             CombatRoutine.AddSpell(Agony+"MO", "F1");
             CombatRoutine.AddSpell(Corruption+"MO", "F2");
             CombatRoutine.AddSpell(SiphonLife + "MO", "F3");
@@ -125,9 +130,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Drain Life", "NumPad1");
             CombatRoutine.AddSpell("Health Funnel", "NumPad2");
             CombatRoutine.AddSpell("Dark Pact", "NumPad3");
-            CombatRoutine.AddSpell("Shadow Bulwark", "NumPad4");
-
-
+            CombatRoutine.AddSpell("Grimoire Of Sacrifice", "NumPad4");
             CombatRoutine.AddSpell("Summon Darkglare", "NumPad5");
             CombatRoutine.AddSpell("Summon Felhunter", "NumPad6");
             CombatRoutine.AddSpell("Summon Succubus", "NumPad7");
@@ -136,7 +139,7 @@ namespace HyperElk.Core
 
 
             //Buffs
-
+            CombatRoutine.AddBuff("Grimoire Of Sacrifice");
 
 
             //Debuffs
@@ -145,6 +148,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Unstable Affliction");
             CombatRoutine.AddDebuff("Siphon Life");
             CombatRoutine.AddDebuff("Seed of Corruption");
+            CombatRoutine.AddDebuff("Vile Taint");
+            CombatRoutine.AddDebuff("Phantom Singularity");
 
             //Debuffs
 
@@ -161,21 +166,11 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             {
-                //Cooldowns
-                if (IsCooldowns)
-                {
-                    //Dark Soul Misery
-                    if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
-                    {
-                        API.CastSpell(DarkSoulMisery);
-                        return;
-                    }
-                }
                 if (IsMouseover)
                 {
                     if (UseCO)
                     {
-                        if (API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                        if (!CastingCorruption && API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                         {
                             API.CastSpell(Corruption + "MO");
                             return;
@@ -183,7 +178,7 @@ namespace HyperElk.Core
                     }
                     if (UseAG)
                 { 
-                        if (API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                        if (!CastingAgony && API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
                         {
                             API.CastSpell(Agony + "MO");
                             return;
@@ -191,7 +186,7 @@ namespace HyperElk.Core
                 }
                     if (UseSL)
                     {
-                        if (API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
+                        if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                         {
                             API.CastSpell(Agony + "MO");
                             return;
@@ -199,26 +194,44 @@ namespace HyperElk.Core
                     }
 
                 }
+                //DarkSoulMisery
+                if (IsCooldowns && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
+                {
+                    API.CastSpell(DarkSoulMisery);
+                    return;
+                }
+                //PhantomSingularity
+                if (IsAOE && TalentPhantomSingularity && API.TargetUnitInRangeCount >= AOEUnitNumber && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && IsRange && NotCasting)
+                {
+                    API.CastSpell(PhantomSingularity);
+                    return;
+                }
                 //Seed of Corruption
-                if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >=1)
+                if (IsAOE && !CastingSOC && !LastSeed && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >=1 && API.PlayerLevel >= 27)
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
                 }
+                //VileTaint
+                if (IsAOE && TalentVileTaint && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
                 //Agony
-                if (API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                if (!CastingAgony && !CastingSOC && !LastSeed && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
                 {
                     API.CastSpell(Agony);
                     return;
                 }
                 //Corruption
-                if (!LastSeed && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                if (!CastingCorruption && !CastingSOC && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                 {
                     API.CastSpell(Corruption);
                     return;
                 }
                 //SiphonLife
-                if (API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && TalentSiphonLife)
+                if (!CastingSL && API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && TalentSiphonLife)
                 {
                     API.CastSpell(SiphonLife);
                     return;
@@ -250,28 +263,21 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-                //Haunt
-                if (API.CanCast(Haunt) && NotMoving && NotCasting && IsRange && NotChanneling && TalentHaunt)
-                {
-                    API.CastSpell(Haunt);
-                    return;
-                }
-                //Vile Taint
-                if (API.CanCast(VileTaint) && API.PlayerCurrentSoulShards >= 2 && NotMoving && NotCasting && IsRange && NotChanneling && TalentVileTaint)
-                {
-                    API.CastSpell(VileTaint);
-                    return;
-                }
-                //Phantom Singularity
-                if (API.CanCast(PhantomSingularity) && NotCasting && IsRange && NotChanneling && TalentPhantomSingularity)
-                {
-                    API.CastSpell(PhantomSingularity);
-                    return;
-                }
-                //Malefic Rapture
-                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                //Malefic Rapture Check
+                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
+                    return;
+                }
+                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Corruption) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //Haunt 
+                if (API.CanCast(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                {
+                    API.CastSpell(Haunt);
                     return;
                 }
                 //Drain Soul
@@ -290,33 +296,43 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
+            //Grimoire Of Sacrifice
+            if (API.PlayerHasPet && TalentGrimoireOfSacrifice && API.PlayerHasBuff("Grimoire Of Sacrifice"))
+            {
+                API.CastSpell(GrimoireOfSacrifice);
+                return;
+            }
             //Summon Imp
-            if (API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 3)
             {
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 10)
             {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 19)
             {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
             {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonFelhunter);
                 return;
             }
             //Summon Darkglare
             if (API.CanCast(SummonDarkglare) && !API.PlayerHasPet && (isMisdirection == "Darkglare") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 42)
             {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonDarkglare);
                 return;
             }
