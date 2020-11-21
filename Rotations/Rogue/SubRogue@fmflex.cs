@@ -30,7 +30,7 @@ namespace HyperElk.Core
         private string Feint = "Feint";
         private string Evasion = "Evasion";
 
-        private string FinWeakness = "Find Weakness";
+        private string FindWeakness = "Find Weakness";
 
 
 
@@ -124,7 +124,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Vanish);
 
             CombatRoutine.AddDebuff(Rupture);
-            CombatRoutine.AddDebuff(FinWeakness);
+            CombatRoutine.AddDebuff(FindWeakness);
 
 
             //CB Properties
@@ -208,7 +208,7 @@ namespace HyperElk.Core
                     return;
                 }
 
-                if (isStealth)
+                if (isStealth || API.PlayerHasBuff(ShadowDance))
                 {
                     API.CastSpell(Shadowstrike);
                     return;
@@ -223,12 +223,12 @@ namespace HyperElk.Core
                     {
                         Finisher();
                     }
-                    else if (IsAOE && API.TargetDebuffRemainingTime(FinWeakness) < 100 && API.PlayerUnitInMeleeRangeCount <= 3)
+                    else if (IsAOE && API.TargetDebuffRemainingTime(FindWeakness) < 100 && API.PlayerUnitInMeleeRangeCount <= 3)
                     {
                         API.CastSpell(Shadowstrike);
                         return;
                     }
-                    else if (API.TargetDebuffRemainingTime(FinWeakness) <= 100 || API.SpellCDDuration(SymbolsofDeath) < 1800 && API.TargetDebuffRemainingTime(FinWeakness) < API.SpellCDDuration(SymbolsofDeath))
+                    else if (API.TargetDebuffRemainingTime(FindWeakness) <= 100 || API.SpellCDDuration(SymbolsofDeath) < 1800 && API.TargetDebuffRemainingTime(FindWeakness) < API.SpellCDDuration(SymbolsofDeath))
                     {
                         API.CastSpell(Shadowstrike);
                         return;
@@ -273,7 +273,7 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
-            if (AutoStealth && !isStealth && !API.SpellISOnCooldown(Stealth) && !API.PlayerIsCasting)
+            if (AutoStealth && !isStealth && !API.PlayerHasBuff(ShadowDance) && !API.SpellISOnCooldown(Stealth) && !API.PlayerIsCasting)
             {
                 API.CastSpell(Stealth);
                 return;

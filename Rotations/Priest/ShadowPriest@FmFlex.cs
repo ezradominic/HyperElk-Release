@@ -150,12 +150,12 @@ namespace HyperElk.Core
         {
             if (!API.PlayerIsMounted)
             {
-                if (PlayerLevel >= 12 && !API.PlayerHasBuff(Shadowform) && !API.PlayerHasBuff(Voidform))
+                if (PlayerLevel >= 12 && API.CanCast(Shadowform) && !API.PlayerHasBuff(Shadowform) && !API.PlayerHasBuff(Voidform))
                 {
                     API.CastSpell(Shadowform);
                     return;
                 }
-                if (PlayerLevel >= 6 && API.PlayerBuffTimeRemaining(PWFortitude) < 30000)
+                if (PlayerLevel >= 6 && API.CanCast(PWFortitude) && API.PlayerBuffTimeRemaining(PWFortitude) < 30000)
                 {
                     API.CastSpell(PWFortitude);
                     return;
