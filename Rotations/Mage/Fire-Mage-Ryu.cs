@@ -4,7 +4,12 @@ namespace HyperElk.Core
     public class FireMage : CombatRoutine
     {
         //Spell Strings
-
+        private string RoP = "Rune of Power";
+        private string AI = "Arcane Intellect";
+        private string Counterspell = "Counterspell";
+        private string IB = "Ice Block";
+        private string MI = "Mirror Image";
+        private string BB = "Blazing Barrier";
 
         //Talents
         bool SearingTouch => API.PlayerIsTalentSelected(1, 3);
@@ -16,7 +21,9 @@ namespace HyperElk.Core
         bool Meteor => API.PlayerIsTalentSelected(7, 3);
 
         //CBProperties
-
+        private int BBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(BB)];
+        private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
+        private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
         //General
         private int Level => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 40;
@@ -67,10 +74,13 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Counterspell", "None");
             CombatRoutine.AddSpell("Arcane Intellect", "None");
             CombatRoutine.AddSpell("Blast Wave");
+            CombatRoutine.AddSpell("Counterspell", "None");
 
 
             //Prop
-
+            CombatRoutine.AddProp(BB, BB, percentListProp, "Life percent at which " + BB + " is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
 
 
         }
@@ -84,7 +94,7 @@ namespace HyperElk.Core
                     API.CastSpell("Arcane Intellect");
                     return;
                 }
-                if (API.CanCast("Blazing Barrier") && Level >= 21 && !API.PlayerHasBuff("Blazing Barrier") && API.PlayerHealthPercent != 0)
+                if (API.CanCast("Blazing Barrier") && Level >= 21 && !API.PlayerHasBuff("Blazing Barrier") && API.PlayerHealthPercent <= BBPercentProc && API.PlayerHealthPercent != 0)
                 {
                     API.CastSpell("Blazing Barrier");
                     return;
@@ -93,9 +103,19 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= 10 && API.PlayerHealthPercent != 0 && Level >= 22)
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7)
+            {
+                API.CastSpell("Counterspell");
+                return;
+            }
+            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22)
             {
                 API.CastSpell("Ice Block");
+                return;
+            }
+            if (API.CanCast("Mirror Image") && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent != 0 && Level >= 44)
+            {
+                API.CastSpell("Mirror Image");
                 return;
             }
             if (Level <= 60)
@@ -115,11 +135,6 @@ namespace HyperElk.Core
             if (Meteor && API.CanCast("Meteor") && InRange)
             {
                 API.CastSpell("Meteor");
-                return;
-            }
-            if (IsCooldowns && API.CanCast("Mirror Image") && Level >= 44)
-            {
-                API.CastSpell("Mirror Image");
                 return;
             }
             if (API.CanCast("Combustion") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns && Level >= 29)

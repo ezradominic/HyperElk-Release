@@ -4,7 +4,12 @@ namespace HyperElk.Core
     public class ArcaneMage : CombatRoutine
     {
         //Spell Strings
-        
+        private string RoP = "Rune of Power";
+        private string AI = "Arcane Intellect";
+        private string Counterspell = "Counterspell";
+        private string IB = "Ice Block";
+        private string MI = "Mirror Image";
+        private string PB = "Prismatic Barrier";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -15,7 +20,9 @@ namespace HyperElk.Core
         bool ArcaneOrb => API.PlayerIsTalentSelected(6, 2);
         bool SuperNova => API.PlayerIsTalentSelected(6, 3);
         //CBProperties
-
+        private int PBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(PB)];
+        private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
+        private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
         //General
         private int Level => API.PlayerLevel;
         private bool NotCasting => !API.PlayerIsCasting;
@@ -75,7 +82,9 @@ namespace HyperElk.Core
 
 
             //Prop
-
+            CombatRoutine.AddProp(PB, PB, percentListProp, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
 
 
         }
@@ -89,7 +98,7 @@ namespace HyperElk.Core
                     API.CastSpell("Arcane Intellect");
                     return;
                 }
-                if (API.CanCast("Prismatic Barrier") && Level >= 21 && !API.PlayerHasBuff("Prismatic Barrier") && API.PlayerHealthPercent != 0)
+                if (API.CanCast("Prismatic Barrier") && Level >= 21 && !API.PlayerHasBuff("Prismatic Barrier") && API.PlayerHealthPercent <= PBPercentProc && API.PlayerHealthPercent != 0)
                 {
                     API.CastSpell("Prismatic Barrier");
                     return;
@@ -98,9 +107,19 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= 10 && API.PlayerHealthPercent != 0 && Level >= 22)
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7)
+            {
+                API.CastSpell("Counterspell");
+                return;
+            }
+            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22)
             {
                 API.CastSpell("Ice Block");
+                return;
+            }
+            if (API.CanCast("Mirror Image") && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent != 0 && Level >= 44 && NotCasting && NotChanneling)
+            {
+                API.CastSpell("Mirror Image");
                 return;
             }
             if (Level <= 60)
@@ -117,11 +136,6 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (IsCooldowns && API.CanCast("Mirror Image") && Level >= 44 && NotCasting && NotChanneling)
-            {
-                API.CastSpell("Mirror Image");
-                return;
-            }
             if (API.CanCast("Arcane Power") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns && NotCasting && NotChanneling)
             {
                 API.CastSpell("Arcane Power");
