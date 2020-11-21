@@ -154,7 +154,7 @@ namespace HyperElk.Core
                     }
                 }
                 //Fracture
-                if (API.PlayerIsTalentSelected(4, 3) && !API.SpellISOnCooldown(Fracture) && IsMelee)
+                if (API.PlayerIsTalentSelected(4, 3) && !API.SpellISOnCooldown(Fracture) && (API.PlayerFury < 30 ||API.PlayerBuffStacks(SoulFragments) <4)   && IsMelee)
                 {
                     API.CastSpell(Fracture);
                     return;
@@ -166,7 +166,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Spirit Bomb
-                if (API.PlayerIsTalentSelected(3, 3) && IsMelee && API.PlayerHealthPercent > 90 && API.PlayerBuffStacks(SoulFragments) >= SoulFragmentNumner)
+                if (API.PlayerIsTalentSelected(3, 3)&& API.PlayerFury >= 30 && IsMelee && API.PlayerHealthPercent > 90 && API.PlayerBuffStacks(SoulFragments) >= SoulFragmentNumner)
                 {
                     API.CastSpell(SpiritBomb);
                     return;

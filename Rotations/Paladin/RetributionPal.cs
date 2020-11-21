@@ -176,12 +176,12 @@ namespace HyperElk.Core
                     return;
                 }
 
-                if (!API.SpellISOnCooldown(AvengingWrath) && API.PlayerCurrentHolyPower >= 3 && PlayerLevel >= 37)
+                if (!API.SpellISOnCooldown(AvengingWrath) && IsMelee && API.PlayerCurrentHolyPower >= 3 && PlayerLevel >= 37)
                 {
                     API.CastSpell(AvengingWrath);
                     return;
                 }
-                if (TalentHolyAvenger && !API.SpellISOnCooldown(HolyAvenger) && API.PlayerCurrentHolyPower == 0)
+                if (TalentHolyAvenger && !API.SpellISOnCooldown(HolyAvenger) && IsMelee && API.PlayerCurrentHolyPower == 0)
                 {
                     API.CastSpell(HolyAvenger);
                     return;
