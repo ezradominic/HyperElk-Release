@@ -30,7 +30,7 @@ namespace HyperElk.Core
         private string Feint = "Feint";
         private string Evasion = "Evasion";
 
-        private string FinWeakness = "Find Weakness";
+        private string FindWeakness = "Find Weakness";
 
 
 
@@ -124,7 +124,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Vanish);
 
             CombatRoutine.AddDebuff(Rupture);
-            CombatRoutine.AddDebuff(FinWeakness);
+            CombatRoutine.AddDebuff(FindWeakness);
 
 
             //CB Properties
@@ -143,7 +143,7 @@ namespace HyperElk.Core
         {
             if (!API.PlayerIsMounted && !API.PlayerIsCasting )
             {
-                if (API.PlayerHealthPercent <= CrimsonVialLifePercent && !API.SpellISOnCooldown(CrimsonVial) && API.PlayerEnergy >= 20)
+                if (API.PlayerHealthPercent <= CrimsonVialLifePercent && API.CanCast(CrimsonVial) && API.PlayerEnergy >= 20)
                 {
                     API.CastSpell(CrimsonVial);
                     return;
@@ -159,24 +159,24 @@ namespace HyperElk.Core
             if (!API.PlayerIsCasting)
             {
 
-                if (isInterrupt && !API.SpellISOnCooldown(Kick) && IsMelee)
+                if (isInterrupt && API.CanCast(Kick) && IsMelee)
                 {
                     API.CastSpell(Kick);
                     return;
                 }
 
-                if (IsCooldowns && API.PlayerHealthPercent <= EvasionLifePercent && !API.SpellISOnCooldown(Evasion))
+                if (IsCooldowns && API.PlayerHealthPercent <= EvasionLifePercent && API.CanCast(Evasion))
                 {
                     API.CastSpell(Evasion);
                     return;
                 }
-                if (API.PlayerHealthPercent <= FeintLifePercent && !API.SpellISOnCooldown(Feint) && API.PlayerEnergy >= 35)
+                if (API.PlayerHealthPercent <= FeintLifePercent && API.CanCast(Feint) && API.PlayerEnergy >= 35)
                 {
                     API.CastSpell(Feint);
                     return;
                 }
 
-                if (IsCooldowns && !API.SpellISOnCooldown(SymbolsofDeath) && SnDCondition &&
+                if (IsCooldowns && API.CanCast(SymbolsofDeath) && SnDCondition &&
                     (TalentEnvelopingShadows || API.SpellCharges(ShadowDance) >= 1) &&
                     (!TalentShurikenTornado || TalentShadowFocus || API.SpellCDDuration(ShurikenStorm) > 200) &&
                     (API.PlayerComboPoints <= 2))
@@ -185,60 +185,57 @@ namespace HyperElk.Core
                     return;
                 }
 
-                if (!isStealth && ((MaxEnergy - API.PlayerEnergy) <= StealthThreshold && (!API.PlayerHasBuff(Vanish) && !API.SpellISOnCooldown(Vanish)) ||
+                if (!isStealth && ((MaxEnergy - API.PlayerEnergy) <= StealthThreshold && (!API.PlayerHasBuff(Vanish) && API.CanCast(Vanish)) ||
                     (!API.PlayerHasBuff(SymbolsofDeath) && !API.PlayerHasBuff(ShadowDance) && API.SpellCharges(ShadowDance) > 0) ||
                     (API.SpellCDDuration(SymbolsofDeath) > 1000)))
                 {
-                    if (!API.SpellISOnCooldown(ShadowDance) && shdComboPoints && (shdThreshold || API.SpellCDDuration(SymbolsofDeath) >= 120 || IsAOE && API.PlayerUnitInMeleeRangeCount >= 4 && API.SpellCDDuration(SymbolsofDeath) > 1000))
+                    if (API.CanCast(ShadowDance) && shdComboPoints && (shdThreshold || API.SpellCDDuration(SymbolsofDeath) >= 120 || IsAOE && API.PlayerUnitInMeleeRangeCount >= 4 && API.SpellCDDuration(SymbolsofDeath) > 1000))
                     {
                         API.CastSpell(ShadowDance);
                         return;
                     }
                 }
-                if (TalentMarkedForDeath && ComboPointDeficit >= MaxComboPoints - 1 && !API.SpellISOnCooldown(MarkedforDeath) && API.TargetRange <= 30)
+                if (TalentMarkedForDeath && ComboPointDeficit >= MaxComboPoints - 1 && API.CanCast(MarkedforDeath) && API.TargetRange <= 30)
                 {
                     API.CastSpell(MarkedforDeath);
                     return;
                 }
 
 
-                if ((API.PlayerUnitInMeleeRangeCount < 6 || !IsAOE) && API.PlayerBuffTimeRemaining(SliceandDice) < API.SpellGCDTotalDuration && API.PlayerComboPoints >= 4 - (API.PlayerTimeInCombat < 1000 ? 1 : 0) * 2)
+                if ((API.PlayerUnitInMeleeRangeCount < 6 || !IsAOE) && API.CanCast(SliceandDice) && API.PlayerBuffTimeRemaining(SliceandDice) < API.SpellGCDTotalDuration && API.PlayerComboPoints >= 4 - (API.PlayerTimeInCombat < 1000 ? 1 : 0) * 2)
                 {
                     API.CastSpell(SliceandDice);
                     return;
                 }
 
-                if (isStealth)
-                {
-                    API.CastSpell(Shadowstrike);
-                    return;
-                }
                 if ((isStealth || API.PlayerHasBuff(ShadowDance)))
                 {
                     if (IsAOE && API.PlayerUnitInMeleeRangeCount == 4 && API.PlayerComboPoints >= 4)
                     {
                         Finisher();
+                        return;
                     }
                     else if (ComboPointDeficit <= 1 - ((TalentDeeperStratagem && API.PlayerHasBuff(Vanish)) ? 1 : 0))
                     {
                         Finisher();
+                        return;
                     }
-                    else if (IsAOE && API.TargetDebuffRemainingTime(FinWeakness) < 100 && API.PlayerUnitInMeleeRangeCount <= 3)
+                    else if (IsAOE && API.CanCast(Shadowstrike) && API.TargetDebuffRemainingTime(FindWeakness) < 100 && API.PlayerUnitInMeleeRangeCount <= 3)
                     {
                         API.CastSpell(Shadowstrike);
                         return;
                     }
-                    else if (API.TargetDebuffRemainingTime(FinWeakness) <= 100 || API.SpellCDDuration(SymbolsofDeath) < 1800 && API.TargetDebuffRemainingTime(FinWeakness) < API.SpellCDDuration(SymbolsofDeath))
+                    else if (API.CanCast(Shadowstrike) && API.TargetDebuffRemainingTime(FindWeakness) <= 100 || API.SpellCDDuration(SymbolsofDeath) < 1800 && API.TargetDebuffRemainingTime(FindWeakness) < API.SpellCDDuration(SymbolsofDeath))
                     {
                         API.CastSpell(Shadowstrike);
                         return;
                     }
-                    else if (IsAOE && API.PlayerUnitInMeleeRangeCount >= 3)
+                    else if (IsAOE && API.CanCast(ShurikenStorm) && API.PlayerUnitInMeleeRangeCount >= 3)
                     {
                         API.CastSpell(ShurikenStorm);
                         return;
                     }
-                    else
+                    else if(API.CanCast(Shadowstrike) && IsMelee)
                     {
                         API.CastSpell(Shadowstrike);
                         return;
@@ -248,21 +245,22 @@ namespace HyperElk.Core
                     (ComboPointDeficit <= 1 && API.PlayerComboPoints >= 3) || (IsAOE && API.PlayerUnitInMeleeRangeCount == 4 && API.PlayerComboPoints >= 4))
                 {
                     Finisher();
+                    return;
                 }
 
                 if (API.PlayeMaxEnergy - API.PlayerEnergy <= StealthThreshold)
                 {
-                    if (IsAOE && API.PlayerUnitInMeleeRangeCount >= 2)
+                    if (IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 && API.CanCast(ShurikenStorm))
                     {
                         API.CastSpell(ShurikenStorm);
                         return;
                     }
-                    if (TalentGloomblade)
+                    if (TalentGloomblade && API.CanCast(Gloomblade))
                     {
                         API.CastSpell(Gloomblade);
                         return;
                     }
-                    else
+                    else if(API.CanCast(Backstab))
                     {
                         API.CastSpell(Backstab);
                         return;
@@ -273,7 +271,7 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
-            if (AutoStealth && !isStealth && !API.SpellISOnCooldown(Stealth) && !API.PlayerIsCasting)
+            if (AutoStealth && !isStealth && !API.PlayerHasBuff(ShadowDance) && API.CanCast(Stealth) && !API.PlayerIsCasting)
             {
                 API.CastSpell(Stealth);
                 return;
@@ -281,24 +279,24 @@ namespace HyperElk.Core
         }
         public void Finisher()
         {
-                if ((API.PlayerUnitInMeleeRangeCount < 6 || !IsAOE) && !API.PlayerHasBuff(ShadowDance) && API.PlayerBuffTimeRemaining(SliceandDice) < (1 + API.PlayerComboPoints) * 1.8)
+                if (API.CanCast(SliceandDice) && (API.PlayerUnitInMeleeRangeCount < 6 || !IsAOE) && !API.PlayerHasBuff(ShadowDance) && API.PlayerBuffTimeRemaining(SliceandDice) < (1 + API.PlayerComboPoints) * 1.8)
                 {
                     API.CastSpell(SliceandDice);
                     return;
                 }
-                else if (!SkipRupture && RuptureRefreshable)
+                else if (!SkipRupture && RuptureRefreshable && API.CanCast(Rupture))
                 {
                     RuptureMaxTime = 400 + (API.PlayerComboPoints * 400);
                     API.CastSpell(Rupture);
                     return;
                 }
-                else if (!SkipRupture && API.TargetDebuffRemainingTime(Rupture) < API.SpellCDDuration(SymbolsofDeath) + 1000 && API.SpellCDDuration(SymbolsofDeath) <= 500)
+                else if (API.CanCast(Rupture) && !SkipRupture && API.TargetDebuffRemainingTime(Rupture) < API.SpellCDDuration(SymbolsofDeath) + 1000 && API.SpellCDDuration(SymbolsofDeath) <= 500)
                 {
                     RuptureMaxTime = 400 + (API.PlayerComboPoints * 400);
                     API.CastSpell(Rupture);
                     return;
                 }
-                else
+                else if(API.CanCast(Eviscerate))
                 {
                     API.CastSpell(Eviscerate);
                     return;

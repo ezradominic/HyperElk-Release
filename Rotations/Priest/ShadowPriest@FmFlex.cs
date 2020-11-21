@@ -150,12 +150,12 @@ namespace HyperElk.Core
         {
             if (!API.PlayerIsMounted)
             {
-                if (PlayerLevel >= 12 && !API.PlayerHasBuff(Shadowform) && !API.PlayerHasBuff(Voidform))
+                if (PlayerLevel >= 12 && API.CanCast(Shadowform) && !API.PlayerHasBuff(Shadowform) && !API.PlayerHasBuff(Voidform))
                 {
                     API.CastSpell(Shadowform);
                     return;
                 }
-                if (PlayerLevel >= 6 && API.PlayerBuffTimeRemaining(PWFortitude) < 30000)
+                if (PlayerLevel >= 6 && API.CanCast(PWFortitude) && API.PlayerBuffTimeRemaining(PWFortitude) < 30000)
                 {
                     API.CastSpell(PWFortitude);
                     return;
@@ -388,9 +388,9 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetUnitInRangeCount <= 9 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+            if (IsMouseover &&  (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.TargetUnitInRangeCount <= 9 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
             {
-                if (IsUseVamp && API.CanCast(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
+                if (!API.MacroIsIgnored(VampiricTouch + "MO") && API.CanCast(VampiricTouch) && (API.PlayerHasBuff(UnfurlingDarkness) || !CastingVT && !API.PlayerIsMoving) && PlayerLevel >= 15) //!CastingVT to prevent double casting VT
                 {
                     if (API.MouseoverDebuffRemainingTime(VampiricTouch) <= 630 ||
                         (TalentMisery && API.MouseoverDebuffRemainingTime(SWPain) <= 360))
@@ -401,7 +401,7 @@ namespace HyperElk.Core
                 }
 
                 //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
-                if (API.CanCast(SWPain) && PlayerLevel >= 2)
+                if (!API.MacroIsIgnored(SWPain + "MO") && API.CanCast(SWPain) && PlayerLevel >= 2)
                 {
                     if (API.MouseoverDebuffRemainingTime(SWPain) <= 360 && !TalentMisery && (!TalentPsychicLink || (TalentPsychicLink && API.TargetUnitInRangeCount <= 2)))
                     {
@@ -467,7 +467,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (IsMouseover && API.PlayerIsMoving && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+            if (IsMouseover&& !API.MacroIsIgnored(SWPain + "MO") && API.PlayerIsMoving && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
             {
                 //actions.main+=/shadow_word_pain,if=refreshable&target.time_to_die>4&!talent.misery.enabled&talent.psychic_link.enabled&spell_targets.mind_sear>2
                 if (API.CanCast(SWPain) && PlayerLevel >= 2)
