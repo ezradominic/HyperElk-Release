@@ -282,7 +282,7 @@ namespace HyperElk.Core
                 API.CastSpell(CatForm);
                 return;
             }
-            if (API.CanCast(Rake) && API.PlayerHasBuff(Prowl) && PlayerLevel >= 10 && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
+            if (API.CanCast(Rake) && API.PlayerHasBuff(Prowl) && isMelee && PlayerLevel >= 10 && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
             {
                 API.CastSpell(Rake);
                 return;
