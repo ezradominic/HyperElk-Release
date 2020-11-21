@@ -195,7 +195,7 @@ namespace HyperElk.Core
                 API.CastSpell("Glacial Spike");
                 return;
             }
-            if (API.CanCast("Ice Lance") && Level >= 10 && API.TargetRange <= 40 && (API.PlayerHasBuff("Fingers of Frost") || API.TargetHasDebuff("Winters Chill")))
+            if (API.CanCast("Ice Lance") && Level >= 10 && API.TargetRange <= 40 && (API.PlayerHasBuff("Fingers of Frost") || API.TargetHasDebuff("Winter's Chill")))
             {
                 API.CastSpell("Ice Lance");
                 return;
