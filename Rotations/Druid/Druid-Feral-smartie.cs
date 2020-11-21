@@ -3,7 +3,7 @@
 
 namespace HyperElk.Core
 {
-    public class FuryWarrior : CombatRoutine
+    public class FeralDruid : CombatRoutine
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spell,Auras
@@ -125,8 +125,8 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Feral Druid v1.0 by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v1.0");
+            CombatRoutine.Name = "Feral Druid v1.1 by smartie";
+            API.WriteLog("Welcome to smartie`s Feral Druid v1.1");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
