@@ -1,5 +1,6 @@
 // Changelog
 // v1.0 First release
+// v1.1 shield block and execute fix
 
 namespace HyperElk.Core
 {
@@ -57,8 +58,8 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Protection Warrior v1.0 by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.0");
+            CombatRoutine.Name = "Protection Warrior v1.1 by smartie";
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.1");
             API.WriteLog("All Talents are supported and auto detected");
 
             //Spells
@@ -138,7 +139,7 @@ namespace HyperElk.Core
                 API.CastSpell(ShieldWall);
                 return;
             }
-            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockLifePercent && PlayerLevel >= 6 && !API.PlayerHasBuff(ShieldBlock))
+            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockLifePercent && PlayerLevel >= 6 && !API.PlayerHasBuff(ShieldBlock) && API.PlayerRage >= 30)
             {
                 API.CastSpell(ShieldBlock);
                 return;
@@ -208,7 +209,7 @@ namespace HyperElk.Core
                     API.CastSpell(ThunderClap);
                     return;
                 }
-                if (API.CanCast(Execute) && API.PlayerRage > 40 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
+                if (API.CanCast(Execute) && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
                 {
                     API.CastSpell(Execute);
                     return;
