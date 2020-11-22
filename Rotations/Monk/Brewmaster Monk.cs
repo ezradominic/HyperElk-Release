@@ -17,7 +17,6 @@ namespace HyperElk.Core
         private bool IsMelee => API.TargetRange < 6;
 
 
-
         //CLASS SPECIFIC
 
         //CBProperties
@@ -105,28 +104,28 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            //Cooldowns
-            if (IsCooldowns)
+            //COOLDOWNS
+            //BlackOxBrew
+            if (IsCooldowns && API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && API.PlayerIsTalentSelected(3, 3))
             {
-                //BlackOxBrew
-                if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && API.PlayerIsTalentSelected(3, 3))
-                {
-                    API.CastSpell(BlackOxBrew);
-                    return;
-                }
-                //Touch of Death
-                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10)
-                {
-                    API.CastSpell(TouchofDeath);
-                    return;
-                }
+            API.CastSpell(BlackOxBrew);
+            return;
             }
+            //Touch of Death
+            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10)
+            {
+            API.CastSpell(TouchofDeath);
+            return;
+            }
+
             //KICK
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
             {
                 API.CastSpell(SpearHandStrike);
                 return;
             }
+
+            //HEALING
             //Healing Elixir
             if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2))
             {
@@ -163,6 +162,8 @@ namespace HyperElk.Core
                 API.CastSpell(Vivify);
                 return;
             }
+
+            //ROTATION
             //Keg Smash
             if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
             {
@@ -175,20 +176,14 @@ namespace HyperElk.Core
                 API.CastSpell(BreathOfFire);
                 return;
             }
-            //Spinning Crane Kick
-            if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
-            {
-                API.CastSpell(SpinningCraneKick);
-                return;
-            }
-            //Invoke Niuzao, the Black Ox
-            if (IsAOE && API.CanCast(InvokeNiuzao) && !API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 42)
-            {
-                API.CastSpell(InvokeNiuzao);
-                return;
-            }
             //Rushing Jade Wind
-            if (IsAOE && API.CanCast(RushingJadeWind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerIsTalentSelected(6, 2))
+            if (IsAOE && API.CanCast(RushingJadeWind) && !API.SpellISOnCooldown(RushingJadeWind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerIsTalentSelected(6, 2))
+            {
+                API.CastSpell(RushingJadeWind);
+                return;
+            }
+            //Spinning Crane Kick
+            if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerEnergy >= 40 && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
