@@ -140,34 +140,34 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (isInterrupt && !API.SpellISOnCooldown(Rebuke) && IsMelee && PlayerLevel >= 27)
+            if (isInterrupt && API.CanCast(Rebuke) && IsMelee && PlayerLevel >= 27)
             {
                 API.CastSpell(Rebuke);
                 return;
             }
             if (IsCooldowns)
             {
-                if (API.PlayerHealthPercent <= LayOnHandsLifePercent && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forearance, false, false))
+                if (API.PlayerHealthPercent <= LayOnHandsLifePercent && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forearance, false, false))
                 {
                     API.CastSpell(LayOnHands);
                     return;
                 }
-                if (IsAvengingWrath && !API.SpellISOnCooldown(AvengingWrath) && PlayerLevel >= 37)
+                if (IsAvengingWrath && API.CanCast(AvengingWrath) && PlayerLevel >= 37)
                 {
                     API.CastSpell(AvengingWrath);
                     return;
                 }
-                if (API.PlayerHealthPercent <= DivineShieldLifePercent && !API.SpellISOnCooldown(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forearance, false, false))
+                if (API.PlayerHealthPercent <= DivineShieldLifePercent && API.CanCast(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forearance, false, false))
                 {
                     API.CastSpell(DivineShield);
                     return;
                 }
-                if (API.PlayerHealthPercent <= GuardianofAncientKingsLifePercent && !API.SpellISOnCooldown(GuardianofAncientKings) && PlayerLevel >= 39 && !HasDefenseBuff)
+                if (API.PlayerHealthPercent <= GuardianofAncientKingsLifePercent && API.CanCast(GuardianofAncientKings) && PlayerLevel >= 39 && !HasDefenseBuff)
                 {
                     API.CastSpell(GuardianofAncientKings);
                     return;
                 }
-                if (API.PlayerHealthPercent <= ArdentDefenderLifePercent && !API.SpellISOnCooldown(ArdentDefender) && PlayerLevel >= 42 && !HasDefenseBuff)
+                if (API.PlayerHealthPercent <= ArdentDefenderLifePercent && API.CanCast(ArdentDefender) && PlayerLevel >= 42 && !HasDefenseBuff)
                 {
                     API.CastSpell(ArdentDefender);
                     return;
@@ -187,17 +187,17 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (!API.SpellISOnCooldown(Consecration) && IsMelee && !API.PlayerHasBuff(Consecration) && PlayerLevel >= 14)
+            if (API.CanCast(Consecration) && IsMelee && !API.PlayerHasBuff(Consecration) && PlayerLevel >= 14)
             {
                 API.CastSpell(Consecration);
                 return;
             }
-            if (API.SpellIsCanbeCast(WordOfGlory) && API.PlayerHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
+            if (API.SpellIsCanbeCast(WordOfGlory) && API.PlayerHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
             }
-            if (API.PlayerHealthPercent > WordOfGloryLifePercent && !API.PlayerHasBuff(ShieldoftheRighteous) && !API.SpellISOnCooldown(ShieldoftheRighteous) && IsMelee && (API.PlayerCurrentHolyPower >= 4 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2)
+            if (API.PlayerHealthPercent > WordOfGloryLifePercent && (!API.PlayerHasBuff(ShieldoftheRighteous) ||  API.PlayerCurrentHolyPower == 5) &&API.CanCast(ShieldoftheRighteous) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2)
             {
                 API.CastSpell(ShieldoftheRighteous);
                 return;
@@ -205,40 +205,40 @@ namespace HyperElk.Core
             //AOE AVENGERS SHIELD
             if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)
             {
-                if (!API.SpellISOnCooldown(AvengersShield) && API.TargetRange <= 30 && PlayerLevel >= 10)
+                if (API.CanCast(AvengersShield) && API.TargetRange <= 30 && PlayerLevel >= 10)
                 {
                     API.CastSpell(AvengersShield);
                     return;
                 }
             }
-            if (!API.SpellISOnCooldown(Judgment) && API.TargetRange <= 30 && PlayerLevel >= 3)
+            if (API.CanCast(Judgment) && API.TargetRange <= 30 && PlayerLevel >= 3)
             {
                 API.CastSpell(Judgment);
                 return;
             }
-            if (API.TargetHealthPercent <= 20 && !API.SpellISOnCooldown(HammerofWrath) && API.TargetRange <= 30 && PlayerLevel >= 46)
+            if (API.TargetHealthPercent <= 20 && API.CanCast(HammerofWrath) && API.TargetRange <= 30 && PlayerLevel >= 46)
             {
                 API.CastSpell(HammerofWrath);
                 return;
             }
-            if (!API.SpellISOnCooldown(AvengersShield) && API.TargetRange <= 30 && PlayerLevel >= 10)
+            if (API.CanCast(AvengersShield) && API.TargetRange <= 30 && PlayerLevel >= 10)
             {
                 API.CastSpell(AvengersShield);
                 return;
             }
 
-            if (!API.SpellISOnCooldown(HammeroftheRighteous) && IsMelee && PlayerLevel >= 14)
+            if (API.CanCast(HammeroftheRighteous) && IsMelee && PlayerLevel >= 14)
             {
                 API.CastSpell(HammeroftheRighteous);
                 return;
             }
-            if (!API.SpellISOnCooldown(CrusaderStrike) && IsMelee && PlayerLevel < 14)
+            if (API.CanCast(CrusaderStrike) && IsMelee && PlayerLevel < 14)
             {
                 API.CastSpell(CrusaderStrike);
                 return;
             }
 
-            if (!API.SpellISOnCooldown(Consecration) && IsMelee && PlayerLevel >= 6)
+            if (API.CanCast(Consecration) && IsMelee && PlayerLevel >= 6)
             {
                 API.CastSpell(Consecration);
                 return;
