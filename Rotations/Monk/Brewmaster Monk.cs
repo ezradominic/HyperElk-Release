@@ -52,6 +52,8 @@ namespace HyperElk.Core
         private string BlackOxBrew = "Black Ox Brew";
         private string HealingElixir = "Healing Elixir";
         private string ChiBurst = "Chi Burst";
+        private string RushingJadeWind = "Rushing Jade Wind";
+        private string InvokeNiuzao = "Invoke Niuzao, the Black Ox";
 
         public override void Initialize()
         {
@@ -74,8 +76,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(BreathOfFire, "D5");
             CombatRoutine.AddSpell(KegSmash, "D6");
             CombatRoutine.AddSpell(TouchofDeath, "D7");
-            CombatRoutine.AddSpell(ChiBurst, "D8");
-
+            CombatRoutine.AddSpell(InvokeNiuzao, "D8");
+            CombatRoutine.AddSpell(ChiBurst, "D9");
+            CombatRoutine.AddSpell(RushingJadeWind, "D0");
 
 
             CombatRoutine.AddSpell(Vivify, "NumPad1");
@@ -112,7 +115,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Touch of Death
-                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth <= API.PlayerMaxHealth && PlayerLevel >= 10)
+                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10)
                 {
                     API.CastSpell(TouchofDeath);
                     return;
@@ -172,13 +175,31 @@ namespace HyperElk.Core
                 API.CastSpell(BreathOfFire);
                 return;
             }
+            //Spinning Crane Kick
+            if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
+            {
+                API.CastSpell(SpinningCraneKick);
+                return;
+            }
+            //Invoke Niuzao, the Black Ox
+            if (IsAOE && API.CanCast(InvokeNiuzao) && !API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 42)
+            {
+                API.CastSpell(InvokeNiuzao);
+                return;
+            }
+            //Rushing Jade Wind
+            if (IsAOE && API.CanCast(RushingJadeWind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerIsTalentSelected(6, 2))
+            {
+                API.CastSpell(SpinningCraneKick);
+                return;
+            }
             //Blackout Kick
             if (API.CanCast(BlackOutKick) && API.PlayerLevel >= 2)
             {
                 API.CastSpell(BlackOutKick);
                 return;
             }
-            //Blackout Kick
+            //ChiBurst
             if (API.CanCast(ChiBurst) && API.PlayerIsTalentSelected(1, 3))
             {
                 API.CastSpell(ChiBurst);
@@ -188,12 +209,6 @@ namespace HyperElk.Core
             if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 50)
             {
                 API.CastSpell(TigerPalm);
-                return;
-            }
-            //Spinning Crane Kick
-            if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
-            {
-                API.CastSpell(SpinningCraneKick);
                 return;
             }
         }
