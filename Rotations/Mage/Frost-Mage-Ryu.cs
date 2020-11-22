@@ -5,6 +5,30 @@ namespace HyperElk.Core
     {
         //Spell Strings
         private string Flurry = "Flurry";
+        private string Icicles = "Icicles";
+        private string BrainFreeze = "Brain Freeze";
+        private string FoF = "Fingers of Frost";
+        private string IF = "Ice Floes";
+        private string RoP = "Rune of Power";
+        private string IceBarrier = "Ice Barrier";
+        private string AI = "Arcane Intellect";
+        private string Frostbolt = "Frostbolt";
+        private string IL = "Ice Lance";
+        private string CoC = "Cone of Cold";
+        private string EB = "Ebonbolt";
+        private string  Blizzard = "Blizzard";
+        private string  GS = "Glacial Spike";
+        private string  IV = "Icy Veins";
+        private string MI = "Mirror Image";
+        private string  IN = "Ice Nova";
+        private string  FO ="Frozen Orb";
+        private string  CS = "Comet Storm";
+        private string RoF = "Ray of Frost";
+        private string  Freeze = "Freeze";
+        private string  WE = "Water Elemental";
+        private string Counterspell = "Counterspell";
+        private string WC = "Winter's Chill";
+        private string IB = "Ice Block";
 
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
@@ -17,7 +41,9 @@ namespace HyperElk.Core
         bool GlacialSpike => API.PlayerIsTalentSelected(7, 3);
 
         //CBProperties
-
+        private int IceBarrierPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IceBarrier)];
+        private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
+        private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
         //General
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         private int Level => API.PlayerLevel;
@@ -33,43 +59,46 @@ namespace HyperElk.Core
             API.WriteLog("All Talents expect Ring of Frost supported. All Cooldowns are associated with Cooldown toggle.");
             //Buff
 
-            CombatRoutine.AddBuff("Icicles");
-            CombatRoutine.AddBuff("Brain Freeze");
-            CombatRoutine.AddBuff("Fingers of Frost");
-            CombatRoutine.AddBuff("Ice Floes");
-            CombatRoutine.AddBuff("Rune of Power");
-            CombatRoutine.AddBuff("Ice Barrier");
-            CombatRoutine.AddBuff("Arcane Intellect");
+            CombatRoutine.AddBuff(Icicles);
+            CombatRoutine.AddBuff(BrainFreeze);
+            CombatRoutine.AddBuff(FoF);
+            CombatRoutine.AddBuff(IF);
+            CombatRoutine.AddBuff(RoP);
+            CombatRoutine.AddBuff(IceBarrier);
+            CombatRoutine.AddBuff(AI);
 
             //Debuff
-            CombatRoutine.AddDebuff("Winter's Chill");
+            CombatRoutine.AddDebuff(WC);
 
             //Spell
-            CombatRoutine.AddSpell("Rune of Power", "None");
-            CombatRoutine.AddSpell("Ice Block");
-            CombatRoutine.AddSpell("Frostbolt");
-            CombatRoutine.AddSpell("Ice Lance");
-            CombatRoutine.AddSpell("Flurry");
-            CombatRoutine.AddSpell("Cone of Cold");
-            CombatRoutine.AddSpell("Ebonbolt");
-            CombatRoutine.AddSpell("Blizzard");
-            CombatRoutine.AddSpell("Glacial Spike", "C");
-            CombatRoutine.AddSpell("Icy Veins", "C");
-            CombatRoutine.AddSpell("Ice Barrier", "C");
-            CombatRoutine.AddSpell("Mirror Image", "C");
-            CombatRoutine.AddSpell("Ice Nova", "None");
-            CombatRoutine.AddSpell("Frozen Orb", "None");
-            CombatRoutine.AddSpell("Comet Storm", "None");
-            CombatRoutine.AddSpell("Ray of Frost", "None");
-            CombatRoutine.AddSpell("Freeze", "None");
-            CombatRoutine.AddSpell("Water Elemental", "None");
-            CombatRoutine.AddSpell("Ice Floes", "None");
-            CombatRoutine.AddSpell("Arcane Intellect", "None");
+            CombatRoutine.AddSpell(RoP, "None");
+            CombatRoutine.AddSpell(IB);
+            CombatRoutine.AddSpell(Frostbolt);
+            CombatRoutine.AddSpell(IL);
+            CombatRoutine.AddSpell(Flurry);
+            CombatRoutine.AddSpell(CoC);
+            CombatRoutine.AddSpell(EB);
+            CombatRoutine.AddSpell(Blizzard);
+            CombatRoutine.AddSpell(GS, "C");
+            CombatRoutine.AddSpell(IV, "C");
+            CombatRoutine.AddSpell(IceBarrier, "C");
+            CombatRoutine.AddSpell(MI, "C");
+            CombatRoutine.AddSpell(IN, "None");
+            CombatRoutine.AddSpell(FO, "None");
+            CombatRoutine.AddSpell(CS, "None");
+            CombatRoutine.AddSpell(RoF, "None");
+            CombatRoutine.AddSpell(Freeze, "None");
+            CombatRoutine.AddSpell(WE, "None");
+            CombatRoutine.AddSpell(IF, "None");
+            CombatRoutine.AddSpell(AI, "None");
+            CombatRoutine.AddSpell(Counterspell, "None");
 
+            //Macro
 
             //Prop
-
-
+            CombatRoutine.AddProp(IceBarrier, IceBarrier, percentListProp, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
 
         }
 
@@ -77,23 +106,33 @@ namespace HyperElk.Core
         {
             if (!API.PlayerIsMounted)
             {
-                if (API.CanCast("Arcane Intellect") && Level >= 8 && !API.PlayerHasBuff("Arcane Intellect"))
+                if (API.CanCast(AI) && Level >= 8 && !API.PlayerHasBuff(AI))
                 {
-                    API.CastSpell("Arcane Intellect");
+                    API.CastSpell(AI);
                     return;
                 }
-                if (API.CanCast("Ice Barrier") && Level >= 21 && !API.PlayerHasBuff("Ice Barrier") && API.PlayerHealthPercent != 0)
+                if (API.CanCast(IceBarrier) && Level >= 21 && !API.PlayerHasBuff(IceBarrier) && API.PlayerHealthPercent <= IceBarrierPercentProc && API.PlayerHealthPercent != 0)
                 {
-                    API.CastSpell("Ice Barrier");
+                    API.CastSpell(IceBarrier);
                     return;
                 }
             }
         }
         public override void CombatPulse()
         {
-            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= 10 && API.PlayerHealthPercent != 0 && Level >= 22)
+            if (isInterrupt && API.CanCast(Counterspell) && Level >= 7)
             {
-                API.CastSpell("Ice Block");
+                API.CastSpell(Counterspell);
+                return;
+            }
+            if (API.CanCast(IB) && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22)
+            {
+                API.CastSpell(IB);
+                return;
+            }
+            if (API.CanCast(MI) && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent !=0 && Level >= 44)
+            {
+                API.CastSpell(MI);
                 return;
             }
             if (Level <= 60)
@@ -110,109 +149,109 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (IsCooldowns && API.CanCast("Mirror Image"))
+            if (API.CanCast(IV) && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns)
             {
-                API.CastSpell("Mirror Image");
+                API.CastSpell(IV);
                 return;
             }
-            if (API.CanCast("Icy Veins") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns)
+            if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !API.PlayerHasBuff(RoP) && !API.PlayerIsMoving && IsCooldowns)
             {
-                API.CastSpell("Icy Veins");
+                API.CastSpell(RoP);
                 return;
             }
-            if (RuneOfPower && API.CanCast("Rune of Power") && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && IsCooldowns)
+            if (API.CanCast(IF) && IceFloes && API.PlayerIsMoving && !API.PlayerHasBuff(IF))
             {
-                API.CastSpell("Rune of Power");
+                API.CastSpell(IF);
                 return;
             }
-            if (API.CanCast("Ice Floes") && IceFloes && API.PlayerIsMoving && !API.PlayerHasBuff("Ice Floes"))
+            if (!API.PlayerHasPet && !LonelyWinter && API.CanCast(WE) && !API.PlayerIsMoving && Level >= 12)
             {
-                API.CastSpell("Ice Floes");
+                API.CastSpell(WE);
                 return;
             }
-            if (!API.PlayerHasPet && !LonelyWinter && API.CanCast("Water Elemental") && !API.PlayerIsMoving && Level >= 12)
+            if (API.CanCast(Flurry) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && API.TargetRange <= 40)
             {
-                API.CastSpell("Water Elemental");
+                API.CastSpell(Flurry);
                 return;
             }
-            if (API.CanCast("Flurry") && Level >= 19 && API.PlayerHasBuff("Brain Freeze") && API.TargetRange <= 40)
+            if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40)
             {
-                API.CastSpell("Flurry");
+                API.CastSpell(FO);
                 return;
             }
-            if (API.CanCast("Frozen Orb") && Level >= 38 && API.TargetRange <= 40)
+            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3)
             {
-                API.CastSpell("Frozen Orb");
+                API.CastSpell(Blizzard);
                 return;
             }
-            if (API.CanCast("Blizzard") && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3)
+            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3)
             {
-                API.CastSpell("Blizzard");
+                API.CastSpell(Blizzard);
                 return;
             }
-            if (API.CanCast("Blizzard") && Level >= 14 && API.TargetRange <= 40 && API.PlayerHasBuff("Ice Floes") && API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3)
+            if (Cometstorm && API.CanCast(CS) && API.TargetRange <= 40 && !API.PlayerIsMoving)
             {
-                API.CastSpell("Blizzard");
+                API.CastSpell(CS);
                 return;
             }
-            if (Cometstorm && API.CanCast("Comet Storm") && API.TargetRange <= 40 && !API.PlayerIsMoving)
+            if (IceNova && API.CanCast(IN) && API.TargetRange <= 40 && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
-                API.CastSpell("Comet Storm");
+                API.CastSpell(IN);
                 return;
             }
-            if (IceNova && API.CanCast("Ice Nova") && API.TargetRange <= 40 && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast(CoC) && Level >= 18 && API.TargetRange <= 10 && API.TargetUnitInRangeCount >= 5)
             {
-                API.CastSpell("Ice Nova");
+                API.CastSpell(CoC);
                 return;
             }
-            if (API.CanCast("Cone of Cold") && Level >= 18 && API.TargetRange <= 10 && API.TargetUnitInRangeCount >= 5)
+            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving)
             {
-                API.CastSpell("Cone of Cold");
+                API.CastSpell(EB);
                 return;
             }
-            if (Ebonbolt && API.CanCast("Ebonbolt") && API.TargetRange <= 40 && !API.PlayerHasBuff("Brain Freeze") && API.PlayerBuffStacks("Icicles") > 4 && !API.PlayerIsMoving)
+            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving)
             {
-                API.CastSpell("Ebonbolt");
+                API.CastSpell(EB);
                 return;
             }
-            if (Ebonbolt && API.CanCast("Ebonbolt") && API.TargetRange <= 40 && !API.PlayerHasBuff("Brain Freeze") && API.PlayerBuffStacks("Icicles") > 4 && API.PlayerHasBuff("Ice Floes") && API.PlayerIsMoving)
+            if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && API.PlayerHasBuff(IF) && API.PlayerIsMoving)
             {
-                API.CastSpell("Ebonbolt");
+                API.CastSpell(RoF);
                 return;
             }
-            if (RayofFrost && API.CanCast("Ray of Frost") && API.TargetHasDebuff("Winter's Chill") && API.PlayerHasBuff("Ice Floes"))
+            if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && !API.PlayerIsMoving)
             {
-                API.CastSpell("Ray of Frost");
+                API.CastSpell(RoF);
                 return;
             }
-            if (GlacialSpike && API.CanCast("Glacial Spike") && API.TargetHasDebuff("Winter's Chill") && API.TargetRange <= 40 && API.PlayerBuffStacks("Icicles") > 4 && !API.PlayerIsMoving)
+            if (GlacialSpike && API.CanCast(GS) && API.TargetHasDebuff(WC) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving)
             {
-                API.CastSpell("Glacial Spike");
+                API.CastSpell(GS);
                 return;
             }
-            if (GlacialSpike && API.CanCast("Glacial Spike") && API.TargetHasDebuff("Winter's Chill") && API.TargetRange <= 40 && API.PlayerBuffStacks("Icicles") > 4 && API.PlayerHasBuff("Ice Floes") && API.PlayerIsMoving)
+            if (GlacialSpike && API.CanCast(GS) && API.TargetHasDebuff(WC) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving)
             {
-                API.CastSpell("Glacial Spike");
+                API.CastSpell(GS);
                 return;
             }
-            if (API.CanCast("Ice Lance") && Level >= 10 && API.TargetRange <= 40 && (API.PlayerHasBuff("Fingers of Frost") || API.TargetHasDebuff("Winter's Chill")))
+            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && (API.PlayerHasBuff(FoF) || API.TargetHasDebuff(WC)))
             {
-                API.CastSpell("Ice Lance");
+                API.CastSpell(IL);
                 return;
             }
-            if (API.CanCast("Frostbolt") && Level >= 1 && API.TargetRange <= 40 && !API.PlayerIsMoving)
+            if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && !API.PlayerIsMoving)
             {
-                API.CastSpell("Frostbolt");
+                API.CastSpell(Frostbolt);
                 return;
             }
-            if (API.CanCast("Frostbolt") && Level >= 1 && API.TargetRange <= 40 && API.PlayerIsMoving && API.PlayerHasBuff("Ice Floes"))
+            if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && API.PlayerIsMoving && API.PlayerHasBuff(IF))
             {
-                API.CastSpell("Frostbolt");
+                API.CastSpell(Frostbolt);
                 return;
             }
-            if (API.PlayerIsMoving && API.CanCast("Ice Lance") && Level >= 10 && !API.PlayerHasBuff("Ice Floes") && API.TargetRange <= 40)
+            if (API.PlayerIsMoving && API.CanCast(IL) && Level >= 10 && !API.PlayerHasBuff(IF) && API.TargetRange <= 40)
             {
-                API.CastSpell("Ice Lance");
+                API.CastSpell(IL);
                 return;
             }
 
