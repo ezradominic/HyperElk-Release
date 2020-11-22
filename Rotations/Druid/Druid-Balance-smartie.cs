@@ -1,5 +1,6 @@
 ﻿// Changelog
 // v1.0 First release
+// v1.1 Starlord and Stellar Drift fixes
 
 namespace HyperElk.Core
 {
@@ -56,6 +57,7 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool isinRange => API.TargetRange < 45;
         private bool isMOinRange => API.MouseoverRange < 45;
+        private bool UseStarlord => (TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) == 0 || TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) > 400 && API.PlayerBuffTimeRemaining(Starlord) != 5000000 || !TalentStarlord);
 
         //CBProperties
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
@@ -72,8 +74,8 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Balance Druid v1.0 by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.0");
+            CombatRoutine.Name = "Balance Druid v1.1 by smartie";
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.1");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -240,7 +242,7 @@ namespace HyperElk.Core
                         API.CastSpell(WarriorofElune);
                         return;
                     }
-                    if (API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && API.TargetDebuffRemainingTime(Moonfire) > 1200 && API.TargetDebuffRemainingTime(Sunfire) > 800 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 600 || !TalentStellarFlare) && TalentIncarnation)
+                    if (API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && TalentIncarnation)
                     {
                         API.CastSpell(Incarnation);
                         return;
@@ -264,7 +266,7 @@ namespace HyperElk.Core
                 // Single Target rota
                 if (API.TargetUnitInRangeCount < AOEUnitNumber || !IsAOE)
                 {
-                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300 && API.PlayerAstral < 93)
+                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300)
                     {
                         API.CastSpell(Moonfire);
                         return;
@@ -274,17 +276,17 @@ namespace HyperElk.Core
                         API.CastSpell(Moonfire);
                         return;
                     }
-                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.TargetDebuffRemainingTime(Sunfire) < 300 && API.PlayerAstral < 93)
+                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.TargetDebuffRemainingTime(Sunfire) < 300)
                     {
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(StellarFlare) && TalentStellarDrift && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.LastSpellCastInGame != (StellarFlare) && API.PlayerAstral < 88)
+                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.LastSpellCastInGame != (StellarFlare))
                     {
                         API.CastSpell(StellarFlare);
                         return;
                     }
-                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && !IsCooldowns|| API.PlayerAstral > 40 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 40 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && (!API.PlayerHasBuff(Starlord) || API.PlayerBuffTimeRemaining(Starlord) > 400))
+                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && !IsCooldowns|| API.PlayerAstral > 40 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 40 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && UseStarlord)
                     {
                         API.CastSpell(Starsurge);
                         return;
@@ -318,12 +320,12 @@ namespace HyperElk.Core
                 //AoE Rota
                 if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)
                 {
-                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300 && API.PlayerAstral < 93)
+                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300)
                     {
                         API.CastSpell(Moonfire);
                         return;
                     }
-                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.TargetDebuffRemainingTime(Sunfire) < 300 && API.PlayerAstral < 93)
+                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.TargetDebuffRemainingTime(Sunfire) < 300)
                     {
                         API.CastSpell(Sunfire);
                         return;
@@ -333,40 +335,40 @@ namespace HyperElk.Core
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.LastSpellCastInGame != (StellarFlare) && API.PlayerAstral < 88)
+                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.LastSpellCastInGame != (StellarFlare))
                     {
                         API.CastSpell(StellarFlare);
                         return;
                     }
                     if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                     {
-                        if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && API.CanCast(Moonfire) && API.PlayerAstral < 93 && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && API.CanCast(Moonfire) && isMOinRange)
                         {
                             API.CastSpell(Moonfire + "MO");
                             return;
                         }
-                        if (API.MouseoverDebuffRemainingTime(Sunfire) <= 300 && API.CanCast(Sunfire) && API.PlayerAstral < 93 && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(Sunfire) <= 300 && API.CanCast(Sunfire) && isMOinRange)
                         {
                             API.CastSpell(Sunfire + "MO");
                             return;
                         }
-                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && API.CanCast(StellarFlare) && API.PlayerAstral < 88 && TalentStellarFlare && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && API.CanCast(StellarFlare) && TalentStellarFlare && isMOinRange)
                         {
                             API.CastSpell(StellarFlare + "MO");
                             return;
                         }
                     }
-                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && PlayerLevel < 34 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && !IsCooldowns || API.PlayerAstral > 40 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 40 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && (!API.PlayerHasBuff(Starlord) || API.PlayerBuffTimeRemaining(Starlord) > 400))
+                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && PlayerLevel < 34 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && !IsCooldowns || API.PlayerAstral > 40 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 40 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && UseStarlord)
                     {
                         API.CastSpell(Starsurge);
                         return;
                     }
-                    if (API.CanCast(Starfall) && API.PlayerBuffTimeRemaining(Starfall) < 100 && PlayerLevel >= 34 && (API.PlayerAstral > 50 && IncaCelestial || API.PlayerAstral > 50 && !IsCooldowns || API.PlayerAstral > 50 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 50 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && (!API.PlayerHasBuff(Starlord) || API.PlayerBuffTimeRemaining(Starlord) > 400))
+                    if (API.CanCast(Starfall) && API.PlayerBuffTimeRemaining(Starfall) < 100 && PlayerLevel >= 34 && (API.PlayerAstral > 50 && IncaCelestial || API.PlayerAstral > 50 && !IsCooldowns || API.PlayerAstral > 50 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 50 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && UseStarlord)
                     {
                         API.CastSpell(Starfall);
                         return;
                     }
-                    if (API.CanCast(Starsurge) && API.PlayerBuffTimeRemaining(Starfall) > 400 && PlayerLevel >= 12 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && !IsCooldowns || API.PlayerAstral > 40 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 40 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && (!API.PlayerHasBuff(Starlord) || API.PlayerBuffTimeRemaining(Starlord) > 400))
+                    if (API.CanCast(Starsurge) && API.PlayerBuffTimeRemaining(Starfall) > 400 && PlayerLevel >= 12 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && !IsCooldowns || API.PlayerAstral > 40 && API.SpellISOnCooldown(Incarnation) && TalentIncarnation || API.PlayerAstral > 40 && API.SpellISOnCooldown(CelestialAlignment) && !TalentIncarnation) && UseStarlord)
                     {
                         API.CastSpell(Starsurge);
                         return;
