@@ -406,7 +406,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cleave +=/ kill_command,if= active_enemies < 4 | !azerite.rapid_reload.enabled
-                if (API.CanCast(Kill_Command) && API.PlayerLevel >= 10 && InRange && API.TargetUnitInRangeCount < 4 && API.PlayerFocus >= 30)
+                if (API.CanCast(Kill_Command) && API.PlayerLevel >= 10 && InRange && API.PlayerFocus >= 30)
                 {
                     API.CastSpell(Kill_Command);
                     return;
