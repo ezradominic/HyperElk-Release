@@ -47,7 +47,7 @@ namespace HyperElk.Core
         private bool InRange => API.TargetRange <= 40;
         private float gcd => API.SpellGCDTotalDuration;
         private float Barbed_Shot_Fractional => (API.SpellCharges(Barbed_Shot) * 100 + ((1000 - API.SpellChargeCD(Barbed_Shot)) / 10));
-        private float BarbedShotCount => (API.PlayerHasBuff("246152") ? 1 : 0) + (API.PlayerHasBuff("246851") ? 1 : 0) + (API.PlayerHasBuff("217200") ? 1 : 0);
+        private float BarbedShotCount => (API.PlayerHasBuff("246152", false, false) ? 1 : 0) + (API.PlayerHasBuff("246851", false, false) ? 1 : 0) + (API.PlayerHasBuff("217200", false, false) ? 1 : 0);
         private float FocusRegen => 10f * (1f + API.PlayerGetHaste / 100f);
         private float RealFocusRegen => FocusRegen + BarbedShotCount * 2.5f;
         private float RealFocusTimeToMax => ((120f - API.PlayerFocus) / ((FocusRegen + BarbedShotCount * 2.5f) + (5 * API.PlayerBuffStacks(Aspect_of_the_Wild)))) * 100f;
@@ -62,9 +62,13 @@ namespace HyperElk.Core
         private bool Talent_Stampede => API.PlayerIsTalentSelected(6, 3);
         private bool Talent_Bloodshed => API.PlayerIsTalentSelected(7, 3);
 
+        private static bool PlayerHasBuff(string buff)
+        {
+            return API.PlayerHasBuff(buff, false, false);
+        }
         private static bool PetHasBuff(string buff)
         {
-            return API.PetBuffTimeRemaining(buff) > 0 && API.PetBuffTimeRemaining(buff) != 5000000;
+            return API.PetHasBuff(buff, false, false);
         }
 
         //CBProperties
@@ -94,7 +98,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Beast Mastery Hunter by Vec";
-            API.WriteLog("Welcome to Beast Masetery Hunter Rotation");
+            API.WriteLog("Welcome to Beast Mastery Hunter Rotation");
             API.WriteLog("Misdirection Macro : /cast [@focus,help][help][@pet,exists] Misdirection");
             API.WriteLog("Mend Pet Macro (revive/call): /cast [mod]Revive Pet; [@pet,dead]Revive Pet; [nopet]Call Pet 1; Mend Pet");
             API.WriteLog("Kill Shot Mouseover - /cast [@mouseover] Kill Shot");
@@ -125,7 +129,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Aspect_of_the_Turtle, "G");
 
             //Macros
-            CombatRoutine.AddMacro(Kill_Command + "MO", "NumPad7");
+            CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
 
             //Buffs
 
@@ -167,7 +171,7 @@ namespace HyperElk.Core
         {
             //API.WriteLog("frenzy" + HasPetBuff(Frenzy));
 
-            if (API.PlayerIsMounted || API.PlayerIsCasting || API.PlayerHasBuff(Aspect_of_the_Turtle))
+            if (API.PlayerIsMounted || API.PlayerIsCasting || PlayerHasBuff(Aspect_of_the_Turtle))
             {
                 return;
             }
@@ -256,7 +260,7 @@ namespace HyperElk.Core
                     }
                     //st->add_action("death_chakram,if=focus+cast_regen<focus.max");
                     //st->add_action("stampede,if=buff.aspect_of_the_wild.up|target.time_to_die<15");
-                    if (API.CanCast(Stampede) && (UseStampede == "always" || (UseStampede == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (API.PlayerHasBuff(Aspect_of_the_Wild) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
+                    if (API.CanCast(Stampede) && (UseStampede == "always" || (UseStampede == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (PlayerHasBuff(Aspect_of_the_Wild) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
                     {
                         API.CastSpell(Stampede);
                         return;
@@ -294,7 +298,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("cobra_shot,if=(focus-cost+focus.regen*(cooldown.kill_command.remains-1)>action.kill_command.cost|cooldown.kill_command.remains>1+gcd)|(buff.bestial_wrath.up|buff.nesingwarys_trapping_apparatus.up)&!runeforge.qapla_eredun_war_order|target.time_to_die<3");
-                    if (API.CanCast(Cobra_Shot) && API.PlayerLevel >= 14 && API.PlayerLevel >= 14 && InRange && (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (API.PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300)
+                    if (API.CanCast(Cobra_Shot) && API.PlayerLevel >= 14 && API.PlayerLevel >= 14 && InRange && (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300)
                     {
                         API.CastSpell(Cobra_Shot);
                         return;
@@ -343,7 +347,7 @@ namespace HyperElk.Core
                     }
                     //cleave->add_action("resonating_arrow");
                     //cleave->add_action("stampede,if=buff.aspect_of_the_wild.up|target.time_to_die<15");
-                    if (API.CanCast(Stampede) && (UseAspectoftheWild == "on AOE" || UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (API.PlayerHasBuff(Aspect_of_the_Wild) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
+                    if (API.CanCast(Stampede) && (UseAspectoftheWild == "on AOE" || UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (PlayerHasBuff(Aspect_of_the_Wild) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
                     {
                         API.CastSpell(Stampede);
                         return;
@@ -474,13 +478,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st +=/ aspect_of_the_wild,if= buff.aspect_of_the_wild.down & (cooldown.barbed_shot.charges < 1 | !azerite.primal_instincts.enabled)
-                if (API.CanCast(Aspect_of_the_Wild) && (UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && !API.PlayerHasBuff(Aspect_of_the_Wild) && InRange && PlayerLevel >= 38)
+                if (API.CanCast(Aspect_of_the_Wild) && (UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && !PlayerHasBuff(Aspect_of_the_Wild) && InRange && PlayerLevel >= 38)
                 {
                     API.CastSpell(Aspect_of_the_Wild);
                     return;
                 }
                 //actions.st +=/ stampede,if= buff.aspect_of_the_wild.up & buff.bestial_wrath.up | target.time_to_die < 15
-                if (API.CanCast(Stampede) && (UseStampede == "always" || (UseStampede == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (API.PlayerHasBuff(Aspect_of_the_Wild) && API.PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
+                if (API.CanCast(Stampede) && (UseStampede == "always" || (UseStampede == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
                 {
                     API.CastSpell(Stampede);
                     return;
@@ -492,7 +496,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st +=/ bestial_wrath,if= talent.scent_of_blood.enabled | talent.one_with_the_pack.enabled & buff.bestial_wrath.remains < gcd | buff.bestial_wrath.down & cooldown.aspect_of_the_wild.remains > 15 | target.time_to_die < 15 + gcd
-                if (API.CanCast(Bestial_Wrath) && (UseBestialWrath == "always" || (UseBestialWrath == "with Cooldowns" && IsCooldowns)) && InRange && (Talent_ScentOfBlood || Talent_OnewiththePack && API.PlayerBuffTimeRemaining(Bestial_Wrath) < gcd || !API.PlayerHasBuff(Bestial_Wrath) && API.SpellCDDuration(Aspect_of_the_Wild) > 1500 || API.TargetTimeToDie < 1500 + gcd))
+                if (API.CanCast(Bestial_Wrath) && (UseBestialWrath == "always" || (UseBestialWrath == "with Cooldowns" && IsCooldowns)) && InRange && (Talent_ScentOfBlood || Talent_OnewiththePack && API.PlayerBuffTimeRemaining(Bestial_Wrath) < gcd || !PlayerHasBuff(Bestial_Wrath) && API.SpellCDDuration(Aspect_of_the_Wild) > 1500 || API.TargetTimeToDie < 1500 + gcd))
                 {
                     API.CastSpell(Bestial_Wrath);
                     return;
@@ -588,13 +592,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cleave +=/ aspect_of_the_wild
-                if (API.CanCast(Aspect_of_the_Wild) && (UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && !API.PlayerHasBuff(Aspect_of_the_Wild) && InRange && PlayerLevel >= 38)
+                if (API.CanCast(Aspect_of_the_Wild) && (UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && !PlayerHasBuff(Aspect_of_the_Wild) && InRange && PlayerLevel >= 38)
                 {
                     API.CastSpell(Aspect_of_the_Wild);
                     return;
                 }
                 //actions.cleave +=/ stampede,if= buff.aspect_of_the_wild.up & buff.bestial_wrath.up | target.time_to_die < 15
-                if (API.CanCast(Stampede) && (UseAspectoftheWild == "on AOE" || UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (API.PlayerHasBuff(Aspect_of_the_Wild) && API.PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
+                if (API.CanCast(Stampede) && (UseAspectoftheWild == "on AOE" || UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
                 {
                     API.CastSpell(Stampede);
                     return;
@@ -636,7 +640,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cleave +=/ barbed_shot,target_if = min:dot.barbed_shot.remains,if= pet.main.buff.frenzy.down & (charges_fractional > 1.8 | buff.bestial_wrath.up) | cooldown.aspect_of_the_wild.remains < pet.main.buff.frenzy.duration - gcd & azerite.primal_instincts.enabled | charges_fractional > 1.4 | target.time_to_die < 9
-                if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && API.PetBuffTimeRemaining(Frenzy) == 0 && (Barbed_Shot_Fractional > 180 || API.PlayerHasBuff(Bestial_Wrath)) || Barbed_Shot_Fractional > 140 || API.TargetTimeToDie < 900)
+                if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && API.PetBuffTimeRemaining(Frenzy) == 0 && (Barbed_Shot_Fractional > 180 || PlayerHasBuff(Bestial_Wrath)) || Barbed_Shot_Fractional > 140 || API.TargetTimeToDie < 900)
                 {
                     API.CastSpell(Barbed_Shot);
                     return;
