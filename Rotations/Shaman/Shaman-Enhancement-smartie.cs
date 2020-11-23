@@ -175,7 +175,7 @@ namespace HyperElk.Core
         {
             if (API.PlayerIsCasting || API.PlayerIsChanneling)
                 return;
-            if (AutoWolf && API.CanCast(GhostWolf) && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
+            if (AutoWolf && API.CanCast(GhostWolf) && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
             {
                 API.CastSpell(GhostWolf);
                 return;
