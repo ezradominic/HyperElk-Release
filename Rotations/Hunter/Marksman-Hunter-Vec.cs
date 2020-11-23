@@ -209,7 +209,7 @@ namespace HyperElk.Core
             }
             if (API.CanCast(Survival_of_the_Fittest) && API.PlayerHealthPercent <= Survival_of_the_FittestLifePercent && PlayerLevel >= 9)
             {
-                API.CastSpell(Exhilaration);
+                API.CastSpell(Survival_of_the_Fittest);
                 return;
             }
 
