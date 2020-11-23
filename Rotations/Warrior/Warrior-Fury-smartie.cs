@@ -66,7 +66,7 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Fury Warrior v1.3 by smartie";
+            CombatRoutine.Name = "Fury Warrior by smartie";
             API.WriteLog("Welcome to smartie`s Fury Warrior v1.3");
             API.WriteLog("All Talents are supported and auto detected");
 

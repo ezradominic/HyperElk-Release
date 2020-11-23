@@ -126,7 +126,7 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Feral Druid v1.1 by smartie";
+            CombatRoutine.Name = "Feral Druid by smartie";
             API.WriteLog("Welcome to smartie`s Feral Druid v1.1");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");

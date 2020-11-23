@@ -75,7 +75,7 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Balance Druid v1.2 by smartie";
+            CombatRoutine.Name = "Balance Druid by smartie";
             API.WriteLog("Welcome to smartie`s Balance Druid v1.2");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
