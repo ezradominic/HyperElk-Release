@@ -1,6 +1,7 @@
 ﻿// Changelog
 // v1.0 First release
 // v1.1 Starlord and Stellar Drift fixes
+// v1.2 switch out of bear fix
 
 namespace HyperElk.Core
 {
@@ -74,8 +75,8 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Balance Druid v1.1 by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.1");
+            CombatRoutine.Name = "Balance Druid v1.2 by smartie";
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.2");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -194,7 +195,7 @@ namespace HyperElk.Core
                     API.CastSpell(BearForm);
                     return;
                 }
-                if (API.PlayerHealthPercent > BearFormLifePercent && API.CanCast(MoonkinForm) && API.PlayerHasBuff(BearForm) && AutoForm)
+                if (API.PlayerHealthPercent > BearFormLifePercent && BearFormLifePercent != 0 && API.CanCast(MoonkinForm) && API.PlayerHasBuff(BearForm) && AutoForm)
                 {
                     API.CastSpell(MoonkinForm);
                     return;

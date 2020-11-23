@@ -74,7 +74,6 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Counterspell", "None");
             CombatRoutine.AddSpell("Arcane Intellect", "None");
             CombatRoutine.AddSpell("Blast Wave");
-            CombatRoutine.AddSpell("Counterspell", "None");
 
 
             //Prop
