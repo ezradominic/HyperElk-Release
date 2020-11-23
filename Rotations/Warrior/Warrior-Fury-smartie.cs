@@ -1,6 +1,7 @@
 // Changelog
 // v1.0 First release
 // v1.1 Victory Rush fix
+// v1.2 covenant support beta
 
 namespace HyperElk.Core
 {
@@ -30,6 +31,11 @@ namespace HyperElk.Core
         private string Enrage = "Enrage";
         private string SuddenDeath = "Sudden Death";
         private string Victorious = "Victorious";
+        private string Condemn = "Condemn";
+        private string SpearofBastion = "Spear of Bastion";
+        private string AncientAftershock = "Ancient Aftershock";
+        private string ConquerorsBanner = "Conqueror's Banner";
+
 
 
         //Talents
@@ -50,11 +56,17 @@ namespace HyperElk.Core
         private int EnragedRegenerationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(EnragedRegeneration)];
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
+        string[] RecklessnessList = new string[] { "always", "with Cooldowns" };
+        string[] SiegebreakerhList = new string[] { "always", "with Cooldowns" };
+        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
+        private string UseRecklessness => RecklessnessList[CombatRoutine.GetPropertyInt(Recklessness)];
+        private string UseSiegebreaker => SiegebreakerhList[CombatRoutine.GetPropertyInt(Siegebreaker)];
+        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Fury Warrior v1.1 by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.1");
+            CombatRoutine.Name = "Fury Warrior v1.2 by smartie";
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.2");
             API.WriteLog("All Talents are supported and auto detected");
 
             //Spells
@@ -77,6 +89,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(StormBolt, "F7");
             CombatRoutine.AddSpell(RallyingCry, "F2");
             CombatRoutine.AddSpell(Bladestorm, "None");
+            CombatRoutine.AddSpell(Condemn, "D1");
+            CombatRoutine.AddSpell(ConquerorsBanner, "D1");
+            CombatRoutine.AddSpell(AncientAftershock, "D1");
+            CombatRoutine.AddSpell(SpearofBastion, "D1");
             CombatRoutine.AddSpell(Slam, "None");
 
             //Buffs
@@ -94,6 +110,9 @@ namespace HyperElk.Core
 
             //Prop
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, "Lineup Recklessness and Siegebreaker", "Generic");
+            CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
+            CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, RecklessnessList, "Use " + Recklessness + "always, with Cooldowns", "Cooldowns", 2);
+            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, SiegebreakerhList, "Use " + Siegebreaker+ "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", percentListProp, "Life percent at which" + EnragedRegeneration + "is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + "is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + "is used, set to 0 to disable", "Defense", 8);
@@ -142,7 +161,22 @@ namespace HyperElk.Core
          {
             if (IsMelee)
             {
-                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && IsCooldowns)
+                if (API.CanCast(ConquerorsBanner) && Covenant == "Necrolord" && !API.PlayerIsMoving && IsCooldowns)
+                {
+                    API.CastSpell(ConquerorsBanner);
+                    return;
+                }
+                if (API.CanCast(SpearofBastion) && Covenant == "Kyrian" && !API.PlayerIsMoving && IsCooldowns)
+                {
+                    API.CastSpell(SpearofBastion);
+                    return;
+                }
+                if (API.CanCast(AncientAftershock) && Covenant == "Night Fae" && !API.PlayerIsMoving && IsCooldowns)
+                {
+                    API.CastSpell(AncientAftershock);
+                    return;
+                }
+                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && (IsCooldowns && UseRecklessness == "with Cooldowns" || UseRecklessness == "always" ))
                 {
                     API.CastSpell(Recklessness);
                     return;
@@ -152,12 +186,12 @@ namespace HyperElk.Core
                     API.CastSpell(Rampage);
                     return;
                 }
-                if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff("Whirlwind") && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
+                if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff(Whirlwind) && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(Whirlwind);
                     return;
                 }
-                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && IsCooldowns && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp))
+                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && IsCooldowns && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp) && (IsCooldowns && UseSiegebreaker== "with Cooldowns" || UseSiegebreaker == "always"))
                 {
                     API.CastSpell(Siegebreaker);
                     return;
@@ -172,9 +206,14 @@ namespace HyperElk.Core
                     API.CastSpell(Bladestorm);
                     return;
                 }
-                if (API.CanCast(Execute) && PlayerLevel >= 9 && (!TalentMassacre && API.TargetHealthPercent < 20 || TalentMassacre && API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Execute) && Covenant != "Venthyr" && PlayerLevel >= 9 && (!TalentMassacre && API.TargetHealthPercent < 20 || TalentMassacre && API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Execute);
+                    return;
+                }
+                if (API.CanCast(Condemn) && Covenant == "Venthyr" && (!TalentMassacre && API.TargetHealthPercent < 20 && API.TargetHealthPercent > 80 || TalentMassacre && API.TargetHealthPercent < 35 && API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                {
+                    API.CastSpell(Condemn);
                     return;
                 }
                 if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage) && IsCooldowns)
