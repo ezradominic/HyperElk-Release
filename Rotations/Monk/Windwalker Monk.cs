@@ -100,8 +100,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Vivify, "NumPad1");
             CombatRoutine.AddSpell(ExpelHarm, "NumPad2");
             CombatRoutine.AddSpell(EnergizingElixir, "NumPad3");
-            CombatRoutine.AddSpell(DampenHarm, "Numpad4");
-            CombatRoutine.AddSpell(FortifyingBrew, "NumPad5");
+            CombatRoutine.AddSpell(DampenHarm, "F1");
+            CombatRoutine.AddSpell(FortifyingBrew, "F2");
 
 
 
@@ -132,12 +132,12 @@ namespace HyperElk.Core
             }
             if (IsCooldowns && !API.SpellISOnCooldown(StormEarthandFire) && !TalentSerenty && API.SpellCharges(StormEarthandFire) >= 1 && !API.PlayerHasBuff(StormEarthandFire) && IsMelee && API.PlayerCurrentChi >= 3 && PlayerLevel >= 27)
             {
-                API.CastSpell(TouchofDeath);
+                API.CastSpell(StormEarthandFire);
                 return;
             }
             if (IsCooldowns && !API.SpellISOnCooldown(EnergizingElixir) && TalentEnergizingElixir && IsMelee && API.PlayerCurrentChi <= 2 && API.PlayerCurrentChi < 50)
             {
-                API.CastSpell(TouchofDeath);
+                API.CastSpell(EnergizingElixir);
                 return;
             }
 
