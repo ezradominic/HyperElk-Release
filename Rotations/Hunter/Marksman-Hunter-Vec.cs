@@ -133,11 +133,14 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Volley, "D1");
             CombatRoutine.AddSpell(Explosive_Shot, "D1");
             CombatRoutine.AddSpell(Serpent_Sting, "D1");
+            CombatRoutine.AddSpell(Feign_Death, "F2");
+            CombatRoutine.AddSpell(Aspect_of_the_Turtle, "G");
 
             CombatRoutine.AddSpell(Mend_Pet, "F5");
             //Buffs
 
             CombatRoutine.AddBuff(Aspect_of_the_Turtle);
+            CombatRoutine.AddBuff(Feign_Death);
             CombatRoutine.AddBuff(Misdirection);
             CombatRoutine.AddBuff(Precise_Shots);
             CombatRoutine.AddBuff(Trick_Shots);
@@ -179,7 +182,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (API.PlayerIsMounted || API.PlayerIsCasting)
+            if (API.PlayerIsMounted || API.PlayerIsCasting || API.PlayerHasBuff(Aspect_of_the_Turtle) || API.PlayerHasBuff(Feign_Death))
             {
                 return;
             }
@@ -212,7 +215,16 @@ namespace HyperElk.Core
                 API.CastSpell(Survival_of_the_Fittest);
                 return;
             }
-
+            if (API.CanCast(Aspect_of_the_Turtle) && API.PlayerHealthPercent <= AspectoftheTurtleLifePercent && PlayerLevel >= 8)
+            {
+                API.CastSpell(Aspect_of_the_Turtle);
+                return;
+            }
+            if (API.CanCast(Feign_Death) && API.PlayerHealthPercent <= FeignDeathLifePercent && PlayerLevel >= 6)
+            {
+                API.CastSpell(Feign_Death);
+                return;
+            }
             if (!API.PlayerHasBuff(Aspect_of_the_Turtle))
             {
                 if (isInterrupt && API.CanCast(Counter_Shot) && InRange && PlayerLevel >= 18)
