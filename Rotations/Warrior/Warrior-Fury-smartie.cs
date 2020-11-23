@@ -56,7 +56,7 @@ namespace HyperElk.Core
         private int EnragedRegenerationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(EnragedRegeneration)];
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
-        string[] RecklessnessList = new string[] { "always", "with Cooldowns" };
+        string[] RecklessnessList = new string[] { "with Cooldowns", "always" };
         string[] SiegebreakerhList = new string[] { "always", "with Cooldowns" };
         string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
         private string UseRecklessness => RecklessnessList[CombatRoutine.GetPropertyInt(Recklessness)];
@@ -111,7 +111,7 @@ namespace HyperElk.Core
             //Prop
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, "Lineup Recklessness and Siegebreaker", "Generic");
             CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
-            CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, RecklessnessList, "Use " + Recklessness + "always, with Cooldowns", "Cooldowns", 2);
+            CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, RecklessnessList, "Use " + Recklessness + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, SiegebreakerhList, "Use " + Siegebreaker+ "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", percentListProp, "Life percent at which" + EnragedRegeneration + "is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + "is used, set to 0 to disable", "Defense", 8);
