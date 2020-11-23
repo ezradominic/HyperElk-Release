@@ -1,9 +1,10 @@
 ﻿// Changelog
 // v1.0 First release
+// v1.1 bearform fix
 
 namespace HyperElk.Core
 {
-    public class FeralDruid : CombatRoutine
+    public class FuryWarrior : CombatRoutine
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spell,Auras
@@ -251,7 +252,7 @@ namespace HyperElk.Core
                     API.CastSpell(BearForm);
                     return;
                 }
-                if (API.PlayerHealthPercent > BearFormLifePercent && API.CanCast(CatForm) && API.PlayerHasBuff(BearForm) && AutoForm)
+                if (API.PlayerHealthPercent > BearFormLifePercent && BearFormLifePercent != 0 && API.CanCast(CatForm) && API.PlayerHasBuff(BearForm) && AutoForm)
                 {
                     API.CastSpell(CatForm);
                     return;
@@ -282,7 +283,7 @@ namespace HyperElk.Core
                 API.CastSpell(CatForm);
                 return;
             }
-            if (API.CanCast(Rake) && API.PlayerHasBuff(Prowl) && isMelee && PlayerLevel >= 10 && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
+            if (API.CanCast(Rake) && API.PlayerHasBuff(Prowl) && PlayerLevel >= 10 && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
             {
                 API.CastSpell(Rake);
                 return;
