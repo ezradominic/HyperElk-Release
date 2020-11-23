@@ -15,6 +15,7 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private bool NotChanneling => !API.PlayerIsChanneling;
+        private bool NotMoving => !API.PlayerIsMoving;
 
 
         //CLASS SPECIFIC
@@ -27,6 +28,7 @@ namespace HyperElk.Core
         private bool TalentRushingJadeWind => API.PlayerIsTalentSelected(6, 2);
         private bool TalentDanceofChiJi => API.PlayerIsTalentSelected(6, 3);
         private bool TalentWhirlingDragonPunch => API.PlayerIsTalentSelected(7, 2);
+        private bool TalentSerenty => API.PlayerIsTalentSelected(7, 3);
 
 
 
@@ -53,6 +55,11 @@ namespace HyperElk.Core
         private string ChiBurst = "Chi Burst";
         private string FistsoftheWhiteTiger = "Fist of the White Tiger";
         private string WhirlingDragonPunch = "Whirling Dragon Punch";
+        private string ChiWave = "Chi Wave";
+        private string MarkoftheCrane = "Mark of the Crane";
+        private string DanceofChiJi = "Dance of Chi-Ji";
+        private string StormEarthandFire = "Storm Earth and Fire";
+        private string Serenity = "Serenity";
         public override void Initialize()
         {
             CombatRoutine.Name = "Windwalker Monk @Mufflon12";
@@ -72,6 +79,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FistsoftheWhiteTiger, "D6");
             CombatRoutine.AddSpell(WhirlingDragonPunch, "D7");
             CombatRoutine.AddSpell(TouchofDeath, "D7");
+            CombatRoutine.AddSpell(ChiWave, "D7");
+            CombatRoutine.AddSpell(StormEarthandFire, "OemOpenBrackets");
+            CombatRoutine.AddSpell(Serenity, "OemOpenBrackets");
 
 
 
@@ -89,9 +99,11 @@ namespace HyperElk.Core
             //Buffs
             CombatRoutine.AddBuff("Blackout Kick!");
             CombatRoutine.AddBuff("Dance of Chi-Ji");
+            CombatRoutine.AddBuff("Storm Earth and Fire");
+            CombatRoutine.AddBuff("Serenity");
 
             //Debuffs
-
+            CombatRoutine.AddDebuff("Mark of the Crane");
 
 
         }
@@ -109,77 +121,92 @@ namespace HyperElk.Core
                 API.CastSpell(TouchofDeath);
                 return;
             }
+            if (IsCooldowns && !API.SpellISOnCooldown(StormEarthandFire) && !TalentSerenty && API.SpellCharges(StormEarthandFire) >= 1 && !API.PlayerHasBuff(StormEarthandFire) && IsMelee && API.PlayerCurrentChi >= 3 && PlayerLevel >= 27)
+            {
+                API.CastSpell(TouchofDeath);
+                return;
+            }
 
             //AOE
             if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
                 //WhirlingDragonPunch
-                if (API.CanCast(WhirlingDragonPunch) && NotChanneling && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick))
+                if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling && IsMelee)
                 {
                     API.CastSpell(WhirlingDragonPunch);
                     return;
                 }
-                //Tiger Palm
-                if (API.CanCast(TigerPalm) && NotChanneling && API.PlayerEnergy >= 45 && API.PlayerCurrentChi <= 4 && NotChanneling)
-                {
-                    API.CastSpell(TigerPalm);
-                    return;
-                }
-                //ChiBurst
-                if (API.CanCast(ChiBurst) && TalentChiBurst && API.PlayerCurrentChi <= 5 && NotChanneling)
-                {
-                    API.CastSpell(ChiBurst);
-                    return;
-                }
                 //Rising Sun Kick
-                if (API.CanCast(RisingSunKick) && NotChanneling && !API.SpellISOnCooldown(RisingSunKick) && API.PlayerCurrentChi >= 2 && API.PlayerUnitInMeleeRangeCount <= 2 && API.PlayerLevel >= 2 && NotChanneling)
+                if (API.CanCast(RisingSunKick) && NotChanneling && API.PlayerCurrentChi >= 5 && API.PlayerLevel >= 10 && IsMelee && NotChanneling)
                 {
                     API.CastSpell(RisingSunKick);
                     return;
                 }
                 //Fists of Fury
-                if (API.CanCast(FistsofFury) && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 10 && NotChanneling)
+                if (API.CanCast(FistsofFury) && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 12 && IsMelee && NotChanneling)
                 {
                     API.CastSpell(FistsofFury);
                     return;
                 }
-                //Spinning Crane Kick Dance of the Chi
-                if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerEnergy >= 40 && API.PlayerHasBuff("Dance of Chi-Ji") && TalentDanceofChiJi && API.PlayerLevel >= 45 && NotChanneling)
+                //Rising Sun Kick
+                if (API.CanCast(RisingSunKick) && NotChanneling && API.PlayerCurrentChi >= 2 && API.PlayerLevel >= 10 && IsMelee && NotChanneling)
+                {
+                    API.CastSpell(RisingSunKick);
+                    return;
+                }
+                //Fist of The White Tiger
+                if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && NotChanneling && API.PlayerCurrentChi <= 2 && API.PlayerEnergy >= 40)
+                {
+                    API.CastSpell(FistsoftheWhiteTiger);
+                    return;
+                }
+                //Spinnging Crane Kick
+                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >=7 && API.PlayerCurrentChi >=2 && API.TargetHasDebuff(MarkoftheCrane) && API.PlayerHasBuff(DanceofChiJi))
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
                 }
-                //Spinning Crane Kick
-                if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerEnergy >= 40 && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerEnergy > 40 && API.PlayerCurrentChi >=2 && API.PlayerLevel >= 7 && NotChanneling)
+                //Rushing Jadewind
+                if (API.CanCast(RushingJadeWind) && NotChanneling && IsMelee && TalentRushingJadeWind && API.PlayerCurrentChi >=1)
                 {
-                API.CastSpell(SpinningCraneKick);
-                return;
-                }
-                //Rushing Jade Wind
-                if (IsAOE && API.CanCast(RushingJadeWind) && !API.SpellISOnCooldown(RushingJadeWind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerCurrentChi >=1 && TalentRushingJadeWind && NotChanneling)
-                {
-                API.CastSpell(RushingJadeWind);
-                return;
+                    API.CastSpell(RushingJadeWind);
+                    return;
                 }
                 //BlackOutKick
-                if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 4 && API.PlayerLevel >= 2 && NotChanneling)
+                if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
                 }
                 //BlackOutKick with buff
-                if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerHasBuff(BlackOutKickBuff) && API.PlayerLevel >= 2 && NotChanneling)
+                if (API.CanCast(BlackOutKick) && NotChanneling && IsMelee && API.PlayerHasBuff(BlackOutKickBuff) && API.PlayerLevel >= 2)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
                 }
-                //FistsoftheWhiteTiger 
-                if (API.CanCast(FistsoftheWhiteTiger) && NotChanneling && API.PlayerEnergy >= 65 && API.PlayerCurrentChi <= 3 && NotChanneling)
+                //Chiwave
+                if (API.CanCast(ChiWave) && NotChanneling && TalentChiWave)
                 {
-                    API.CastSpell(FistsoftheWhiteTiger);
+                    API.CastSpell(ChiWave);
+                    return;
+                }
+                //ChiBurst
+                if (API.CanCast(ChiBurst) && TalentChiBurst && NotChanneling && IsMelee && NotMoving && API.PlayerCurrentChi < 5)
+                {
+                    API.CastSpell(ChiBurst);
+                    return;
+                }
+                //Tiger Palm
+                if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+                {
+                    API.CastSpell(TigerPalm);
                     return;
                 }
             }
+
+
+
+
             //KICK
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18 && NotChanneling)
             {
@@ -209,46 +236,159 @@ namespace HyperElk.Core
 
             //ROTATION
             //WhirlingDragonPunch
-            if (API.CanCast(WhirlingDragonPunch) && NotChanneling && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling)
+            if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling && IsMelee)
             {
                 API.CastSpell(WhirlingDragonPunch);
                 return;
             }
-            //BlackOutKick with buff
-            if (API.CanCast(BlackOutKick) &&NotChanneling && API.PlayerHasBuff(BlackOutKickBuff) && API.PlayerLevel >= 2 && NotChanneling)
-            {
-                API.CastSpell(BlackOutKick);
-                return;
-            }
             //Rising Sun Kick
-            if (API.CanCast(RisingSunKick) && NotChanneling && !API.SpellISOnCooldown(RisingSunKick) && API.PlayerCurrentChi >= 2 && API.PlayerLevel >= 2 && NotChanneling)
+            if (API.CanCast(RisingSunKick) && NotChanneling && API.PlayerCurrentChi >= 5 && API.PlayerLevel >= 10 && IsMelee && NotChanneling)
             {
                 API.CastSpell(RisingSunKick);
                 return;
             }
-            //ChiBurst
-            if (API.CanCast(ChiBurst) && TalentChiBurst && API.PlayerCurrentChi >= 5 && NotChanneling)
-            {
-                API.CastSpell(ChiBurst);
-                return;
-            }
             //Fists of Fury
-            if (API.CanCast(FistsofFury) && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 10 && NotChanneling)
+            if (API.CanCast(FistsofFury) && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 12 && IsMelee && NotChanneling)
             {
                 API.CastSpell(FistsofFury);
                 return;
             }
+            //Rising Sun Kick
+            if (API.CanCast(RisingSunKick) && NotChanneling && API.PlayerCurrentChi >= 2 && API.PlayerLevel >= 10 && IsMelee && NotChanneling)
+            {
+                API.CastSpell(RisingSunKick);
+                return;
+            }
+            //Fist of The White Tiger
+            if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && NotChanneling && API.PlayerCurrentChi <= 2 && API.PlayerEnergy >=40)
+            {
+                API.CastSpell(FistsoftheWhiteTiger);
+                return;
+            }
             //BlackOutKick
-            if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 4 && API.PlayerLevel >= 2 && NotChanneling)
+            if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
             {
                 API.CastSpell(BlackOutKick);
                 return;
             }
+            //BlackOutKick with buff
+            if (API.CanCast(BlackOutKick) && NotChanneling && IsMelee && API.PlayerHasBuff(BlackOutKickBuff) && API.PlayerLevel >= 2)
+            {
+                API.CastSpell(BlackOutKick);
+                return;
+            }
+            //Chiwave
+            if (API.CanCast(ChiWave) && NotChanneling && TalentChiWave)
+            {
+                API.CastSpell(ChiWave);
+                return;
+            }
+            //ChiBurst
+            if (API.CanCast(ChiBurst) && TalentChiBurst && NotChanneling && IsMelee && NotMoving && API.PlayerCurrentChi < 5)
+            {
+                API.CastSpell(ChiBurst);
+                return;
+            }   
             //Tiger Palm
-            if (API.CanCast(TigerPalm) && NotChanneling && API.PlayerEnergy >= 45 && API.PlayerCurrentChi <= 4 && NotChanneling)
+            if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
             {
                 API.CastSpell(TigerPalm);
                 return;
+            }
+
+            //Serenity ROTATION
+            if (TalentSerenty)
+            {
+                //Serenty
+                if (API.CanCast(Serenity) && IsMelee && NotChanneling)
+                {
+                    API.CastSpell(Serenity);
+                    return;
+                }
+                if (API.PlayerHasBuff(Serenity))
+                {
+                    //Fists of Fury
+                    if (API.CanCast(FistsofFury) && IsMelee && NotChanneling)
+                    {
+                        API.CastSpell(FistsofFury);
+                        return;
+                    }
+                    //Rising Sun Kick
+                    if (API.CanCast(RisingSunKick) && NotChanneling && IsMelee)
+                    {
+                        API.CastSpell(RisingSunKick);
+                        return;
+                    }
+                    //BlackOutKick
+                    if (API.CanCast(BlackOutKick) && NotChanneling && IsMelee)
+                    {
+                        API.CastSpell(BlackOutKick);
+                        return;
+                    }
+                }
+
+                if (!API.PlayerHasBuff(Serenity))
+                {
+                    if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling && IsMelee)
+                    {
+                        API.CastSpell(WhirlingDragonPunch);
+                        return;
+                    }
+                    //Rising Sun Kick
+                    if (API.CanCast(RisingSunKick) && NotChanneling && API.PlayerCurrentChi >= 5 && API.PlayerLevel >= 10 && IsMelee && NotChanneling)
+                    {
+                        API.CastSpell(RisingSunKick);
+                        return;
+                    }
+                    //Fists of Fury
+                    if (API.CanCast(FistsofFury) && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 12 && IsMelee && NotChanneling)
+                    {
+                        API.CastSpell(FistsofFury);
+                        return;
+                    }
+                    //Rising Sun Kick
+                    if (API.CanCast(RisingSunKick) && NotChanneling && API.PlayerCurrentChi >= 2 && API.PlayerLevel >= 10 && IsMelee && NotChanneling)
+                    {
+                        API.CastSpell(RisingSunKick);
+                        return;
+                    }
+                    //Fist of The White Tiger
+                    if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && NotChanneling && API.PlayerCurrentChi <= 2 && API.PlayerEnergy >= 40)
+                    {
+                        API.CastSpell(FistsoftheWhiteTiger);
+                        return;
+                    }
+                    //BlackOutKick
+                    if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
+                    {
+                        API.CastSpell(BlackOutKick);
+                        return;
+                    }
+                    //BlackOutKick with buff
+                    if (API.CanCast(BlackOutKick) && NotChanneling && IsMelee && API.PlayerHasBuff(BlackOutKickBuff) && API.PlayerLevel >= 2)
+                    {
+                        API.CastSpell(BlackOutKick);
+                        return;
+                    }
+                    //Chiwave
+                    if (API.CanCast(ChiWave) && NotChanneling && TalentChiWave)
+                    {
+                        API.CastSpell(ChiWave);
+                        return;
+                    }
+                    //ChiBurst
+                    if (API.CanCast(ChiBurst) && TalentChiBurst && NotChanneling && IsMelee && NotMoving && API.PlayerCurrentChi < 5)
+                    {
+                        API.CastSpell(ChiBurst);
+                        return;
+                    }
+                    //Tiger Palm
+                    if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+                    {
+                        API.CastSpell(TigerPalm);
+                        return;
+                    }
+                }
             }
         }
         public override void OutOfCombatPulse()
