@@ -71,6 +71,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FistsofFury, "D5");
             CombatRoutine.AddSpell(FistsoftheWhiteTiger, "D6");
             CombatRoutine.AddSpell(WhirlingDragonPunch, "D7");
+            CombatRoutine.AddSpell(TouchofDeath, "D7");
 
 
 
