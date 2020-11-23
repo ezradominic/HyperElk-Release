@@ -1,5 +1,7 @@
 ﻿// Changelog
 // v1.0 First release
+using System.Diagnostics;
+
 
 namespace HyperElk.Core
 {
@@ -35,14 +37,12 @@ namespace HyperElk.Core
         private string LightningShield = "Lightning Shield";
 
         //Talents
-        bool TalentEchoofTheElements => API.PlayerIsTalentSelected(1, 2);
         bool TalentEchoingShock => API.PlayerIsTalentSelected(2, 2);
         bool TalentElementalBlast => API.PlayerIsTalentSelected(2, 3);
         bool TalentEarthShield => API.PlayerIsTalentSelected(3, 2);
         bool TalentMasterofTheElements => API.PlayerIsTalentSelected(4, 1);
         bool TalentStormElemental => API.PlayerIsTalentSelected(4, 2);
         bool TalentLiquidManaTotem => API.PlayerIsTalentSelected(4, 3);
-        bool TalentSurgeOfPower => API.PlayerIsTalentSelected(6, 1);
         bool TalentIcefury => API.PlayerIsTalentSelected(6, 3);
         bool TalentStormkeeper => API.PlayerIsTalentSelected(7, 2);
         bool TalentAscendance => API.PlayerIsTalentSelected(7, 3);
@@ -60,8 +60,8 @@ namespace HyperElk.Core
         private int HealingStreamTotemLifePercent => percentListProp[CombatRoutine.GetPropertyInt(HealingStreamTotem)];
         private int HealingSurgeLifePercent => percentListProp[CombatRoutine.GetPropertyInt(HealingSurge)];
 
-        //private static readonly Stopwatch stormwatch = new Stopwatch();
-        //private static readonly Stopwatch pullwatch = new Stopwatch();
+        private static readonly Stopwatch stormwatch = new Stopwatch();
+        private static readonly Stopwatch pullwatch = new Stopwatch();
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman v1.0 by smartie";
@@ -119,7 +119,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            /*if (!pullwatch.IsRunning && API.PlayerIsInCombat)
+            if (!pullwatch.IsRunning && API.PlayerIsInCombat)
             {
                 pullwatch.Start();
                 API.WriteLog("Entering Combat, Starting opener timer.");
@@ -134,8 +134,7 @@ namespace HyperElk.Core
             {
                 stormwatch.Reset();
                 API.WriteLog("Resetting Stormwatch.");
-            }*/
-            //API.WriteLog("LavaBurst?"+ API.CanCast(LavaBurst));
+            }
         }
         public override void CombatPulse()
         {
@@ -209,8 +208,8 @@ namespace HyperElk.Core
                 if (API.CanCast(StormElemental) && TalentStormElemental && IsCooldowns)
                 {
                     API.CastSpell(StormElemental);
-                    //stormwatch.Start();
-                    //API.WriteLog("Starting Stormwatch.");
+                    stormwatch.Start();
+                    API.WriteLog("Starting Stormwatch.");
                     return;
                 }
                 if (API.CanCast(EarthElemental) && PlayerLevel >= 37 && (!API.PlayerHasPet && TalentStormElemental || !TalentStormElemental) && IsCooldowns)
@@ -261,11 +260,11 @@ namespace HyperElk.Core
                         API.CastSpell(EarthShock);
                         return;
                     }
-                    /*if (API.CanCast(LightningBolt) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && stormwatch.IsRunning)
+                    if (API.CanCast(LightningBolt) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && stormwatch.IsRunning)
                     {
                         API.CastSpell(LightningBolt);
                         return;
-                    }*/
+                    }
                     if (API.CanCast(Ascendance) && TalentAscendance && IsCooldowns)
                     {
                         API.CastSpell(Ascendance);
