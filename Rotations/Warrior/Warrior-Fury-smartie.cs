@@ -191,7 +191,7 @@ namespace HyperElk.Core
                     API.CastSpell(Whirlwind);
                     return;
                 }
-                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && IsCooldowns && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp) && (IsCooldowns && UseSiegebreaker== "with Cooldowns" || UseSiegebreaker == "always"))
+                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && (IsCooldowns && UseSiegebreaker== "with Cooldowns" || UseSiegebreaker == "always"))
                 {
                     API.CastSpell(Siegebreaker);
                     return;
