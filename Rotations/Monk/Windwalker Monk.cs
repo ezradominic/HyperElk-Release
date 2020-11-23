@@ -36,6 +36,8 @@ namespace HyperElk.Core
         private int VivifyLifePercentProc => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
+        private int DampenHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
+
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         bool LastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
@@ -62,6 +64,9 @@ namespace HyperElk.Core
         private string DanceofChiJi = "Dance of Chi-Ji";
         private string StormEarthandFire = "Storm Earth and Fire";
         private string Serenity = "Serenity";
+        private string DampenHarm = "Dampen Harm";
+        private string EnergizingElixir = "Energizing Elixir";
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Windwalker Monk @Mufflon12";
@@ -70,6 +75,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Vivify, "Vivify", numbList, "Life percent at which " + Vivify + " is used, set to 0 to disable", "Healing", 5);
             CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 9);
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
+            CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
 
 
             //Spells
@@ -93,7 +99,8 @@ namespace HyperElk.Core
 
             CombatRoutine.AddSpell(Vivify, "NumPad1");
             CombatRoutine.AddSpell(ExpelHarm, "NumPad2");
-
+            CombatRoutine.AddSpell(EnergizingElixir, "NumPad3");
+            CombatRoutine.AddSpell(DampenHarm, "Numpad4");
             CombatRoutine.AddSpell(FortifyingBrew, "NumPad5");
 
 
@@ -128,12 +135,17 @@ namespace HyperElk.Core
                 API.CastSpell(TouchofDeath);
                 return;
             }
+            if (IsCooldowns && !API.SpellISOnCooldown(EnergizingElixir) && TalentEnergizingElixir && IsMelee && API.PlayerCurrentChi <= 2 && API.PlayerCurrentChi < 50)
+            {
+                API.CastSpell(TouchofDeath);
+                return;
+            }
 
             //AOE
             if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
                 //WhirlingDragonPunch
-                if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling && IsMelee)
+                if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellCDDuration(FistsofFury) > 50 && API.SpellCDDuration(RisingSunKick) > 50 && NotChanneling && IsMelee)
                 {
                     API.CastSpell(WhirlingDragonPunch);
                     return;
@@ -223,6 +235,12 @@ namespace HyperElk.Core
                 API.CastSpell(ExpelHarm);
                 return;
             }
+            //Expel Harm
+            if (API.PlayerHealthPercent <= DampenHarmLifePercentProc && !API.SpellISOnCooldown(DampenHarm) && !API.PlayerIsMounted && TalentDampenHarm && NotChanneling)
+            {
+                API.CastSpell(DampenHarm);
+                return;
+            }
             //Vivify
             if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4 && NotChanneling)
             {
@@ -238,7 +256,7 @@ namespace HyperElk.Core
 
             //ROTATION
             //WhirlingDragonPunch
-            if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling && IsMelee)
+            if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellCDDuration(FistsofFury) > 50 && API.SpellCDDuration(RisingSunKick) > 50 && NotChanneling && IsMelee)
             {
                 API.CastSpell(WhirlingDragonPunch);
                 return;
@@ -331,7 +349,7 @@ namespace HyperElk.Core
 
                 if (!API.PlayerHasBuff(Serenity))
                 {
-                    if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellISOnCooldown(FistsofFury) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling && IsMelee)
+                    if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellCDDuration(FistsofFury) > 50 && API.SpellCDDuration(RisingSunKick) > 50 && NotChanneling && IsMelee)
                     {
                         API.CastSpell(WhirlingDragonPunch);
                         return;
