@@ -197,7 +197,9 @@ namespace HyperElk.Core
                 API.CastSpell(WordOfGlory);
                 return;
             }
-            if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous) && IsMelee && (API.PlayerBuffTimeRemaining(ShieldoftheRighteous) <=950 || API.PlayerCurrentHolyPower >= 4 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2)
+            if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous,true,true) && IsMelee
+                && (API.PlayerBuffTimeRemaining(ShieldoftheRighteous) <=950 || API.PlayerCurrentHolyPower >= 4 || API.PlayerHasBuff(DivinePurpose)) 
+                && PlayerLevel >= 2)
             {
                 API.CastSpell(ShieldoftheRighteous);
                 return;

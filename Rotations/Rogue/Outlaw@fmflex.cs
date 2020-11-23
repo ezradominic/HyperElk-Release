@@ -158,7 +158,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (!isStealth || API.PlayerIsCasting)
+            if (isStealth || API.PlayerIsCasting)
                 return;
 
 
