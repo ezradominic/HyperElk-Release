@@ -1,6 +1,6 @@
 // Changelog
 // v1.0 First release
-// v1.1 shield block and execute fix
+// v1.1 Victory Rush fix
 
 namespace HyperElk.Core
 {
@@ -34,6 +34,7 @@ namespace HyperElk.Core
         private string VengeanceRevenge = "Vengeance: Revenge";
         private string VengeanceIgnorePain = "Vengeance: Ignore Pain";
         private string RenewedFury = "Renewed Fury";
+        private string Victorious = "Victorious";
 
         //Talents
         bool TalentDevastator => API.PlayerIsTalentSelected(1, 3);
@@ -98,6 +99,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SpellReflection);
             CombatRoutine.AddBuff(VictoryRush);
             CombatRoutine.AddBuff(BattleShout);
+            CombatRoutine.AddBuff(Victorious);
 
             //Debuff
             CombatRoutine.AddDebuff(DeepWounds);
@@ -139,12 +141,12 @@ namespace HyperElk.Core
                 API.CastSpell(ShieldWall);
                 return;
             }
-            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockLifePercent && PlayerLevel >= 6 && !API.PlayerHasBuff(ShieldBlock) && API.PlayerRage >= 30)
+            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockLifePercent && PlayerLevel >= 6 && !API.PlayerHasBuff(ShieldBlock))
             {
                 API.CastSpell(ShieldBlock);
                 return;
             }
-            if (API.CanCast(VictoryRush) && API.PlayerHealthPercent <= VictoryRushLifePercent && API.PlayerHasBuff(VictoryRush) && PlayerLevel >= 5)
+            if (API.CanCast(VictoryRush) && API.PlayerHealthPercent <= VictoryRushLifePercent && API.PlayerHasBuff(Victorious) && PlayerLevel >= 5)
             {
                 API.CastSpell(VictoryRush);
                 return;
@@ -209,7 +211,7 @@ namespace HyperElk.Core
                     API.CastSpell(ThunderClap);
                     return;
                 }
-                if (API.CanCast(Execute) && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
+                if (API.CanCast(Execute) && API.PlayerRage > 40 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
                 {
                     API.CastSpell(Execute);
                     return;

@@ -1,6 +1,6 @@
 // Changelog
 // v1.0 First release
-// v1.1 small fix
+// v1.1 Victory Rush fix
 
 namespace HyperElk.Core
 {
@@ -29,6 +29,7 @@ namespace HyperElk.Core
         private string Slam = "Slam";
         private string Enrage = "Enrage";
         private string SuddenDeath = "Sudden Death";
+        private string Victorious = "Victorious";
 
 
         //Talents
@@ -86,6 +87,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SuddenDeath);
             CombatRoutine.AddBuff(VictoryRush);
             CombatRoutine.AddBuff(BattleShout);
+            CombatRoutine.AddBuff(Victorious);
 
             //Debuff
             CombatRoutine.AddDebuff(Siegebreaker);
@@ -120,7 +122,7 @@ namespace HyperElk.Core
                 API.CastSpell(EnragedRegeneration);
                 return;
             }
-            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(VictoryRush))
+            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious))
             {
                 API.CastSpell(VictoryRush);
                 return;
@@ -155,7 +157,7 @@ namespace HyperElk.Core
                     API.CastSpell(Whirlwind);
                     return;
                 }
-                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 && IsCooldowns || !IsLineUp || !IsCooldowns))
+                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && IsCooldowns && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp))
                 {
                     API.CastSpell(Siegebreaker);
                     return;

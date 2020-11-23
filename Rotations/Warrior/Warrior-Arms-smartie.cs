@@ -1,6 +1,6 @@
 //Changelog test@test.de
 // v1.0 First release
-// v1.1 small fix
+// v1.1 Victory Rush fix
 
 namespace HyperElk.Core
 {
@@ -32,6 +32,7 @@ namespace HyperElk.Core
         private string SuddenDeath = "Sudden Death";
         private string DeepWounds = "Deep Wounds";
         private string StoneHeart = "Stone Heart";
+        private string Victorious = "Victorious";
 
         //Talents
         bool TalentSkullsplitter => API.PlayerIsTalentSelected(1, 3);
@@ -95,6 +96,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SweepingStrikes);
             CombatRoutine.AddBuff(VictoryRush);
             CombatRoutine.AddBuff(StoneHeart);
+            CombatRoutine.AddBuff(Victorious);
             //Debuff
             CombatRoutine.AddDebuff(ColossusSmash);
             CombatRoutine.AddDebuff(DeepWounds);
@@ -123,7 +125,7 @@ namespace HyperElk.Core
                 API.CastSpell(Pummel);
                 return;
             }
-            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(VictoryRush))
+            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious))
             {
                 API.CastSpell(VictoryRush);
                 return;
