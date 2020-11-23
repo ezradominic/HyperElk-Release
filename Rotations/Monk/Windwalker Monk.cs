@@ -37,6 +37,8 @@ namespace HyperElk.Core
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        bool LastTigerPalm => API.PlayerLastSpell == TigerPalm;
+        bool LastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
 
 
         //Spells,Buffs,Debuffs
@@ -173,7 +175,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //BlackOutKick
-                if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
+                if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -197,7 +199,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Tiger Palm
-                if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+                if (API.CanCast(TigerPalm) && !LastTigerPalm && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
                 {
                     API.CastSpell(TigerPalm);
                     return;
@@ -266,7 +268,7 @@ namespace HyperElk.Core
                 return;
             }
             //BlackOutKick
-            if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
+            if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
             {
                 API.CastSpell(BlackOutKick);
                 return;
@@ -290,7 +292,7 @@ namespace HyperElk.Core
                 return;
             }   
             //Tiger Palm
-            if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+            if (API.CanCast(TigerPalm) && !LastTigerPalm && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -320,7 +322,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //BlackOutKick
-                    if (API.CanCast(BlackOutKick) && NotChanneling && IsMelee)
+                    if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && IsMelee)
                     {
                         API.CastSpell(BlackOutKick);
                         return;
@@ -359,7 +361,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //BlackOutKick
-                    if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
+                    if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
                     {
                         API.CastSpell(BlackOutKick);
                         return;
@@ -383,7 +385,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //Tiger Palm
-                    if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+                    if (API.CanCast(TigerPalm) && !LastTigerPalm && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
                     {
                         API.CastSpell(TigerPalm);
                         return;
