@@ -35,6 +35,7 @@ namespace HyperElk.Core
 
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
+        private int FleshcraftPercentProc => CombatRoutine.GetPropertyInt("FleshcraftPercentProc");
 
 
 
@@ -85,6 +86,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Stagger, "Use " + PurifyingBrew, StaggerList, "Use " + PurifyingBrew + " 2nd charge always, Light / Moderate / Heavy Stagger", "Stagger Management", 1);
             CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
             CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Covenant Stuff", 0);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Stuff", 5);
 
 
 
@@ -132,6 +134,12 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             //HEALING
+            //NECROLORDS FLESHCRAFT
+            if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && IsCooldowns && API.PlayerHealthPercent <= FleshcraftPercentProc)
+            {
+                API.CastSpell(Fleshcraft);
+                return;
+            }
             //Healing Elixir
             if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2))
             {
@@ -212,11 +220,6 @@ namespace HyperElk.Core
                 API.CastSpell(BonedustBrew);
                 return;
             }
-//            if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && IsCooldowns)
-  //          {
-    //            API.CastSpell(Fleshcraft);
-      //          return;
-        //    }
             //BlackOxBrew
             if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && API.PlayerIsTalentSelected(3, 3))
             {
