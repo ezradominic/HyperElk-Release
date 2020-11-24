@@ -16,7 +16,6 @@ namespace HyperElk.Core
 
         private int CurrentRune => API.PlayerCurrentRunes;
         private int CurrentRP => API.PlayerRunicPower;
-        private bool UseCF => CombatRoutine.GetPropertyBool("UseCF");
         private int DeathStrikePercentLife => percentListProp[CombatRoutine.GetPropertyInt(DeathStrike)];
         private int VampiricBloodPercentLife => percentListProp[CombatRoutine.GetPropertyInt(VampiricBlood)];
         private int AntiMagicShellPercentLife => percentListProp[CombatRoutine.GetPropertyInt(AntiMagicShell)];
@@ -68,7 +67,6 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Blood DK rotation @ Mufflon12");
             API.WriteLog("DnD Macro to be use : /cast [@player] Death and Decay");
             API.WriteLog("Anti-Magic Zone Macro to be use : /cast [@player] Anti-Magic Zone");
-            CombatRoutine.AddProp("UseCF", "Use Concentrated Flame", true, "Should the rotation use Concentrated Flame");
 
             CombatRoutine.AddProp(AntiMagicZone, AntiMagicZone + "%", percentListProp, "Life percent at which " + AntiMagicZone + " is used, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp(AntiMagicShell, AntiMagicShell + "%", percentListProp, "Life percent at which " + AntiMagicShell + " is used, set to 0 to disable", "Healing", 7);
@@ -198,11 +196,8 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-                if (PlayerLevel <= 50)
-                {
                     rotation();
                     return;
-                }
             }
 
         }
@@ -251,15 +246,6 @@ namespace HyperElk.Core
                 return;
             }
 
-            //Concentrated Flame
-            if (UseCF)
-            {
-                if (API.CanCast(ConcentratedFlame) && IsMelee && API.TargetRange <= 40)
-                {
-                    API.CastSpell(ConcentratedFlame);
-                    return;
-                }
-            }
             //Blood Boil
             if (API.CanCast(BloodBoil) && API.TargetRange <= 10 && (!API.TargetHasDebuff(BloodPlague) || API.SpellCharges(BloodBoil)>=2) && PlayerLevel >= 17)
             {
