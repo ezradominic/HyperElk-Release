@@ -8,6 +8,7 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //stopwatch
         private readonly Stopwatch pullwatch = new Stopwatch();
+        private readonly Stopwatch CallPetTimer = new Stopwatch();
 
         //Spells,Buffs,Debuffs
         private string Steady_Shot = "Steady Shot";
@@ -35,11 +36,8 @@ namespace HyperElk.Core
         private string Aspect_of_the_Turtle = "Aspect of the Turtle";
         private string Blood_Fury = "Blood Fury";
         private string Bag_of_Tricks = "Bag of Tricks";
-        private string Entropic_Embrace = "Entropic Embrace";
-        private string Ancestral_Call = "Ancestral Call";
-        private string Lights_Judgment = "Lights Judgment";
-        private string Arcane_Torrent = "Arcane Torrent";
-        private string Berserking = "Berserking";
+        private string Revive_Pet = "Revive Pet";
+
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool isMOinRange => API.MouseoverRange <= 40;
@@ -62,6 +60,15 @@ namespace HyperElk.Core
         private bool Talent_Stampede => API.PlayerIsTalentSelected(6, 3);
         private bool Talent_Bloodshed => API.PlayerIsTalentSelected(7, 3);
 
+        private static void CastSpell(string spell)
+        {
+            if (API.CanCast(spell))
+            {
+                API.CastSpell(spell);
+                return;
+            }
+        }
+
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -80,6 +87,7 @@ namespace HyperElk.Core
         string[] AMurderofCrowsList = new string[] { "always", "with Cooldowns" };
         string[] StampedeList = new string[] { "always", "with Cooldowns", "on AOE" };
         string[] BloodshedList = new string[] { "always", "with Cooldowns" };
+        string[] combatList = new string[] { "In Combat", "Out Of Combat", "Everytime" };
 
         private int ExhilarationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Exhilaration)];
         private int PetExhilarationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Exhilaration + "PET")];
@@ -94,6 +102,7 @@ namespace HyperElk.Core
         private string UseBloodshed => BloodshedList[CombatRoutine.GetPropertyInt(Bloodshed)];
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
         private bool UseShadowlandsRotation => CombatRoutine.GetPropertyBool("Shadowlands");
+        private string UseRevivePet => combatList[CombatRoutine.GetPropertyInt(Revive_Pet)];
 
         public override void Initialize()
         {
@@ -109,6 +118,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Kill_Command, "D2");
             CombatRoutine.AddSpell(Barbed_Shot, "R");
             CombatRoutine.AddSpell(Mend_Pet, "X");
+            CombatRoutine.AddSpell(Revive_Pet, "X");
+            CombatRoutine.AddSpell("Call Pet", "F1");
             CombatRoutine.AddSpell(Cobra_Shot, "D5");
             CombatRoutine.AddSpell(Bestial_Wrath, "C");
             CombatRoutine.AddSpell(Aspect_of_the_Wild, "V");
@@ -130,7 +141,6 @@ namespace HyperElk.Core
 
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
-
             //Buffs
 
             CombatRoutine.AddBuff("246152");
@@ -156,6 +166,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(A_Murder_of_Crows, "Use " + A_Murder_of_Crows, AMurderofCrowsList, "Use " + A_Murder_of_Crows + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Stampede, "Use " + Stampede, StampedeList, "Use " + Stampede + "always, with Cooldowns, on AOE", "Cooldowns", 0);
             CombatRoutine.AddProp(Bloodshed, "Use " + Bloodshed, BloodshedList, "Use " + Bloodshed + "always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Revive_Pet, "Use " + Revive_Pet, combatList, "Use " + "Revive/Call Pet" + "In Combat, Out Of Combat, Everytime","Pet", 0);
 
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", true, "Should the rotation try to ressurect/call your Pet", "Pet");
             CombatRoutine.AddProp("Shadowlands", "Use Shadowlands Rotation", false, "Use the Shadowlands rotation", "BETA");
@@ -170,22 +181,33 @@ namespace HyperElk.Core
         public override void Pulse()
         {
             //API.WriteLog("frenzy" + HasPetBuff(Frenzy));
-
+            if (CallPetTimer.ElapsedMilliseconds > 10000)
+            {
+                CallPetTimer.Reset();
+            }
             if (API.PlayerIsMounted || API.PlayerIsCasting || PlayerHasBuff(Aspect_of_the_Turtle))
             {
                 return;
             }
-            if (API.CanCast(Mend_Pet) && !API.PlayerHasPet && UseCallPet)
+            if (API.PetHealthPercent <= 1 && CallPetTimer.ElapsedMilliseconds > 150 * 2 && UseCallPet && ((API.PlayerIsInCombat && UseRevivePet == "In Combat") || (!API.PlayerIsInCombat && UseRevivePet == "Out Of Combat") || UseRevivePet == "Everytime")
+                  && API.CanCast("Revive Pet") && !API.PlayerIsMoving)
+            {
+                API.CastSpell("Revive Pet");
+                return;
+            }
+
+            if (!API.PlayerHasPet && (CallPetTimer.ElapsedMilliseconds < 150 * 2 || !CallPetTimer.IsRunning) && UseCallPet)
+            {
+                API.CastSpell("Call Pet");
+                CallPetTimer.Start();
+                return;
+            }
+            if (API.CanCast(Mend_Pet) && API.PlayerHasPet && API.PetHealthPercent <= MendPetLifePercent && API.PetHealthPercent >=1)
             {
                 API.CastSpell(Mend_Pet);
                 return;
             }
-            if (API.CanCast(Mend_Pet) && API.PlayerHasPet && API.PetHealthPercent <= MendPetLifePercent)
-            {
-                API.CastSpell(Mend_Pet);
-                return;
-            }
-            if (API.CanCast(Exhilaration) && ((API.PlayerHealthPercent <= ExhilarationLifePercent && PlayerLevel >= 9) || (API.PetHealthPercent <= PetExhilarationLifePercent && PlayerLevel >= 44)))
+            if (API.CanCast(Exhilaration) && ((API.PlayerHealthPercent <= ExhilarationLifePercent && PlayerLevel >= 9) || (API.PetHealthPercent <= PetExhilarationLifePercent && API.PetHealthPercent >= 1 && PlayerLevel >= 44)))
             {
                 API.CastSpell(Exhilaration);
                 return;
