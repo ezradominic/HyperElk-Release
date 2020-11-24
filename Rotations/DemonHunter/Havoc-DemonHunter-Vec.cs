@@ -56,7 +56,7 @@ namespace HyperElk.Core
         //CBProperties
         string[] TrueshotList = new string[] { "always", "with Cooldowns" };
         string[] EyeBeamList = new string[] { "always", "with Cooldowns", "On AOE" };
-        string[] MetamorphosisList = new string[] { "always", "with Cooldowns" };
+        string[] MetamorphosisList = new string[] { "always", "with Cooldowns", "never" };
         string[] Throw_GlaiveList = new string[] { "On", "Off" };
         string[] FelBarrageList = new string[] { "On", "Off" };
 
@@ -66,7 +66,7 @@ namespace HyperElk.Core
         private int BlurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Blur)];
 
         private string UseEyeBeam => EyeBeamList[CombatRoutine.GetPropertyInt(Eye_Beam)];
-        private string UseMetamorphosis => TrueshotList[CombatRoutine.GetPropertyInt(Metamorphosis)];
+        private string UseMetamorphosis => MetamorphosisList[CombatRoutine.GetPropertyInt(Metamorphosis)];
         private string UseThrowGlaive => Throw_GlaiveList[CombatRoutine.GetPropertyInt(Throw_Glaive)];
         private string UseFelBarrage => FelBarrageList[CombatRoutine.GetPropertyInt(Fel_Barrage)];
 
@@ -190,7 +190,7 @@ namespace HyperElk.Core
             //Settings
  
             CombatRoutine.AddProp(Eye_Beam, "Use " + Eye_Beam, EyeBeamList, "Use " + Eye_Beam + "always, with Cooldowns, On AOE", "Cooldowns", 0);
-            CombatRoutine.AddProp(Metamorphosis, "Use " + Metamorphosis, MetamorphosisList, "Use " + Metamorphosis + "always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Metamorphosis, "Use " + Metamorphosis, MetamorphosisList, "Use " + Metamorphosis + "always, with Cooldowns, never", "Cooldowns");
             CombatRoutine.AddProp(Throw_Glaive, "Use " + Throw_Glaive, Throw_GlaiveList, "Use " + Throw_Glaive + "On, Off", "General", 0);
             CombatRoutine.AddProp(Fel_Barrage, "Use " + Fel_Barrage, FelBarrageList, "Use " + Fel_Barrage + "On, Off", "Cooldowns", 0);
 
@@ -224,7 +224,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-
+            //API.WriteLog("debug:" + "cancast "+ API.CanCast(Metamorphosis)+ "when "+ UseMetamorphosis);
             if (isInterrupt && API.CanCast(Disrupt) && MeleeRange && PlayerLevel >= 29)
             {
                 API.CastSpell(Disrupt);
@@ -233,17 +233,17 @@ namespace HyperElk.Core
             //API.WriteLog("lastspell " + API.LastSpellCastInGame);
             #region Cooldowns
             //apl_cooldown->add_action(this, "Metamorphosis", "if=!(talent.demonic.enabled|variable.pooling_for_meta)&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)|target.time_to_die<25");
-            if(API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && !(Talent_Demonic || PoolingForMeta) || API.TargetTimeToDie < 2500)
-            {
-                API.CastSpell(Metamorphosis);
-                return;
-            }
-            //apl_cooldown->add_action(this, "Metamorphosis", "                                                                                                 if=talent.demonic.enabled&(&level<54|(cooldown.eye_beam.remains>20&(!variable.blade_dance|cooldown.blade_dance.remains>gcd.max)))&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)");
-            if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && Talent_Demonic &&(API.PlayerLevel <54 || (API.SpellCDDuration(Eye_Beam) > 2000 && (!BladeDance||API.SpellCDDuration(Blade_Dance) > 150))))
-            {
-                API.CastSpell(Metamorphosis);
-                return;
-            }
+             if(API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && ((UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && !(Talent_Demonic || PoolingForMeta) || API.TargetTimeToDie < 2500))
+             {
+                 API.CastSpell(Metamorphosis);
+                 return;
+             }
+             //apl_cooldown->add_action(this, "Metamorphosis", "                                                                                                 if=talent.demonic.enabled&(&level<54|(cooldown.eye_beam.remains>20&(!variable.blade_dance|cooldown.blade_dance.remains>gcd.max)))&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)");
+             if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && ((UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && Talent_Demonic &&(API.PlayerLevel <54 || (API.SpellCDDuration(Eye_Beam) > 2000 && (!BladeDance||API.SpellCDDuration(Blade_Dance) > 150)))))
+             {
+                 API.CastSpell(Metamorphosis);
+                 return;
+             }
             //apl_cooldown->add_action("sinful_brand,if=!dot.sinful_brand.ticking");
             //apl_cooldown->add_action("the_hunt,if=!talent.demonic.enabled&!variable.waiting_for_momentum|buff.furious_gaze.up");
             //apl_cooldown->add_action("fodder_to_the_flame");

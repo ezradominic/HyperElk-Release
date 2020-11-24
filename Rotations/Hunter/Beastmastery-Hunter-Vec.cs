@@ -158,7 +158,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Bloodshed, "Use " + Bloodshed, BloodshedList, "Use " + Bloodshed + "always, with Cooldowns", "Cooldowns", 0);
 
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", true, "Should the rotation try to ressurect/call your Pet", "Pet");
-            CombatRoutine.AddProp("Shadowlands", "Use Shadowlands Rotation", true, "Use the Shadowlands rotation", "BETA");
+            CombatRoutine.AddProp("Shadowlands", "Use Shadowlands Rotation", false, "Use the Shadowlands rotation", "BETA");
 
             CombatRoutine.AddProp(Exhilaration, "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Exhilaration + "PET", "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used to heal your pet, set to 0 to disable", "Pet", 2);

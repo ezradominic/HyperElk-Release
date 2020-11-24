@@ -24,6 +24,8 @@ namespace HyperElk.Core
         private int CelestialBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
+        private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
+
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
         string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
@@ -64,7 +66,8 @@ namespace HyperElk.Core
         private string ExplodingKeg = "Exploding Keg";
         private string Stagger = "Stagger";
         private string WeaponsofOrder = "Weapons of Order";
-
+        private string BonedustBrew = "Bonedust Brew";
+        private string Fleshcraft = "Fleshcraft";
 
         private string LightStagger = "Light Stagger";
         private string ModerateStagger = "Moderate Stagger";
@@ -84,6 +87,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Stagger, "Use " + PurifyingBrew, StaggerList, "Use " + PurifyingBrew + " 2nd charge always, Light / Moderate / Heavy Stagger", "Stagger Management", 1);
             CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
             CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Covenant Stuff", 0);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Stuff", 5);
 
 
 
@@ -109,6 +113,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(BlackOxBrew, "NumPad6");
             CombatRoutine.AddSpell(HealingElixir, "NumPad7");
             CombatRoutine.AddSpell(WeaponsofOrder, "Oem6");
+            CombatRoutine.AddSpell(BonedustBrew, "Oem6");
+            CombatRoutine.AddSpell(Fleshcraft, "OemOpenBrackets");
 
             //Buffs
 
@@ -128,11 +134,91 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            //HEALING
+            //NECROLORDS FLESHCRAFT
+            if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc)
+            {
+                API.CastSpell(Fleshcraft);
+                return;
+            }
+            //Healing Elixir
+            if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2))
+            {
+                API.CastSpell(HealingElixir);
+                return;
+            }
+            //Expel Harm
+            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8)
+            {
+                API.CastSpell(ExpelHarm);
+                return;
+            }
+            //Celestial Brew
+            if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27)
+            {
+                API.CastSpell(CelestialBrew);
+                return;
+            }
+            //Purifying Brew
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23 && PlayerLevel <= 47)
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //Purifying Brew 2nd Charge
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && API.SpellCharges(PurifyingBrew) >= 2)
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //Purifying Brew 2nd Charge
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "always"))
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //Purifying Brew 2nd Charge Light stagger
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Light Stagger") && API.PlayerHasDebuff(LightStagger))
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //Purifying Brew 2nd Charge Moderate stagger
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Moderate Stagger") && API.PlayerHasDebuff(ModerateStagger))
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //Purifying Brew 2nd Charge Heavy stagger
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Heavy Stagger") && API.PlayerHasDebuff(HeavyStagger))
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //Fortifying Brew
+            if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && !API.SpellISOnCooldown(FortifyingBrew) && PlayerLevel >= 28)
+            {
+                API.CastSpell(FortifyingBrew);
+                return;
+            }
+            //Vivify
+            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
+            {
+                API.CastSpell(Vivify);
+                return;
+            }
+
             //COOLDOWNS
             //WeaponsofOrder
             if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && IsCooldowns)
             {
                 API.CastSpell(WeaponsofOrder);
+                return;
+            }
+            //BonedustBrew
+            if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && IsCooldowns)
+            {
+                API.CastSpell(BonedustBrew);
                 return;
             }
             //BlackOxBrew
@@ -155,7 +241,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            //AOE
+            //ROTATION AOE
             if(IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
                 //Rushing Jade Wind
@@ -212,74 +298,6 @@ namespace HyperElk.Core
                     API.CastSpell(SpinningCraneKick);
                     return;
                 }
-            }
-
-            //HEALING
-            //Healing Elixir
-            if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2))
-            {
-                API.CastSpell(HealingElixir);
-                return;
-            }
-            //Expel Harm
-            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) &&  !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8)
-            {
-                API.CastSpell(ExpelHarm);
-                return;
-            }
-            //Celestial Brew
-            if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27)
-            {
-                API.CastSpell(CelestialBrew);
-                return;
-            }
-            //Purifying Brew
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23 && PlayerLevel <= 47)
-            {
-                API.CastSpell(PurifyingBrew);
-                return;
-            }
-            //Purifying Brew 2nd Charge
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && API.SpellCharges(PurifyingBrew) >= 2)
-            {
-                API.CastSpell(PurifyingBrew);
-                return;
-            }
-            //Purifying Brew 2nd Charge
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "always"))
-            {
-                API.CastSpell(PurifyingBrew);
-               return;
-            }
-            //Purifying Brew 2nd Charge Light stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Light Stagger") && API.PlayerHasDebuff(LightStagger))
-            {
-                API.CastSpell(PurifyingBrew);
-                return;
-            }
-            //Purifying Brew 2nd Charge Moderate stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Moderate Stagger") && API.PlayerHasDebuff(ModerateStagger))
-            {
-                API.CastSpell(PurifyingBrew);
-                return;
-            }
-            //Purifying Brew 2nd Charge Heavy stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Heavy Stagger") && API.PlayerHasDebuff(HeavyStagger))
-            {
-                API.CastSpell(PurifyingBrew);
-                return;
-            }
-            //Fortifying Brew
-            if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && !API.SpellISOnCooldown(FortifyingBrew) && PlayerLevel >= 28)
-            {
-                API.CastSpell(FortifyingBrew);
-                return;
-            }
-            //Vivify
-            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
-            {
-                API.CastSpell(Vivify);
-                return;
             }
 
             //ROTATION  SINGLE TARGET
