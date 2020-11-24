@@ -59,7 +59,7 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Protection Warrior v1.1 by smartie";
+            CombatRoutine.Name = "Protection Warrior by smartie";
             API.WriteLog("Welcome to smartie`s Protection Warrior v1.1");
             API.WriteLog("All Talents are supported and auto detected");
 

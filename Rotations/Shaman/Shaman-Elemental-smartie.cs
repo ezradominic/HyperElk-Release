@@ -64,7 +64,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch pullwatch = new Stopwatch();
         public override void Initialize()
         {
-            CombatRoutine.Name = "Elemental Shaman v1.0 by smartie";
+            CombatRoutine.Name = "Elemental Shaman by smartie";
             API.WriteLog("Welcome to smartie`s Elemental Shaman v1.0");
 
             //Spells

@@ -2,6 +2,7 @@
 // v1.0 First release
 // v1.1 Victory Rush fix
 // v1.2 covenant support beta
+// v1.3 a few fixes
 
 namespace HyperElk.Core
 {
@@ -65,8 +66,8 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Fury Warrior v1.2 by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.2");
+            CombatRoutine.Name = "Fury Warrior by smartie";
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.3");
             API.WriteLog("All Talents are supported and auto detected");
 
             //Spells
@@ -191,7 +192,7 @@ namespace HyperElk.Core
                     API.CastSpell(Whirlwind);
                     return;
                 }
-                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && IsCooldowns && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp) && (IsCooldowns && UseSiegebreaker== "with Cooldowns" || UseSiegebreaker == "always"))
+                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && (IsCooldowns && UseSiegebreaker== "with Cooldowns" || UseSiegebreaker == "always"))
                 {
                     API.CastSpell(Siegebreaker);
                     return;
@@ -216,7 +217,7 @@ namespace HyperElk.Core
                     API.CastSpell(Condemn);
                     return;
                 }
-                if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage) && IsCooldowns)
+                if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage))
                 {
                     API.CastSpell(DragonRoar);
                     return;

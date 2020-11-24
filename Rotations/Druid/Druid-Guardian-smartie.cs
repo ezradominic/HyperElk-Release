@@ -61,7 +61,7 @@ namespace HyperElk.Core
         private int PulverizeLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Pulverize)];
         public override void Initialize()
         {
-            CombatRoutine.Name = "Guardian Druid v1.0 by smartie";
+            CombatRoutine.Name = "Guardian Druid by smartie";
             API.WriteLog("Welcome to smartie`s Guardian Druid v1.0");
 
             //Spells

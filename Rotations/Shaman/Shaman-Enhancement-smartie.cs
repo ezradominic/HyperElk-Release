@@ -66,7 +66,7 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Enhancement Shaman v1.0 by smartie";
+            CombatRoutine.Name = "Enhancement Shaman by smartie";
             API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.0");
 
             //Spells
