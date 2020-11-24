@@ -58,6 +58,8 @@ namespace HyperElk.Core
         private string Haemostasis = "Haemostasis";
         private string BloodShield = "Blood Shield";
         private string BloodPlague = "Blood Plague";
+        private string BloodforBlood = "Blood for Blood";
+        private string DeathChain = "Death Chain";
 
 
 
@@ -106,6 +108,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Mark of Blood", "F2");
             CombatRoutine.AddSpell("Death Pact", "F3");
             CombatRoutine.AddSpell("Bonestorm", "F4");
+            CombatRoutine.AddSpell(BloodforBlood, "NumPad1");
+            CombatRoutine.AddSpell(DeathChain, "NumPad2");
 
             CombatRoutine.AddBuff("Bone Shield");
             CombatRoutine.AddBuff("Crimson Scourge");
@@ -113,6 +117,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(DancingRuneWeapon);
             CombatRoutine.AddBuff("Haemostasis");
             CombatRoutine.AddBuff("Blood Shield");
+            CombatRoutine.AddBuff(BloodforBlood);
 
 
             CombatRoutine.AddDebuff("Blood Plague");
@@ -214,6 +219,21 @@ namespace HyperElk.Core
 
         private void rotation()
         {
+            if (API.PlayerHealthPercent >= 80 && API.CanCast(BloodforBlood,true,true) && IsMelee && !API.PlayerHasBuff(BloodforBlood))
+            {
+                API.CastSpell(BloodforBlood);
+                return;
+            }
+            if (IsAOE && API.TargetUnitInRangeCount >= 3 && API.CanCast(DeathChain, true, true) && API.TargetRange<=10)
+            {
+                API.CastSpell(DeathChain);
+                return;
+            }
+            if (CurrentRune >= 2 && API.CanCast(Marrowrend) && IsMelee && API.PlayerBuffTimeRemaining(BoneShield) < 300 && PlayerLevel >= 11)
+            {
+                API.CastSpell(Marrowrend);
+                return;
+            }
             if (CurrentRune >= 2 && API.CanCast(Marrowrend) && IsMelee && API.PlayerBuffTimeRemaining(BoneShield) < 300 && PlayerLevel >= 11)
             {
                 API.CastSpell(Marrowrend);
@@ -225,7 +245,7 @@ namespace HyperElk.Core
                 API.CastSpell(DeathStrike);
                 return;
             }
-            if (API.PlayerIsTalentSelected(1, 2) && !API.PlayerHasBuff(DancingRuneWeapon) && API.PlayerHealthPercent <= BlooddrinkerPercentLife && API.CanCast(Blooddrinker) && API.TargetRange <= 40)
+            if (API.PlayerIsTalentSelected(1, 2) && !API.PlayerHasBuff(DancingRuneWeapon) && API.PlayerHealthPercent <= BlooddrinkerPercentLife && API.CanCast(Blooddrinker) && API.TargetRange <= 30)
             {
                 API.CastSpell(Blooddrinker);
                 return;
@@ -247,7 +267,7 @@ namespace HyperElk.Core
             }
 
             //Blood Boil
-            if (API.CanCast(BloodBoil) && API.TargetRange <= 10 && (!API.TargetHasDebuff(BloodPlague) || API.SpellCharges(BloodBoil)>=2) && PlayerLevel >= 17)
+            if (API.CanCast(BloodBoil) && API.TargetRange < 10 && (!API.TargetHasDebuff(BloodPlague) || API.SpellCharges(BloodBoil)>=2) && PlayerLevel >= 17)
             {
                 API.CastSpell(BloodBoil);
                 return;
