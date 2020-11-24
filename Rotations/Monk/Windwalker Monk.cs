@@ -41,6 +41,11 @@ namespace HyperElk.Core
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
         bool LastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
+        private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
+        string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
+
+        private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
+        string[] InvokeXuenList = new string[] { "always", "with Cooldowns" };
 
 
         //Spells,Buffs,Debuffs
@@ -66,6 +71,7 @@ namespace HyperElk.Core
         private string Serenity = "Serenity";
         private string DampenHarm = "Dampen Harm";
         private string EnergizingElixir = "Energizing Elixir";
+        private string InvokeXuen = "Invoke Xuen,  the White Tiger";
 
         public override void Initialize()
         {
@@ -76,6 +82,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 9);
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
             CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
+            CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
+            CombatRoutine.AddProp(InvokeXuen, "Use " + InvokeXuen, InvokeXuenList, "Use " + InvokeXuenList + "always, with Cooldowns", "Cooldowns", 1);
 
 
             //Spells
@@ -102,6 +110,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(EnergizingElixir, "NumPad3");
             CombatRoutine.AddSpell(DampenHarm, "F1");
             CombatRoutine.AddSpell(FortifyingBrew, "F2");
+            CombatRoutine.AddSpell(InvokeXuen, "F3");
 
 
 
@@ -124,17 +133,37 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             //COOLDOWNS
+            //InvokeXuen
+            if (!API.SpellISOnCooldown(InvokeXuen) && PlayerLevel >= 42 && (UseInvokeXuen == "with Cooldowns"))
+            {
+                API.CastSpell(InvokeXuen);
+                return;
+            }
+            //InvokeXuen
+            if (!API.SpellISOnCooldown(InvokeXuen) && PlayerLevel >= 42 && (UseInvokeXuen == "always"))
+            {
+                API.CastSpell(InvokeXuen);
+                return;
+            }
             //Touch of Death
-            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10)
+            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
             {
                 API.CastSpell(TouchofDeath);
                 return;
             }
+            //Touch of Death
+            if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "always"))
+            {
+                API.CastSpell(TouchofDeath);
+                return;
+            }
+            //StormEarthandFire
             if (IsCooldowns && !API.SpellISOnCooldown(StormEarthandFire) && !TalentSerenty && API.SpellCharges(StormEarthandFire) >= 1 && !API.PlayerHasBuff(StormEarthandFire) && IsMelee && API.PlayerCurrentChi >= 3 && PlayerLevel >= 27)
             {
                 API.CastSpell(StormEarthandFire);
                 return;
             }
+            //EnergizingElixir
             if (IsCooldowns && !API.SpellISOnCooldown(EnergizingElixir) && TalentEnergizingElixir && IsMelee && API.PlayerCurrentChi <= 2 && API.PlayerCurrentChi < 50)
             {
                 API.CastSpell(EnergizingElixir);
@@ -349,6 +378,7 @@ namespace HyperElk.Core
 
                 if (!API.PlayerHasBuff(Serenity))
                 {
+                    //WhirlingDragonPunch
                     if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellCDDuration(FistsofFury) > 50 && API.SpellCDDuration(RisingSunKick) > 50 && NotChanneling && IsMelee)
                     {
                         API.CastSpell(WhirlingDragonPunch);
