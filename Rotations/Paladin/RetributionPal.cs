@@ -269,7 +269,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (API.TargetHealthPercent <= 20 && !API.SpellISOnCooldown(HammerofWrath) && API.TargetRange <= 30 && PlayerLevel >= 46)
+            if ((API.TargetHealthPercent <= 20 || ((API.PlayerHasBuff(AvengingWrath)|| API.PlayerHasBuff(Crusade)) && PlayerLevel >= 58)) && !API.SpellISOnCooldown(HammerofWrath) && API.TargetRange <= 30 && PlayerLevel >= 46)
             {
                 API.CastSpell(HammerofWrath);
                 return;

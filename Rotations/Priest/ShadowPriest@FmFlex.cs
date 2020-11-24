@@ -192,11 +192,8 @@ namespace HyperElk.Core
                 API.CastSpell(ShadowMend);
                 return;
             }
-            if (PlayerLevel <= 50)
-            {
                 rotation();
                 return;
-            }
         }
 
         public override void OutOfCombatPulse()
