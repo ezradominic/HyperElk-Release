@@ -33,7 +33,7 @@ namespace HyperElk.Core
         private string Enrage = "Enrage";
         private string SuddenDeath = "Sudden Death";
         private string Victorious = "Victorious";
-        private string Condemn = "Condemn";
+        private string Condemn = "330325";
         private string SpearofBastion = "Spear of Bastion";
         private string AncientAftershock = "Ancient Aftershock";
         private string ConquerorsBanner = "Conqueror's Banner";
@@ -91,7 +91,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(StormBolt, "F7");
             CombatRoutine.AddSpell(RallyingCry, "F2");
             CombatRoutine.AddSpell(Bladestorm, "None");
-            CombatRoutine.AddSpell(Condemn, "D1");
+            CombatRoutine.AddSpell(Condemn, "D6");
             CombatRoutine.AddSpell(ConquerorsBanner, "D1");
             CombatRoutine.AddSpell(AncientAftershock, "D1");
             CombatRoutine.AddSpell(SpearofBastion, "D1");
@@ -218,7 +218,7 @@ namespace HyperElk.Core
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && Covenant == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Condemn) && !API.SpellISOnCooldown(Condemn) && Covenant == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Condemn);
                     return;
