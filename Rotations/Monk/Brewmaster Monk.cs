@@ -24,6 +24,8 @@ namespace HyperElk.Core
         private int CelestialBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
+        private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
+
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
         string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
@@ -35,7 +37,6 @@ namespace HyperElk.Core
 
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
-        private int FleshcraftPercentProc => CombatRoutine.GetPropertyInt("FleshcraftPercentProc");
 
 
 
@@ -135,7 +136,7 @@ namespace HyperElk.Core
         {
             //HEALING
             //NECROLORDS FLESHCRAFT
-            if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && IsCooldowns && API.PlayerHealthPercent <= FleshcraftPercentProc)
+            if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc)
             {
                 API.CastSpell(Fleshcraft);
                 return;
