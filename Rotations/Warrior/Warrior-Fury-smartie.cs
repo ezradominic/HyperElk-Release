@@ -3,6 +3,7 @@
 // v1.1 Victory Rush fix
 // v1.2 covenant support beta
 // v1.3 a few fixes
+// v1.4 Condemn fix
 
 namespace HyperElk.Core
 {
@@ -67,7 +68,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.3");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.4");
             API.WriteLog("All Talents are supported and auto detected");
 
             //Spells
@@ -182,6 +183,11 @@ namespace HyperElk.Core
                     API.CastSpell(Recklessness);
                     return;
                 }
+                /*if(API.CanCast(RacialSpell1) && IsCooldowns && API.PlayerHasBuff(Recklessness) && API.PlayerRaceName == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }*/
                 if (API.CanCast(Rampage) && PlayerLevel >= 19 && API.PlayerRage >= 80 && API.SpellCDDuration(Recklessness) < 300)
                 {
                     API.CastSpell(Rampage);
@@ -212,7 +218,7 @@ namespace HyperElk.Core
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && Covenant == "Venthyr" && (!TalentMassacre && API.TargetHealthPercent < 20 && API.TargetHealthPercent > 80 || TalentMassacre && API.TargetHealthPercent < 35 && API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Condemn) && Covenant == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Condemn);
                     return;
