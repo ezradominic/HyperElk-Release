@@ -58,6 +58,7 @@ namespace HyperElk.Core
 
         //CBProperties
         bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
+        bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
         bool CastingAgony => API.PlayerLastSpell == Agony;
         bool CastingCorruption => API.PlayerLastSpell == Corruption;
         bool CastingSL => API.PlayerLastSpell == SiphonLife;
@@ -121,9 +122,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Dark Soul Misery", "D8");
 
 
-            CombatRoutine.AddSpell(Agony+"MO", "F1");
-            CombatRoutine.AddSpell(Corruption+"MO", "F2");
-            CombatRoutine.AddSpell(SiphonLife + "MO", "F3");
+            CombatRoutine.AddMacro(Agony+"MO", "F1");
+            CombatRoutine.AddMacro(Corruption+"MO", "F2");
+            CombatRoutine.AddMacro(SiphonLife + "MO", "F3");
 
 
 
@@ -206,7 +207,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Seed of Corruption
-                if (IsAOE && !CastingSOC && !LastSeed && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >=1 && API.PlayerLevel >= 27)
+                if (IsAOE && !CastingSOC && !CastingSOC1 && !LastSeed && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >=1 && API.PlayerLevel >= 27)
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
