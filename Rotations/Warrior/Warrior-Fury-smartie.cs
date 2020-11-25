@@ -4,6 +4,7 @@
 // v1.2 covenant support beta
 // v1.3 a few fixes
 // v1.4 Condemn fix
+// v1.5 covenant ability always or with cds
 
 namespace HyperElk.Core
 {
@@ -59,17 +60,19 @@ namespace HyperElk.Core
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
         string[] RecklessnessList = new string[] { "with Cooldowns", "always" };
-        string[] SiegebreakerhList = new string[] { "always", "with Cooldowns" };
+        string[] SiegebreakerList = new string[] { "always", "with Cooldowns" };
+        string[] CovenantUse = new string[] { "with Cooldowns", "always" };
         string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
+        private string UseCovenant => CovenantUse[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseRecklessness => RecklessnessList[CombatRoutine.GetPropertyInt(Recklessness)];
-        private string UseSiegebreaker => SiegebreakerhList[CombatRoutine.GetPropertyInt(Siegebreaker)];
+        private string UseSiegebreaker => SiegebreakerList[CombatRoutine.GetPropertyInt(Siegebreaker)];
         private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.4");
-            API.WriteLog("All Talents are supported and auto detected");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.5");
+            API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, "D1");
@@ -113,8 +116,9 @@ namespace HyperElk.Core
             //Prop
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, "Lineup Recklessness and Siegebreaker", "Generic");
             CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
+            CombatRoutine.AddProp("CovenantUse", "Use " + "Covenant Ability", CovenantUse, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, RecklessnessList, "Use " + Recklessness + "always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, SiegebreakerhList, "Use " + Siegebreaker+ "always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, SiegebreakerList, "Use " + Siegebreaker+ "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", percentListProp, "Life percent at which" + EnragedRegeneration + "is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + "is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + "is used, set to 0 to disable", "Defense", 8);
@@ -163,17 +167,17 @@ namespace HyperElk.Core
          {
             if (IsMelee)
             {
-                if (API.CanCast(ConquerorsBanner) && Covenant == "Necrolord" && !API.PlayerIsMoving && IsCooldowns)
+                if (API.CanCast(ConquerorsBanner) && Covenant == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
                 {
                     API.CastSpell(ConquerorsBanner);
                     return;
                 }
-                if (API.CanCast(SpearofBastion) && Covenant == "Kyrian" && !API.PlayerIsMoving && IsCooldowns)
+                if (API.CanCast(SpearofBastion) && Covenant == "Kyrian" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
                 {
                     API.CastSpell(SpearofBastion);
                     return;
                 }
-                if (API.CanCast(AncientAftershock) && Covenant == "Night Fae" && !API.PlayerIsMoving && IsCooldowns)
+                if (API.CanCast(AncientAftershock) && Covenant == "Night Fae" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
                 {
                     API.CastSpell(AncientAftershock);
                     return;
