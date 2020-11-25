@@ -17,7 +17,6 @@ namespace HyperElk.Core
 
 
         //CLASS SPECIFIC
-
         //CBProperties
         private int VivifyLifePercentProc => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
@@ -45,6 +44,10 @@ namespace HyperElk.Core
         //Nigh Fae
         string[] FaelineStompList = new string[] { "always", "with Cooldowns", "AOE" };
         private string UseFaelineStomp => FaelineStompList[CombatRoutine.GetPropertyInt(FaelineStomp)];
+        //Venthyr 
+        string[] FallenOrderList = new string[] { "always", "with Cooldowns", "AOE" };
+
+        private string UseFallenOrder => FallenOrderList[CombatRoutine.GetPropertyInt(FallenOrder)];
 
 
 
@@ -76,6 +79,7 @@ namespace HyperElk.Core
         private string BonedustBrew = "Bonedust Brew";
         private string Fleshcraft = "Fleshcraft";
         private string FaelineStomp = "FaelineStomp";
+        private string FallenOrder = "Fallen Order";
 
         private string LightStagger = "Light Stagger";
         private string ModerateStagger = "Moderate Stagger";
@@ -100,9 +104,11 @@ namespace HyperElk.Core
             //Necrolords
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Necrolord", 5);
             CombatRoutine.AddProp(BonedustBrew, "Use " + BonedustBrew, BonedustBrewList, "How to use Bonedust Brew", "Covenant Necrolord", 0);
-
             //Nigh Fae
             CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
+            //Venthyr 
+            CombatRoutine.AddProp(FallenOrder, "Use " + FallenOrder, FallenOrderList, "How to use Fallen Order", "Covenant Venthyr", 0);
+
 
             //Spells
             CombatRoutine.AddSpell(TigerPalm, "D1");
@@ -129,6 +135,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(BonedustBrew, "Oem6");
             CombatRoutine.AddSpell(Fleshcraft, "OemOpenBrackets");
             CombatRoutine.AddSpell(FaelineStomp, "Oem6");
+            CombatRoutine.AddSpell(FallenOrder, "Oem6");
 
             //Buffs
 
@@ -244,6 +251,13 @@ namespace HyperElk.Core
                 API.CastSpell(FaelineStomp);
                 return;
             }
+            //Covenant Venthyr
+            //Fallen Order
+            if (API.CanCast(FallenOrder) && IsCooldowns && Covenant == "Venthyr" && UseFallenOrder == "with Cooldowns")
+            {
+                API.CastSpell(FallenOrder);
+                return;
+            }
             //BlackOxBrew
             if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && API.PlayerIsTalentSelected(3, 3))
             {
@@ -269,23 +283,30 @@ namespace HyperElk.Core
             {
                 //Covenant Kyrian
                 //WeaponsofOrder
-                if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "AOE")
+                if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && (UseWeaponsofOrder == "AOE" || UseWeaponsofOrder == "always"))
                 {
                     API.CastSpell(WeaponsofOrder);
                     return;
                 }
                 //Covenant Necrolord
                 //BonedustBrew
-                if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "AOE")
+                if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && (UseBonedustBrew == "AOE" || UseBonedustBrew == "always"))
                 {
                     API.CastSpell(BonedustBrew);
                     return;
                 }
                 //Covenant Night Fae
                 //FaelineStomp
-                if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "AOE")
+                if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
                 {
                     API.CastSpell(FaelineStomp);
+                    return;
+                }
+                //Covenant Venthyr
+                //Fallen Order
+                if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
+                {
+                    API.CastSpell(FallenOrder);
                     return;
                 }
                 //Rushing Jade Wind
@@ -295,7 +316,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //InvokeNiuzao
-                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns))
+                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "On AOE"))
                 {
                     API.CastSpell(InvokeNiuzao);
                     return;
@@ -364,6 +385,13 @@ namespace HyperElk.Core
             if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
             {
                 API.CastSpell(FaelineStomp);
+                return;
+            }
+            //Covenant Venthyr
+            //Fallen Order
+            if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && UseFaelineStomp == "always")
+            {
+                API.CastSpell(FallenOrder);
                 return;
             }
             //Touch of Death
