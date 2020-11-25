@@ -159,7 +159,6 @@ namespace HyperElk.Core
         public override void Pulse()
         {
             {
-
             }
         }
 
@@ -188,7 +187,7 @@ namespace HyperElk.Core
                     {
                         if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                         {
-                            API.CastSpell(Agony + "MO");
+                            API.CastSpell(SiphonLife + "MO");
                             return;
                         }
                     }
@@ -225,7 +224,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Corruption
-                if (!CastingCorruption && !CastingSOC && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                if (!CastingCorruption && !CastingSOC && !LastSeed && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                 {
                     API.CastSpell(Corruption);
                     return;
