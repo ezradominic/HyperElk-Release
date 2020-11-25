@@ -24,8 +24,6 @@ namespace HyperElk.Core
         private int CelestialBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
-        private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
-
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
         string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
@@ -37,7 +35,16 @@ namespace HyperElk.Core
 
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
-
+        //Kyrian
+        private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
+        string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
+        //Necrolords
+        private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
+        string[] BonedustBrewList = new string[] { "always", "with Cooldowns", "AOE" };
+        private string UseBonedustBrew => BonedustBrewList[CombatRoutine.GetPropertyInt(BonedustBrew)];
+        //Nigh Fae
+        string[] FaelineStompList = new string[] { "always", "with Cooldowns", "AOE" };
+        private string UseFaelineStomp => FaelineStompList[CombatRoutine.GetPropertyInt(FaelineStomp)];
 
 
 
@@ -68,6 +75,7 @@ namespace HyperElk.Core
         private string WeaponsofOrder = "Weapons of Order";
         private string BonedustBrew = "Bonedust Brew";
         private string Fleshcraft = "Fleshcraft";
+        private string FaelineStomp = "FaelineStomp";
 
         private string LightStagger = "Light Stagger";
         private string ModerateStagger = "Moderate Stagger";
@@ -87,9 +95,14 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Stagger, "Use " + PurifyingBrew, StaggerList, "Use " + PurifyingBrew + " 2nd charge always, Light / Moderate / Heavy Stagger", "Stagger Management", 1);
             CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
             CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Covenant Stuff", 0);
-            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Stuff", 5);
+            //Kyrian
+            CombatRoutine.AddProp("Weapons of Order", "Use " + "Weapons of Order", WeaponsofOrderList, "How to use Weapons of Order", "Covenant Kyrian", 0);
+            //Necrolords
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Necrolord", 5);
+            CombatRoutine.AddProp(BonedustBrew, "Use " + BonedustBrew, BonedustBrewList, "How to use Bonedust Brew", "Covenant Necrolord", 0);
 
-
+            //Nigh Fae
+            CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
 
             //Spells
             CombatRoutine.AddSpell(TigerPalm, "D1");
@@ -115,6 +128,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(WeaponsofOrder, "Oem6");
             CombatRoutine.AddSpell(BonedustBrew, "Oem6");
             CombatRoutine.AddSpell(Fleshcraft, "OemOpenBrackets");
+            CombatRoutine.AddSpell(FaelineStomp, "Oem6");
 
             //Buffs
 
@@ -208,17 +222,26 @@ namespace HyperElk.Core
                 return;
             }
 
-            //COOLDOWNS
+            //COOLDOWNN
+            //Covenant Kyrian
             //WeaponsofOrder
-            if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && IsCooldowns)
+            if (API.CanCast(WeaponsofOrder) && IsCooldowns && Covenant == "Kyrian" && UseWeaponsofOrder == "with Cooldowns")
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
             }
+            //Covenant Necrolord
             //BonedustBrew
-            if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && IsCooldowns)
+            if (API.CanCast(BonedustBrew) && IsCooldowns && Covenant == "Necrolord" && UseBonedustBrew == "with Cooldowns")
             {
                 API.CastSpell(BonedustBrew);
+                return;
+            }
+            //Covenant Night Fae
+            //FaelineStomp
+            if (API.CanCast(FaelineStomp) && IsCooldowns && Covenant == "Night Fae" && UseFaelineStomp == "with Cooldowns")
+            {
+                API.CastSpell(FaelineStomp);
                 return;
             }
             //BlackOxBrew
@@ -228,10 +251,10 @@ namespace HyperElk.Core
             return;
             }
             //Touch of Death
-            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "Cooldowns" && IsCooldowns))
+            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
             {
-            API.CastSpell(TouchofDeath);
-            return;
+                API.CastSpell(TouchofDeath);
+                return;
             }
 
             //KICK
@@ -244,6 +267,27 @@ namespace HyperElk.Core
             //ROTATION AOE
             if(IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
+                //Covenant Kyrian
+                //WeaponsofOrder
+                if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "AOE")
+                {
+                    API.CastSpell(WeaponsofOrder);
+                    return;
+                }
+                //Covenant Necrolord
+                //BonedustBrew
+                if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "AOE")
+                {
+                    API.CastSpell(BonedustBrew);
+                    return;
+                }
+                //Covenant Night Fae
+                //FaelineStomp
+                if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "AOE")
+                {
+                    API.CastSpell(FaelineStomp);
+                    return;
+                }
                 //Rushing Jade Wind
                 if (API.CanCast(RushingJadeWind) && !API.SpellISOnCooldown(RushingJadeWind) && API.PlayerIsTalentSelected(6, 2))
                 {
@@ -301,6 +345,27 @@ namespace HyperElk.Core
             }
 
             //ROTATION  SINGLE TARGET
+            //Covenant Kyrian
+            //WeaponsofOrder
+            if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
+            {
+                API.CastSpell(WeaponsofOrder);
+                return;
+            }
+            //Covenant Necrolord
+            //BonedustBrew
+            if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "always")
+            {
+                API.CastSpell(BonedustBrew);
+                return;
+            }
+            //Covenant Night Fae
+            //FaelineStomp
+            if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
+            {
+                API.CastSpell(FaelineStomp);
+                return;
+            }
             //Touch of Death
             if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "always"))
             {
