@@ -29,6 +29,10 @@ namespace HyperElk.Core
         private string Counterspell = "Counterspell";
         private string WC = "Winter's Chill";
         private string IB = "Ice Block";
+        private string ShiftingPower = "Shifting Power";
+        private string RadiantSpark = "Radiant Spark";
+        private string Deathborne = "Deathborne";
+        private string MirrorsofTorment = "Mirrors of Torment";
 
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
@@ -44,9 +48,14 @@ namespace HyperElk.Core
         private int IceBarrierPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IceBarrier)];
         private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
+        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
+        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
         //General
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         private int Level => API.PlayerLevel;
+        private bool NotCasting => !API.PlayerIsCasting;
+        private bool NotChanneling => !API.PlayerIsChanneling;
+        private bool InRange => API.TargetRange <= 40;
 
 
         public override void Initialize()
@@ -92,6 +101,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(IF, "None");
             CombatRoutine.AddSpell(AI, "None");
             CombatRoutine.AddSpell(Counterspell, "None");
+            CombatRoutine.AddSpell(ShiftingPower);
+            CombatRoutine.AddSpell(RadiantSpark);
+            CombatRoutine.AddSpell(Deathborne);
+            CombatRoutine.AddSpell(MirrorsofTorment);
 
             //Macro
 
@@ -99,6 +112,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(IceBarrier, IceBarrier, percentListProp, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
             CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
+            CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
 
         }
 
@@ -149,107 +163,127 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (API.CanCast(IV) && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns)
+            if (API.CanCast(RadiantSpark) && InRange && Covenant == "Kyrian")
+            {
+                API.CastSpell(RadiantSpark);
+                return;
+            }
+            if (API.CanCast(MirrorsofTorment) && InRange && Covenant == "Venthyr" && IsCooldowns && NotChanneling)
+            {
+                API.CastSpell(MirrorsofTorment);
+                return;
+            }
+            if (API.CanCast(Deathborne) && InRange && Covenant == "Necrolord" && IsCooldowns && NotChanneling)
+            {
+                API.CastSpell(Deathborne);
+                return;
+            }
+            if (API.CanCast(IV) && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns && NotChanneling)
             {
                 API.CastSpell(IV);
                 return;
             }
-            if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !API.PlayerHasBuff(RoP) && !API.PlayerIsMoving && IsCooldowns)
+            if (API.CanCast(ShiftingPower) && InRange && Covenant == "Night Fae" && API.SpellISOnCooldown(IV) && !API.PlayerHasBuff(IV) && IsCooldowns)
+            {
+                API.CastSpell(ShiftingPower);
+                return;
+            }
+            if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !API.PlayerHasBuff(RoP) && !API.PlayerIsMoving && IsCooldowns && NotChanneling)
             {
                 API.CastSpell(RoP);
                 return;
             }
-            if (API.CanCast(IF) && IceFloes && API.PlayerIsMoving && !API.PlayerHasBuff(IF))
+            if (API.CanCast(IF) && IceFloes && API.PlayerIsMoving && !API.PlayerHasBuff(IF) && NotChanneling)
             {
                 API.CastSpell(IF);
                 return;
             }
-            if (!API.PlayerHasPet && !LonelyWinter && API.CanCast(WE) && !API.PlayerIsMoving && Level >= 12)
+            if (!API.PlayerHasPet && !LonelyWinter && API.CanCast(WE) && !API.PlayerIsMoving && Level >= 12 && NotChanneling)
             {
                 API.CastSpell(WE);
                 return;
             }
-            if (API.CanCast(Flurry) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && API.TargetRange <= 40)
+            if (API.CanCast(Flurry) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && API.TargetRange <= 40 && NotChanneling)
             {
                 API.CastSpell(Flurry);
                 return;
             }
-            if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40)
+            if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40 && NotChanneling)
             {
                 API.CastSpell(FO);
                 return;
             }
-            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3)
+            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3 && NotCasting && NotChanneling)
             {
                 API.CastSpell(Blizzard);
                 return;
             }
-            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3)
+            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3 && NotCasting && NotChanneling)
             {
                 API.CastSpell(Blizzard);
                 return;
             }
-            if (Cometstorm && API.CanCast(CS) && API.TargetRange <= 40 && !API.PlayerIsMoving)
+            if (Cometstorm && API.CanCast(CS) && API.TargetRange <= 40 && !API.PlayerIsMoving && NotChanneling)
             {
                 API.CastSpell(CS);
                 return;
             }
-            if (IceNova && API.CanCast(IN) && API.TargetRange <= 40 && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (IceNova && API.CanCast(IN) && API.TargetRange <= 40 && (API.PlayerIsMoving || !API.PlayerIsMoving) && NotChanneling)
             {
                 API.CastSpell(IN);
                 return;
             }
-            if (API.CanCast(CoC) && Level >= 18 && API.TargetRange <= 10 && API.TargetUnitInRangeCount >= 5)
+            if (API.CanCast(CoC) && Level >= 18 && API.TargetRange <= 10 && API.TargetUnitInRangeCount >= 5 && NotChanneling)
             {
                 API.CastSpell(CoC);
                 return;
             }
-            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving)
+            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving && NotCasting && NotChanneling)
             {
                 API.CastSpell(EB);
                 return;
             }
-            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving)
+            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && NotCasting && NotChanneling) 
             {
                 API.CastSpell(EB);
                 return;
             }
-            if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && API.PlayerHasBuff(IF) && API.PlayerIsMoving)
+            if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && API.PlayerHasBuff(IF) && API.PlayerIsMoving && NotCasting && NotChanneling)
             {
                 API.CastSpell(RoF);
                 return;
             }
-            if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && !API.PlayerIsMoving)
+            if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && !API.PlayerIsMoving && NotCasting && NotChanneling)
             {
                 API.CastSpell(RoF);
                 return;
             }
-            if (GlacialSpike && API.CanCast(GS) && API.TargetHasDebuff(WC) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving)
+            if (GlacialSpike && API.CanCast(GS) && API.TargetHasDebuff(WC) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving && NotCasting && NotChanneling)
             {
                 API.CastSpell(GS);
                 return;
             }
-            if (GlacialSpike && API.CanCast(GS) && API.TargetHasDebuff(WC) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving)
+            if (GlacialSpike && API.CanCast(GS) && API.TargetHasDebuff(WC) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && NotCasting && NotChanneling)
             {
                 API.CastSpell(GS);
                 return;
             }
-            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && (API.PlayerHasBuff(FoF) || API.TargetHasDebuff(WC)))
+            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && (API.PlayerHasBuff(FoF) || API.TargetHasDebuff(WC)) && NotChanneling) 
             {
                 API.CastSpell(IL);
                 return;
             }
-            if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && !API.PlayerIsMoving)
+            if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && !API.PlayerIsMoving && NotCasting && NotChanneling)
             {
                 API.CastSpell(Frostbolt);
                 return;
             }
-            if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && API.PlayerIsMoving && API.PlayerHasBuff(IF))
+            if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && API.PlayerIsMoving && API.PlayerHasBuff(IF) && NotCasting && NotChanneling)
             {
                 API.CastSpell(Frostbolt);
                 return;
             }
-            if (API.PlayerIsMoving && API.CanCast(IL) && Level >= 10 && !API.PlayerHasBuff(IF) && API.TargetRange <= 40)
+            if (API.PlayerIsMoving && API.CanCast(IL) && Level >= 10 && !API.PlayerHasBuff(IF) && API.TargetRange <= 40 && NotChanneling)
             {
                 API.CastSpell(IL);
                 return;
