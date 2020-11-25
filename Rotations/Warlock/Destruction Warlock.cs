@@ -66,6 +66,8 @@ namespace HyperElk.Core
         private bool NotMoving => !API.PlayerIsMoving;
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
+        private bool UseHavoc => (bool)CombatRoutine.GetProperty("UseHavoc");
+
 
         public override void Initialize()
         {
@@ -82,10 +84,10 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 5);
             CombatRoutine.AddProp(HealthFunnel, "Health Funnel", numbList, "Life percent at which " + HealthFunnel + " is used, set to 0 to disable", "PETS", 0);
             CombatRoutine.AddProp(DarkPact, "Dark Pact", numbList, "Life percent at which " + DarkPact + " is used, set to 0 to disable", "Healing", 2);
+            CombatRoutine.AddProp("UseHavoc", "Use Havoc", true, "Use Havoc. Set Change Target to TAB in your spellbook to change target after cast Havoc", "Class Specific");
 
 
             //Spells
-            CombatRoutine.AddSpell(ChangeTarget, "Tab");
             CombatRoutine.AddSpell(Immolate, "D1");
             CombatRoutine.AddSpell(Incinerate, "D2");
             CombatRoutine.AddSpell(Conflagrate, "D3");
@@ -93,7 +95,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ShadowBurn, "D5");
             CombatRoutine.AddSpell(Cataclysm, "D6");
             CombatRoutine.AddSpell(Havoc, "D7");
-            CombatRoutine.AddSpell(RainOfFire, "D8");
+            CombatRoutine.AddMacro(RainOfFire, "D8");
             CombatRoutine.AddSpell(SoulFire, "D9");
             CombatRoutine.AddSpell(ChannelDemonFire, "D0");
             CombatRoutine.AddSpell(DarkSoulMisery, "OemOpenBrackets");
@@ -155,12 +157,15 @@ namespace HyperElk.Core
                 API.CastSpell(Immolate);
                 return;
             }
-            if (IsAOE && API.CanCast(Havoc) && API.TargetUnitInRangeCount >= AOEUnitNumber && API.CanCast(Havoc) && IsRange && NotCasting && IsRange && NotChanneling)
+            if (UseHavoc)
             {
+                if (IsAOE && API.CanCast(Havoc) && API.TargetUnitInRangeCount >= AOEUnitNumber && API.CanCast(Havoc) && IsRange && NotCasting && IsRange && NotChanneling)
+                {
                 API.CastSpell(Havoc);
-                API.CastSpell(ChangeTarget);
                 return;
+                }
             }
+
             //DarkSoulMisery
             if (IsCooldowns && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
             {
