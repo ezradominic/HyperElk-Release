@@ -1,6 +1,7 @@
 // Changelog
 // v1.0 First release
 // v1.1 Victory Rush fix
+// v1.2 covenants added - shield block changed
 
 namespace HyperElk.Core
 {
@@ -35,6 +36,10 @@ namespace HyperElk.Core
         private string VengeanceIgnorePain = "Vengeance: Ignore Pain";
         private string RenewedFury = "Renewed Fury";
         private string Victorious = "Victorious";
+        private string Condemn = "330325";
+        private string SpearofBastion = "Spear of Bastion";
+        private string AncientAftershock = "Ancient Aftershock";
+        private string ConquerorsBanner = "Conqueror's Banner";
 
         //Talents
         bool TalentDevastator => API.PlayerIsTalentSelected(1, 3);
@@ -49,19 +54,25 @@ namespace HyperElk.Core
         private bool IsMelee => API.TargetRange < 6;
 
         //CBProperties
+        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
+        string[] CovenantUse = new string[] { "with Cooldowns", "always" };
+        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
+        private string UseCovenant => CovenantUse[CombatRoutine.GetPropertyInt("UseCovenant")];
         private int LastStandLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LastStand)];
         private int ShieldWallLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ShieldWall)];
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
         private int IgnorePainLifePercent => percentListProp[CombatRoutine.GetPropertyInt(IgnorePain)];
-        private int ShieldBlockLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ShieldBlock)];
+        private int DemoralizingShoutLifePercent => percentListProp[CombatRoutine.GetPropertyInt(DemoralizingShout)];
+        private int ShieldBlockFirstChargeLifePercent => percentListProp[CombatRoutine.GetPropertyInt("FirstShieldBlock")];
+        private int ShieldBlockSecondChargeLifePercent => percentListProp[CombatRoutine.GetPropertyInt("SecondShieldBlock")];
 
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.1");
-            API.WriteLog("All Talents are supported and auto detected");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.2");
+            API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam, "D4");
@@ -86,6 +97,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(StormBolt, "F8");
             CombatRoutine.AddSpell(DragonRoar, "NumPad5");
             CombatRoutine.AddSpell(Ravager, "NumPad6");
+            CombatRoutine.AddSpell(Condemn, "D0");
+            CombatRoutine.AddSpell(ConquerorsBanner, "D1");
+            CombatRoutine.AddSpell(AncientAftershock, "D1");
+            CombatRoutine.AddSpell(SpearofBastion, "D1");
 
 
             //Buffs
@@ -105,12 +120,16 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(DeepWounds);
 
             //Prop
-            CombatRoutine.AddProp(LastStand, LastStand + " Life Percent", percentListProp, "Life percent at which" + LastStand + "is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp(ShieldWall, ShieldWall + " Life Percent", percentListProp, "Life percent at which" + ShieldWall + "is used, set to 0 to disable", "Defense", 3);
-            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(IgnorePain, IgnorePain + " Life Percent", percentListProp, "Life percent at which" + IgnorePain + "is used, set to 0 to disable", "Defense", 9);
-            CombatRoutine.AddProp(ShieldBlock, ShieldBlock + " Life Percent", percentListProp, "Life percent at which" + ShieldBlock + "is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, " Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
+            CombatRoutine.AddProp("CovenantUse", "Use " + "Covenant Ability", CovenantUse, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(LastStand, LastStand + " Life Percent", percentListProp, "Life percent at which" + LastStand + " is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp(ShieldWall, ShieldWall + " Life Percent", percentListProp, "Life percent at which" + ShieldWall + " is used, set to 0 to disable", "Defense", 3);
+            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(DemoralizingShout, DemoralizingShout + " Life Percent", percentListProp, "Life percent at which" + DemoralizingShout + " is used without Booming Voice Talent, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(IgnorePain, IgnorePain + " Life Percent", percentListProp, "Life percent at which" + IgnorePain + " is used, set to 0 to disable", "Defense", 9);
+            CombatRoutine.AddProp("FirstShieldBlock", "ShieldBlock 1. Charge" + " Life Percent", percentListProp, "Life percent at which" + ShieldBlock + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp("SecondShieldBlock", "ShieldBlock 2. Charge" + " Life Percent", percentListProp, "Life percent at which" + ShieldBlock + " is used, set to 0 to disable", "Defense", 5);
 
         }
         public override void Pulse()
@@ -131,6 +150,11 @@ namespace HyperElk.Core
                 API.CastSpell(Pummel);
                 return;
             }
+            if (API.CanCast(IgnorePain) && (API.PlayerRage >= 40 || API.PlayerRage >= 26 && API.PlayerHasBuff(VengeanceIgnorePain)) && (!API.PlayerHasBuff(IgnorePain) || API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) < 200) && API.PlayerHealthPercent <= IgnorePainLifePercent && PlayerLevel >= 17)
+            {
+                API.CastSpell(IgnorePain);
+                return;
+            }
             if (API.CanCast(LastStand) && API.PlayerHealthPercent <= LastStandLifePercent && PlayerLevel >= 38)
             {
                 API.CastSpell(LastStand);
@@ -141,7 +165,17 @@ namespace HyperElk.Core
                 API.CastSpell(ShieldWall);
                 return;
             }
-            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockLifePercent && PlayerLevel >= 6 && !API.PlayerHasBuff(ShieldBlock))
+            if (API.CanCast(DemoralizingShout) && API.PlayerHealthPercent <= DemoralizingShoutLifePercent && PlayerLevel >= 27 && !TalentBoomingVoice)
+            {
+                API.CastSpell(DemoralizingShout);
+                return;
+            }
+            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockFirstChargeLifePercent && API.SpellCharges(ShieldBlock) == 2 && PlayerLevel >= 6 && API.PlayerRage >= 30 && !API.PlayerHasBuff(ShieldBlock))
+            {
+                API.CastSpell(ShieldBlock);
+                return;
+            }
+            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockSecondChargeLifePercent && API.SpellCharges(ShieldBlock) < 2 && PlayerLevel >= 6 && API.PlayerRage >= 30 && !API.PlayerHasBuff(ShieldBlock))
             {
                 API.CastSpell(ShieldBlock);
                 return;
@@ -154,11 +188,6 @@ namespace HyperElk.Core
             if (API.CanCast(ImpendingVictory) && API.PlayerHealthPercent <= ImpendingVictoryLifePercent && TalentImpendingVictory)
             {
                 API.CastSpell(ImpendingVictory);
-                return;
-            }
-            if (API.CanCast(IgnorePain) && (API.PlayerRage >= 40 || API.PlayerRage >= 26 && API.PlayerHasBuff(VengeanceIgnorePain)) && (!API.PlayerHasBuff(IgnorePain) || API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) < 200) && API.PlayerHealthPercent <= IgnorePainLifePercent && PlayerLevel >= 17)
-            {
-                API.CastSpell(IgnorePain);
                 return;
             }
             rotation();
@@ -176,6 +205,21 @@ namespace HyperElk.Core
             }
             if (IsMelee)
             {
+                if (API.CanCast(ConquerorsBanner) && Covenant == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                {
+                    API.CastSpell(ConquerorsBanner);
+                    return;
+                }
+                if (API.CanCast(SpearofBastion) && Covenant == "Kyrian" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                {
+                    API.CastSpell(SpearofBastion);
+                    return;
+                }
+                if (API.CanCast(AncientAftershock) && Covenant == "Night Fae" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                {
+                    API.CastSpell(AncientAftershock);
+                    return;
+                }
                 if (API.CanCast(Avatar) && IsCooldowns && PlayerLevel >= 32)
                 {
                     API.CastSpell(Avatar);
@@ -211,9 +255,14 @@ namespace HyperElk.Core
                     API.CastSpell(ThunderClap);
                     return;
                 }
-                if (API.CanCast(Execute) && API.PlayerRage > 40 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
+                if (API.CanCast(Execute) && Covenant != "Venthyr" && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
                 {
                     API.CastSpell(Execute);
+                    return;
+                }
+                if (API.CanCast(Condemn) && Covenant == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent))
+                {
+                    API.CastSpell(Condemn);
                     return;
                 }
                 if (API.CanCast(Revenge) && API.PlayerHasBuff(FreeRevenge) && PlayerLevel >= 12)
