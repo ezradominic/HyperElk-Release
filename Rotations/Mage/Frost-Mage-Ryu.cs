@@ -75,6 +75,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(RoP);
             CombatRoutine.AddBuff(IceBarrier);
             CombatRoutine.AddBuff(AI);
+            CombatRoutine.AddBuff(IV);
 
             //Debuff
             CombatRoutine.AddDebuff(WC);
