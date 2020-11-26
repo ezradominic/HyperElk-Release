@@ -36,7 +36,7 @@ namespace HyperElk.Core
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt("Rune of Power")];
         private string UseCom => CDUsage[CombatRoutine.GetPropertyInt("Combustion")];
 
-        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");

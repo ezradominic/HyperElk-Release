@@ -39,7 +39,7 @@ namespace HyperElk.Core
         private string UseAP => CDUsage[CombatRoutine.GetPropertyInt("Arcane Power")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt("Rune of Power")];
 
-        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         //General
         private int Level => API.PlayerLevel;
         private bool NotCasting => !API.PlayerIsCasting;

@@ -51,7 +51,7 @@ namespace HyperElk.Core
         private int IceBarrierPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IceBarrier)];
         private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
-        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt(RoP)];
         private string UseIV => CDUsage[CombatRoutine.GetPropertyInt(IV)];
         private int FleshcraftPercentProc => percentListProp[CombatRoutine.GetPropertyInt(Fleshcraft)];
