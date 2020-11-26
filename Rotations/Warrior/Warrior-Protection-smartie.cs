@@ -2,6 +2,7 @@
 // v1.0 First release
 // v1.1 Victory Rush fix
 // v1.2 covenants added - shield block changed
+// v1.3 covenant update
 
 namespace HyperElk.Core
 {
@@ -54,10 +55,10 @@ namespace HyperElk.Core
         private bool IsMelee => API.TargetRange < 6;
 
         //CBProperties
-        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
-        string[] CovenantUse = new string[] { "with Cooldowns", "always" };
-        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
-        private string UseCovenant => CovenantUse[CombatRoutine.GetPropertyInt("UseCovenant")];
+
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private int LastStandLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LastStand)];
         private int ShieldWallLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ShieldWall)];
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
@@ -71,7 +72,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.2");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.3");
             API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
 
             //Spells
@@ -120,8 +121,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(DeepWounds);
 
             //Prop
-            CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, " Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
-            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CovenantUse, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(LastStand, LastStand + " Life Percent", percentListProp, "Life percent at which" + LastStand + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(ShieldWall, ShieldWall + " Life Percent", percentListProp, "Life percent at which" + ShieldWall + " is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 8);
@@ -205,17 +205,17 @@ namespace HyperElk.Core
             }
             if (IsMelee)
             {
-                if (API.CanCast(ConquerorsBanner) && Covenant == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(ConquerorsBanner);
                     return;
                 }
-                if (API.CanCast(SpearofBastion) && Covenant == "Kyrian" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                if (API.CanCast(SpearofBastion) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(SpearofBastion);
                     return;
                 }
-                if (API.CanCast(AncientAftershock) && Covenant == "Night Fae" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                if (API.CanCast(AncientAftershock) && PlayerCovenantSettings == "Night Fae" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(AncientAftershock);
                     return;
@@ -255,12 +255,12 @@ namespace HyperElk.Core
                     API.CastSpell(ThunderClap);
                     return;
                 }
-                if (API.CanCast(Execute) && Covenant != "Venthyr" && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
+                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
                 {
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && Covenant == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent))
+                if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent))
                 {
                     API.CastSpell(Condemn);
                     return;
