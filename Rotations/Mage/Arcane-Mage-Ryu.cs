@@ -100,6 +100,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(RadiantSpark);
             CombatRoutine.AddSpell(Deathborne);
             CombatRoutine.AddSpell(MirrorsofTorment);
+            CombatRoutine.AddSpell(Fleshcraft);
 
 
             //Prop
