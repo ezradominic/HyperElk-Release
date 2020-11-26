@@ -63,7 +63,8 @@ namespace HyperElk.Core
         private bool InRange => API.TargetRange <= 40;
 
 
-    public override void Initialize()
+
+        public override void Initialize()
         {
             CombatRoutine.Name = "Frost Mage by Ryu";
             API.WriteLog("Welcome to Frost Mage by Ryu");
@@ -112,6 +113,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Deathborne);
             CombatRoutine.AddSpell(MirrorsofTorment);
             CombatRoutine.AddSpell(AE);
+            CombatRoutine.AddSpell(Fleshcraft);
 
             //Macro
 
@@ -121,7 +123,6 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
             CombatRoutine.AddProp("Use Coveant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
-            CombatRoutine.AddProp("Arcane Power", "Use " + "Arcane Power", CDUsage, "Use " + "Arcane Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp(RoP, "Use " + RoP, CDUsage, "Use " + RoP + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp(IV, "Use " + IV, CDUsage, "Use " + IV + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
 
@@ -292,6 +293,11 @@ namespace HyperElk.Core
             if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling)
             {
                 API.CastSpell(MirrorsofTorment);
+                return;
+            }
+            if (API.CanCast(AE) && API.TargetRange <= 3 && IsAOE && API.PlayerUnitInMeleeRangeCount >= 3)
+            {
+                API.CastSpell(AE);
                 return;
             }
             if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && !API.PlayerIsMoving && NotCasting && NotChanneling)
