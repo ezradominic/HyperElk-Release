@@ -212,7 +212,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //Haunt 
-                    if (API.CanCast(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
+                    if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
                     {
                         API.CastSpell(Haunt);
                         return;
@@ -306,7 +306,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Haunt 
-                if (API.CanCast(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
+                if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
                 {
                     API.CastSpell(Haunt);
                     return;
