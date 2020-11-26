@@ -26,12 +26,11 @@ namespace HyperElk.Core
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
         string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
-        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
-        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
 
         private string UseInvokeNiuzao => InvokeNiuzaoList[CombatRoutine.GetPropertyInt(InvokeNiuzao)];
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
-
+        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
+        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
         //Kyrian
@@ -355,6 +354,12 @@ namespace HyperElk.Core
                 if (API.CanCast(ExplodingKeg) && API.PlayerIsTalentSelected(6, 3))
                 {
                     API.CastSpell(ExplodingKeg);
+                    return;
+                }
+                //Tiger Palm -> nothing else to do 
+                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 50)
+                {
+                    API.CastSpell(TigerPalm);
                     return;
                 }
                 //Spinning Crane Kick
