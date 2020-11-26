@@ -280,7 +280,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //Drain Soul
-                    if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
+                    if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && NotChanneling)
                     {
                         API.CastSpell(DrainSoul);
                         return;
@@ -357,7 +357,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Drain Soul
-                if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
+                if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && NotChanneling)
                 {
                     API.CastSpell(DrainSoul);
                     return;
