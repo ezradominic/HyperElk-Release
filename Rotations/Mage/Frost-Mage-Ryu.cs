@@ -190,7 +190,7 @@ namespace HyperElk.Core
                 API.CastSpell(IV);
                 return;
             }
-            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown(RoP) && API.SpellISOnCooldown(IV) && !API.PlayerHasBuff(IV) && UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE)
+            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown(RoP) && API.SpellISOnCooldown(IV) && !API.PlayerHasBuff(IV) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE))
             {
                 API.CastSpell(ShiftingPower);
                 return;
