@@ -63,6 +63,7 @@ namespace HyperElk.Core
         bool CastingCorruption => API.PlayerLastSpell == Corruption;
         bool CastingSL => API.PlayerLastSpell == SiphonLife;
         bool LastSeed => API.CurrentCastSpellID("player") == 27243;
+        bool LastUnstableAffliction => API.PlayerLastSpell == UnstableAffliction;
 
 
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
@@ -195,7 +196,108 @@ namespace HyperElk.Core
                     }
 
                 }
-
+                //AOE
+                if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
+                {
+                    //Seed of Corruption
+                    if (!CastingSOC && !CastingSOC1 && !LastSeed && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >= 1 && API.PlayerLevel >= 27)
+                    {
+                        API.CastSpell(SeedofCorruption);
+                        return;
+                    }
+                    // Drain Life
+                    if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
+                    {
+                        API.CastSpell(DrainLife);
+                        return;
+                    }
+                    //Haunt 
+                    if (API.CanCast(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
+                    {
+                        API.CastSpell(Haunt);
+                        return;
+                    }
+                    //PhantomSingularity
+                    if (IsAOE && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && IsRange && NotCasting)
+                    {
+                        API.CastSpell(PhantomSingularity);
+                        return;
+                    }
+                    //Agony
+                    if (!CastingAgony && !CastingSOC && !LastSeed && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                    {
+                        API.CastSpell(Agony);
+                        return;
+                    }
+                    //Corruption
+                    if (!CastingCorruption && !CastingSOC && !LastSeed && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                    {
+                        API.CastSpell(Corruption);
+                        return;
+                    }
+                    //SiphonLife
+                    if (!CastingSL && API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && TalentSiphonLife)
+                    {
+                        API.CastSpell(SiphonLife);
+                        return;
+                    }
+                    //DarkSoulMisery
+                    if (IsCooldowns && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
+                    {
+                        API.CastSpell(DarkSoulMisery);
+                        return;
+                    }
+                    //Unstable Affliction
+                    if (UseUA)
+                    {
+                        if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 500 && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 13)
+                        {
+                            API.CastSpell(UnstableAffliction);
+                            return;
+                        }
+                    }
+                    //VileTaint
+                    if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //Dark Glare
+                    if (IsCooldowns && API.CanCast(SummonDarkglare) && !API.SpellISOnCooldown(SummonDarkglare) && PlayerLevel >= 42)
+                    {
+                        API.CastSpell(SummonDarkglare);
+                        return;
+                    }
+                    //Malefic Rapture Check
+                    if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                    {
+                        API.CastSpell(MaleficRapture);
+                        return;
+                    }
+                    if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Corruption) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                    {
+                        API.CastSpell(MaleficRapture);
+                        return;
+                    }
+                    //Drain Soul
+                    if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
+                    {
+                        API.CastSpell(DrainSoul);
+                        return;
+                    }
+                    //Shadow Bolt
+                    if (API.CanCast(ShadowBolt) && NotMoving && NotCasting && IsRange && NotChanneling && !TalentDrainSoul && PlayerLevel >= 1)
+                    {
+                        API.CastSpell(ShadowBolt);
+                        return;
+                    }
+                    // Dark Pact
+                    if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
+                    {
+                        API.CastSpell(DarkPact);
+                        return;
+                    }
+                }
                 //SingelTarget
                 // Drain Life
                 if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
@@ -212,7 +314,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 500 && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 500 && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
@@ -294,110 +396,6 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(DarkPact);
                     return;
-                }
-
-
-                //AOE
-                if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)
-                {
-                    // Drain Life
-                    if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
-                    {
-                        API.CastSpell(DrainLife);
-                        return;
-                    }
-                    //Haunt 
-                    if (API.CanCast(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
-                    {
-                        API.CastSpell(Haunt);
-                        return;
-                    }
-                    //PhantomSingularity
-                    if (IsAOE && TalentPhantomSingularity && API.TargetUnitInRangeCount >= AOEUnitNumber && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && IsRange && NotCasting)
-                    {
-                        API.CastSpell(PhantomSingularity);
-                        return;
-                    }
-                    //Agony
-                    if (!CastingAgony && !CastingSOC && !LastSeed && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(Agony);
-                        return;
-                    }
-                    //Corruption
-                    if (!CastingCorruption && !CastingSOC && !LastSeed && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
-                    {
-                        API.CastSpell(Corruption);
-                        return;
-                    }
-                    //SiphonLife
-                    if (!CastingSL && API.CanCast(SiphonLife) && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && TalentSiphonLife)
-                    {
-                        API.CastSpell(SiphonLife);
-                        return;
-                    }
-                    //Seed of Corruption
-                    if (IsAOE && !CastingSOC && !CastingSOC1 && !LastSeed && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >= 1 && API.PlayerLevel >= 27)
-                    {
-                        API.CastSpell(SeedofCorruption);
-                        return;
-                    }
-                    //DarkSoulMisery
-                    if (IsCooldowns && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
-                    {
-                        API.CastSpell(DarkSoulMisery);
-                        return;
-                    }
-                    //Unstable Affliction
-                    if (UseUA)
-                    {
-                        if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 500 && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 13)
-                        {
-                            API.CastSpell(UnstableAffliction);
-                            return;
-                        }
-                    }
-                    //VileTaint
-                    if (TalentVileTaint && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
-                    {
-                        API.CastSpell(VileTaint);
-                        return;
-                    }
-                    //Dark Glare
-                    if (IsCooldowns && API.CanCast(SummonDarkglare) && !API.SpellISOnCooldown(SummonDarkglare) && PlayerLevel >= 42)
-                    {
-                        API.CastSpell(SummonDarkglare);
-                        return;
-                    }
-                    //Malefic Rapture Check
-                    if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
-                    {
-                        API.CastSpell(MaleficRapture);
-                        return;
-                    }
-                    if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Corruption) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
-                    {
-                        API.CastSpell(MaleficRapture);
-                        return;
-                    }
-                    //Drain Soul
-                    if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
-                    {
-                        API.CastSpell(DrainSoul);
-                        return;
-                    }
-                    //Shadow Bolt
-                    if (API.CanCast(ShadowBolt) && NotMoving && NotCasting && IsRange && NotChanneling && !TalentDrainSoul && PlayerLevel >= 1)
-                    {
-                        API.CastSpell(ShadowBolt);
-                        return;
-                    }
-                    // Dark Pact
-                    if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
-                    {
-                        API.CastSpell(DarkPact);
-                        return;
-                    }
                 }
             }
         }
