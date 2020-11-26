@@ -121,7 +121,7 @@ namespace HyperElk.Core
 
             //Prop
             CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, " Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
-            CombatRoutine.AddProp("CovenantUse", "Use " + "Covenant Ability", CovenantUse, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CovenantUse, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(LastStand, LastStand + " Life Percent", percentListProp, "Life percent at which" + LastStand + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(ShieldWall, ShieldWall + " Life Percent", percentListProp, "Life percent at which" + ShieldWall + " is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 8);
