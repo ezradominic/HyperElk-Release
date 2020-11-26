@@ -151,6 +151,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Seed of Corruption");
             CombatRoutine.AddDebuff("Vile Taint");
             CombatRoutine.AddDebuff("Phantom Singularity");
+            CombatRoutine.AddDebuff("Haunt");
 
             //Debuffs
 
@@ -170,7 +171,7 @@ namespace HyperElk.Core
                 {
                     if (UseCO)
                     {
-                        if (!CastingCorruption && API.CanCast(Corruption) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                        if (!CastingCorruption && API.CanCast(Corruption) && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                         {
                             API.CastSpell(Corruption + "MO");
                             return;
@@ -178,7 +179,7 @@ namespace HyperElk.Core
                     }
                     if (UseAG)
                 { 
-                        if (!CastingAgony && API.CanCast(Agony) && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                        if (!CastingAgony && API.CanCast(Agony) && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
                         {
                             API.CastSpell(Agony + "MO");
                             return;
@@ -186,13 +187,19 @@ namespace HyperElk.Core
                 }
                     if (UseSL)
                     {
-                        if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
+                        if (!CastingSL && API.CanCast(SiphonLife) && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                         {
                             API.CastSpell(SiphonLife + "MO");
                             return;
                         }
                     }
 
+                }
+                //Haunt 
+                if (API.CanCast(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
+                {
+                    API.CastSpell(Haunt);
+                    return;
                 }
                 //DarkSoulMisery
                 if (IsCooldowns && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery)
@@ -274,12 +281,6 @@ namespace HyperElk.Core
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-                //Haunt 
-                if (API.CanCast(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
-                {
-                    API.CastSpell(Haunt);
-                    return;
-                }
                 //Drain Soul
                 if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
                 {
@@ -327,13 +328,6 @@ namespace HyperElk.Core
             {
                 API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonFelhunter);
-                return;
-            }
-            //Summon Darkglare
-            if (API.CanCast(SummonDarkglare) && !API.PlayerHasPet && (isMisdirection == "Darkglare") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 42)
-            {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(SummonDarkglare);
                 return;
             }
         }
