@@ -1,5 +1,6 @@
 ﻿// Changelog
 // v1.0 First release
+// v1.1 frenzied regeneration fix
 
 namespace HyperElk.Core
 {
@@ -62,7 +63,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.0");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.1");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, "D3");
@@ -144,7 +145,7 @@ namespace HyperElk.Core
                     API.CastSpell(Renewal);
                     return;
                 }
-                if (API.PlayerHealthPercent <= FrenziedRegenerationLifePercent && PlayerLevel >= 21 && API.PlayerRage >= 10 && API.CanCast(FrenziedRegeneration) && API.PlayerHasBuff(BearForm))
+                if (API.PlayerHealthPercent <= FrenziedRegenerationLifePercent && PlayerLevel >= 21 && API.PlayerRage >= 10 && API.CanCast(FrenziedRegeneration) && API.PlayerHasBuff(BearForm) && API.PlayerBuffTimeRemaining(FrenziedRegeneration) == 0)
                 {
                     API.CastSpell(FrenziedRegeneration);
                     return;
