@@ -92,6 +92,7 @@ namespace HyperElk.Core
             API.WriteLog("Create the following mouseover macro and assigned to the bind:");
             API.WriteLog("/cast [@mouseover] Agony");
             API.WriteLog("/cast [@mouseover] Corruption");
+            API.WriteLog("/cast [@mouseover] Vile Taint");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
             CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 5);
@@ -117,12 +118,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Unstable Affliction", "D5");
             CombatRoutine.AddSpell("Seed of Corruption", "D6");
             CombatRoutine.AddSpell("Siphon Life", "D7");
-            CombatRoutine.AddSpell("Vile Taint", "D8");
             CombatRoutine.AddSpell("Phantom Singularity", "D8");
             CombatRoutine.AddSpell("Haunt", "D8");
             CombatRoutine.AddSpell("Dark Soul Misery", "D8");
 
-
+            CombatRoutine.AddMacro("Vile Taint", "D8");
             CombatRoutine.AddMacro(Agony+"MO", "F1");
             CombatRoutine.AddMacro(Corruption+"MO", "F2");
             CombatRoutine.AddMacro(SiphonLife + "MO", "F3");
@@ -345,13 +345,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //PhantomSingularity
-                if (IsAOE && TalentPhantomSingularity && API.TargetUnitInRangeCount >= AOEUnitNumber && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && IsRange && NotCasting)
+                if (TalentPhantomSingularity &&API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && IsRange && NotCasting)
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
                 }
                 //VileTaint
-                if (TalentVileTaint && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
                 {
                     API.CastSpell(VileTaint);
                     return;
