@@ -46,7 +46,22 @@ namespace HyperElk.Core
 
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
         string[] InvokeXuenList = new string[] { "always", "with Cooldowns" };
+        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
+        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
+        //Kyrian
+        private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
+        string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
+        //Necrolords
+        private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
+        string[] BonedustBrewList = new string[] { "always", "with Cooldowns", "AOE" };
+        private string UseBonedustBrew => BonedustBrewList[CombatRoutine.GetPropertyInt(BonedustBrew)];
+        //Nigh Fae
+        string[] FaelineStompList = new string[] { "always", "with Cooldowns", "AOE" };
+        private string UseFaelineStomp => FaelineStompList[CombatRoutine.GetPropertyInt(FaelineStomp)];
 
+        //Venthyr 
+        string[] FallenOrderList = new string[] { "always", "with Cooldowns", "AOE" };
+        private string UseFallenOrder => FallenOrderList[CombatRoutine.GetPropertyInt(FallenOrder)];
 
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
@@ -72,6 +87,11 @@ namespace HyperElk.Core
         private string DampenHarm = "Dampen Harm";
         private string EnergizingElixir = "Energizing Elixir";
         private string InvokeXuen = "Invoke Xuen,  the White Tiger";
+        private string WeaponsofOrder = "Weapons of Order";
+        private string BonedustBrew = "Bonedust Brew";
+        private string Fleshcraft = "Fleshcraft";
+        private string FaelineStomp = "FaelineStomp";
+        private string FallenOrder = "Fallen Order";
 
         public override void Initialize()
         {
@@ -84,6 +104,15 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
             CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
             CombatRoutine.AddProp(InvokeXuen, "Use " + InvokeXuen, InvokeXuenList, "Use " + InvokeXuenList + "always, with Cooldowns", "Cooldowns", 1);
+            //Kyrian
+            CombatRoutine.AddProp("Weapons of Order", "Use " + "Weapons of Order", WeaponsofOrderList, "How to use Weapons of Order", "Covenant Kyrian", 0);
+            //Necrolords
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Necrolord", 5);
+            CombatRoutine.AddProp(BonedustBrew, "Use " + BonedustBrew, BonedustBrewList, "How to use Bonedust Brew", "Covenant Necrolord", 0);
+            //Nigh Fae
+            CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
+            //Venthyr 
+            CombatRoutine.AddProp(FallenOrder, "Use " + FallenOrder, FallenOrderList, "How to use Fallen Order", "Covenant Venthyr", 0);
 
 
             //Spells
@@ -99,7 +128,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(StormEarthandFire, "OemOpenBrackets");
             CombatRoutine.AddSpell(Serenity, "OemOpenBrackets");
 
-
+            CombatRoutine.AddSpell(WeaponsofOrder, "Oem6");
+            CombatRoutine.AddSpell(BonedustBrew, "Oem6");
+            CombatRoutine.AddSpell(Fleshcraft, "OemOpenBrackets");
+            CombatRoutine.AddSpell(FaelineStomp, "Oem6");
+            CombatRoutine.AddSpell(FallenOrder, "Oem6");
 
             CombatRoutine.AddSpell(ChiBurst, "D9");
             CombatRoutine.AddSpell(RisingSunKick, "D0");
@@ -133,6 +166,34 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             //COOLDOWNS
+            //Covenant Kyrian
+            //WeaponsofOrder
+            if (API.CanCast(WeaponsofOrder) && IsCooldowns && Covenant == "Kyrian" && UseWeaponsofOrder == "with Cooldowns")
+            {
+                API.CastSpell(WeaponsofOrder);
+                return;
+            }
+            //Covenant Necrolord
+            //BonedustBrew
+            if (API.CanCast(BonedustBrew) && IsCooldowns && Covenant == "Necrolord" && UseBonedustBrew == "with Cooldowns")
+            {
+                API.CastSpell(BonedustBrew);
+                return;
+            }
+            //Covenant Night Fae
+            //FaelineStomp
+            if (API.CanCast(FaelineStomp) && IsCooldowns && Covenant == "Night Fae" && UseFaelineStomp == "with Cooldowns")
+            {
+                API.CastSpell(FaelineStomp);
+                return;
+            }
+            //Covenant Venthyr
+            //Fallen Order
+            if (API.CanCast(FallenOrder) && IsCooldowns && Covenant == "Venthyr" && UseFallenOrder == "with Cooldowns")
+            {
+                API.CastSpell(FallenOrder);
+                return;
+            }
             //InvokeXuen
             if (!API.SpellISOnCooldown(InvokeXuen) && PlayerLevel >= 42 && (UseInvokeXuen == "with Cooldowns"))
             {
@@ -173,6 +234,34 @@ namespace HyperElk.Core
             //AOE
             if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
+                //Covenant Kyrian
+                //WeaponsofOrder
+                if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && (UseWeaponsofOrder == "AOE" || UseWeaponsofOrder == "always"))
+                {
+                    API.CastSpell(WeaponsofOrder);
+                    return;
+                }
+                //Covenant Necrolord
+                //BonedustBrew
+                if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && (UseBonedustBrew == "AOE" || UseBonedustBrew == "always"))
+                {
+                    API.CastSpell(BonedustBrew);
+                    return;
+                }
+                //Covenant Night Fae
+                //FaelineStomp
+                if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
+                {
+                    API.CastSpell(FaelineStomp);
+                    return;
+                }
+                //Covenant Venthyr
+                //Fallen Order
+                if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
+                {
+                    API.CastSpell(FallenOrder);
+                    return;
+                }
                 //WhirlingDragonPunch
                 if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellCDDuration(FistsofFury) > 50 && API.SpellCDDuration(RisingSunKick) > 50 && NotChanneling && IsMelee)
                 {
@@ -284,6 +373,34 @@ namespace HyperElk.Core
             }
 
             //ROTATION
+            //Covenant Kyrian
+            //WeaponsofOrder
+            if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
+            {
+                API.CastSpell(WeaponsofOrder);
+                return;
+            }
+            //Covenant Necrolord
+            //BonedustBrew
+            if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "always")
+            {
+                API.CastSpell(BonedustBrew);
+                return;
+            }
+            //Covenant Night Fae
+            //FaelineStomp
+            if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
+            {
+                API.CastSpell(FaelineStomp);
+                return;
+            }
+            //Covenant Venthyr
+            //Fallen Order
+            if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && UseFaelineStomp == "always")
+            {
+                API.CastSpell(FallenOrder);
+                return;
+            }
             //WhirlingDragonPunch
             if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellCDDuration(FistsofFury) > 50 && API.SpellCDDuration(RisingSunKick) > 50 && NotChanneling && IsMelee)
             {
@@ -378,6 +495,34 @@ namespace HyperElk.Core
 
                 if (!API.PlayerHasBuff(Serenity))
                 {
+                    //Covenant Kyrian
+                    //WeaponsofOrder
+                    if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
+                    {
+                        API.CastSpell(WeaponsofOrder);
+                        return;
+                    }
+                    //Covenant Necrolord
+                    //BonedustBrew
+                    if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "always")
+                    {
+                        API.CastSpell(BonedustBrew);
+                        return;
+                    }
+                    //Covenant Night Fae
+                    //FaelineStomp
+                    if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
+                    {
+                        API.CastSpell(FaelineStomp);
+                        return;
+                    }
+                    //Covenant Venthyr
+                    //Fallen Order
+                    if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && UseFaelineStomp == "always")
+                    {
+                        API.CastSpell(FallenOrder);
+                        return;
+                    }
                     //WhirlingDragonPunch
                     if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && API.SpellCDDuration(FistsofFury) > 50 && API.SpellCDDuration(RisingSunKick) > 50 && NotChanneling && IsMelee)
                     {
