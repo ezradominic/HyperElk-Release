@@ -61,7 +61,7 @@ namespace HyperElk.Core
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
-        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with cooldowns", "on AOE", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseRecklessness => CDUsage[CombatRoutine.GetPropertyInt(Recklessness)];
         private string UseSiegebreaker => CDUsage[CombatRoutine.GetPropertyInt(Siegebreaker)];
