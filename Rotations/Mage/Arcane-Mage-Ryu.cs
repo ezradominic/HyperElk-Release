@@ -10,6 +10,10 @@ namespace HyperElk.Core
         private string IB = "Ice Block";
         private string MI = "Mirror Image";
         private string PB = "Prismatic Barrier";
+        private string ShiftingPower = "Shifting Power";
+        private string RadiantSpark = "Radiant Spark";
+        private string Deathborne = "Deathborne";
+        private string MirrorsofTorment = "Mirrors of Torment";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -23,6 +27,8 @@ namespace HyperElk.Core
         private int PBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(PB)];
         private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
+        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
+        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
         //General
         private int Level => API.PlayerLevel;
         private bool NotCasting => !API.PlayerIsCasting;
@@ -79,12 +85,17 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Mana Gem", "None");
             CombatRoutine.AddSpell("Touch of the Magi", "None");
             CombatRoutine.AddSpell("Arcane Intellect", "None");
+            CombatRoutine.AddSpell(ShiftingPower);
+            CombatRoutine.AddSpell(RadiantSpark);
+            CombatRoutine.AddSpell(Deathborne);
+            CombatRoutine.AddSpell(MirrorsofTorment);
 
 
             //Prop
             CombatRoutine.AddProp(PB, PB, percentListProp, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
             CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
+            CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
 
 
         }
@@ -136,6 +147,21 @@ namespace HyperElk.Core
 
         private void rotation()
         {
+            if (API.CanCast(RadiantSpark) && InRange && Covenant == "Kyrian")
+            {
+                API.CastSpell(RadiantSpark);
+                return;
+            }
+            if (API.CanCast(MirrorsofTorment) && InRange && Covenant == "Venthyr" && IsCooldowns && NotChanneling)
+            {
+                API.CastSpell(MirrorsofTorment);
+                return;
+            }
+            if (API.CanCast(Deathborne) && InRange && Covenant == "Necrolord" && IsCooldowns && NotChanneling)
+            {
+                API.CastSpell(Deathborne);
+                return;
+            }
             if (API.CanCast("Arcane Power") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns && NotCasting && NotChanneling)
             {
                 API.CastSpell("Arcane Power");
@@ -144,6 +170,11 @@ namespace HyperElk.Core
             if (RuneofPower && API.CanCast("Rune of Power") && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && IsCooldowns && NotCasting && NotChanneling)
             {
                 API.CastSpell("Rune of Power");
+                return;
+            }
+            if (API.CanCast(ShiftingPower) && InRange && Covenant == "Night Fae" && API.SpellISOnCooldown("Arcane Power") && !API.PlayerHasBuff("Arcane Power") && IsCooldowns)
+            {
+                API.CastSpell(ShiftingPower);
                 return;
             }
             if (API.CanCast("Touch of the Magi") && Level >= 33 && Burn && (API.PlayerCurrentArcaneCharges <= 0 || !API.TargetHasDebuff("Touch of the Magi")) && InRange && NotCasting && NotChanneling)
