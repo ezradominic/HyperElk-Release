@@ -3,11 +3,13 @@
 // v1.1 Victory Rush fix
 // v1.2 covenants added - shield block changed
 // v1.3 covenant update
+// v1.4 heroic throw update
 
 namespace HyperElk.Core
 {
     public class ProtWarrior : CombatRoutine
     {
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spell,Auras
         private string ShieldSlam = "Shield Slam";
         private string Devastate = "Devastate";
@@ -55,7 +57,9 @@ namespace HyperElk.Core
         private bool IsMelee => API.TargetRange < 6;
 
         //CBProperties
-
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        private string UseHeroicThrow => heroiclist[CombatRoutine.GetPropertyInt(HeroicThrow)];
+        string[] heroiclist = new string[] {"Not Used", "when out of melee", "only Mouseover", "both"};
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with cooldowns", "on AOE", "always" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
@@ -72,7 +76,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.3");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.4");
             API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
 
             //Spells
@@ -103,6 +107,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(AncientAftershock, "D1");
             CombatRoutine.AddSpell(SpearofBastion, "D1");
 
+            //Macros
+            CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
+
 
             //Buffs
             CombatRoutine.AddBuff(FreeRevenge);
@@ -120,7 +127,12 @@ namespace HyperElk.Core
             //Debuff
             CombatRoutine.AddDebuff(DeepWounds);
 
+            //Toggle
+            CombatRoutine.AddToggle("Mouseover");
+
             //Prop
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp(HeroicThrow, "Use Heroic Throw", heroiclist, "Use " + HeroicThrow + " ,when out of melee, only Mousover or both", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(LastStand, LastStand + " Life Percent", percentListProp, "Life percent at which" + LastStand + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(ShieldWall, ShieldWall + " Life Percent", percentListProp, "Life percent at which" + ShieldWall + " is used, set to 0 to disable", "Defense", 3);
@@ -198,10 +210,18 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (API.CanCast(HeroicThrow) && API.TargetRange >= 8 && API.TargetRange <= 30)
+            if (API.CanCast(HeroicThrow) && PlayerLevel >= 24 && API.TargetRange >= 8 && API.TargetRange <= 30 && (UseHeroicThrow == "when out of melee" || UseHeroicThrow == "both"))
             {
                 API.CastSpell(HeroicThrow);
                 return;
+            }
+            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && (UseHeroicThrow == "only Mouseover" || UseHeroicThrow == "both"))
+            {
+                if (API.CanCast(HeroicThrow) && PlayerLevel >= 24 && API.MouseoverRange >= 8 && API.MouseoverRange <= 30)
+                {
+                    API.CastSpell(HeroicThrow + "MO");
+                    return;
+                }
             }
             if (IsMelee)
             {

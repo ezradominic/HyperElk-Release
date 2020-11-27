@@ -6,12 +6,14 @@
 // v1.4 Condemn fix
 // v1.5 covenant ability always or with cds
 // v1.6 covenant changes
+// v1.7 Heroic Throw toggle
 
 namespace HyperElk.Core
 {
     public class FuryWarrior : CombatRoutine
     {
-        //Speel,Auras
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        //Spell,Auras
         private string Bloodthirst = "Bloodthirst";
         private string Onslaught = "Onslaught";
         private string RagingBlow = "Raging Blow";
@@ -56,12 +58,15 @@ namespace HyperElk.Core
         private bool IsMelee => API.TargetRange < 6;
 
         //CBProperties
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        private string UseHeroicThrow => heroiclist[CombatRoutine.GetPropertyInt(HeroicThrow)];
         private bool IsLineUp => CombatRoutine.GetPropertyBool("LineUp");
         private int EnragedRegenerationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(EnragedRegeneration)];
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        string[] heroiclist = new string[] { "Not Used", "when out of melee", "only Mouseover", "both" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseRecklessness => CDUsage[CombatRoutine.GetPropertyInt(Recklessness)];
         private string UseSiegebreaker => CDUsage[CombatRoutine.GetPropertyInt(Siegebreaker)];
@@ -69,7 +74,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.6");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.7");
             API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
 
             //Spells
@@ -98,6 +103,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SpearofBastion, "D1");
             CombatRoutine.AddSpell(Slam, "None");
 
+            //Macros
+            CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
+
             //Buffs
             CombatRoutine.AddBuff(Enrage);
             CombatRoutine.AddBuff(Whirlwind);
@@ -111,7 +119,12 @@ namespace HyperElk.Core
             //Debuff
             CombatRoutine.AddDebuff(Siegebreaker);
 
+            //Toggle
+            CombatRoutine.AddToggle("Mouseover");
+
             //Prop
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp(HeroicThrow, "Use Heroic Throw", heroiclist, "Use " + HeroicThrow + " ,when out of melee, only Mousover or both", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, CDUsage, "Use " + Recklessness + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsage, "Use " + Siegebreaker+ " always, with Cooldowns", "Cooldowns", 0);
@@ -162,6 +175,19 @@ namespace HyperElk.Core
         }
         private void rotation()
          {
+            if (API.CanCast(HeroicThrow) && PlayerLevel >= 24 && API.TargetRange >= 8 && API.TargetRange <= 30 && (UseHeroicThrow == "when out of melee" || UseHeroicThrow == "both"))
+            {
+                API.CastSpell(HeroicThrow);
+                return;
+            }
+            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && (UseHeroicThrow == "only Mouseover" || UseHeroicThrow == "both"))
+            {
+                if (API.CanCast(HeroicThrow) && PlayerLevel >= 24 && API.MouseoverRange >= 8 && API.MouseoverRange <= 30)
+                {
+                    API.CastSpell(HeroicThrow + "MO");
+                    return;
+                }
+            }
             if (IsMelee)
             {
                 if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
