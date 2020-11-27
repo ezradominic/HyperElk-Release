@@ -33,6 +33,7 @@ namespace HyperElk.Core
         private string AntiMagicShell = "Anti-Magic Shell";
         private string Lichborne = "Lichborne";
         private string MindFreeze = "Mind Freeze";
+        private string SwarmingMist = "Swarming Mist";
         private string ColdHeart = "Cold Heart";
         private string DarkSuccor = "Dark Succor";
         private string Rime = "Rime";
@@ -96,6 +97,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(HornofWinter, "D1");
             CombatRoutine.AddSpell(EmpowerRuneWeapon, "D1");
             CombatRoutine.AddSpell(MindFreeze, "D1");
+            CombatRoutine.AddSpell(SwarmingMist, "NumPad2");
 
             CombatRoutine.AddSpell(IceboundFortitude, "D1");
             CombatRoutine.AddSpell(AntiMagicShell, "D1");
@@ -172,6 +174,12 @@ namespace HyperElk.Core
                     && IsMelee)
                 {
                     API.CastSpell(PillarofFrost);
+                    return;
+                }
+
+                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && API.CanCast(SwarmingMist) && CurrentRune >=1 && IsMelee && CurrentRune <=40   )
+                {
+                    API.CastSpell(SwarmingMist);
                     return;
                 }
 
