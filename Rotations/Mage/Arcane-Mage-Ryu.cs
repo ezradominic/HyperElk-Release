@@ -72,6 +72,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Prismatic Barrier");
             CombatRoutine.AddBuff("Arcane Intellect");
             CombatRoutine.AddBuff("Arcane Familiar");
+            CombatRoutine.AddBuff("Evocation");
 
             //Debuff
             CombatRoutine.AddDebuff("Nether Tempest");
@@ -169,17 +170,17 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling)
+            if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && NotCasting)
             {
                 API.CastSpell(RadiantSpark);
                 return;
             }
-            if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE"  && IsAOE) && NotChanneling)
+            if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE"  && IsAOE) && NotChanneling && NotCasting)
             {
                 API.CastSpell(MirrorsofTorment);
                 return;
             }
-            if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE"  && IsAOE) && NotChanneling)
+            if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE"  && IsAOE) && NotChanneling && NotCasting)
             {
                 API.CastSpell(Deathborne);
                 return;
@@ -194,7 +195,7 @@ namespace HyperElk.Core
                 API.CastSpell("Rune of Power");
                 return;
             }
-            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Arcane Power") && API.SpellISOnCooldown("Touch of the Magi") && API.SpellISOnCooldown("Evocation") && (RuneofPower && API.SpellISOnCooldown("Rune of Power") || !RuneofPower) && !API.PlayerHasBuff("Arcane Power") && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE))
+            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Arcane Power") && API.SpellISOnCooldown("Touch of the Magi") && API.SpellISOnCooldown("Evocation") && NotCasting && NotChanneling && !API.PlayerHasBuff("Evocation") && (RuneofPower && API.SpellISOnCooldown("Rune of Power") || !RuneofPower) && !API.PlayerHasBuff("Arcane Power") && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE))
             {
                 API.CastSpell(ShiftingPower);
                 return;
@@ -214,7 +215,7 @@ namespace HyperElk.Core
                 API.CastSpell("Nether Tempest");
                 return;
             }
-            if (API.CanCast("Presence of Mind") && NotCasting && NotChanneling && Level >= 42 && API.PlayerHasBuff("Arcane Power") && API.PlayerBuffTimeRemaining("Arcane Power") <= 300 && !API.PlayerHasBuff("Presence of Mind") && Burn)
+            if (API.CanCast("Presence of Mind") && Level >= 42 && API.PlayerHasBuff("Arcane Power") && API.PlayerBuffTimeRemaining("Arcane Power") <= 300 && !API.PlayerHasBuff("Presence of Mind") && Burn)
             {
                 API.CastSpell("Presence of Mind");
                 return;

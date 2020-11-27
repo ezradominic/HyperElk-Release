@@ -35,6 +35,7 @@ namespace HyperElk.Core
         private string MirrorsofTorment = "Mirrors of Torment";
         private string AE = "Arcane Explosion";
         private string Fleshcraft = "Fleshcraft";
+        private string FR = "Freezing Rain";
 
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
@@ -82,6 +83,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(IceBarrier);
             CombatRoutine.AddBuff(AI);
             CombatRoutine.AddBuff(IV);
+            CombatRoutine.AddBuff(FR);
 
             //Debuff
             CombatRoutine.AddDebuff(WC);
@@ -122,7 +124,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
-            CombatRoutine.AddProp("Use Coveant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
+            CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
             CombatRoutine.AddProp(RoP, "Use " + RoP, CDUsage, "Use " + RoP + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp(IV, "Use " + IV, CDUsage, "Use " + IV + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
 
@@ -190,7 +192,7 @@ namespace HyperElk.Core
                 API.CastSpell(IV);
                 return;
             }
-            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown(RoP) && API.SpellISOnCooldown(IV) && !API.PlayerHasBuff(IV) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE))
+            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && (API.SpellISOnCooldown(RoP) || !RuneOfPower) && API.SpellISOnCooldown(IV) && !API.PlayerHasBuff(IV) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE))
             {
                 API.CastSpell(ShiftingPower);
                 return;
@@ -220,7 +222,7 @@ namespace HyperElk.Core
                 API.CastSpell(FO);
                 return;
             }
-            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && (API.TargetUnitInRangeCount >= 3 && IsAOE || FreezingRain) && NotCasting && NotChanneling)
+            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && (API.TargetUnitInRangeCount >= 3 && IsAOE || FreezingRain && API.PlayerHasBuff(FR)) && NotCasting && NotChanneling)
             {
                 API.CastSpell(Blizzard);
                 return;
