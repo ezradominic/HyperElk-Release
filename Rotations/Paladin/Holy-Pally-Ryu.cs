@@ -34,6 +34,17 @@ public class HolyPally : CombatRoutine
         private string Forbearance = "Forbearance";
         private string Infusion = "Infusion of Light";
         private string AvengingCrusader = "Avenging Crusader";
+        private string PartySwap = "Party Swap";
+        private string Fleshcraft = "Fleshcraft";
+        private string DivineToll = "Divine Toll";
+        private string DivineTollHealing = "Divine Toll Healing";
+        private string VanqusihersHammer = "Vanquisher's Hammer";
+        private string AshenHallow = "Ashen Hallow";
+        private string Party1 = "party1";
+        private string Party2 = "party2";
+        private string Party3 = "party3";
+        private string Party4 = "party4";
+        private string Player = "player";
 
 
         //Talents
@@ -63,6 +74,8 @@ public class HolyPally : CombatRoutine
         int[] numbList = new int[] { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40",};
+
+
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent);
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent);
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
@@ -105,9 +118,28 @@ public class HolyPally : CombatRoutine
         {
 
             return API.UnitHealthPercent(units[i]) <= HPLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= HPLifePercent) >= 3;
+
+        }
+        private bool HPRaid1 => HPRaid(1);
+        private bool DTParty(int i)
+        {
+
+            return API.UnitHealthPercent(units[i]) <= DTLifePercent && units.Count(p => API.UnitHealthPercent(p) <= DTLifePercent) >= 3;
         }
 
-        private bool HPRaid1 => HPRaid(1);
+        private bool DTParty1 => DTParty(1);
+        private bool DTRaid(int i)
+        {
+
+            return API.UnitHealthPercent(units[i]) <= HPLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= HPLifePercent) >= 3;
+
+        }
+        private bool DTRaid1 => DTRaid(1);
+        private bool PlayerSwap => API.UnitHealthPercent(Player) <= PartySwapPercent;
+        private bool Party1Swap => API.UnitHealthPercent(Party1) <= PartySwapPercent;
+        private bool Party2Swap => API.UnitHealthPercent(Party2) <= PartySwapPercent;
+        private bool Party3Swap => API.UnitHealthPercent(Party3) <= PartySwapPercent;
+        private bool Party4Swap => API.UnitHealthPercent(Party4) <= PartySwapPercent;
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private int DivineShieldLifePercent => numbList[CombatRoutine.GetPropertyInt(DivineShield)];
         private int DivineProtectionLifePercent => numbList[CombatRoutine.GetPropertyInt(DivineProtection)];
@@ -123,6 +155,10 @@ public class HolyPally : CombatRoutine
         private int LoDLifePercent => numbList[CombatRoutine.GetPropertyInt(LoD)];
         private int BoVLifePercent => numbList[CombatRoutine.GetPropertyInt(BoV)];
         private int HPLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyPrism)];
+        private int PartySwapPercent => numbList[CombatRoutine.GetPropertyInt(PartySwap)];
+        private int DTLifePercent => numbList[CombatRoutine.GetPropertyInt(DivineToll)];
+        private int FleshcraftPercentProc => percentListProp[CombatRoutine.GetPropertyInt(Fleshcraft)];
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         //General
         private int Level => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 40;
@@ -131,23 +167,27 @@ public class HolyPally : CombatRoutine
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool DTHealing => CombatRoutine.GetPropertyBool(DivineTollHealing);
 
 
-    //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
-    //  public int interruptDelay => random.Next((int)(CombatRoutine.GetPropertyInt("KICKTime") * 0.9), (int)(CombatRoutine.GetPropertyInt("KICKTime") * 1.1));
+        //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
+        //  public int interruptDelay => random.Next((int)(CombatRoutine.GetPropertyInt("KICKTime") * 0.9), (int)(CombatRoutine.GetPropertyInt("KICKTime") * 1.1));
 
-    public override void Initialize()
+        public override void Initialize()
         {
             CombatRoutine.Name = "Holy Pally by Ryu";
             API.WriteLog("Welcome to Holy Pally by Ryu");
+            API.WriteLog("Be advised this a Beta Rotation");
             API.WriteLog("All Talents expect PVP Talents and Row 3 talents are supported. All Cooldowns are associated with Cooldown toggle.");
             API.WriteLog("Will add settings for CDs soon, however all CDs will be used when CD on one. If you wish to contorl when to use them, please use the toggle off fuction and use /break marco to cast them when needed");
             API.WriteLog("If you use Lights Hammer Macro, you need to use an /addonname break to stop the rotation to be able to cast it.");
             API.WriteLog("You need to create /cast [@mouseover] xxxx where xxx is each of the spells that have MO in the bindings in order for Mouseover to work");
+            API.WriteLog("Venthyr and Night Fae Cov's are not supported. You can create a /xxx break marco to use those abilties when you would like at this time.");
             //Buff
             CombatRoutine.AddBuff(Infusion);
             CombatRoutine.AddBuff(AvengingWrath);
             CombatRoutine.AddBuff(AvengingCrusader);
+            CombatRoutine.AddBuff(Forbearance);
 
             //Debuff
             CombatRoutine.AddDebuff(Forbearance);
@@ -176,6 +216,15 @@ public class HolyPally : CombatRoutine
             CombatRoutine.AddSpell(AvengingCrusader, "F2");
             CombatRoutine.AddSpell(HolyPrism, "None");
             CombatRoutine.AddSpell(WoG, "None");
+            CombatRoutine.AddSpell(Player);
+            CombatRoutine.AddSpell(Party1);
+            CombatRoutine.AddSpell(Party2);
+            CombatRoutine.AddSpell(Party3);
+            CombatRoutine.AddSpell(Party4);
+            CombatRoutine.AddSpell(Fleshcraft);
+            CombatRoutine.AddSpell(DivineToll);
+            CombatRoutine.AddSpell(VanqusihersHammer);
+            CombatRoutine.AddSpell(AshenHallow);
 
             //Mouseover
             CombatRoutine.AddSpell(HolyLight + "MO", "None");
@@ -195,7 +244,10 @@ public class HolyPally : CombatRoutine
             //Prop
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(DivineProtection, DivineProtection + " Life Percent", numbList, "Life percent at which" + DivineProtection + "is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
+            CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
 
+            CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 17);
             CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(HolyLight, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "is used, set to 0 to disable", "Healing", 11);
             CombatRoutine.AddProp(HoLI, HoLI + " Life Percent", numbList, "Life percent at which" + HoLI + "is used, set to 0 to disable", "Healing", 12);
@@ -208,8 +260,34 @@ public class HolyPally : CombatRoutine
             CombatRoutine.AddProp(LoD, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when three members are at life percent, set to 0 to disable", "Healing", 19);
             CombatRoutine.AddProp(BoV, BoV + " Life Percent", numbList, "Life percent at which" + BoV + "is used when three members are at life percent, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp(HolyPrism, HolyPrism + " Life Percent", numbList, "Life percent at which" + HolyPrism + "is used when three members are at life percent, set to 0 to disable", "Healing", 21);
+            CombatRoutine.AddProp(DivineToll, DivineToll + " Life Percent", numbList, "Life percent at which" + DivineToll + "is used when three members are at life percent, set to 0 to disable", "Healing", 21);
+            CombatRoutine.AddProp(DivineTollHealing, DivineToll, true, "If Divine Tool should be on Healing, if for dps, change to false, set to true by default for healing", "Healing");
 
-
+            //                 if (PlayerSwap && API.TargetHealthPercent <= PartySwapPercent)
+            //{
+            //    API.CastSpell(Player);
+            //    API.WriteLog("Player Health : " + API.UnitHealthPercent(Player));
+            //}
+            //if (Party1Swap && API.TargetHealthPercent <= PartySwapPercent)
+            // {
+            //     API.CastSpell(Party1);
+            //     API.WriteLog("Party1 Health : " + API.UnitHealthPercent(Party1));
+            // }
+            // if (Party2Swap && API.TargetHealthPercent <= PartySwapPercent)
+            // {
+            //     API.CastSpell(Party2);
+            //     API.WriteLog("Party2 Health : " + API.UnitHealthPercent(Party2));
+            // }
+            // if (Party3Swap && API.TargetHealthPercent <= PartySwapPercent)
+            // {
+            //     API.CastSpell(Party3);
+            //     API.WriteLog("Party3 Health : " + API.UnitHealthPercent(Party3));
+            // }
+            // if (Party4Swap && API.TargetHealthPercent <= PartySwapPercent)
+            // {
+            //  API.CastSpell(Party4);
+            //   API.WriteLog("Party4 Health : " + API.UnitHealthPercent(Party4));
+            //}
         }
 
         public override void Pulse()
@@ -246,14 +324,14 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(DivineProtection);
                     return;
                 }
+                if (API.CanCast(DivineToll) && DTHealing && (DTRaid1 || DTParty1) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(DivineToll);
+                    return;
+                }
                 if (API.CanCast(BoV) && BeaconofVirtue && InRange && (BoVParty1 || BoVRaid1 && API.PlayerIsInRaid) && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(BoV);
-                    return;
-                }
-                if (API.CanCast(BoV) && BeaconofVirtue && InRange && IsMouseover && (BoVParty1 || BoVRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(BoV + "MO");
                     return;
                 }
                 if (API.CanCast(HolyPrism) && HolyPrismT && InRange && (HPParty1 || HPRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
@@ -261,19 +339,9 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(HolyPrism);
                     return;
                 }
-                if (API.CanCast(HolyPrism) && HolyPrismT && InRange && IsMouseover && (HPParty1 || HPRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(HolyPrism + "MO");
-                    return;
-                }
                 if (API.CanCast(LoD) && API.PlayerCurrentHolyPower >= 3 && InRange && (LoDParty1 || LoDRaid1 && API.PlayerIsInRaid) && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(LoD);
-                    return;
-                }
-                if (API.CanCast(LoD)  && InRange && IsMouseover && (LoDParty1 || LoDRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(LoD + "MO");
                     return;
                 }
                 if (API.CanCast(LoH) && InRange && API.TargetHealthPercent <= LoHLifePercent && API.TargetHealthPercent != 0 && !API.TargetHasBuff(Forbearance) && !API.PlayerCanAttackTarget)
@@ -281,19 +349,9 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(LoH);
                     return;
                 }
-                if (API.CanCast(LoH) && InRange && IsMouseover && API.MouseoverHealthPercent <= LoHLifePercent && API.MouseoverHealthPercent != 0 && !API.TargetHasBuff(Forbearance) && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(LoH + "MO");
-                    return;
-                }
                 if (API.CanCast(BoS) && InRange && API.TargetHealthPercent <= BoSLifePercent && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(BoS);
-                    return;
-                }
-                if (API.CanCast(BoS) && InRange && IsMouseover && API.MouseoverHealthPercent <= BoSLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(BoS + "MO");
                     return;
                 }
                 if (API.CanCast(HolyShock) && InRange && API.TargetHealthPercent <= HolyShockLifePercent && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
@@ -301,19 +359,9 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (API.CanCast(HolyShock) && InRange && IsMouseover && API.MouseoverHealthPercent <= HolyShockLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(HolyShock + "MO");
-                    return;
-                }
                 if (API.CanCast(WoG) && InRange && API.PlayerCurrentHolyPower >= 3 && API.TargetHealthPercent <= WoGLifePercent && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(WoG);
-                    return;
-                }
-                if (API.CanCast(WoG) && InRange && IsMouseover && API.PlayerCurrentHolyPower >= 3 && API.MouseoverHealthPercent <= WoGLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(WoG + "MO");
                     return;
                 }
                 if (API.CanCast(FoL) && InRange && API.TargetHealthPercent <= FoLLifePercent && API.TargetHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
@@ -321,19 +369,9 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(FoL);
                     return;
                 }
-                if (API.CanCast(FoL) && InRange && IsMouseover && API.MouseoverHealthPercent <= FoLLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(FoL + "MO");
-                    return;
-                }
                 if (API.CanCast(HolyLight) && InRange && API.TargetHealthPercent <= HolyLightLifePercent && API.TargetHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(HolyLight);
-                    return;
-                }
-                if (API.CanCast(HolyLight) && InRange && IsMouseover && API.MouseoverHealthPercent <= HolyLightLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(HolyLight + "MO");
                     return;
                 }
                 if (API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && InRange && API.TargetHealthPercent <= FolILifePercent && API.TargetHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
@@ -341,24 +379,70 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(FoL);
                     return;
                 }
-                if (API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && IsMouseover && InRange && API.MouseoverHealthPercent <= FolILifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(FoL + "MO");
-                    return;
-                }
                 if (API.CanCast(HolyLight) && API.PlayerHasBuff(Infusion) && InRange && API.TargetHealthPercent <= HoLILifePercent && API.TargetHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (API.CanCast(HolyLight) && API.PlayerHasBuff(Infusion) && IsMouseover && InRange && API.MouseoverHealthPercent <= HoLILifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
+                if (API.CanCast(BF) && BestowFaith && InRange && API.TargetHealthPercent <= BFLifePercent && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(BF);
+                    return;
+                }
+                /// Mouseover
+                if (API.CanCast(BoV) && BeaconofVirtue && InRange && IsMouseover && (BoVParty1 || BoVRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(BoV + "MO");
+                    return;
+                }
+                if (API.CanCast(HolyPrism) && HolyPrismT && InRange && IsMouseover && (HPParty1 || HPRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(HolyPrism + "MO");
+                    return;
+                }
+                if (API.CanCast(LoD) && InRange && IsMouseover && (LoDParty1 || LoDRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(LoD + "MO");
+                    return;
+                }
+                if (API.CanCast(LoH) && InRange && IsMouseover && API.MouseoverHealthPercent <= LoHLifePercent && API.MouseoverHealthPercent != 0 && !API.TargetHasBuff(Forbearance) && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(LoH + "MO");
+                    return;
+                }
+                if (API.CanCast(BoS) && InRange && IsMouseover && API.MouseoverHealthPercent <= BoSLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(BoS + "MO");
+                    return;
+                }
+                if (API.CanCast(HolyShock) && InRange && IsMouseover && API.MouseoverHealthPercent <= HolyShockLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(HolyShock + "MO");
+                    return;
+                }
+                if (API.CanCast(WoG) && InRange && IsMouseover && API.PlayerCurrentHolyPower >= 3 && API.MouseoverHealthPercent <= WoGLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(WoG + "MO");
+                    return;
+                }
+                if (API.CanCast(FoL) && InRange && IsMouseover && API.MouseoverHealthPercent <= FoLLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(FoL + "MO");
+                    return;
+                }
+                if (API.CanCast(HolyLight) && InRange && IsMouseover && API.MouseoverHealthPercent <= HolyLightLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (API.CanCast(BF) && BestowFaith && InRange && API.TargetHealthPercent <= BFLifePercent && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                if (API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && IsMouseover && InRange && API.MouseoverHealthPercent <= FolILifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
                 {
-                    API.CastSpell(BF);
+                    API.CastSpell(FoL + "MO");
+                    return;
+                }
+                if (API.CanCast(HolyLight) && API.PlayerHasBuff(Infusion) && IsMouseover && InRange && API.MouseoverHealthPercent <= HoLILifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget)
+                {
+                    API.CastSpell(HolyLight + "MO");
                     return;
                 }
                 if (API.CanCast(BF) && BestowFaith && InRange && IsMouseover && API.MouseoverHealthPercent <= BFLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
@@ -370,6 +454,11 @@ public class HolyPally : CombatRoutine
         }
         public override void CombatPulse()
         {
+            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc)
+            {
+                API.CastSpell(Fleshcraft);
+                return;
+            }
             if (API.CanCast(CrusaderStrike) && CrusadersMight && API.SpellISOnCooldown(HolyShock) && IsMelee && API.PlayerCanAttackTarget)
             {
                 API.CastSpell(CrusaderStrike);
@@ -400,6 +489,16 @@ public class HolyPally : CombatRoutine
                 API.CastSpell(HolyShock + "MO");
                 return;
             }
+            if (API.CanCast(DivineToll) && !DTHealing && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(DivineToll);
+                return;
+            }
+            if (API.CanCast(VanqusihersHammer) && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling)
+            {
+                API.CastSpell(VanqusihersHammer);
+                return;
+            }
             if (API.CanCast(Judgement) && InRange && API.PlayerCanAttackTarget)
             {
                 API.CastSpell(Judgement);
@@ -425,9 +524,9 @@ public class HolyPally : CombatRoutine
                 API.CastSpell(Cons);
                 return;
             }
-            if (API.CanCast(Cons) && API.TargetUnitInRangeCount > 2 && IsMoMelee && !API.MouseoverHasDebuff(Cons) && !API.PlayerIsMoving && API.PlayerCanAttackTarget)
+            if (API.CanCast(Cons) && API.TargetUnitInRangeCount > 2 && IsMouseover && IsMoMelee && !API.MouseoverHasDebuff(Cons) && !API.PlayerIsMoving && API.PlayerCanAttackTarget)
             {
-                API.CastSpell(Cons);
+                API.CastSpell(Cons + "MO");
                 return;
             }
             //  if (API.CanCast("Hammer of Justice") && API.IsSpellInRange("Hammer of Justice") && ConfigFile.ReadValue<bool>("Holy-Pally", "HJCheck") && API.TargetHealthPercent <= ConfigFile.ReadValue<int>("Holy-Pally", "HJUpDown") && API.TargetHealthPercent != 0 && API.PlayerCanAttackTarget)
