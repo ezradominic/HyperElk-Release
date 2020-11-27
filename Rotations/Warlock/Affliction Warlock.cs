@@ -31,9 +31,11 @@ namespace HyperElk.Core
         private string Haunt = "Haunt";
         private string DarkSoulMisery = "Dark Soul Misery";
         private string GrimoireOfSacrifice = "Grimoire Of Sacrifice";
-
-
+        private string ScouringTithe = "Scouring Tithe";
         private string Misdirection = "Misdirection";
+        private string CovenantAbility = "Covenant Ability";
+        private string SoulRot = "Soul Rot";
+        private string ImpendingCatastrophe = "Impending Catastrophe";
 
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
@@ -75,9 +77,11 @@ namespace HyperElk.Core
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
         private bool UseCO => (bool)CombatRoutine.GetProperty("UseCO");
         private bool UseSL => (bool)CombatRoutine.GetProperty("UseSL");
-
         private int DarkPactPercentProc => numbList[CombatRoutine.GetPropertyInt(DarkPact)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        private string UseCovenantAbility => CovenantAbilityList[CombatRoutine.GetPropertyInt(CovenantAbility)];
+
+        string[] CovenantAbilityList = new string[] { "always", "with Cooldowns", "AOE" };
 
 
         public override void Initialize()
@@ -107,6 +111,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseAG", "Use Agony", true, "Use Agony for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseCO", "Use Corruption", true, "Use Corruption for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
+            CombatRoutine.AddProp("Covenant Ability", "Use " + "Covenant Ability", CovenantAbilityList, "How to use Weapons of Order", "Covenant", 0);
 
 
             //Spells
@@ -121,7 +126,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Phantom Singularity", "D8");
             CombatRoutine.AddSpell("Haunt", "D8");
             CombatRoutine.AddSpell("Dark Soul Misery", "D8");
-
+            CombatRoutine.AddSpell(ScouringTithe, "F1");
+            CombatRoutine.AddSpell(SoulRot, "F1");
+            CombatRoutine.AddSpell(ImpendingCatastrophe, "F1");
             CombatRoutine.AddMacro("Vile Taint", "D8");
             CombatRoutine.AddMacro(Agony+"MO", "F1");
             CombatRoutine.AddMacro(Corruption+"MO", "F2");
@@ -143,7 +150,6 @@ namespace HyperElk.Core
             //Buffs
             CombatRoutine.AddBuff("Grimoire Of Sacrifice");
 
-
             //Debuffs
             CombatRoutine.AddDebuff("Corruption");
             CombatRoutine.AddDebuff("Agony");
@@ -153,7 +159,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Vile Taint");
             CombatRoutine.AddDebuff("Phantom Singularity");
             CombatRoutine.AddDebuff("Haunt");
-
+            CombatRoutine.AddBuff("Soul Rot");
             //Debuffs
 
 
@@ -199,6 +205,18 @@ namespace HyperElk.Core
                 //AOE
                 if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
                 {
+                    //Scouring Tithe
+                    if (API.CanCast(ScouringTithe) && !API.SpellISOnCooldown(ScouringTithe) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "On AOE"))
+                    {
+                        API.CastSpell(Haunt);
+                        return;
+                    }
+                    //Scouring Tithe
+                    if (API.CanCast(ScouringTithe) && !API.SpellISOnCooldown(ScouringTithe) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "With Cooldowns" && IsCooldowns))
+                    {
+                        API.CastSpell(Haunt);
+                        return;
+                    }
                     //Seed of Corruption
                     if (!CastingSOC && !CastingSOC1 && !LastSeed && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >= 1 && API.PlayerLevel >= 27)
                     {
@@ -221,6 +239,18 @@ namespace HyperElk.Core
                     if (IsAOE && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && IsRange && NotCasting)
                     {
                         API.CastSpell(PhantomSingularity);
+                        return;
+                    }
+                    //Venthyr SPELL                   
+                    if (API.CanCast(ImpendingCatastrophe) && !API.SpellISOnCooldown(ImpendingCatastrophe) && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //NIGHT FAE SPELL
+                    if (API.CanCast(SoulRot) && !API.SpellISOnCooldown(SoulRot) && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                    {
+                        API.CastSpell(SoulRot);
                         return;
                     }
                     //Agony
@@ -268,6 +298,25 @@ namespace HyperElk.Core
                         API.CastSpell(SummonDarkglare);
                         return;
                     }
+                    //NIGHT FAE SPELL
+                    //actions.covenant +=/ soul_rot,if= cooldown.summon_darkglare.remains < 5 | cooldown.summon_darkglare.remains > 50 | cooldown.summon_darkglare.remains > 25 & conduit.corrupting_leer.enabled
+                    if (API.CanCast(SoulRot) && !API.SpellISOnCooldown(SoulRot) && API.SpellCDDuration(SummonDarkglare) <= 500 && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "with Cooldown")
+                    {
+                        API.CastSpell(SoulRot);
+                            return;
+                    }
+                    //Venthyr SPELL                   
+                    if (API.CanCast(ImpendingCatastrophe) && !API.SpellISOnCooldown(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) <= 500 && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "with Cooldown")
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //Malefic Rapture Check
+                    if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(SoulRot) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                    {
+                        API.CastSpell(MaleficRapture);
+                        return;
+                    }
                     //Malefic Rapture Check
                     if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
                     {
@@ -305,6 +354,18 @@ namespace HyperElk.Core
                     }
                 }
                 //SingelTarget
+                //Scouring Tithe
+                if (API.CanCast(ScouringTithe) && !API.SpellISOnCooldown(ScouringTithe) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always"))
+                {
+                    API.CastSpell(Haunt);
+                    return;
+                }
+                //Scouring Tithe
+                if (API.CanCast(ScouringTithe) && !API.SpellISOnCooldown(ScouringTithe) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "With Cooldowns" && IsCooldowns))
+                {
+                    API.CastSpell(Haunt);
+                    return;
+                }
                 // Drain Life
                 if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
                 {
@@ -325,6 +386,37 @@ namespace HyperElk.Core
                         API.CastSpell(UnstableAffliction);
                         return;
                     }
+                }
+                //Dark Glare
+                if (IsCooldowns && API.CanCast(SummonDarkglare) && !API.SpellISOnCooldown(SummonDarkglare) && PlayerLevel >= 42)
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
+                //NIGHT FAE SPELL
+                //actions.covenant +=/ soul_rot,if= cooldown.summon_darkglare.remains < 5 | cooldown.summon_darkglare.remains > 50 | cooldown.summon_darkglare.remains > 25 & conduit.corrupting_leer.enabled
+                if (API.CanCast(SoulRot) && !API.SpellISOnCooldown(SoulRot) && API.SpellCDDuration(SummonDarkglare) <= 500 && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "with Cooldown")
+                {
+                    API.CastSpell(SoulRot);
+                    return;
+                }
+                //Venthyr SPELL                   
+                if (API.CanCast(ImpendingCatastrophe) && !API.SpellISOnCooldown(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) <= 500 && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "with Cooldown")
+                {
+                    API.CastSpell(ImpendingCatastrophe);
+                    return;
+                }
+                //Venthyr SPELL                   
+                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "with Cooldown")
+                {
+                    API.CastSpell(ImpendingCatastrophe);
+                    return;
+                }
+                //NIGHT FAE SPELL
+                if (API.CanCast(SoulRot) && !API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "always")
+                {
+                    API.CastSpell(SoulRot);
+                    return;
                 }
                 //Agony
                 if (!CastingAgony && !CastingSOC && !LastSeed && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
@@ -375,6 +467,11 @@ namespace HyperElk.Core
                         return;
                 }
                 //Malefic Rapture Check
+                if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(SoulRot) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
                 if (API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetHasDebuff(Agony) && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
