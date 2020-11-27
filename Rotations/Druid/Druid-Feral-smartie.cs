@@ -2,6 +2,7 @@
 // v1.0 First release
 // v1.1 bearform fix
 // v1.2 bloodtalons and covenant stuff
+// v1.3 low level fix
 
 using System.Diagnostics;
 
@@ -97,7 +98,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v1.2");
+            API.WriteLog("Welcome to smartie`s Feral Druid v1.3");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -367,7 +368,7 @@ namespace HyperElk.Core
                             API.CastSpell(SavageRoar);
                             return;
                         }
-                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300))
+                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
                         {
                             API.CastSpell(FerociousBite);
                             return;
@@ -428,7 +429,7 @@ namespace HyperElk.Core
                                 API.CastSpell(Thrash);
                                 return;
                             }
-                            if (isMelee && PlayerLevel >= 5 && API.TargetDebuffRemainingTime(Thrash) > 300 && !API.PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || API.TargetHasDebuff(Rake) && API.PlayerHasBuff(Clearcasting)) && API.CanCast(Shred) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            if (isMelee && PlayerLevel >= 5 && (API.TargetDebuffRemainingTime(Thrash) > 300 || PlayerLevel < 11) && !API.PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || PlayerLevel < 10) && API.CanCast(Shred) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
                             {
                                 API.CastSpell(Shred);
                                 return;
@@ -443,13 +444,13 @@ namespace HyperElk.Core
                     {
                         if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                         {
-                            if (API.MouseoverDebuffRemainingTime(Rip) <= 360 && API.CanCast(Rip) && !TalentPrimalWrath && isMOMelee)
+                            if (API.MouseoverDebuffRemainingTime(Rip) <= 360 && PlayerLevel >= 21 && API.CanCast(Rip) && !TalentPrimalWrath && isMOMelee)
                             {
                                 API.CastSpell(Rip + "MO");
                                 return;
                             }
                         }
-                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !TalentPrimalWrath && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300))
+                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !TalentPrimalWrath && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
                         {
                             API.CastSpell(FerociousBite);
                             return;
@@ -500,7 +501,7 @@ namespace HyperElk.Core
                         }
                         if (!Bloodytalons)
                         {
-                            if (isThrashMelee && !API.PlayerHasBuff(Prowl) && API.TargetDebuffRemainingTime(Rake) > 360 && TalentBrutalSlash && API.CanCast(BrutalSlash) && API.TargetHasDebuff(Thrash) && (API.PlayerHasBuff(Clearcasting) || !IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15))
+                            if (isThrashMelee && !API.PlayerHasBuff(Prowl) && API.TargetDebuffRemainingTime(Rake) > 360 && TalentBrutalSlash && API.CanCast(BrutalSlash) && (API.TargetHasDebuff(Thrash) || PlayerLevel < 11) && (API.PlayerHasBuff(Clearcasting) || !IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15))
                             {
                                 API.CastSpell(BrutalSlash);
                                 return;
@@ -527,12 +528,12 @@ namespace HyperElk.Core
                             }
                             if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                             {
-                                if (API.MouseoverDebuffRemainingTime(Rake) <= 360 && API.CanCast(Rake) && isMOMelee)
+                                if (API.MouseoverDebuffRemainingTime(Rake) <= 360 && PlayerLevel >= 10 && API.CanCast(Rake) && isMOMelee)
                                 {
                                     API.CastSpell(Rake + "MO");
                                     return;
                                 }
-                                if (API.MouseoverDebuffRemainingTime(Thrash) <= 300 && API.CanCast(Thrash) && isMOThrashMelee)
+                                if (API.MouseoverDebuffRemainingTime(Thrash) <= 300 && PlayerLevel >= 11 && API.CanCast(Thrash) && isMOThrashMelee)
                                 {
                                     API.CastSpell(Thrash + "MO");
                                     return;
