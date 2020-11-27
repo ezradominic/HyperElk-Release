@@ -329,7 +329,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cooldown+=/convoke_the_spirits,if=(dot.rip.remains>4&(buff.tigers_fury.down|buff.tigers_fury.remains<4)&combo_points=0&dot.thrash_cat.ticking&dot.rake.ticking)|fight_remains<5
-                if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && (API.PlayerBuffTimeRemaining(TigersFury) == 0 || API.PlayerBuffTimeRemaining(TigersFury) < 400) && API.PlayerComboPoints == 0 && API.TargetHasDebuff(Thrash) && API.TargetHasDebuff(Rake)))
+                if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && (API.PlayerBuffTimeRemaining(TigersFury) == 0 || API.PlayerBuffTimeRemaining(TigersFury) < 400) && API.PlayerComboPoints == 0 && API.TargetHasDebuff(Thrash) && API.TargetHasDebuff(Rake)))
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;
