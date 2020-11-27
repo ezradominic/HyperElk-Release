@@ -1,6 +1,7 @@
 //Changelog test@test.de
 // v1.0 First release
 // v1.1 Victory Rush fix
+// v1.2 covenant support
 
 namespace HyperElk.Core
 {
@@ -33,6 +34,10 @@ namespace HyperElk.Core
         private string DeepWounds = "Deep Wounds";
         private string StoneHeart = "Stone Heart";
         private string Victorious = "Victorious";
+        private string Condemn = "330325";
+        private string SpearofBastion = "Spear of Bastion";
+        private string AncientAftershock = "Ancient Aftershock";
+        private string ConquerorsBanner = "Conqueror's Banner";
 
         //Talents
         bool TalentSkullsplitter => API.PlayerIsTalentSelected(1, 3);
@@ -53,7 +58,26 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
 
+        //rota bools
+        bool IsAvatar => UseAvatar == "with Cooldowns" && IsCooldowns || UseAvatar == "always";
+        bool IsRavager => UseRavager == "with Cooldowns" && IsCooldowns || UseRavager == "always" || UseRavager == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsBladestorm => UseBladestorm == "with Cooldowns" && IsCooldowns || UseBladestorm == "always" || UseBladestorm == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsColossusSmash => UseColossusSmash == "with Cooldowns" && IsCooldowns || UseColossusSmash == "always";
+        bool IsWarbreaker => UseWarbreaker == "with Cooldowns" && IsCooldowns || UseWarbreaker == "always" || UseWarbreaker == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsDeadlyCalm => UseDeadlyCalm == "with Cooldowns" && IsCooldowns || UseDeadlyCalm == "always";
+        bool IsCovenant => UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE;
+
+
         //CBProperties
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseAvatar => CDUsage[CombatRoutine.GetPropertyInt(Avatar)];
+        private string UseRavager => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Ravager)];
+        private string UseBladestorm => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Bladestorm)];
+        private string UseColossusSmash => CDUsage[CombatRoutine.GetPropertyInt(ColossusSmash)];
+        private string UseWarbreaker => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Warbreaker)];
+        private string UseDeadlyCalm => CDUsage[CombatRoutine.GetPropertyInt(DeadlyCalm)];
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
         private int DiebytheSwordLifePercent => percentListProp[CombatRoutine.GetPropertyInt(DiebytheSword)];
@@ -62,8 +86,8 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v1.1");
-            API.WriteLog("All Talents are supported and auto detected");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v1.2");
+            API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
 
             //Spells
             CombatRoutine.AddSpell(MortalStrike, "D4");
@@ -88,6 +112,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(BattleShout, "None");
             CombatRoutine.AddSpell(Avatar, "None");
             CombatRoutine.AddSpell(StormBolt, "F7");
+            CombatRoutine.AddSpell(Condemn, "D6");
+            CombatRoutine.AddSpell(ConquerorsBanner, "D1");
+            CombatRoutine.AddSpell(AncientAftershock, "D1");
+            CombatRoutine.AddSpell(SpearofBastion, "D1");
             //Buffs
             CombatRoutine.AddBuff(BattleShout);
             CombatRoutine.AddBuff(DeadlyCalm);
@@ -102,10 +130,17 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(DeepWounds);
             CombatRoutine.AddDebuff(Rend);
             //Prop
-            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(DiebytheSword, DiebytheSword + " Life Percent", percentListProp, "Life percent at which" + DiebytheSword + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(DefensiveStance, DefensiveStance + " Life Percent", percentListProp, "Life percent at which" + DefensiveStance + "is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(Avatar, "Use " + Avatar, CDUsage, "Use " + Avatar + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Ravager, "Use " + Ravager, CDUsageWithAOE, "Use " + Ravager + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Bladestorm, "Use " + Bladestorm, CDUsageWithAOE, "Use " + Bladestorm + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(ColossusSmash, "Use " + ColossusSmash, CDUsage, "Use " + ColossusSmash + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Warbreaker, "Use " + Warbreaker, CDUsageWithAOE, "Use " + Warbreaker + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(DeadlyCalm, "Use " + DeadlyCalm, CDUsage, "Use " + DeadlyCalm + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(DiebytheSword, DiebytheSword + " Life Percent", percentListProp, "Life percent at which" + DiebytheSword + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(DefensiveStance, DefensiveStance + " Life Percent", percentListProp, "Life percent at which" + DefensiveStance + " is used, set to 0 to disable", "Defense", 8);
         }
         public override void Pulse()
         {
@@ -150,14 +185,29 @@ namespace HyperElk.Core
         {
             if (IsMelee)
             {
-                if (API.CanCast(Avatar) && TalentAvatar && (API.SpellCDDuration(ColossusSmash) < 800 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 800 && TalentWarbreaker) && IsCooldowns)
+                if (API.CanCast(Avatar) && TalentAvatar && (API.SpellCDDuration(ColossusSmash) < 800 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 800 && TalentWarbreaker) && IsAvatar)
                 {
                     API.CastSpell(Avatar);
                     return;
                 }
+                if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && IsCovenant)
+                {
+                    API.CastSpell(ConquerorsBanner);
+                    return;
+                }
+                if (API.CanCast(SpearofBastion) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && IsCovenant)
+                {
+                    API.CastSpell(SpearofBastion);
+                    return;
+                }
+                if (API.CanCast(AncientAftershock) && PlayerCovenantSettings == "Night Fae" && !API.PlayerIsMoving && IsCovenant)
+                {
+                    API.CastSpell(AncientAftershock);
+                    return;
+                }
                 if (TalentMassacre && API.TargetHealthPercent < 35 || !TalentMassacre && API.TargetHealthPercent < 20)
                 {
-                    if (API.CanCast(DeadlyCalm) && TalentDeadlyCalm && IsCooldowns)
+                    if (API.CanCast(DeadlyCalm) && TalentDeadlyCalm && IsDeadlyCalm)
                     {
                         API.CastSpell(DeadlyCalm);
                         return;
@@ -172,17 +222,17 @@ namespace HyperElk.Core
                         API.CastSpell(Skullsplitter);
                         return;
                     }
-                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && (API.SpellCDDuration(ColossusSmash) < 200 && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) < 200) && IsCooldowns)
+                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && (API.SpellCDDuration(ColossusSmash) < 200 && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) < 200) && IsRavager)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker)
+                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
                     }
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker)
+                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker)
                     {
                         API.CastSpell(Warbreaker);
                         return;
@@ -197,7 +247,7 @@ namespace HyperElk.Core
                         API.CastSpell(Cleave);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && API.PlayerRage < 30 && !API.PlayerHasBuff(DeadlyCalm) && IsCooldowns)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && API.PlayerRage < 30 && !API.PlayerHasBuff(DeadlyCalm) && IsBladestorm)
                     {
                         API.CastSpell(Bladestorm);
                         return;
@@ -207,9 +257,14 @@ namespace HyperElk.Core
                         API.CastSpell(Overpower);
                         return;
                     }
-                    if (API.CanCast(Execute) && PlayerLevel >= 10 && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
+                    if (API.CanCast(Execute) && PlayerLevel >= 10 && PlayerCovenantSettings != "Venthyr" && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
                     {
                         API.CastSpell(Execute);
+                        return;
+                    }
+                    if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
+                    {
+                        API.CastSpell(Condemn);
                         return;
                     }
                 }
@@ -220,7 +275,7 @@ namespace HyperElk.Core
                         API.CastSpell(Rend);
                         return;
                     }
-                    if (API.CanCast(DeadlyCalm) && TalentDeadlyCalm && IsCooldowns)
+                    if (API.CanCast(DeadlyCalm) && TalentDeadlyCalm && IsDeadlyCalm)
                     {
                         API.CastSpell(DeadlyCalm);
                         return;
@@ -230,7 +285,7 @@ namespace HyperElk.Core
                         API.CastSpell(Skullsplitter);
                         return;
                     }
-                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && (API.SpellCDDuration(ColossusSmash) < 200 && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) < 200) && IsCooldowns)
+                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && (API.SpellCDDuration(ColossusSmash) < 200 && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) < 200) && IsRavager)
                     {
                         API.CastSpell(Ravager);
                         return;
@@ -240,22 +295,27 @@ namespace HyperElk.Core
                         API.CastSpell(MortalStrike);
                         return;
                     }
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker)
+                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
                     }
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker)
+                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker)
                     {
                         API.CastSpell(Warbreaker);
                         return;
                     }
-                    if (API.CanCast(Execute) && PlayerLevel >= 10 && (API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
+                    if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80)) && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
+                    {
+                        API.CastSpell(Condemn);
+                        return;
+                    }
+                    if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 10 && (API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
                     {
                         API.CastSpell(Execute);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && API.SpellCDDuration(MortalStrike) > 50 && IsCooldowns)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && API.SpellCDDuration(MortalStrike) > 50 && IsBladestorm)
                     {
                         API.CastSpell(Bladestorm);
                         return;
@@ -303,27 +363,27 @@ namespace HyperElk.Core
                         API.CastSpell(Skullsplitter);
                         return;
                     }
-                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && (API.SpellCDDuration(ColossusSmash) < 200 && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) < 200) && IsCooldowns)
+                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && (API.SpellCDDuration(ColossusSmash) < 200 && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) < 200) && IsRavager)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker)
+                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
                     }
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker)
+                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker)
                     {
                         API.CastSpell(Warbreaker);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && IsCooldowns)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && IsBladestorm)
                     {
                         API.CastSpell(Bladestorm);
                         return;
                     }
-                    if (API.CanCast(DeadlyCalm) && TalentDeadlyCalm && IsCooldowns)
+                    if (API.CanCast(DeadlyCalm) && TalentDeadlyCalm && IsDeadlyCalm)
                     {
                         API.CastSpell(DeadlyCalm);
                         return;
@@ -333,7 +393,12 @@ namespace HyperElk.Core
                         API.CastSpell(Cleave);
                         return;
                     }
-                    if (API.CanCast(Execute) && PlayerLevel >= 10 && (API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)) && (API.PlayerHasBuff(SweepingStrikes) || API.SpellCDDuration(SweepingStrikes) > 800))
+                    if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80)) && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
+                    {
+                        API.CastSpell(Condemn);
+                        return;
+                    }
+                    if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 10 && (API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(StoneHeart)))
                     {
                         API.CastSpell(Execute);
                         return;

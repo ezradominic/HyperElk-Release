@@ -206,7 +206,7 @@ namespace HyperElk.Core
                         return;
                     }
                     // Drain Life
-                    if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
+                    if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
                     {
                         API.CastSpell(DrainLife);
                         return;
@@ -280,7 +280,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //Drain Soul
-                    if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
+                    if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && NotChanneling)
                     {
                         API.CastSpell(DrainSoul);
                         return;
@@ -297,10 +297,16 @@ namespace HyperElk.Core
                         API.CastSpell(DarkPact);
                         return;
                     }
+                    // Health Funnel
+                    if (API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+                    {
+                        API.CastSpell(HealthFunnel);
+                        return;
+                    }
                 }
                 //SingelTarget
                 // Drain Life
-                if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
+                if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
                 {
                     API.CastSpell(DrainLife);
                     return;
@@ -357,7 +363,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Drain Soul
-                if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul)
+                if (API.CanCast(DrainSoul) && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && NotChanneling)
                 {
                     API.CastSpell(DrainSoul);
                     return;
@@ -386,7 +392,7 @@ namespace HyperElk.Core
                     return;
                 }
                 // Health Funnel
-                if (API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8)
+                if (API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
                 {
                     API.CastSpell(HealthFunnel);
                     return;

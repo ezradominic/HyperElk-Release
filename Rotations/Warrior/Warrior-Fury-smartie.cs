@@ -5,6 +5,7 @@
 // v1.3 a few fixes
 // v1.4 Condemn fix
 // v1.5 covenant ability always or with cds
+// v1.6 covenant changes
 
 namespace HyperElk.Core
 {
@@ -59,19 +60,16 @@ namespace HyperElk.Core
         private int EnragedRegenerationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(EnragedRegeneration)];
         private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
         private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
-        string[] RecklessnessList = new string[] { "with Cooldowns", "always" };
-        string[] SiegebreakerList = new string[] { "always", "with Cooldowns" };
-        string[] CovenantUse = new string[] { "with Cooldowns", "always" };
-        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
-        private string UseCovenant => CovenantUse[CombatRoutine.GetPropertyInt("UseCovenant")];
-        private string UseRecklessness => RecklessnessList[CombatRoutine.GetPropertyInt(Recklessness)];
-        private string UseSiegebreaker => SiegebreakerList[CombatRoutine.GetPropertyInt(Siegebreaker)];
-        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseRecklessness => CDUsage[CombatRoutine.GetPropertyInt(Recklessness)];
+        private string UseSiegebreaker => CDUsage[CombatRoutine.GetPropertyInt(Siegebreaker)];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.5");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.6");
             API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
 
             //Spells
@@ -114,14 +112,13 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Siegebreaker);
 
             //Prop
-            CombatRoutine.AddProp("LineUp", "LineUp CDS", true, "Lineup Recklessness and Siegebreaker", "Generic");
-            CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
-            CombatRoutine.AddProp("CovenantUse", "Use " + "Covenant Ability", CovenantUse, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, RecklessnessList, "Use " + Recklessness + "always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, SiegebreakerList, "Use " + Siegebreaker+ "always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", percentListProp, "Life percent at which" + EnragedRegeneration + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + "is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, CDUsage, "Use " + Recklessness + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsage, "Use " + Siegebreaker+ " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("LineUp", "LineUp CDS", true, " Lineup Recklessness and Siegebreaker", "Cooldowns");
+            CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", percentListProp, " Life percent at which" + EnragedRegeneration + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 8);
 
         }
         public override void Pulse()
@@ -167,17 +164,17 @@ namespace HyperElk.Core
          {
             if (IsMelee)
             {
-                if (API.CanCast(ConquerorsBanner) && Covenant == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(ConquerorsBanner);
                     return;
                 }
-                if (API.CanCast(SpearofBastion) && Covenant == "Kyrian" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                if (API.CanCast(SpearofBastion) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(SpearofBastion);
                     return;
                 }
-                if (API.CanCast(AncientAftershock) && Covenant == "Night Fae" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always"))
+                if (API.CanCast(AncientAftershock) && PlayerCovenantSettings == "Night Fae" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(AncientAftershock);
                     return;
@@ -217,12 +214,12 @@ namespace HyperElk.Core
                     API.CastSpell(Bladestorm);
                     return;
                 }
-                if (API.CanCast(Execute) && Covenant != "Venthyr" && PlayerLevel >= 9 && (!TalentMassacre && API.TargetHealthPercent < 20 || TalentMassacre && API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && (!TalentMassacre && API.TargetHealthPercent < 20 || TalentMassacre && API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && !API.SpellISOnCooldown(Condemn) && Covenant == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Condemn) && !API.SpellISOnCooldown(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Condemn);
                     return;

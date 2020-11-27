@@ -33,6 +33,8 @@ namespace HyperElk.Core
         private string RadiantSpark = "Radiant Spark";
         private string Deathborne = "Deathborne";
         private string MirrorsofTorment = "Mirrors of Torment";
+        private string AE = "Arcane Explosion";
+        private string Fleshcraft = "Fleshcraft";
 
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
@@ -43,19 +45,23 @@ namespace HyperElk.Core
         bool Cometstorm => API.PlayerIsTalentSelected(6, 3);
         bool RayofFrost => API.PlayerIsTalentSelected(7, 2);
         bool GlacialSpike => API.PlayerIsTalentSelected(7, 3);
+        bool FreezingRain => API.PlayerIsTalentSelected(6, 1);
 
         //CBProperties
         private int IceBarrierPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IceBarrier)];
         private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
-        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
-        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
+        private string UseROP => CDUsage[CombatRoutine.GetPropertyInt(RoP)];
+        private string UseIV => CDUsage[CombatRoutine.GetPropertyInt(IV)];
+        private int FleshcraftPercentProc => percentListProp[CombatRoutine.GetPropertyInt(Fleshcraft)];
         //General
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         private int Level => API.PlayerLevel;
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool InRange => API.TargetRange <= 40;
+
 
 
         public override void Initialize()
@@ -106,6 +112,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(RadiantSpark);
             CombatRoutine.AddSpell(Deathborne);
             CombatRoutine.AddSpell(MirrorsofTorment);
+            CombatRoutine.AddSpell(AE);
+            CombatRoutine.AddSpell(Fleshcraft);
 
             //Macro
 
@@ -113,7 +121,10 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(IceBarrier, IceBarrier, percentListProp, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
             CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
-            CombatRoutine.AddProp("Covenant", "Covenant", CovenantList, "Choose your Covenant: None, Venthyr, Night Fae, Kyrian, Necrolord", "Generic", 0);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
+            CombatRoutine.AddProp("Use Coveant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
+            CombatRoutine.AddProp(RoP, "Use " + RoP, CDUsage, "Use " + RoP + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
+            CombatRoutine.AddProp(IV, "Use " + IV, CDUsage, "Use " + IV + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
 
         }
 
@@ -124,11 +135,6 @@ namespace HyperElk.Core
                 if (API.CanCast(AI) && Level >= 8 && !API.PlayerHasBuff(AI))
                 {
                     API.CastSpell(AI);
-                    return;
-                }
-                if (API.CanCast(IceBarrier) && Level >= 21 && !API.PlayerHasBuff(IceBarrier) && API.PlayerHealthPercent <= IceBarrierPercentProc && API.PlayerHealthPercent != 0)
-                {
-                    API.CastSpell(IceBarrier);
                     return;
                 }
             }
@@ -150,6 +156,16 @@ namespace HyperElk.Core
                 API.CastSpell(MI);
                 return;
             }
+            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc)
+            {
+                API.CastSpell(Fleshcraft);
+                return;
+            }
+            if (API.CanCast(IceBarrier) && Level >= 21 && !API.PlayerHasBuff(IceBarrier) && API.PlayerHealthPercent <= IceBarrierPercentProc && API.PlayerHealthPercent != 0)
+            {
+                API.CastSpell(IceBarrier);
+                return;
+            }
             if (Level <= 60)
             {
                 rotation();
@@ -164,32 +180,22 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (API.CanCast(RadiantSpark) && InRange && Covenant == "Kyrian")
-            {
-                API.CastSpell(RadiantSpark);
-                return;
-            }
-            if (API.CanCast(MirrorsofTorment) && InRange && Covenant == "Venthyr" && IsCooldowns && NotChanneling)
-            {
-                API.CastSpell(MirrorsofTorment);
-                return;
-            }
-            if (API.CanCast(Deathborne) && InRange && Covenant == "Necrolord" && IsCooldowns && NotChanneling)
+            if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling)
             {
                 API.CastSpell(Deathborne);
                 return;
             }
-            if (API.CanCast(IV) && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && IsCooldowns && NotChanneling)
+            if (API.CanCast(IV) && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && (IsCooldowns && UseIV == "With Cooldowns" || UseIV == "On Cooldown") && NotChanneling)
             {
                 API.CastSpell(IV);
                 return;
             }
-            if (API.CanCast(ShiftingPower) && InRange && Covenant == "Night Fae" && API.SpellISOnCooldown(IV) && !API.PlayerHasBuff(IV) && IsCooldowns)
+            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown(RoP) && API.SpellISOnCooldown(IV) && !API.PlayerHasBuff(IV) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE))
             {
                 API.CastSpell(ShiftingPower);
                 return;
             }
-            if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !API.PlayerHasBuff(RoP) && !API.PlayerIsMoving && IsCooldowns && NotChanneling)
+            if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !API.PlayerHasBuff(RoP) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotChanneling && API.SpellCDDuration(IV) >= 1500) 
             {
                 API.CastSpell(RoP);
                 return;
@@ -204,7 +210,7 @@ namespace HyperElk.Core
                 API.CastSpell(WE);
                 return;
             }
-            if (API.CanCast(Flurry) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && API.TargetRange <= 40 && NotChanneling)
+            if (API.CanCast(Flurry) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && !API.TargetHasDebuff(WC) && API.TargetRange <= 40 && NotChanneling)
             {
                 API.CastSpell(Flurry);
                 return;
@@ -214,12 +220,12 @@ namespace HyperElk.Core
                 API.CastSpell(FO);
                 return;
             }
-            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3 && NotCasting && NotChanneling)
+            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && (API.TargetUnitInRangeCount >= 3 && IsAOE || FreezingRain) && NotCasting && NotChanneling)
             {
                 API.CastSpell(Blizzard);
                 return;
             }
-            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3 && NotCasting && NotChanneling)
+            if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && API.TargetUnitInRangeCount >= 3 && IsAOE && NotCasting && NotChanneling)
             {
                 API.CastSpell(Blizzard);
                 return;
@@ -234,22 +240,12 @@ namespace HyperElk.Core
                 API.CastSpell(IN);
                 return;
             }
-            if (API.CanCast(CoC) && Level >= 18 && API.TargetRange <= 10 && API.TargetUnitInRangeCount >= 5 && NotChanneling)
+            if (API.CanCast(CoC) && Level >= 18 && API.TargetRange <= 10 && API.TargetUnitInRangeCount >= 3 && IsAOE && NotChanneling)
             {
                 API.CastSpell(CoC);
                 return;
             }
-            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving && NotCasting && NotChanneling)
-            {
-                API.CastSpell(EB);
-                return;
-            }
-            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && NotCasting && NotChanneling) 
-            {
-                API.CastSpell(EB);
-                return;
-            }
-            if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && API.PlayerHasBuff(IF) && API.PlayerIsMoving && NotCasting && NotChanneling)
+            if (RayofFrost && API.CanCast(RoF) && (API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 1) && API.PlayerHasBuff(IF) && API.PlayerIsMoving && NotCasting && NotChanneling)
             {
                 API.CastSpell(RoF);
                 return;
@@ -269,9 +265,39 @@ namespace HyperElk.Core
                 API.CastSpell(GS);
                 return;
             }
-            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && (API.PlayerHasBuff(FoF) || API.TargetHasDebuff(WC)) && NotChanneling) 
+            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && NotChanneling) 
             {
                 API.CastSpell(IL);
+                return;
+            }
+            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.PlayerHasBuff(FoF) && NotChanneling)
+            {
+                API.CastSpell(IL);
+                return;
+            }
+            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && !API.PlayerIsMoving && NotCasting && NotChanneling)
+            {
+                API.CastSpell(EB);
+                return;
+            }
+            if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !API.PlayerHasBuff(BrainFreeze) && API.PlayerBuffStacks(Icicles) > 4 && API.PlayerHasBuff(IF) && API.PlayerIsMoving && NotCasting && NotChanneling)
+            {
+                API.CastSpell(EB);
+                return;
+            }
+            if (API.CanCast(RadiantSpark) && API.PlayerHasBuff(BrainFreeze) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling)
+            {
+                API.CastSpell(RadiantSpark);
+                return;
+            }
+            if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling)
+            {
+                API.CastSpell(MirrorsofTorment);
+                return;
+            }
+            if (API.CanCast(AE) && API.TargetRange <= 3 && IsAOE && API.PlayerUnitInMeleeRangeCount >= 3)
+            {
+                API.CastSpell(AE);
                 return;
             }
             if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && !API.PlayerIsMoving && NotCasting && NotChanneling)
