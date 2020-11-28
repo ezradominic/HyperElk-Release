@@ -319,7 +319,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("resonating_arrow,if=buff.bestial_wrath.up|target.time_to_die<10");
-                    if (API.CanCast(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1000) && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1000) && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Resonating_Arrow);
                         return;
@@ -409,7 +409,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("resonating_arrow");
-                    if (API.CanCast(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Resonating_Arrow);
                         return;
