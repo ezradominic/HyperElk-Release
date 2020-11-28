@@ -1,6 +1,10 @@
 ﻿// Changelog
 // v1.0 First release
 // v1.1 bearform fix
+// v1.2 bloodtalons and covenant stuff
+// v1.3 low level fix
+
+using System.Diagnostics;
 
 namespace HyperElk.Core
 {
@@ -26,6 +30,7 @@ namespace HyperElk.Core
         private string Incarnation = "Incarnation: King of the Jungle";
         private string SkullBash = "Skull Bash";
         private string SurvivalInstincts = "Survival Instincts";
+        private string Barkskin = "Barkskin";
         private string Renewal = "Renewal";
         private string StampedingRoar = "Stampeding Roar";
         private string Maim = "Maim";
@@ -41,6 +46,10 @@ namespace HyperElk.Core
         private string TravelForm = "Travel Form";
         private string ScentofBlood = "Scent of Blood";
         private string Shadowmeld = "Shadowmeld";
+        private string RavenousFrenzy = "Ravenous Frenzy";
+        private string ConvoketheSpirits = "Convoke the Spirits";
+        private string KindredSpirits = "Kindred Spirits";
+        private string AdaptiveSwarm = "Adaptive Swarm";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
@@ -57,68 +66,30 @@ namespace HyperElk.Core
         bool TalentFeralFrenzy => API.PlayerIsTalentSelected(7, 3);
 
         //General
+        private static readonly Stopwatch rakewatch = new Stopwatch();
         private int PlayerLevel => API.PlayerLevel;
-        private bool isMelee
-        {
-            get
-            {
-                if (TalentBalanceAffinity && API.TargetRange < 9 || !TalentBalanceAffinity && API.TargetRange < 6)
-                    return true;
-                return false;
-            }
-        }
-        private bool isMOMelee
-        {
-            get
-            {
-                if (TalentBalanceAffinity && API.MouseoverRange < 9 || !TalentBalanceAffinity && API.MouseoverRange < 6)
-                    return true;
-                return false;
-            }
-        }
-        private bool isThrashMelee
-        {
-            get
-            {
-                if (TalentBalanceAffinity && API.TargetRange < 12 || !TalentBalanceAffinity && API.TargetRange < 9)
-                    return true;
-                return false;
-            }
-        }
-        private bool isMOThrashMelee
-        {
-            get
-            {
-                if (TalentBalanceAffinity && API.MouseoverRange < 12 || !TalentBalanceAffinity && API.MouseoverRange < 9)
-                    return true;
-                return false;
-            }
-        }
-        private bool isKickRange
-        {
-            get
-            {
-                if (TalentBalanceAffinity && API.TargetRange < 17 || !TalentBalanceAffinity && API.TargetRange < 14)
-                    return true;
-                return false;
-            }
-        }
-        private bool IncaBerserk
-        {
-            get
-            {
-                if (API.PlayerHasBuff(Incarnation) || API.PlayerHasBuff(Berserk))
-                    return true;
-                return false;
-            }
-        }
+        private bool isMelee => (TalentBalanceAffinity && API.TargetRange < 9 || !TalentBalanceAffinity && API.TargetRange < 6);
+        private bool isMOMelee => (TalentBalanceAffinity && API.MouseoverRange < 9 || !TalentBalanceAffinity && API.MouseoverRange < 6);
+        private bool isThrashMelee => (TalentBalanceAffinity && API.TargetRange < 12 || !TalentBalanceAffinity && API.TargetRange < 9);
+        private bool isMOThrashMelee => (TalentBalanceAffinity && API.MouseoverRange < 12 || !TalentBalanceAffinity && API.MouseoverRange < 9);
+        private bool isKickRange => (TalentBalanceAffinity && API.TargetRange < 17 || !TalentBalanceAffinity && API.TargetRange < 14);
+        private bool IncaBerserk => (API.PlayerHasBuff(Incarnation) || API.PlayerHasBuff(Berserk));
+        private bool Bloodytalons => (API.PlayerBuffTimeRemaining(Bloodtalons) == 0 && TalentBloodtalons);
+        bool IsFeralFrenzy => (UseFeralFrenzy == "with Cooldowns" && IsCooldowns || UseFeralFrenzy == "always");
+        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+
         //CBProperties
-		public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseFeralFrenzy => CDUsage[CombatRoutine.GetPropertyInt(FeralFrenzy)];
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool ProwlOOC => CombatRoutine.GetPropertyBool("ProwlOOC");
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
         private int RegrowthLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Regrowth)];
         private int RenewalLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Renewal)];
+        private int BarkskinLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Barkskin)];
         private int SurvivalInstinctsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(SurvivalInstincts)];
         private int FrenziedRegenerationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(FrenziedRegeneration)];
         private int IronfurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Ironfur)];
@@ -127,7 +98,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v1.1");
+            API.WriteLog("Welcome to smartie`s Feral Druid v1.3");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -152,6 +123,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Incarnation, "D1");
             CombatRoutine.AddSpell(SkullBash, "F12");
             CombatRoutine.AddSpell(SurvivalInstincts, "F1");
+            CombatRoutine.AddSpell(Barkskin, "F1");
             CombatRoutine.AddSpell(Renewal, "F6");
             CombatRoutine.AddSpell(StampedingRoar, "F7");
             CombatRoutine.AddSpell(Maim, "F9");
@@ -161,12 +133,16 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Mangle, "D3");
             CombatRoutine.AddSpell(FrenziedRegeneration, "D7");
             CombatRoutine.AddSpell(Ironfur, "D8");
-			CombatRoutine.AddSpell(TravelForm, "NumPad6");
+            CombatRoutine.AddSpell(TravelForm, "NumPad6");
+            CombatRoutine.AddSpell(RavenousFrenzy, "D1");
+            CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
+            CombatRoutine.AddSpell(KindredSpirits, "D1");
+            CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
 
-			//Macros
-            CombatRoutine.AddMacro(Rake+"MO", "D2");
-            CombatRoutine.AddMacro(Thrash+"MO", "D6");
-            CombatRoutine.AddMacro(Rip+"MO", "D6");
+            //Macros
+            CombatRoutine.AddMacro(Rake + "MO", "D2");
+            CombatRoutine.AddMacro(Thrash + "MO", "D6");
+            CombatRoutine.AddMacro(Rip + "MO", "D6");
 
 
             //Buffs
@@ -186,23 +162,27 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Incarnation);
             CombatRoutine.AddBuff(ScentofBlood);
             CombatRoutine.AddBuff(Shadowmeld);
+            CombatRoutine.AddBuff(RavenousFrenzy);
 
             //Debuff
             CombatRoutine.AddDebuff(Rip);
             CombatRoutine.AddDebuff(Thrash);
             CombatRoutine.AddDebuff(Rake);
             CombatRoutine.AddDebuff(Moonfire);
-			
-			//Toggle
-			CombatRoutine.AddToggle("Mouseover");
+
+            //Toggle
+            CombatRoutine.AddToggle("Mouseover");
 
             //Prop
-			AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(FeralFrenzy, "Use " + FeralFrenzy, CDUsage, "Use " + FeralFrenzy + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("ProwlOOC", "ProwlOOC", true, "Use Prowl out of Combat", "Generic");
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
             CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", percentListProp, "Life percent at which" + Regrowth + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Renewal, Renewal + " Life Percent", percentListProp, "Life percent at which" + Renewal + "is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", percentListProp, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp(SurvivalInstincts, SurvivalInstincts + " Life Percent", percentListProp, "Life percent at which" + SurvivalInstincts + "is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(FrenziedRegeneration, FrenziedRegeneration + " Life Percent", percentListProp, "Life percent at which" + FrenziedRegeneration + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", percentListProp, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 9);
@@ -210,6 +190,13 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            // Stopwatch stop
+            if (rakewatch.IsRunning && rakewatch.ElapsedMilliseconds > 4000)
+            {
+                rakewatch.Reset();
+                //API.WriteLog("Resetting Rakewatch.");
+            }
+            //API.WriteLog("Bloodtalons Buff ? :"+ !Bloodytalons);
         }
         public override void CombatPulse()
         {
@@ -235,6 +222,11 @@ namespace HyperElk.Core
                 if (API.CanCast(Renewal) && API.PlayerHealthPercent <= RenewalLifePercent && TalentRenewal)
                 {
                     API.CastSpell(Renewal);
+                    return;
+                }
+                if (API.CanCast(Barkskin) && PlayerLevel >= 24 && API.PlayerHealthPercent <= BarkskinLifePercent)
+                {
+                    API.CastSpell(Barkskin);
                     return;
                 }
                 if (API.PlayerHealthPercent <= FrenziedRegenerationLifePercent && API.PlayerRage >= 10 && API.CanCast(FrenziedRegeneration) && API.PlayerHasBuff(BearForm) && TalentGuardianAffinity)
@@ -283,7 +275,7 @@ namespace HyperElk.Core
                 API.CastSpell(CatForm);
                 return;
             }
-            if (API.CanCast(Rake) && API.PlayerHasBuff(Prowl) && PlayerLevel >= 10 && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
+            if (API.CanCast(Rake) && API.PlayerHasBuff(Prowl) && isMelee && PlayerLevel >= 10 && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
             {
                 API.CastSpell(Rake);
                 return;
@@ -332,6 +324,27 @@ namespace HyperElk.Core
                         return;
                     }
                 }
+                if (API.CanCast(RavenousFrenzy) && isMelee && IncaBerserk && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                {
+                    API.CastSpell(RavenousFrenzy);
+                    return;
+                }
+                //actions.cooldown+=/convoke_the_spirits,if=(dot.rip.remains>4&(buff.tigers_fury.down|buff.tigers_fury.remains<4)&combo_points=0&dot.thrash_cat.ticking&dot.rake.ticking)|fight_remains<5
+                if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && (API.PlayerBuffTimeRemaining(TigersFury) == 0 || API.PlayerBuffTimeRemaining(TigersFury) < 400) && API.PlayerComboPoints == 0 && API.TargetHasDebuff(Thrash) && API.TargetHasDebuff(Rake)))
+                {
+                    API.CastSpell(ConvoketheSpirits);
+                    return;
+                }
+                if (API.CanCast(KindredSpirits) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerHasBuff(TigersFury, false, false))
+                {
+                    API.CastSpell(KindredSpirits);
+                    return;
+                }
+                if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant)
+                {
+                    API.CastSpell(AdaptiveSwarm);
+                    return;
+                }
                 if (API.CanCast(TigersFury) && PlayerLevel >= 12 && isMelee &&
                 (!TalentPredator && (API.PlayerEnergy <= 40 || IncaBerserk) ||
                 TalentPredator && (!API.PlayerHasBuff(TigersFury) || API.PlayerHasBuff(TigersFury) && API.PlayerEnergy <= 40)))
@@ -339,7 +352,7 @@ namespace HyperElk.Core
                     API.CastSpell(TigersFury);
                     return;
                 }
-                if (isMelee && TalentFeralFrenzy && API.CanCast(FeralFrenzy) && API.PlayerComboPoints == 0)
+                if (isMelee && TalentFeralFrenzy && API.CanCast(FeralFrenzy) && API.PlayerComboPoints == 0 && IsFeralFrenzy)
                 {
                     API.CastSpell(FeralFrenzy);
                     return;
@@ -350,14 +363,14 @@ namespace HyperElk.Core
                     //Finisher
                     if (API.PlayerComboPoints > 4)
                     {
-                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300))
-                        {
-                            API.CastSpell(FerociousBite);
-                            return;
-                        }
                         if (TalentSavageRoar && isMelee && API.CanCast(SavageRoar) && (!IncaBerserk && API.PlayerEnergy >= 30 || IncaBerserk && API.PlayerEnergy >= 18) && !API.PlayerHasBuff(SavageRoar))
                         {
                             API.CastSpell(SavageRoar);
+                            return;
+                        }
+                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
+                        {
+                            API.CastSpell(FerociousBite);
                             return;
                         }
                         if (isMelee && PlayerLevel >= 21 && API.CanCast(Rip) && (!IncaBerserk && API.PlayerEnergy >= 20 || IncaBerserk && API.PlayerEnergy >= 12) && (!API.TargetHasDebuff(Rip) || API.TargetDebuffRemainingTime(Rip) <= 300))
@@ -369,30 +382,58 @@ namespace HyperElk.Core
                     //Generator
                     if (API.PlayerComboPoints < 5)
                     {
-                        if (TalentBrutalSlash && API.TargetDebuffRemainingTime(Thrash) > 300 && !API.PlayerHasBuff(Prowl) && isThrashMelee && (API.TargetDebuffRemainingTime(Rake) > 360 || API.TargetHasDebuff(Rake) && API.PlayerHasBuff(Clearcasting)) && API.CanCast(BrutalSlash) && (!IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15 || API.PlayerHasBuff(Clearcasting)))
+                        if (Bloodytalons)
                         {
-                            API.CastSpell(BrutalSlash);
-                            return;
+                            if (API.CanCast(Rake) && PlayerLevel >= 10 && (API.TargetDebuffRemainingTime(Rake) <= 360 && TalentBrutalSlash || !TalentBrutalSlash && !rakewatch.IsRunning) && isMelee && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
+                            {
+                                API.CastSpell(Rake);
+                                rakewatch.Start();
+                                //API.WriteLog("Starting Rakewatch.");
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 11 && API.LastSpellCastInGame != Thrash && API.LastSpellCastInGame != BrutalSlash && API.CanCast(Thrash) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(Thrash);
+                                return;
+                            }
+                            if (TalentBrutalSlash && API.LastSpellCastInGame == Thrash && API.TargetDebuffRemainingTime(Thrash) > 300 && isThrashMelee && API.CanCast(BrutalSlash) && (!IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(BrutalSlash);
+                                return;
+                            }
+                            if (isMelee && PlayerLevel >= 5 && (API.LastSpellCastInGame == BrutalSlash && TalentBrutalSlash || API.LastSpellCastInGame == Thrash && !TalentBrutalSlash) && API.CanCast(Shred) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(Shred);
+                                return;
+                            }
                         }
-                        if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21) && API.TargetDebuffRemainingTime(Rake) <= 360)
+                        if (!Bloodytalons)
                         {
-                            API.CastSpell(Rake);
-                            return;
-                        }
-                        if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!IncaBerserk && API.PlayerEnergy >= 30 || IncaBerserk && API.PlayerEnergy >= 18))
-                        {
-                            API.CastSpell(Moonfire);
-                            return;
-                        }
-                        if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
-                        {
-                            API.CastSpell(Thrash);
-                            return;
-                        }
-                        if (isMelee && PlayerLevel >= 5 && API.TargetDebuffRemainingTime(Thrash) > 300 && !API.PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || API.TargetHasDebuff(Rake) && API.PlayerHasBuff(Clearcasting)) && API.CanCast(Shred) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
-                        {
-                            API.CastSpell(Shred);
-                            return;
+                            if (TalentBrutalSlash && API.TargetDebuffRemainingTime(Thrash) > 300 && !API.PlayerHasBuff(Prowl) && isThrashMelee && API.CanCast(BrutalSlash) && (!IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(BrutalSlash);
+                                return;
+                            }
+                            if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21) && API.TargetDebuffRemainingTime(Rake) <= 360)
+                            {
+                                API.CastSpell(Rake);
+                                return;
+                            }
+                            if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!IncaBerserk && API.PlayerEnergy >= 30 || IncaBerserk && API.PlayerEnergy >= 18))
+                            {
+                                API.CastSpell(Moonfire);
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(Thrash);
+                                return;
+                            }
+                            if (isMelee && PlayerLevel >= 5 && (API.TargetDebuffRemainingTime(Thrash) > 300 || PlayerLevel < 11) && !API.PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || PlayerLevel < 10) && API.CanCast(Shred) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(Shred);
+                                return;
+                            }
                         }
                     }
                 }
@@ -401,15 +442,15 @@ namespace HyperElk.Core
                     //Finisher
                     if (API.PlayerComboPoints > 4)
                     {
-						if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                        if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                         {
-                            if (API.MouseoverDebuffRemainingTime(Rip) <= 360 && API.CanCast(Rip) && !TalentPrimalWrath && isMOMelee)
+                            if (API.MouseoverDebuffRemainingTime(Rip) <= 360 && PlayerLevel >= 21 && API.CanCast(Rip) && !TalentPrimalWrath && isMOMelee)
                             {
                                 API.CastSpell(Rip + "MO");
                                 return;
                             }
                         }
-                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !TalentPrimalWrath && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300))
+                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !TalentPrimalWrath && (!IncaBerserk && API.PlayerEnergy >= 50 || IncaBerserk && API.PlayerEnergy >= 25) && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
                         {
                             API.CastSpell(FerociousBite);
                             return;
@@ -433,58 +474,86 @@ namespace HyperElk.Core
                     //Generator
                     if (API.PlayerComboPoints < 5)
                     {
-                        if (isThrashMelee && !API.PlayerHasBuff(Prowl) && API.TargetDebuffRemainingTime(Rake) > 360 && TalentBrutalSlash && API.CanCast(BrutalSlash) && API.TargetHasDebuff(Thrash) && (API.PlayerHasBuff(Clearcasting) || !IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15))
+                        if (Bloodytalons)
                         {
-                            API.CastSpell(BrutalSlash);
-                            return;
-                        }
-                        if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
-                        {
-                            API.CastSpell(Thrash);
-                            return;
-                        }
-                        if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && TalentScentofBlood && !API.PlayerHasBuff(ScentofBlood) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
-                        {
-                            API.CastSpell(Thrash);
-                            return;
-                        }
-                        if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && TalentScentofBlood && API.CanCast(Swipe) && API.PlayerHasBuff(ScentofBlood))
-                        {
-                            API.CastSpell(Swipe);
-                            return;
-                        }
-                        if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21) && API.TargetDebuffRemainingTime(Rake) <= 360)
-                        {
-                            API.CastSpell(Rake);
-                            return;
-                        }
-                        if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
-                        {
-                            if (API.MouseoverDebuffRemainingTime(Rake) <= 360 && API.CanCast(Rake) && isMOMelee)
+                            if (API.CanCast(Rake) && PlayerLevel >= 10 && (API.TargetDebuffRemainingTime(Rake) <= 360 && TalentBrutalSlash || !TalentBrutalSlash && !rakewatch.IsRunning) && isMelee && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21))
                             {
-                                API.CastSpell(Rake + "MO");
+                                API.CastSpell(Rake);
+                                rakewatch.Start();
+                                //API.WriteLog("Starting Rakewatch.");
                                 return;
                             }
-                            if (API.MouseoverDebuffRemainingTime(Thrash) <= 300 && API.CanCast(Thrash) && isMOThrashMelee)
+                            if (isThrashMelee && PlayerLevel >= 11 && API.LastSpellCastInGame != Thrash && API.LastSpellCastInGame != BrutalSlash && API.CanCast(Thrash) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
                             {
-                                API.CastSpell(Thrash + "MO");
+                                API.CastSpell(Thrash);
+                                return;
+                            }
+                            if (TalentBrutalSlash && API.LastSpellCastInGame == Thrash && API.TargetDebuffRemainingTime(Thrash) > 300 && isThrashMelee && API.CanCast(BrutalSlash) && (!IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(BrutalSlash);
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 42 && API.LastSpellCastInGame == Thrash && !TalentBrutalSlash && API.CanCast(Swipe) && (!IncaBerserk && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || IncaBerserk && API.PlayerEnergy >= 21))
+                            {
+                                API.CastSpell(Swipe);
                                 return;
                             }
                         }
-                        if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!IncaBerserk && API.PlayerEnergy >= 30 || IncaBerserk && API.PlayerEnergy >= 18))
+                        if (!Bloodytalons)
                         {
-                            API.CastSpell(Moonfire);
-                            return;
-                        }
-                        if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && !TalentBrutalSlash && API.CanCast(Swipe) && API.TargetHasDebuff(Thrash) && (!IncaBerserk && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || IncaBerserk && API.PlayerEnergy >= 21))
-                        {
-                            API.CastSpell(Swipe);
-                            return;
-                        }
-                        if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
-                        {
-                            API.CastSpell(Thrash);
-                            return;
+                            if (isThrashMelee && !API.PlayerHasBuff(Prowl) && API.TargetDebuffRemainingTime(Rake) > 360 && TalentBrutalSlash && API.CanCast(BrutalSlash) && (API.TargetHasDebuff(Thrash) || PlayerLevel < 11) && (API.PlayerHasBuff(Clearcasting) || !IncaBerserk && API.PlayerEnergy >= 25 || IncaBerserk && API.PlayerEnergy >= 15))
+                            {
+                                API.CastSpell(BrutalSlash);
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(Thrash);
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && TalentScentofBlood && !API.PlayerHasBuff(ScentofBlood) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(Thrash);
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && TalentScentofBlood && API.CanCast(Swipe) && API.PlayerHasBuff(ScentofBlood))
+                            {
+                                API.CastSpell(Swipe);
+                                return;
+                            }
+                            if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!IncaBerserk && API.PlayerEnergy >= 35 || IncaBerserk && API.PlayerEnergy >= 21) && API.TargetDebuffRemainingTime(Rake) <= 360)
+                            {
+                                API.CastSpell(Rake);
+                                return;
+                            }
+                            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                            {
+                                if (API.MouseoverDebuffRemainingTime(Rake) <= 360 && PlayerLevel >= 10 && API.CanCast(Rake) && isMOMelee)
+                                {
+                                    API.CastSpell(Rake + "MO");
+                                    return;
+                                }
+                                if (API.MouseoverDebuffRemainingTime(Thrash) <= 300 && PlayerLevel >= 11 && API.CanCast(Thrash) && isMOThrashMelee)
+                                {
+                                    API.CastSpell(Thrash + "MO");
+                                    return;
+                                }
+                            }
+                            if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!IncaBerserk && API.PlayerEnergy >= 30 || IncaBerserk && API.PlayerEnergy >= 18))
+                            {
+                                API.CastSpell(Moonfire);
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && !TalentBrutalSlash && API.CanCast(Swipe) && API.TargetHasDebuff(Thrash) && (!IncaBerserk && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || IncaBerserk && API.PlayerEnergy >= 21))
+                            {
+                                API.CastSpell(Swipe);
+                                return;
+                            }
+                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!IncaBerserk && API.PlayerEnergy >= 40 || IncaBerserk && API.PlayerEnergy >= 24 || API.PlayerHasBuff(Clearcasting)))
+                            {
+                                API.CastSpell(Thrash);
+                                return;
+                            }
                         }
                     }
                 }
