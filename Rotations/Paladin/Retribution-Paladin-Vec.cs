@@ -35,7 +35,7 @@ namespace HyperElk.Core
 
         private string DivinePurpose = "Divine Purpose";
         private string EmpyreanPower = "Empyrean Power";
-        private string Forearance = "Forearance";
+        private string Forbearance = "Forbearance";
         private string SelflessHealer = "Selfless Healer";
         private string VanquishersHammer = "Vanquisher's Hammer";
         private string DivineToll = "Divine Toll";
@@ -167,7 +167,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Seraphim);
 
             //Debuffs
-            CombatRoutine.AddDebuff(Forearance);
+            CombatRoutine.AddDebuff(Forbearance);
             CombatRoutine.AddDebuff(Judgment);
             CombatRoutine.AddDebuff(ExecutionSentence);
             CombatRoutine.AddDebuff(FinalReckoning);
@@ -227,12 +227,12 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (API.PlayerHealthPercent <= LayOnHandsLifePercent && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forearance, false, false))
+            if (API.PlayerHealthPercent <= LayOnHandsLifePercent && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forbearance, false, false))
             {
                 API.CastSpell(LayOnHands);
                 return;
             }
-            if (API.PlayerHealthPercent <= DivineShieldLifePercent && !API.SpellISOnCooldown(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forearance, false, false))
+            if (API.PlayerHealthPercent <= DivineShieldLifePercent && !API.SpellISOnCooldown(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forbearance, false, false))
             {
                 API.CastSpell(DivineShield);
                 return;
