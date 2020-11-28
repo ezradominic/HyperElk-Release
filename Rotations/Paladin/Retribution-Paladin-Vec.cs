@@ -262,7 +262,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-           API.WriteLog("debug: buff: " + API.CanCast(ExecutionSentence));
+           //API.WriteLog("debug: buff: " + API.CanCast(ExecutionSentence));
             #region cooldowns
             if (IsCooldowns)
             {
