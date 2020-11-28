@@ -168,7 +168,7 @@ namespace HyperElk.Core
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", true, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             //Settings
             CombatRoutine.AddProp(Misdirection, "Use Misdirection", MisdirectionList, "Use " + Misdirection + "Off, On AOE, On", "Generic", 0);
             CombatRoutine.AddProp(Bestial_Wrath, "Use " + Bestial_Wrath, AlwaysCooldownsList, "Use " + Bestial_Wrath + "always, with Cooldowns", "Cooldowns", 0);
@@ -191,7 +191,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            // API.WriteLog("Has Pet  " + API.PlayerHasPet + "HP " + API.PetHealthPercent);
+            // API.WriteLog("wild spirits  " + API.CanCast(Wild_Spirits));
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
                 CallPetTimer.Stop();
@@ -272,13 +272,13 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("wild_spirits");
-                    if (API.CanCast(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Wild_Spirits);
                         return;
                     }
                     //st->add_action("flayed_shot");
-                    if (API.CanCast(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Flayed_Shot);
                         return;
@@ -301,7 +301,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("death_chakram,if=focus+cast_regen<focus.max");
-                    if (API.CanCast(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Death_Chakram);
                         return;
@@ -319,7 +319,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("resonating_arrow,if=buff.bestial_wrath.up|target.time_to_die<10");
-                    if (API.CanCast(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1000) && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1000) && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Resonating_Arrow);
                         return;
@@ -384,14 +384,14 @@ namespace HyperElk.Core
                     //cleave->add_action("tar_trap,if=runeforge.soulforge_embers&tar_trap.remains<gcd&cooldown.flare.remains<gcd");
                     //cleave->add_action("flare,if=tar_trap.up&runeforge.soulforge_embers");
                     //cleave->add_action("death_chakram,if=focus+cast_regen<focus.max");
-                    if (API.CanCast(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 + 3 * API.TargetUnitInRangeCount < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 + 3 * API.TargetUnitInRangeCount < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Death_Chakram);
                         return;
                     }
 
                     //cleave->add_action("wild_spirits");
-                    if (API.CanCast(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Wild_Spirits);
                         return;
@@ -409,7 +409,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("resonating_arrow");
-                    if (API.CanCast(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Resonating_Arrow);
                         return;
@@ -421,7 +421,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("flayed_shot");
-                    if (API.CanCast(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (API.CanCast(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Flayed_Shot);
                         return;
