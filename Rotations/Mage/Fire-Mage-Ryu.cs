@@ -157,7 +157,7 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && NotCasting) 
+            if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && NotCasting)
             {
                 API.CastSpell(RadiantSpark);
                 return;
@@ -213,7 +213,7 @@ namespace HyperElk.Core
                 API.CastSpell("Meteor");
                 return;
             }
-            if (API.CanCast("Fire Blast") && API.SpellCharges("Fire Blast") > 0 && API.PlayerHasBuff("Heating Up") && InRange && Level >= 33 && NotChanneling && NotCasting && !CastShifting) 
+            if (API.CanCast("Fire Blast") && API.SpellCharges("Fire Blast") > 0 && API.PlayerHasBuff("Heating Up") && InRange && Level >= 33 && NotChanneling && NotCasting && !CastShifting)
             {
                 API.CastSpell("Fire Blast");
                 return;
@@ -235,12 +235,12 @@ namespace HyperElk.Core
                 API.CastSpell("Pyroblast");
                 return;
             }
-            if (API.CanCast("Phoenix Flames") && InRange && API.SpellCharges("Phoenix Flames") >= 1 && API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") == 0 && Level >= 19 && NotChanneling && NotCasting && !CastShifting) 
+            if (API.CanCast("Phoenix Flames") && InRange && API.SpellCharges("Phoenix Flames") >= 1 && API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") == 0 && Level >= 19 && NotChanneling && NotCasting && !CastShifting)
             {
                 API.CastSpell("Phoenix Flames");
                 return;
             }
-            if (API.CanCast("Phoenix Flames") && InRange && !API.PlayerHasBuff("Heating Up") && API.SpellCharges("Phoenix Flames") > 0 && Level >= 19 && NotChanneling && NotCasting && !CastShifting) 
+            if (API.CanCast("Phoenix Flames") && InRange && !API.PlayerHasBuff("Heating Up") && API.SpellCharges("Phoenix Flames") > 0 && Level >= 19 && NotChanneling && NotCasting && !CastShifting)
             {
                 API.CastSpell("Phoenix Flames");
                 return;
@@ -250,7 +250,7 @@ namespace HyperElk.Core
                 API.CastSpell("Scorch with Combustion");
                 return;
             }
-            if (API.CanCast("Scorch") && SearingTouch && API.TargetHealthPercent <= 30 && !API.PlayerHasBuff("Heating Up") && InRange && Level >= 13 && NotCasting && NotChanneling)  
+            if (API.CanCast("Scorch") && SearingTouch && API.TargetHealthPercent <= 30 && !API.PlayerHasBuff("Heating Up") && InRange && Level >= 13 && NotCasting && NotChanneling)
             {
                 API.CastSpell("Scorch");
                 API.WriteLog("Scorch under 30%");
@@ -269,11 +269,11 @@ namespace HyperElk.Core
                 return;
             }
             if (API.CanCast("Fireball") && NotCasting && NotChanneling && !API.PlayerIsMoving && InRange && API.TargetHealthPercent > 30.0 && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff("Combustion") && Level >= 10)
+            {
                 API.CastSpell("Fireball");
                 return;
             }
         }
-
     }
 }
 
