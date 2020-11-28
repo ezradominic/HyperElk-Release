@@ -1,5 +1,6 @@
 ﻿// Changelog
 // v1.0 First release
+// v1.1 covenants + cd managment
 using System.Diagnostics;
 
 
@@ -35,6 +36,10 @@ namespace HyperElk.Core
         private string SpiritwalkersGrace = "Spiritwalker's Grace";
         private string HealingStreamTotem = "Healing Stream Totem";
         private string LightningShield = "Lightning Shield";
+        private string PrimordialWave = "Primordial Wave";
+        private string VesperTotem = "Vesper Totem";
+        private string FaeTransfusion = "Fae Transfusion";
+        private string ChainHarvest = "Chain Harvest";
 
         //Talents
         bool TalentEchoingShock => API.PlayerIsTalentSelected(2, 2);
@@ -51,8 +56,23 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool IsInRange => API.TargetRange < 41;
         private bool IsInKickRange => API.TargetRange < 31;
+        bool IsAscendance => (UseAscendance == "with Cooldowns" && IsCooldowns || UseAscendance == "always");
+        bool IsStormElemental => (UseStormElemental == "with Cooldowns" && IsCooldowns || UseStormElemental == "always");
+        bool IsEarthElemental => (UseEarthElemental == "with Cooldowns" && IsCooldowns || UseEarthElemental == "always");
+        bool IsFireElemental => (UseFireElemental == "with Cooldowns" && IsCooldowns || UseFireElemental == "always");
+        bool IsStormkeeper => (UseStormkeeper == "with Cooldowns" && IsCooldowns || UseStormkeeper == "always" || UseStormkeeper == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
+
+        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
 
         //CBProperties
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseAscendance => CDUsage[CombatRoutine.GetPropertyInt(Ascendance)];
+        private string UseStormElemental => CDUsage[CombatRoutine.GetPropertyInt(StormElemental)];
+        private string UseEarthElemental => CDUsage[CombatRoutine.GetPropertyInt(EarthElemental)];
+        private string UseFireElemental => CDUsage[CombatRoutine.GetPropertyInt(FireElemental)];
+        private string UseStormkeeper => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Stormkeeper)];
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
         private bool SelfLightningShield => CombatRoutine.GetPropertyBool("LightningShield");
         private bool SelfEarthShield => CombatRoutine.GetPropertyBool("EarthShield");
@@ -65,7 +85,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.0");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.1");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, "D7");
@@ -91,6 +111,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(EarthShield, "F7");
             CombatRoutine.AddSpell(HealingStreamTotem, "NumPad6");
             CombatRoutine.AddSpell(LightningShield, "F2");
+            CombatRoutine.AddSpell(PrimordialWave, "D1");
+            CombatRoutine.AddSpell(VesperTotem, "D1");
+            CombatRoutine.AddSpell(FaeTransfusion, "D1");
+            CombatRoutine.AddSpell(ChainHarvest, "D1");
 
             //Buffs
             CombatRoutine.AddBuff(LavaSurge);
@@ -103,18 +127,24 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(EarthShield);
             CombatRoutine.AddBuff(LightningShield);
             CombatRoutine.AddBuff(SpiritwalkersGrace);
+            CombatRoutine.AddBuff(PrimordialWave);
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock);
 
 
             //Prop
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(Ascendance, "Use " + Ascendance, CDUsage, "Use " + Ascendance + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(StormElemental, "Use " + StormElemental, CDUsage, "Use " + StormElemental + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(EarthElemental, "Use " + EarthElemental, CDUsage, "Use " + EarthElemental + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(FireElemental, "Use " + FireElemental, CDUsage, "Use " + FireElemental + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Stormkeeper, "Use " + Stormkeeper, CDUsageWithAOE, "Use " + Stormkeeper + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + "on ourselfs", "Generic");
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + "on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
             CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", percentListProp, "Life percent at which" + AstralShift + "is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", percentListProp, "Life percent at which" + HealingStreamTotem + "is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp("Instant" + HealingSurge, HealingSurge + " Life Percent", percentListProp, "Life percent at which" + HealingSurge + "is used with Maelstorm Weapon Stacks, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(HealingSurge, HealingSurge + " Life Percent", percentListProp, "Life percent at which" + HealingSurge + "is used, set to 0 to disable", "Defense", 0);
         }
         public override void Pulse()
@@ -200,21 +230,36 @@ namespace HyperElk.Core
         {
             if (IsInRange)
             {
-                if (API.CanCast(FireElemental) && PlayerLevel >= 34 && !TalentStormElemental && IsCooldowns)
+                if (API.CanCast(FireElemental) && PlayerLevel >= 34 && !TalentStormElemental && IsFireElemental)
                 {
                     API.CastSpell(FireElemental);
                     return;
                 }
-                if (API.CanCast(StormElemental) && TalentStormElemental && IsCooldowns)
+                if (API.CanCast(StormElemental) && TalentStormElemental && IsStormElemental)
                 {
                     API.CastSpell(StormElemental);
                     stormwatch.Start();
                     API.WriteLog("Starting Stormwatch.");
                     return;
                 }
-                if (API.CanCast(EarthElemental) && PlayerLevel >= 37 && (!API.PlayerHasPet && TalentStormElemental || !TalentStormElemental) && IsCooldowns)
+                if (API.CanCast(EarthElemental) && PlayerLevel >= 37 && (!API.PlayerHasPet && TalentStormElemental || !TalentStormElemental) && IsEarthElemental)
                 {
                     API.CastSpell(EarthElemental);
+                    return;
+                }
+                if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && !API.PlayerHasBuff(PrimordialWave) && IsInRange)
+                {
+                    API.CastSpell(PrimordialWave);
+                    return;
+                }
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && IsInRange)
+                {
+                    API.CastSpell(VesperTotem);
+                    return;
+                }
+                if (API.CanCast(FaeTransfusion) && IsInRange && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                {
+                    API.CastSpell(FaeTransfusion);
                     return;
                 }
                 // Single Target rota
@@ -250,7 +295,7 @@ namespace HyperElk.Core
                         API.CastSpell(LiquidManaTotem);
                         return;
                     }
-                    if (API.CanCast(Stormkeeper) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentStormkeeper && IsCooldowns)
+                    if (API.CanCast(Stormkeeper) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentStormkeeper && IsStormkeeper)
                     {
                         API.CastSpell(Stormkeeper);
                         return;
@@ -265,7 +310,7 @@ namespace HyperElk.Core
                         API.CastSpell(LightningBolt);
                         return;
                     }
-                    if (API.CanCast(Ascendance) && TalentAscendance && IsCooldowns)
+                    if (API.CanCast(Ascendance) && TalentAscendance && IsAscendance)
                     {
                         API.CastSpell(Ascendance);
                         return;
@@ -278,6 +323,11 @@ namespace HyperElk.Core
                     if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerHasBuff(Icefury) && API.PlayerHasBuff(MasteroftheElements))
                     {
                         API.CastSpell(FrostShock);
+                        return;
+                    }
+                    if (API.CanCast(ChainHarvest) && IsInRange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                    {
+                        API.CastSpell(ChainHarvest);
                         return;
                     }
                     if (API.CanCast(LightningBolt) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && API.PlayerHasBuff(SurgeofPower))
@@ -314,7 +364,7 @@ namespace HyperElk.Core
                 //AoE rota
                 if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)
                 {
-                    if (API.CanCast(Stormkeeper) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentStormkeeper && IsCooldowns)
+                    if (API.CanCast(Stormkeeper) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentStormkeeper && IsStormkeeper)
                     {
                         API.CastSpell(Stormkeeper);
                         return;

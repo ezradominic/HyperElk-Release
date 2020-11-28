@@ -26,7 +26,7 @@ namespace HyperElk.Core
         private string FrostShock = "Frost Shock";
         private string IceStrike = "Ice Strike";
         private string FireNova = "Fire Nova";
-        private string StormKeeper = "Storm Keeper";
+        private string StormKeeper = "Stormkeeper";
         private string FlameShock = "Flame Shock";
         private string EarthElemental = "Earth Elemental";
         private string EarthShield = "Earth Shield";
