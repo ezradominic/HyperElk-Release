@@ -4,6 +4,7 @@
 // v1.2 bloodtalons and covenant stuff
 // v1.3 low level fix
 // v1.4 improved bloodtalons code and alot of small fixes
+// v1.5 covenant update :-)
 
 using System.Diagnostics;
 
@@ -49,8 +50,10 @@ namespace HyperElk.Core
         private string Shadowmeld = "Shadowmeld";
         private string RavenousFrenzy = "Ravenous Frenzy";
         private string ConvoketheSpirits = "Convoke the Spirits";
-        private string KindredSpirits = "Kindred Spirits";
         private string AdaptiveSwarm = "Adaptive Swarm";
+        private string LoneEmpowerment= "Lone Empowerment";
+        private string LoneSpirit = "Lone Spirit";
+        private string Soulshape = "Soulshape";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
@@ -105,7 +108,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v1.4");
+            API.WriteLog("Welcome to smartie`s Feral Druid v1.5");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -143,8 +146,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TravelForm, "NumPad6");
             CombatRoutine.AddSpell(RavenousFrenzy, "D1");
             CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
-            CombatRoutine.AddSpell(KindredSpirits, "D1");
             CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
+            CombatRoutine.AddSpell(LoneEmpowerment, "D1");
+
 
             //Macros
             CombatRoutine.AddMacro(Rake + "MO", "D2");
@@ -170,6 +174,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(ScentofBlood);
             CombatRoutine.AddBuff(Shadowmeld);
             CombatRoutine.AddBuff(RavenousFrenzy);
+            CombatRoutine.AddBuff(LoneSpirit);
+            CombatRoutine.AddBuff(Soulshape);
 
             //Debuff
             CombatRoutine.AddDebuff(Rip);
@@ -290,7 +296,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if ((!API.PlayerHasBuff(CatForm) && PlayerLevel >= 5) && !API.PlayerHasBuff(BearForm) && AutoForm)
+            if ((!API.PlayerHasBuff(CatForm) && PlayerLevel >= 5) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(Soulshape) && AutoForm)
             {
                 API.CastSpell(CatForm);
                 return;
@@ -352,9 +358,9 @@ namespace HyperElk.Core
                     API.CastSpell(ConvoketheSpirits);
                     return;
                 }
-                if (API.CanCast(KindredSpirits) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerHasBuff(TigersFury, false, false))
+                if (API.CanCast(LoneEmpowerment) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerHasBuff(TigersFury, false, false) && API.PlayerHasBuff(LoneSpirit))
                 {
-                    API.CastSpell(KindredSpirits);
+                    API.CastSpell(LoneEmpowerment);
                     return;
                 }
                 if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))

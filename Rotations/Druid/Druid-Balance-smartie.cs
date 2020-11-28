@@ -4,6 +4,7 @@
 // v1.2 switch out of bear fix
 // v1.3 covenants added + cd managment
 // v1.35 small hotfix
+// v1.4 covenant update
 
 namespace HyperElk.Core
 {
@@ -44,8 +45,10 @@ namespace HyperElk.Core
         private string Starlord = "Starlord";
         private string RavenousFrenzy = "Ravenous Frenzy";
         private string ConvoketheSpirits = "Convoke the Spirits";
-        private string KindredSpirits = "Kindred Spirits";
         private string AdaptiveSwarm = "Adaptive Swarm";
+        private string LoneEmpowerment = "Lone Empowerment";
+        private string LoneSpirit = "Lone Spirit";
+        private string Soulshape = "Soulshape";
 
         //Talents
         bool TalentNatureBalance => API.PlayerIsTalentSelected(1, 1);
@@ -97,7 +100,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.35");
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.4");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -133,8 +136,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TravelForm, "NumPad6");
             CombatRoutine.AddSpell(RavenousFrenzy, "D1");
             CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
-            CombatRoutine.AddSpell(KindredSpirits, "D1");
             CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
+            CombatRoutine.AddSpell(LoneEmpowerment, "D1");
 
             //Macros
             CombatRoutine.AddMacro(Moonfire+"MO", "NumPad7");
@@ -155,6 +158,9 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(FrenziedRegeneration);
             CombatRoutine.AddBuff(Starlord);
             CombatRoutine.AddBuff(RavenousFrenzy);
+            CombatRoutine.AddBuff(LoneSpirit);
+            CombatRoutine.AddBuff(Soulshape);
+
 
             //Debuff
             CombatRoutine.AddDebuff(Moonfire);
@@ -249,7 +255,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (API.CanCast(MoonkinForm) && PlayerLevel >= 21 && !API.PlayerHasBuff(MoonkinForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm))
+            if (API.CanCast(MoonkinForm) && PlayerLevel >= 21 && !API.PlayerHasBuff(MoonkinForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape))
             {
                 API.CastSpell(MoonkinForm);
                 return;
@@ -304,9 +310,9 @@ namespace HyperElk.Core
                     API.CastSpell(ConvoketheSpirits);
                     return;
                 }
-                if (API.CanCast(KindredSpirits) && isinRange && PlayerCovenantSettings == "Kyrian" && IsCovenant)
+                if (API.CanCast(LoneEmpowerment) && isinRange && API.PlayerHasBuff(LoneSpirit) && PlayerCovenantSettings == "Kyrian" && IsCovenant)
                 {
-                    API.CastSpell(KindredSpirits);
+                    API.CastSpell(LoneEmpowerment);
                     return;
                 }
                 if (API.CanCast(AdaptiveSwarm) && isinRange && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))

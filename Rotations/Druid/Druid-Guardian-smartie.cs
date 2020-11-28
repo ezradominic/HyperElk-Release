@@ -2,6 +2,7 @@
 // v1.0 First release
 // v1.1 frenzied regeneration fix
 // v1.2 covenants added + cd managment
+// v1.3 covenant update :-)
 
 namespace HyperElk.Core
 {
@@ -32,8 +33,10 @@ namespace HyperElk.Core
         private string Renewal = "Renewal";
         private string RavenousFrenzy = "Ravenous Frenzy";
         private string ConvoketheSpirits = "Convoke the Spirits";
-        private string KindredSpirits = "Kindred Spirits";
         private string AdaptiveSwarm = "Adaptive Swarm";
+        private string LoneProtection = "Lone Protection";
+        private string LoneSpirit = "Lone Spirit";
+        private string Soulshape = "Soulshape";
 
 
         //Talents
@@ -74,10 +77,11 @@ namespace HyperElk.Core
         private int IronfurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Ironfur)];
         private int BristlingFurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(BristlingFur)];
         private int PulverizeLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Pulverize)];
+        private int LoneProtectionLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LoneProtection)];
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.2");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.3");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, "D3");
@@ -101,8 +105,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Typhoon, "F8");
             CombatRoutine.AddSpell(RavenousFrenzy, "D1");
             CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
-            CombatRoutine.AddSpell(KindredSpirits, "D1");
             CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
+            CombatRoutine.AddSpell(LoneProtection, "D1");
 
             //Buffs
             CombatRoutine.AddBuff(GalacticGuardian);
@@ -119,6 +123,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Pulverize);
             CombatRoutine.AddBuff(ToothandClaw);
             CombatRoutine.AddBuff(RavenousFrenzy);
+            CombatRoutine.AddBuff(LoneSpirit);
+            CombatRoutine.AddBuff(Soulshape);
 
             //Debuff
             CombatRoutine.AddDebuff(Thrash);
@@ -138,6 +144,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", percentListProp, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 9);
             CombatRoutine.AddProp(BristlingFur, BristlingFur + " Life Percent", percentListProp, "Life percent at which" + BristlingFur + "is used, set to 0 to disable", "Defense", 5);
             CombatRoutine.AddProp(Pulverize, Pulverize + " Life Percent", percentListProp, "Life percent at which" + Pulverize + "is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(LoneProtection, LoneProtection + " Life Percent", percentListProp, "Life percent at which" + LoneProtection + "is used, set to 0 to disable", "Defense", 5);
         }
         public override void Pulse()
         {
@@ -188,6 +195,11 @@ namespace HyperElk.Core
                     API.CastSpell(Pulverize);
                     return;
                 }
+                if (API.PlayerHealthPercent <= LoneProtectionLifePercent && API.CanCast(LoneProtection) && isMelee && API.PlayerHasBuff(LoneSpirit) && PlayerCovenantSettings == "Kyrian")
+                {
+                    API.CastSpell(LoneProtection);
+                    return;
+                }
                 rotation();
                 return;
             }
@@ -204,7 +216,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if ((!API.PlayerHasBuff(BearForm) && PlayerLevel >= 8) && !API.PlayerHasBuff(CatForm) && AutoForm)
+            if ((!API.PlayerHasBuff(BearForm) && PlayerLevel >= 8) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && AutoForm)
             {
                 API.CastSpell(BearForm);
                 return;
@@ -235,11 +247,6 @@ namespace HyperElk.Core
                 if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(ConvoketheSpirits);
-                    return;
-                }
-                if (API.CanCast(KindredSpirits) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant)
-                {
-                    API.CastSpell(KindredSpirits);
                     return;
                 }
                 if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))
