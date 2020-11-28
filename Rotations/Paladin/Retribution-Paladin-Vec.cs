@@ -35,7 +35,7 @@ namespace HyperElk.Core
 
         private string DivinePurpose = "Divine Purpose";
         private string EmpyreanPower = "Empyrean Power";
-        private string Forearance = "Forearance";
+        private string Forbearance = "Forbearance";
         private string SelflessHealer = "Selfless Healer";
         private string VanquishersHammer = "Vanquisher's Hammer";
         private string DivineToll = "Divine Toll";
@@ -50,7 +50,7 @@ namespace HyperElk.Core
         private bool HasDefenseBuff => API.PlayerHasBuff(ShieldofVengeance, false, false) || API.PlayerHasBuff(DivineShield, false, false);
         private float CrusaderStrikeCooldown => (6 / (1 + API.PlayerGetHaste / 100)) * 100;
         private float Crusader_Strike_Fractional => (API.SpellCharges(CrusaderStrike) * 100 + ((CrusaderStrikeCooldown - API.SpellChargeCD(CrusaderStrike)) / (CrusaderStrikeCooldown / 100)));
-        private bool gcd_to_hpg => API.SpellCDDuration(CrusaderStrike) > gcd && API.SpellCDDuration(BladeofJustice) > gcd && API.SpellCDDuration(Judgment) > gcd && (API.SpellCDDuration(HammerofWrath) > gcd || API.TargetHealthPercent > 20) && API.SpellCDDuration(WakeofAshes) > gcd;
+        private bool gcd_to_hpg => API.SpellCDDuration(CrusaderStrike) > gcd && API.SpellCDDuration(BladeofJustice) > gcd && API.SpellCDDuration(Judgment) > gcd && (API.SpellCDDuration(HammerofWrath) > gcd || API.TargetHealthPercent > 20) && API.SpellCDDuration(WakeofAshes) > gcd ;
 
         private static bool PlayerHasBuff(string buff)
         {
@@ -112,7 +112,7 @@ namespace HyperElk.Core
         private int WordOfGloryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(WordOfGlory)];
         private int FlashofLightLifePercentProc => percentListProp[CombatRoutine.GetPropertyInt(FlashofLight)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
-        private string UseWakeofAshes => AlwaysCooldownsList[CombatRoutine.GetPropertyInt("UseWakeofAshes")];
+        private string UseWakeofAshes => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseWakeofAshes")];
 
         public override void Initialize()
         {
@@ -167,7 +167,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Seraphim);
 
             //Debuffs
-            CombatRoutine.AddDebuff(Forearance);
+            CombatRoutine.AddDebuff(Forbearance);
             CombatRoutine.AddDebuff(Judgment);
             CombatRoutine.AddDebuff(ExecutionSentence);
             CombatRoutine.AddDebuff(FinalReckoning);
@@ -180,7 +180,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(FlashofLight, "Selfless Healer Life Percent", percentListProp, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", FlashofLight, 5);
             
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp("UseWakeofAshes", "Use " + "Wake of Ashes", AlwaysCooldownsList, "Use " + WakeofAshes + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("UseWakeofAshes", "Use " + "Wake of Ashes", CDUsageWithAOE, "Use " + WakeofAshes + " always, with Cooldowns", "Cooldowns", 0);
 
             CombatRoutine.AddProp("AURASWITCH", "Auto Aura Switch", true, "Auto Switch Aura between Crusader Aura and Devotion Aura", "Generic");
 
@@ -227,12 +227,12 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (API.PlayerHealthPercent <= LayOnHandsLifePercent && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forearance, false, false))
+            if (API.PlayerHealthPercent <= LayOnHandsLifePercent && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forbearance, false, false))
             {
                 API.CastSpell(LayOnHands);
                 return;
             }
-            if (API.PlayerHealthPercent <= DivineShieldLifePercent && !API.SpellISOnCooldown(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forearance, false, false))
+            if (API.PlayerHealthPercent <= DivineShieldLifePercent && !API.SpellISOnCooldown(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forbearance, false, false))
             {
                 API.CastSpell(DivineShield);
                 return;
@@ -313,7 +313,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //generators->add_action(this, "Wake of Ashes", "if=(holy_power=0|holy_power<=2&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!raid_event.adds.exists|raid_event.adds.in>20)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>15)&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>15)");
-                if (API.CanCast(WakeofAshes) && IsMelee && PlayerLevel >= 39 && (holy_power == 0 || holy_power <= 2 && (API.SpellCDDuration(BladeofJustice) > gcd * 2 || API.TargetHasDebuff(ExecutionSentence) || API.TargetHasDebuff(FinalReckoning))) && (!API.PlayerIsTalentSelected(1, 3) || (API.SpellCDDuration(ExecutionSentence) > 1500)) && (!Talent_FinalReckoning || (API.SpellCDDuration(FinalReckoning) > 1500)))
+                if (API.CanCast(WakeofAshes) && IsMelee && PlayerLevel >= 39 && (UseWakeofAshes == "With Cooldowns" && IsCooldowns || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && (!IsCooldowns || ((holy_power == 0 || holy_power <= 2 && (API.SpellCDDuration(BladeofJustice) > gcd * 2 || API.TargetHasDebuff(ExecutionSentence) || API.TargetHasDebuff(FinalReckoning))) && (!API.PlayerIsTalentSelected(1, 3) || (API.SpellCDDuration(ExecutionSentence) > 1500)) && (!Talent_FinalReckoning || (API.SpellCDDuration(FinalReckoning) > 1500)))))
                 {
                     API.CastSpell(WakeofAshes);
                     return;

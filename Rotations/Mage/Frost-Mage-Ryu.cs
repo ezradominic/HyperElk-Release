@@ -36,7 +36,8 @@ namespace HyperElk.Core
         private string AE = "Arcane Explosion";
         private string Fleshcraft = "Fleshcraft";
         private string FR = "Freezing Rain";
-
+        private string trinket1 = "trinket1";
+        private string trinket2 = "trinket2";
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
         bool IceNova => API.PlayerIsTalentSelected(1, 3);
@@ -52,6 +53,8 @@ namespace HyperElk.Core
         private int IceBarrierPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IceBarrier)];
         private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
+        private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
+        private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt(RoP)];
         private string UseIV => CDUsage[CombatRoutine.GetPropertyInt(IV)];
@@ -59,6 +62,7 @@ namespace HyperElk.Core
         //General
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         bool CastShifting => API.PlayerLastSpell == ShiftingPower;
+        bool CastIV => API.PlayerLastSpell == IV;
         private int Level => API.PlayerLevel;
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
@@ -119,6 +123,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Fleshcraft);
 
             //Macro
+            CombatRoutine.AddMacro(trinket1);
+            CombatRoutine.AddMacro(trinket2);
 
             //Prop
             CombatRoutine.AddProp(IceBarrier, IceBarrier, percentListProp, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
@@ -128,6 +134,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
             CombatRoutine.AddProp(RoP, "Use " + RoP, CDUsage, "Use " + RoP + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp(IV, "Use " + IV, CDUsage, "Use " + IV + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
 
         }
 
@@ -169,6 +177,14 @@ namespace HyperElk.Core
                 API.CastSpell(IceBarrier);
                 return;
             }
+            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !CastShifting) 
+                API.CastSpell(trinket1);
+            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !CastShifting)
+                API.CastSpell(trinket1);
+            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !CastShifting)
+                API.CastSpell(trinket2);
+            if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !CastShifting)
+                API.CastSpell(trinket2);
             if (Level <= 60)
             {
                 rotation();
@@ -198,7 +214,7 @@ namespace HyperElk.Core
                 API.CastSpell(ShiftingPower);
                 return;
             }
-            if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !API.PlayerHasBuff(RoP) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotChanneling && API.SpellCDDuration(IV) >= 1500 && !CastShifting) 
+            if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !CastIV && !API.PlayerHasBuff(RoP) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotChanneling && API.SpellCDDuration(IV) >= 1500 && !CastShifting) 
             {
                 API.CastSpell(RoP);
                 return;

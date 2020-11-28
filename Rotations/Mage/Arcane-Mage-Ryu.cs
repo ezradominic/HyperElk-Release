@@ -15,6 +15,8 @@ namespace HyperElk.Core
         private string Deathborne = "Deathborne";
         private string MirrorsofTorment = "Mirrors of Torment";
         private string Fleshcraft = "Fleshcraft";
+        private string trinket1 = "trinket1";
+        private string trinket2 = "trinket2";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -40,6 +42,8 @@ namespace HyperElk.Core
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt("Rune of Power")];
 
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
+        private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
+        private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
         //General
         private int Level => API.PlayerLevel;
         private bool NotCasting => !API.PlayerIsCasting;
@@ -50,7 +54,7 @@ namespace HyperElk.Core
         private bool Conserve => API.PlayerMana <= 59 && API.SpellISOnCooldown("Evocation");
         private int Mana => API.PlayerMana;
         bool CastShifting => API.PlayerLastSpell == ShiftingPower;
-
+        bool CastArcanePower => API.PlayerLastSpell == "Arcane Power";
         //private static readonly Stopwatch Burnphase = new Stopwatch();
         //private static readonly Stopwatch API.PlayerMana <= 59 && API.SpellISOnCooldown("Evocation")phase = new Stopwatch();
 
@@ -104,6 +108,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(MirrorsofTorment);
             CombatRoutine.AddSpell(Fleshcraft);
 
+            //Macro
+            CombatRoutine.AddMacro(trinket1);
+            CombatRoutine.AddMacro(trinket2);
+
 
             //Prop
             CombatRoutine.AddProp(PB, PB, percentListProp, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
@@ -113,7 +121,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
             CombatRoutine.AddProp("Arcane Power", "Use " + "Arcane Power", CDUsage, "Use " + "Arcane Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Rune of Power", "Use " + "Rune of Power", CDUsage, "Use " + "Rune of Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
-
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
 
 
 
@@ -157,6 +166,14 @@ namespace HyperElk.Core
                 API.CastSpell("Prismatic Barrier");
                 return;
             }
+            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !CastShifting)
+                API.CastSpell(trinket1);
+            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !CastShifting)
+                API.CastSpell(trinket1);
+            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !CastShifting)
+                API.CastSpell(trinket2);
+            if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !CastShifting)
+                API.CastSpell(trinket2);
             if (Level <= 60)
             {
                 rotation();
@@ -191,7 +208,7 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Power");
                 return;
             }
-            if (RuneofPower && API.CanCast("Rune of Power") && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotCasting && NotChanneling && !CastShifting)
+            if (RuneofPower && API.CanCast("Rune of Power") && !CastArcanePower && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotCasting && NotChanneling && !CastShifting)
             {
                 API.CastSpell("Rune of Power");
                 return;
