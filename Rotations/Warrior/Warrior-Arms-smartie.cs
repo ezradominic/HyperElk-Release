@@ -3,6 +3,7 @@
 // v1.1 Victory Rush fix
 // v1.2 covenant support
 // v1.3 big apl update + heroic throw stuff
+// v1.4 condemn fix
 
 namespace HyperElk.Core
 {
@@ -36,7 +37,7 @@ namespace HyperElk.Core
         private string DeepWounds = "Deep Wounds";
         private string StoneHeart = "Stone Heart";
         private string Victorious = "Victorious";
-        private string Condemn = "330325";
+        private string Condemn = "Condemn";
         private string SpearofBastion = "Spear of Bastion";
         private string AncientAftershock = "Ancient Aftershock";
         private string ConquerorsBanner = "Conqueror's Banner";
@@ -93,8 +94,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v1.3");
-            API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v1.4");
 
             //Spells
             CombatRoutine.AddSpell(MortalStrike, "D4");
@@ -178,7 +178,7 @@ namespace HyperElk.Core
                 API.CastSpell(Pummel);
                 return;
             }
-            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious))
+            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious) && IsMelee)
             {
                 API.CastSpell(VictoryRush);
                 return;

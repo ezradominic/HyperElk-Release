@@ -4,6 +4,7 @@
 // v1.2 covenants added - shield block changed
 // v1.3 covenant update
 // v1.4 heroic throw update
+// v1.5 condemn fix
 
 namespace HyperElk.Core
 {
@@ -39,7 +40,7 @@ namespace HyperElk.Core
         private string VengeanceIgnorePain = "Vengeance: Ignore Pain";
         private string RenewedFury = "Renewed Fury";
         private string Victorious = "Victorious";
-        private string Condemn = "330325";
+        private string Condemn = "Condemn";
         private string SpearofBastion = "Spear of Bastion";
         private string AncientAftershock = "Ancient Aftershock";
         private string ConquerorsBanner = "Conqueror's Banner";
@@ -76,8 +77,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.4");
-            API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.5");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam, "D4");
@@ -192,7 +192,7 @@ namespace HyperElk.Core
                 API.CastSpell(ShieldBlock);
                 return;
             }
-            if (API.CanCast(VictoryRush) && API.PlayerHealthPercent <= VictoryRushLifePercent && API.PlayerHasBuff(Victorious) && PlayerLevel >= 5)
+            if (API.CanCast(VictoryRush) && API.PlayerHealthPercent <= VictoryRushLifePercent && API.PlayerHasBuff(Victorious) && PlayerLevel >= 5 && IsMelee)
             {
                 API.CastSpell(VictoryRush);
                 return;

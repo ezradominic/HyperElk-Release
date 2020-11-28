@@ -7,6 +7,7 @@
 // v1.5 covenant ability always or with cds
 // v1.6 covenant changes
 // v1.7 Heroic Throw toggle
+// v1.8 condemn fix
 
 namespace HyperElk.Core
 {
@@ -37,7 +38,7 @@ namespace HyperElk.Core
         private string Enrage = "Enrage";
         private string SuddenDeath = "Sudden Death";
         private string Victorious = "Victorious";
-        private string Condemn = "330325";
+        private string Condemn = "Condemn";
         private string SpearofBastion = "Spear of Bastion";
         private string AncientAftershock = "Ancient Aftershock";
         private string ConquerorsBanner = "Conqueror's Banner";
@@ -74,8 +75,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.7");
-            API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.8");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, "D1");
@@ -157,7 +157,7 @@ namespace HyperElk.Core
                 API.CastSpell(EnragedRegeneration);
                 return;
             }
-            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious))
+            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious) && IsMelee)
             {
                 API.CastSpell(VictoryRush);
                 return;
@@ -245,7 +245,7 @@ namespace HyperElk.Core
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && !API.SpellISOnCooldown(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
+                if (!API.SpellISOnCooldown(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Condemn);
                     return;
