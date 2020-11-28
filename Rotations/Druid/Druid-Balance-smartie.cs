@@ -2,6 +2,7 @@
 // v1.0 First release
 // v1.1 Starlord and Stellar Drift fixes
 // v1.2 switch out of bear fix
+// v1.3 covenants added + cd managment
 
 namespace HyperElk.Core
 {
@@ -40,6 +41,10 @@ namespace HyperElk.Core
         private string TravelForm = "Travel Form";
         private string CatForm = "Cat Form";
         private string Starlord = "Starlord";
+        private string RavenousFrenzy = "Ravenous Frenzy";
+        private string ConvoketheSpirits = "Convoke the Spirits";
+        private string KindredSpirits = "Kindred Spirits";
+        private string AdaptiveSwarm = "Adaptive Swarm";
 
         //Talents
         bool TalentNatureBalance => API.PlayerIsTalentSelected(1, 1);
@@ -59,8 +64,23 @@ namespace HyperElk.Core
         private bool isinRange => API.TargetRange < 45;
         private bool isMOinRange => API.MouseoverRange < 45;
         private bool UseStarlord => (TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) == 0 || TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) > 400 && API.PlayerBuffTimeRemaining(Starlord) != 5000000 || !TalentStarlord);
+        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsIncarnation => (UseIncarnation == "with Cooldowns" && IsCooldowns || UseIncarnation == "always");
+        bool IsCelestialAlignment => (UseCelestialAlignment == "with Cooldowns" && IsCooldowns || UseCelestialAlignment == "always");
+        bool IsWarriorofElune => (UseWarriorofElune == "with Cooldowns" && IsCooldowns || UseWarriorofElune == "always" || UseWarriorofElune == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsForceofNature => (UseForceofNature == "with Cooldowns" && IsCooldowns || UseForceofNature == "always" || UseForceofNature == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsFuryofElune => (UseFuryofElune == "with Cooldowns" && IsCooldowns || UseFuryofElune == "always" || UseFuryofElune == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+
 
         //CBProperties
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
+        private string UseCelestialAlignment => CDUsage[CombatRoutine.GetPropertyInt(CelestialAlignment)];
+        private string UseWarriorofElune => CDUsageWithAOE[CombatRoutine.GetPropertyInt(WarriorofElune)];
+        private string UseForceofNature => CDUsageWithAOE[CombatRoutine.GetPropertyInt(ForceofNature)];
+        private string UseFuryofElune => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FuryofElune)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool SpamDots => CombatRoutine.GetPropertyBool("SpamDots");
@@ -76,7 +96,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.2");
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.3");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -110,6 +130,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FrenziedRegeneration, "D6");
             CombatRoutine.AddSpell(Ironfur, "D5");
             CombatRoutine.AddSpell(TravelForm, "NumPad6");
+            CombatRoutine.AddSpell(RavenousFrenzy, "D1");
+            CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
+            CombatRoutine.AddSpell(KindredSpirits, "D1");
+            CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
 
             //Macros
             CombatRoutine.AddMacro(Moonfire+"MO", "NumPad7");
@@ -129,18 +153,26 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(CatForm);
             CombatRoutine.AddBuff(FrenziedRegeneration);
             CombatRoutine.AddBuff(Starlord);
+            CombatRoutine.AddBuff(RavenousFrenzy);
 
             //Debuff
             CombatRoutine.AddDebuff(Moonfire);
             CombatRoutine.AddDebuff(Sunfire);
             CombatRoutine.AddDebuff(StellarFlare);
             CombatRoutine.AddDebuff(Thrash);
+            CombatRoutine.AddDebuff(AdaptiveSwarm);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
 
             //Prop
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsage, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(CelestialAlignment, "Use " + CelestialAlignment, CDUsage, "Use " + CelestialAlignment + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(WarriorofElune, "Use " + WarriorofElune, CDUsageWithAOE, "Use " + WarriorofElune + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(ForceofNature, "Use " + ForceofNature, CDUsageWithAOE, "Use " + ForceofNature + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(FuryofElune, "Use " + FuryofElune, CDUsageWithAOE, "Use " + FuryofElune + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("SpamDots", "SpamDots", true, "Will spam Dots while moving", "Generic");
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
@@ -236,33 +268,50 @@ namespace HyperElk.Core
             }
             if (isinRange && (API.PlayerHasBuff(MoonkinForm) || PlayerLevel < 21))
             {
-                if (IsCooldowns)
+                if (API.CanCast(WarriorofElune) && !API.PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune)
                 {
-                    if (API.CanCast(WarriorofElune) && !API.PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune)
-                    {
-                        API.CastSpell(WarriorofElune);
-                        return;
-                    }
-                    if (API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && TalentIncarnation)
-                    {
-                        API.CastSpell(Incarnation);
-                        return;
-                    }
-                    if (API.CanCast(CelestialAlignment) && PlayerLevel >= 39 && !IncaCelestial && API.PlayerAstral >= 90 && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && !TalentIncarnation)
-                    {
-                        API.CastSpell(CelestialAlignment);
-                        return;
-                    }
-                    if (API.CanCast(FuryofElune) && TalentFuryOfElune)
-                    {
-                        API.CastSpell(FuryofElune);
-                        return;
-                    }
-                    if (API.CanCast(ForceofNature) && TalentForceOfNature && (IncaCelestial || (API.SpellCDDuration(Incarnation) > 3000 && TalentIncarnation || API.SpellCDDuration(CelestialAlignment) > 3000 && !TalentIncarnation)))
-                    {
-                        API.CastSpell(ForceofNature);
-                        return;
-                    }
+                    API.CastSpell(WarriorofElune);
+                    return;
+                }
+                if (API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && IsIncarnation && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && TalentIncarnation)
+                {
+                    API.CastSpell(Incarnation);
+                    return;
+                }
+                if (API.CanCast(CelestialAlignment) && PlayerLevel >= 39 && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral >= 90 && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && !TalentIncarnation)
+                {
+                    API.CastSpell(CelestialAlignment);
+                    return;
+                }
+                if (API.CanCast(FuryofElune) && TalentFuryOfElune && IsFuryofElune)
+                {
+                    API.CastSpell(FuryofElune);
+                    return;
+                }
+                if (API.CanCast(ForceofNature) && TalentForceOfNature && IsForceofNature && (IncaCelestial || (API.SpellCDDuration(Incarnation) > 3000 && TalentIncarnation || API.SpellCDDuration(CelestialAlignment) > 3000 && !TalentIncarnation)))
+                {
+                    API.CastSpell(ForceofNature);
+                    return;
+                }
+                if (API.CanCast(RavenousFrenzy) && isinRange && IncaCelestial && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                {
+                    API.CastSpell(RavenousFrenzy);
+                    return;
+                }
+                if (API.CanCast(ConvoketheSpirits) && isinRange && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                {
+                    API.CastSpell(ConvoketheSpirits);
+                    return;
+                }
+                if (API.CanCast(KindredSpirits) && isinRange && PlayerCovenantSettings == "Kyrian" && IsCovenant)
+                {
+                    API.CastSpell(KindredSpirits);
+                    return;
+                }
+                if (API.CanCast(AdaptiveSwarm) && isinRange && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))
+                {
+                    API.CastSpell(AdaptiveSwarm);
+                    return;
                 }
                 // Single Target rota
                 if (API.TargetUnitInRangeCount < AOEUnitNumber || !IsAOE)

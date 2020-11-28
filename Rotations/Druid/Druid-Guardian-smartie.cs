@@ -1,6 +1,7 @@
 ﻿// Changelog
 // v1.0 First release
 // v1.1 frenzied regeneration fix
+// v1.2 covenants added + cd managment
 
 namespace HyperElk.Core
 {
@@ -29,6 +30,10 @@ namespace HyperElk.Core
         private string ToothandClaw = "Tooth and Claw";
         private string Berserk = "Berserk";
         private string Renewal = "Renewal";
+        private string RavenousFrenzy = "Ravenous Frenzy";
+        private string ConvoketheSpirits = "Convoke the Spirits";
+        private string KindredSpirits = "Kindred Spirits";
+        private string AdaptiveSwarm = "Adaptive Swarm";
 
 
         //Talents
@@ -50,7 +55,16 @@ namespace HyperElk.Core
         private bool isKickRange => (TalentBalanceAffinity && API.TargetRange < 17 || !TalentBalanceAffinity && API.TargetRange < 14);
 
         private bool IncaBerserk => (API.PlayerHasBuff(Incarnation) || API.PlayerHasBuff(Berserk));
+        bool IsBerserk => (UseBerserk == "with Cooldowns" && IsCooldowns || UseBerserk == "always");
+        bool IsIncarnation => (UseIncarnation == "with Cooldowns" && IsCooldowns || UseIncarnation == "always");
+        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+
         //CBProperties
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
+        private string UseBerserk => CDUsage[CombatRoutine.GetPropertyInt(Berserk)];
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
         private int BarkskinLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Barkskin)];
@@ -63,7 +77,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.1");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.2");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, "D3");
@@ -85,6 +99,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SkullBash, "F12");
             CombatRoutine.AddSpell(StampedingRoar, "NumPad5");
             CombatRoutine.AddSpell(Typhoon, "F8");
+            CombatRoutine.AddSpell(RavenousFrenzy, "D1");
+            CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
+            CombatRoutine.AddSpell(KindredSpirits, "D1");
+            CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
 
             //Buffs
             CombatRoutine.AddBuff(GalacticGuardian);
@@ -100,12 +118,17 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(BristlingFur);
             CombatRoutine.AddBuff(Pulverize);
             CombatRoutine.AddBuff(ToothandClaw);
+            CombatRoutine.AddBuff(RavenousFrenzy);
 
             //Debuff
             CombatRoutine.AddDebuff(Thrash);
             CombatRoutine.AddDebuff(Moonfire);
+            CombatRoutine.AddDebuff(AdaptiveSwarm);
 
             //Prop
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsage, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Berserk, "Use " + Berserk, CDUsage, "Use " + Berserk + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
             CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", percentListProp, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 6);
@@ -193,14 +216,35 @@ namespace HyperElk.Core
             }
             if (API.PlayerHasBuff(BearForm) && PlayerLevel >= 8)
             {
-                if (API.CanCast(Incarnation) && TalentIncarnation && isMelee && IsCooldowns)
+                if (API.CanCast(Incarnation) && TalentIncarnation && isMelee && IsIncarnation)
                 {
                     API.CastSpell(Incarnation);
                     return;
                 }
-                if (API.CanCast(Berserk) && !TalentIncarnation && isMelee && IsCooldowns)
+                if (API.CanCast(Berserk) && !TalentIncarnation && isMelee && IsBerserk)
                 {
                     API.CastSpell(Berserk);
+                    return;
+                }
+                if (API.CanCast(RavenousFrenzy) && isMelee && IncaBerserk && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                {
+                    API.CastSpell(RavenousFrenzy);
+                    return;
+                }
+                //actions.cooldown+=/convoke_the_spirits,if=(dot.rip.remains>4&(buff.tigers_fury.down|buff.tigers_fury.remains<4)&combo_points=0&dot.thrash_cat.ticking&dot.rake.ticking)|fight_remains<5
+                if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                {
+                    API.CastSpell(ConvoketheSpirits);
+                    return;
+                }
+                if (API.CanCast(KindredSpirits) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant)
+                {
+                    API.CastSpell(KindredSpirits);
+                    return;
+                }
+                if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))
+                {
+                    API.CastSpell(AdaptiveSwarm);
                     return;
                 }
                 // Single Target rota

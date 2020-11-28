@@ -176,6 +176,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Thrash);
             CombatRoutine.AddDebuff(Rake);
             CombatRoutine.AddDebuff(Moonfire);
+            CombatRoutine.AddDebuff(AdaptiveSwarm);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
@@ -351,12 +352,12 @@ namespace HyperElk.Core
                     API.CastSpell(ConvoketheSpirits);
                     return;
                 }
-                /*if (API.CanCast(KindredSpirits) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerHasBuff(TigersFury, false, false))
+                if (API.CanCast(KindredSpirits) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerHasBuff(TigersFury, false, false))
                 {
                     API.CastSpell(KindredSpirits);
                     return;
-                }*/
-                if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant)
+                }
+                if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))
                 {
                     API.CastSpell(AdaptiveSwarm);
                     return;
