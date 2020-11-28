@@ -49,6 +49,7 @@ namespace HyperElk.Core
         private bool Burn => API.PlayerMana >= 10;
         private bool Conserve => API.PlayerMana <= 59 && API.SpellISOnCooldown("Evocation");
         private int Mana => API.PlayerMana;
+        bool CastShifting => API.PlayerLastSpell == ShiftingPower;
 
         //private static readonly Stopwatch Burnphase = new Stopwatch();
         //private static readonly Stopwatch API.PlayerMana <= 59 && API.SpellISOnCooldown("Evocation")phase = new Stopwatch();
@@ -136,22 +137,22 @@ namespace HyperElk.Core
                 API.CastSpell("Counterspell");
                 return;
             }
-            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22)
+            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22 && NotCasting && NotChanneling && !CastShifting)
             {
                 API.CastSpell("Ice Block");
                 return;
             }
-            if (API.CanCast("Mirror Image") && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent != 0 && Level >= 44 && NotCasting && NotChanneling)
+            if (API.CanCast("Mirror Image") && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent != 0 && Level >= 44 && NotCasting && NotChanneling && !CastShifting)
             {
                 API.CastSpell("Mirror Image");
                 return;
             }
-            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc)
+            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotCasting && NotChanneling && !CastShifting)
             {
                 API.CastSpell(Fleshcraft);
                 return;
             }
-            if (API.CanCast("Prismatic Barrier") && Level >= 21 && !API.PlayerHasBuff("Prismatic Barrier") && API.PlayerHealthPercent <= PBPercentProc && API.PlayerHealthPercent != 0)
+            if (API.CanCast("Prismatic Barrier") && Level >= 21 && !API.PlayerHasBuff("Prismatic Barrier") && API.PlayerHealthPercent <= PBPercentProc && API.PlayerHealthPercent != 0 && NotCasting && NotChanneling && !CastShifting)
             {
                 API.CastSpell("Prismatic Barrier");
                 return;
@@ -185,12 +186,12 @@ namespace HyperElk.Core
                 API.CastSpell(Deathborne);
                 return;
             }
-            if (API.CanCast("Arcane Power") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && NotCasting && NotChanneling && (IsCooldowns && UseAP == "With Cooldowns" || UseAP == "On Cooldown"))
+            if (API.CanCast("Arcane Power") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && NotCasting && NotChanneling && (IsCooldowns && UseAP == "With Cooldowns" || UseAP == "On Cooldown") && !CastShifting)
             {
                 API.CastSpell("Arcane Power");
                 return;
             }
-            if (RuneofPower && API.CanCast("Rune of Power") && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotCasting && NotChanneling)
+            if (RuneofPower && API.CanCast("Rune of Power") && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotCasting && NotChanneling && !CastShifting)
             {
                 API.CastSpell("Rune of Power");
                 return;
@@ -205,32 +206,32 @@ namespace HyperElk.Core
                 API.CastSpell("Touch of the Magi");
                 return;
             }
-            if (API.CanCast("Arcane Orb") && InRange && ArcaneOrb && Burn && API.PlayerCurrentArcaneCharges <= 3 && (API.PlayerIsMoving || !API.PlayerIsMoving) && NotCasting && NotChanneling && API.SpellISOnCooldown("Touch of the Magi"))
+            if (API.CanCast("Arcane Orb") && InRange && ArcaneOrb && Burn && API.PlayerCurrentArcaneCharges <= 3 && (API.PlayerIsMoving || !API.PlayerIsMoving) && NotCasting && NotChanneling && API.SpellISOnCooldown("Touch of the Magi") && !CastShifting)
             {
                 API.CastSpell("Arcane Orb");
                 return;
             }
-            if (API.CanCast("Nether Tempest") && NotCasting && NotChanneling && InRange && NetherTempest && (Burn || Conserve) && API.PlayerCurrentArcaneCharges == 4 && (!API.TargetHasDebuff("Nether Tempest") || API.TargetDebuffRemainingTime("Nether Tempest") <= 300) && !API.PlayerHasBuff("Arcane Power") && !API.PlayerHasBuff("Rune of Power") && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Nether Tempest") && !CastShifting && NotCasting && NotChanneling && InRange && NetherTempest && (Burn || Conserve) && API.PlayerCurrentArcaneCharges == 4 && (!API.TargetHasDebuff("Nether Tempest") || API.TargetDebuffRemainingTime("Nether Tempest") <= 300) && !API.PlayerHasBuff("Arcane Power") && !API.PlayerHasBuff("Rune of Power") && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Nether Tempest");
                 return;
             }
-            if (API.CanCast("Presence of Mind") && Level >= 42 && API.PlayerHasBuff("Arcane Power") && API.PlayerBuffTimeRemaining("Arcane Power") <= 300 && !API.PlayerHasBuff("Presence of Mind") && Burn)
+            if (API.CanCast("Presence of Mind") && Level >= 42 && API.PlayerHasBuff("Arcane Power") && API.PlayerBuffTimeRemaining("Arcane Power") <= 300 && !API.PlayerHasBuff("Presence of Mind") && Burn && !CastShifting)
             {
                 API.CastSpell("Presence of Mind");
                 return;
             }
-            if (API.CanCast("Arcane Barrage") && NotCasting && NotChanneling && Level >= 10 && InRange && (IsAOE && API.TargetUnitInRangeCount >= 3 || IsAOE && API.TargetUnitInRangeCount >= 2 && Resonace) && InRange && API.PlayerCurrentArcaneCharges == 4 && Burn && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Barrage") && !CastShifting && NotCasting && NotChanneling && Level >= 10 && InRange && (IsAOE && API.TargetUnitInRangeCount >= 3 || IsAOE && API.TargetUnitInRangeCount >= 2 && Resonace) && InRange && API.PlayerCurrentArcaneCharges == 4 && Burn && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Barrage");
                 return;
             }
-            if (API.CanCast("Arcane Explosion") && NotCasting && NotChanneling && Level >= 6 && InRange && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && Burn && (API.PlayerIsMoving || !API.PlayerIsMoving) && IsAOE)
+            if (API.CanCast("Arcane Explosion") && !CastShifting && NotCasting && NotChanneling && Level >= 6 && InRange && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && Burn && (API.PlayerIsMoving || !API.PlayerIsMoving) && IsAOE)
             {
                 API.CastSpell("Arcane Explosion");
                 return;
             }
-            if (API.CanCast("Arcane Missiles") && NotCasting && NotChanneling && Level >= 13 && InRange && API.PlayerHasBuff("Clearcasting") && !API.PlayerHasBuff("Arcane Power") && Mana < 95 && Burn && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Missiles") && !CastShifting && NotCasting && NotChanneling && Level >= 13 && InRange && API.PlayerHasBuff("Clearcasting") && !API.PlayerHasBuff("Arcane Power") && Mana < 95 && Burn && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Missiles");
                 return;
@@ -245,17 +246,17 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Blast");
                 return;
             }
-            if (API.CanCast("Evocation") && NotCasting && NotChanneling && Level >= 27 && Mana <= 10 && (API.PlayerIsMoving && Slipstream|| !API.PlayerIsMoving))
+            if (API.CanCast("Evocation") && !CastShifting && NotCasting && NotChanneling && Level >= 27 && Mana <= 10 && (API.PlayerIsMoving && Slipstream|| !API.PlayerIsMoving))
             {
                 API.CastSpell("Evocation");
                 return;
             }
-            if (API.CanCast("Arcane Barrage") && NotCasting && NotChanneling && Level >= 10 && InRange && API.SpellISOnCooldown("Evocation") && API.PlayerCurrentArcaneCharges <= 4 && Mana <= 25 && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Barrage") && !CastShifting && NotCasting && NotChanneling && Level >= 10 && InRange && API.SpellISOnCooldown("Evocation") && API.PlayerCurrentArcaneCharges <= 4 && Mana <= 25 && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Barrage");
                 return;
             }
-            if (API.CanCast("Arcane Orb") && NotCasting && NotChanneling && InRange && ArcaneOrb && Conserve && API.PlayerCurrentArcaneCharges <= 3 && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Orb") && !CastShifting && NotCasting && NotChanneling && InRange && ArcaneOrb && Conserve && API.PlayerCurrentArcaneCharges <= 3 && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Orb");
                 return;
@@ -265,22 +266,22 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Blast");
                 return;
             }
-            if (API.CanCast("Arcane Missiles") && NotCasting && NotChanneling && Level >= 13 && InRange && Level >= 12 && API.PlayerHasBuff("Clearcasting") && !API.PlayerHasBuff("Arcane Power") && Mana < 95 && Conserve && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Missiles") && !CastShifting && NotCasting && NotChanneling && Level >= 13 && InRange && Level >= 12 && API.PlayerHasBuff("Clearcasting") && !API.PlayerHasBuff("Arcane Power") && Mana < 95 && Conserve && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Missiles");
                 return;
             }
-            if (API.CanCast("Arcane Explosion") && NotCasting && NotChanneling && Level >= 6 && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && API.PlayerHasBuff("Clearcasting") && Conserve && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Explosion") && !CastShifting && NotCasting && NotChanneling && Level >= 6 && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && API.PlayerHasBuff("Clearcasting") && Conserve && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Explosion");
                 return;
             }
-            if (API.CanCast("Arcane Barrage") && NotCasting && NotChanneling && Level >= 10 && InRange && API.TargetUnitInRangeCount >= 3 && API.PlayerCurrentArcaneCharges == 4 && Conserve && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Barrage") && !CastShifting && NotCasting && NotChanneling && Level >= 10 && InRange && API.TargetUnitInRangeCount >= 3 && API.PlayerCurrentArcaneCharges == 4 && Conserve && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Barrage");
                 return;
             }
-            if (API.CanCast("Arcane Explosion") && NotCasting && NotChanneling && Level >= 6 && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && Conserve && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Explosion") && !CastShifting && NotCasting && NotChanneling && Level >= 6 && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && Conserve && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Explosion");
                 return;

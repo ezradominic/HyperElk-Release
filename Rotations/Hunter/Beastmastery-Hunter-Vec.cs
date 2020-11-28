@@ -37,6 +37,10 @@ namespace HyperElk.Core
         private string Blood_Fury = "Blood Fury";
         private string Bag_of_Tricks = "Bag of Tricks";
         private string Revive_Pet = "Revive Pet";
+        private string Wild_Spirits = "Wild Spirits";
+        private string Resonating_Arrow = "Resonating Arrow";
+        private string Flayed_Shot = "Flayed Shot";
+        private string Death_Chakram = "Death Chakram";
 
         //Misc
         private int PlayerLevel => API.PlayerLevel;
@@ -82,7 +86,7 @@ namespace HyperElk.Core
 
 
         string[] MisdirectionList = new string[] { "Off", "On AOE", "On" };
-        string[] BestialWrathList = new string[] { "always", "with Cooldowns" };
+        string[] AlwaysCooldownsList = new string[] { "always", "with Cooldowns" };
         string[] AspectoftheWildList = new string[] { "always", "with Cooldowns" };
         string[] AMurderofCrowsList = new string[] { "always", "with Cooldowns" };
         string[] StampedeList = new string[] { "always", "with Cooldowns", "on AOE" };
@@ -96,12 +100,13 @@ namespace HyperElk.Core
         private int MendPetLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Mend_Pet)];
         private string UseMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private string UseAspectoftheWild => AspectoftheWildList[CombatRoutine.GetPropertyInt(Aspect_of_the_Wild)];
-        private string UseBestialWrath => BestialWrathList[CombatRoutine.GetPropertyInt(Bestial_Wrath)];
+        private string UseBestialWrath => AlwaysCooldownsList[CombatRoutine.GetPropertyInt(Bestial_Wrath)];
         private string UseAMurderofCrows => AMurderofCrowsList[CombatRoutine.GetPropertyInt(A_Murder_of_Crows)];
         private string UseStampede => StampedeList[CombatRoutine.GetPropertyInt(Stampede)];
         private string UseBloodshed => BloodshedList[CombatRoutine.GetPropertyInt(Bloodshed)];
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
         private string UseRevivePet => combatList[CombatRoutine.GetPropertyInt(Revive_Pet)];
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
 
         public override void Initialize()
         {
@@ -137,6 +142,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Feign_Death, "F2");
             CombatRoutine.AddSpell(Aspect_of_the_Turtle, "G");
 
+            CombatRoutine.AddSpell(Wild_Spirits, "F10");
+            CombatRoutine.AddSpell(Resonating_Arrow, "F10");
+            CombatRoutine.AddSpell(Flayed_Shot, "F10");
+            CombatRoutine.AddSpell(Death_Chakram, "F10");
+
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
             //Buffs
@@ -153,19 +163,22 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Barbed_Shot);
             CombatRoutine.AddBuff(Feign_Death);
 
+
             //Debuffs
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", true, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             //Settings
             CombatRoutine.AddProp(Misdirection, "Use Misdirection", MisdirectionList, "Use " + Misdirection + "Off, On AOE, On", "Generic", 0);
-            CombatRoutine.AddProp(Bestial_Wrath, "Use " + Bestial_Wrath, BestialWrathList, "Use " + Bestial_Wrath + "always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Bestial_Wrath, "Use " + Bestial_Wrath, AlwaysCooldownsList, "Use " + Bestial_Wrath + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Aspect_of_the_Wild, "Use " + Aspect_of_the_Wild, AspectoftheWildList, "Use " + Aspect_of_the_Wild + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(A_Murder_of_Crows, "Use " + A_Murder_of_Crows, AMurderofCrowsList, "Use " + A_Murder_of_Crows + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Stampede, "Use " + Stampede, StampedeList, "Use " + Stampede + "always, with Cooldowns, on AOE", "Cooldowns", 0);
             CombatRoutine.AddProp(Bloodshed, "Use " + Bloodshed, BloodshedList, "Use " + Bloodshed + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Revive_Pet, "Use " + Revive_Pet, combatList, "Use " + "Revive/Call Pet" + "In Combat, Out Of Combat, Everytime", "Pet", 0);
+
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
 
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", true, "Should the rotation try to ressurect/call your Pet", "Pet");
 
@@ -178,21 +191,22 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-// API.WriteLog("Has Pet  " + API.PlayerHasPet + "HP " + API.PetHealthPercent);
+             //API.WriteLog("wild spirits  " + !API.SpellISOnCooldown(Wild_Spirits)+ " Cov: "+PlayerCovenantSettings + " use "+ UseCovenant);
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
+                CallPetTimer.Stop();
                 CallPetTimer.Reset();
             }
             if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
             {
-                if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && CallPetTimer.ElapsedMilliseconds > 150 * 2 && UseCallPet && ((API.PlayerIsInCombat && UseRevivePet == "In Combat") || (!API.PlayerIsInCombat && UseRevivePet == "Out Of Combat") || UseRevivePet == "Everytime")
-                      && API.CanCast(Revive_Pet) && !API.PlayerIsMoving)
+                if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && CallPetTimer.ElapsedMilliseconds > gcd * 20 && UseCallPet && ((API.PlayerIsInCombat && UseRevivePet == "In Combat") || (!API.PlayerIsInCombat && UseRevivePet == "Out Of Combat") || UseRevivePet == "Everytime")
+                      && API.CanCast(Revive_Pet))
                 {
                     API.CastSpell(Revive_Pet);
                     return;
                 }
 
-                if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && (CallPetTimer.ElapsedMilliseconds < 150 * 2 || !CallPetTimer.IsRunning) && UseCallPet)
+                if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && (CallPetTimer.ElapsedMilliseconds <= gcd * 20 || !CallPetTimer.IsRunning) && UseCallPet)
                 {
                     API.CastSpell("Call Pet");
                     CallPetTimer.Start();
@@ -258,7 +272,17 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("wild_spirits");
+                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Wild_Spirits);
+                        return;
+                    }
                     //st->add_action("flayed_shot");
+                    if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Flayed_Shot);
+                        return;
+                    }
                     //st->add_action("kill_shot,if=buff.flayers_mark.remains<5|target.health.pct<=20");
                     if (API.CanCast(Kill_Shot) && API.TargetHealthPercent <= 20 && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
                     {
@@ -277,6 +301,11 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("death_chakram,if=focus+cast_regen<focus.max");
+                    if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Death_Chakram);
+                        return;
+                    }
                     //st->add_action("stampede,if=buff.aspect_of_the_wild.up|target.time_to_die<15");
                     if (API.CanCast(Stampede) && (UseStampede == "always" || (UseStampede == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (PlayerHasBuff(Aspect_of_the_Wild) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
                     {
@@ -290,6 +319,11 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("resonating_arrow,if=buff.bestial_wrath.up|target.time_to_die<10");
+                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1000) && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Resonating_Arrow);
+                        return;
+                    }
                     //st->add_action("bestial_wrath,if=cooldown.wild_spirits.remains>15|!covenant.night_fae|target.time_to_die<15");
                     if (API.CanCast(Bestial_Wrath) && (UseBestialWrath == "always" || (UseBestialWrath == "with Cooldowns" && IsCooldowns)) && InRange)
                     {
@@ -350,7 +384,18 @@ namespace HyperElk.Core
                     //cleave->add_action("tar_trap,if=runeforge.soulforge_embers&tar_trap.remains<gcd&cooldown.flare.remains<gcd");
                     //cleave->add_action("flare,if=tar_trap.up&runeforge.soulforge_embers");
                     //cleave->add_action("death_chakram,if=focus+cast_regen<focus.max");
+                    if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 + 3 * API.TargetUnitInRangeCount < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Death_Chakram);
+                        return;
+                    }
+
                     //cleave->add_action("wild_spirits");
+                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Wild_Spirits);
+                        return;
+                    }
                     //cleave->add_action("barbed_shot,target_if=min:dot.barbed_shot.remains,if=full_recharge_time<gcd&cooldown.bestial_wrath.remains|cooldown.bestial_wrath.remains<12+gcd&talent.scent_of_blood");
                     if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && (API.SpellCharges(Barbed_Shot) == 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath) || API.SpellCDDuration(Bestial_Wrath) < 1200 + gcd && Talent_ScentOfBlood))
                     {
@@ -364,6 +409,11 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("resonating_arrow");
+                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Resonating_Arrow);
+                        return;
+                    }
                     //cleave->add_action("stampede,if=buff.aspect_of_the_wild.up|target.time_to_die<15");
                     if (API.CanCast(Stampede) && (UseAspectoftheWild == "on AOE" || UseAspectoftheWild == "always" || (UseAspectoftheWild == "with Cooldowns" && IsCooldowns)) && Talent_Stampede && IsCooldowns && (PlayerHasBuff(Aspect_of_the_Wild) || API.TargetTimeToDie < 1500) && API.TargetRange <= 30)
                     {
@@ -371,6 +421,11 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("flayed_shot");
+                    if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Flayed_Shot);
+                        return;
+                    }
                     //cleave->add_action("kill_shot");
                     if (API.CanCast(Kill_Shot) && API.TargetHealthPercent < 20 && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
                     {
