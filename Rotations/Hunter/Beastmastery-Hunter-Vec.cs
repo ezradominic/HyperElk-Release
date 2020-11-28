@@ -48,12 +48,14 @@ namespace HyperElk.Core
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool InRange => API.TargetRange <= 40;
         private float gcd => API.SpellGCDTotalDuration;
-        private float Barbed_Shot_Fractional => (API.SpellCharges(Barbed_Shot) * 100 + ((1000 - API.SpellChargeCD(Barbed_Shot)) / 10));
         private float BarbedShotCount => (API.PlayerHasBuff("246152", false, false) ? 1 : 0) + (API.PlayerHasBuff("246851", false, false) ? 1 : 0) + (API.PlayerHasBuff("217200", false, false) ? 1 : 0);
         private float FocusRegen => 10f * (1f + API.PlayerGetHaste / 100f);
         private float RealFocusRegen => FocusRegen + BarbedShotCount * 2.5f;
         private float RealFocusTimeToMax => ((120f - API.PlayerFocus) / ((FocusRegen + BarbedShotCount * 2.5f) + (5 * API.PlayerBuffStacks(Aspect_of_the_Wild)))) * 100f;
         private float Barrage_ExecuteTime => 300f / (1f + (API.PlayerGetHaste / 100f));
+        private float BarbedShotCooldown => 1200f / (1f + (API.PlayerGetHaste / 100f));
+        private float Barbed_Shot_Fractional => (API.SpellCharges(Barbed_Shot) * 100 + ((BarbedShotCooldown - API.SpellChargeCD(Barbed_Shot)) / (BarbedShotCooldown/100)));
+        private float Barbed_Shot_FullRechargeTime => (2 - API.SpellCharges(Barbed_Shot)) * BarbedShotCooldown + API.SpellCDDuration(Barbed_Shot);
         //Talents
         private bool Talent_DireBeast => API.PlayerIsTalentSelected(1, 3);
         private bool Talent_ScentOfBlood => API.PlayerIsTalentSelected(2, 1);
@@ -295,7 +297,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("barbed_shot,if=(cooldown.wild_spirits.remains>full_recharge_time|!covenant.night_fae)&(cooldown.bestial_wrath.remains<12*charges_fractional+gcd&talent.scent_of_blood|full_recharge_time<gcd&cooldown.bestial_wrath.remains)|target.time_to_die<9");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && ((API.SpellCDDuration(Bestial_Wrath) < 1200 * Barbed_Shot_Fractional + gcd && Talent_ScentOfBlood || (API.SpellCharges(Barbed_Shot) == 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath))) || API.TargetTimeToDie < 900))
+                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && (API.SpellCDDuration(Wild_Spirits) > Barbed_Shot_FullRechargeTime || PlayerCovenantSettings != "Night Fae") && ((API.SpellCDDuration(Bestial_Wrath) < (12 * Barbed_Shot_Fractional/100 + gcd/100)*100 && Talent_ScentOfBlood || (API.SpellCharges(Barbed_Shot) >= 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath))) || API.TargetTimeToDie < 900))
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
