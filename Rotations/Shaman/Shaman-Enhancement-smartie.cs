@@ -1,5 +1,6 @@
 ﻿// Changelog
 // v1.0 First release
+// v1.1 covenants and cd managment
 
 namespace HyperElk.Core
 {
@@ -37,6 +38,10 @@ namespace HyperElk.Core
         private string MaelstromWeapon = "Maelstrom Weapon";
         private string HealingStreamTotem = "Healing Stream Totem";
         private string LashingFlames = "Lashing Flames";
+        private string PrimordialWave = "Primordial Wave";
+        private string VesperTotem = "Vesper Totem";
+        private string FaeTransfusion = "Fae Transfusion";
+        private string ChainHarvest = "Chain Harvest";
 
         //Talents
         bool TalentLashingFlames => API.PlayerIsTalentSelected(1, 1);
@@ -45,6 +50,7 @@ namespace HyperElk.Core
         bool TalentEarthShield => API.PlayerIsTalentSelected(3, 2);
         bool TalentFireNova => API.PlayerIsTalentSelected(4, 3);
         bool TalentStormkeeper => API.PlayerIsTalentSelected(6, 2);
+        bool TalentCrashingStorm => API.PlayerIsTalentSelected(6, 1);
         bool TalentSundering => API.PlayerIsTalentSelected(6, 3);
         bool TalentEarthenSpike => API.PlayerIsTalentSelected(7, 2);
         bool TalentAscendance => API.PlayerIsTalentSelected(7, 3);
@@ -54,20 +60,38 @@ namespace HyperElk.Core
         private bool isMelee => API.TargetRange < 6;
         private bool isinrange => API.TargetRange < 41;
         private bool iskickrange => API.TargetRange < 31;
+        bool IsAscendance => (UseAscendance == "with Cooldowns" && IsCooldowns || UseAscendance == "always");
+        bool IsFeralSpirit => (UseFeralSpirit == "with Cooldowns" && IsCooldowns || UseFeralSpirit == "always");
+        bool IsEarthElemental => (UseEarthElemental == "with Cooldowns" && IsCooldowns || UseEarthElemental == "always");
+        bool IsSundering => (UseSundering == "with Cooldowns" && IsCooldowns || UseSundering == "always" || UseSundering == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsFireNova => (UseFireNova == "with Cooldowns" && IsCooldowns || UseFireNova == "always" || UseFireNova == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsStormKeeper => (UseStormKeeper == "with Cooldowns" && IsCooldowns || UseStormKeeper == "always" || UseStormKeeper == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+
+        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+
 
         //CBProperties
+        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseAscendance => CDUsage[CombatRoutine.GetPropertyInt(Ascendance)];
+        private string UseFeralSpirit => CDUsage[CombatRoutine.GetPropertyInt(FeralSpirit)];
+        private string UseEarthElemental => CDUsage[CombatRoutine.GetPropertyInt(EarthElemental)];
+        private string UseSundering => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Sundering)];
+        private string UseFireNova => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FireNova)];
+        private string UseStormKeeper => CDUsageWithAOE[CombatRoutine.GetPropertyInt(StormKeeper)];
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
         private bool SelfLightningShield => CombatRoutine.GetPropertyBool("LightningShield");
         private bool SelfEarthShield => CombatRoutine.GetPropertyBool("EarthShield");
         private int AstralShiftLifePercent => percentListProp[CombatRoutine.GetPropertyInt(AstralShift)];
         private int HealingStreamTotemLifePercent => percentListProp[CombatRoutine.GetPropertyInt(HealingStreamTotem)];
         private int HealingSurgeLifePercent => percentListProp[CombatRoutine.GetPropertyInt(HealingSurge)];
-        private int HealingSurgeFreeLifePercent => percentListProp[CombatRoutine.GetPropertyInt("Instant" + HealingSurge)];
+        private int HealingSurgeFreeLifePercent => percentListProp[CombatRoutine.GetPropertyInt("InstantHealingSurge")];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.0");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.1");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, "D3");
@@ -96,6 +120,10 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(WindfuryTotem, "NumPad2");
             CombatRoutine.AddSpell(PrimalStrike, "D1");
             CombatRoutine.AddSpell(HealingStreamTotem, "F4");
+            CombatRoutine.AddSpell(PrimordialWave, "D1");
+            CombatRoutine.AddSpell(VesperTotem, "D1");
+            CombatRoutine.AddSpell(FaeTransfusion, "D1");
+            CombatRoutine.AddSpell(ChainHarvest, "D1");
 
             //Buffs
             CombatRoutine.AddBuff(CrashLightning);
@@ -109,19 +137,28 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Hailstorm);
             CombatRoutine.AddBuff(MaelstromWeapon);
             CombatRoutine.AddBuff(WindfuryTotem);
+            CombatRoutine.AddBuff(PrimordialWave);
+            CombatRoutine.AddBuff(VesperTotem);
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock);
             CombatRoutine.AddDebuff(LashingFlames);
 
             //Prop
-            CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + "on ourselfs", "Generic");
-            CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + "on ourselfs", "Generic");
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(Ascendance, "Use " + Ascendance, CDUsage, "Use " + Ascendance + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(FeralSpirit, "Use " + FeralSpirit, CDUsage, "Use " + FeralSpirit + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(EarthElemental, "Use " + EarthElemental, CDUsage, "Use " + EarthElemental + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Sundering, "Use " + Sundering, CDUsageWithAOE, "Use " + Sundering + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(FireNova, "Use " + FireNova, CDUsageWithAOE, "Use " + FireNova + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(StormKeeper, "Use " + StormKeeper, CDUsageWithAOE, "Use " + StormKeeper + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + " on ourselfs", "Generic");
+            CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
-            CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", percentListProp, "Life percent at which" + AstralShift + "is used, set to 0 to disable", "Defense", 4);
-            CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", percentListProp, "Life percent at which" + HealingStreamTotem + "is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp("Instant" + HealingSurge, HealingSurge + " Life Percent", percentListProp, "Life percent at which" + HealingSurge + "is used with Maelstorm Weapon Stacks, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(HealingSurge, HealingSurge + " Life Percent", percentListProp, "Life percent at which" + HealingSurge + "is used, set to 0 to disable", "Defense", 0);
+            CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", percentListProp, "Life percent at which" + AstralShift + " is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", percentListProp, "Life percent at which" + HealingStreamTotem + " is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp("InstantHealingSurge", "Instant HealingSurge" + "Life Percent", percentListProp, "Life percent at which" + HealingSurge + " is used with Maelstorm Weapon Stacks, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp(HealingSurge, HealingSurge + " Life Percent", percentListProp, "Life percent at which" + HealingSurge + " is used, set to 0 to disable", "Defense", 0);
         }
         public override void Pulse()
         {
@@ -198,12 +235,37 @@ namespace HyperElk.Core
                 API.CastSpell(WindfuryTotem);
                 return;
             }
+            if (API.CanCast(Ascendance) && isMelee && TalentAscendance && IsAscendance)
+            {
+                API.CastSpell(Ascendance);
+                return;
+            }
+            if (API.CanCast(Windstrike) && PlayerLevel >= 15 && API.PlayerHasBuff(Ascendance) && isMelee)
+            {
+                API.CastSpell(Windstrike);
+                return;
+            }
+            if (API.CanCast(FeralSpirit) && PlayerLevel >= 34 && isMelee && IsFeralSpirit)
+            {
+                API.CastSpell(FeralSpirit);
+                return;
+            }
             // Single Target rota
             if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
             {
+                if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && !API.PlayerHasBuff(PrimordialWave) && isinrange)
+                {
+                    API.CastSpell(PrimordialWave);
+                    return;
+                }
                 if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange)
                 {
                     API.CastSpell(FlameShock);
+                    return;
+                }
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isinrange)
+                {
+                    API.CastSpell(VesperTotem);
                     return;
                 }
                 if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange && API.PlayerHasBuff(Hailstorm))
@@ -216,14 +278,9 @@ namespace HyperElk.Core
                     API.CastSpell(EarthenSpike);
                     return;
                 }
-                if (API.CanCast(Ascendance) && isMelee && TalentAscendance && IsCooldowns)
+                if (API.CanCast(FaeTransfusion) && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
-                    API.CastSpell(Ascendance);
-                    return;
-                }
-                if (API.CanCast(Windstrike) && PlayerLevel >= 15 && API.PlayerHasBuff(Ascendance) && isMelee)
-                {
-                    API.CastSpell(Windstrike);
+                    API.CastSpell(FaeTransfusion);
                     return;
                 }
                 if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerHasBuff(StormKeeper) && API.PlayerMana >= 1 && isinrange)
@@ -231,24 +288,19 @@ namespace HyperElk.Core
                     API.CastSpell(LightningBolt);
                     return;
                 }
-                if (API.CanCast(StormKeeper) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && !API.PlayerIsMoving && IsCooldowns && isinrange && TalentStormkeeper)
-                {
-                    API.CastSpell(StormKeeper);
-                    return;
-                }
-                if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) >= 8 && API.PlayerMana >= 1 && isinrange)
-                {
-                    API.CastSpell(LightningBolt);
-                    return;
-                }
-                if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee && TalentLashingFlames && !API.TargetHasDebuff(LashingFlames))
-                {
-                    API.CastSpell(LavaLash);
-                    return;
-                }
                 if (API.CanCast(ElementalBlast) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 3 && TalentElementalBlast)
                 {
                     API.CastSpell(ElementalBlast);
+                    return;
+                }
+                if (API.CanCast(ChainHarvest) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                {
+                    API.CastSpell(ChainHarvest);
+                    return;
+                }
+                if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) == 10 && API.PlayerMana >= 1 && isinrange)
+                {
+                    API.CastSpell(LightningBolt);
                     return;
                 }
                 if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee && API.PlayerHasBuff(HotHand))
@@ -266,24 +318,14 @@ namespace HyperElk.Core
                     API.CastSpell(Stormstrike);
                     return;
                 }
-                if (API.CanCast(FeralSpirit) && PlayerLevel >= 34 && isMelee && IsCooldowns)
+                if (API.CanCast(StormKeeper) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && !API.PlayerIsMoving && isinrange && TalentStormkeeper && IsStormKeeper)
                 {
-                    API.CastSpell(FeralSpirit);
+                    API.CastSpell(StormKeeper);
                     return;
                 }
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering)
+                if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) >= 8 && API.PlayerMana >= 1 && isinrange)
                 {
-                    API.CastSpell(Sundering);
-                    return;
-                }
-                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 500 && isinrange)
-                {
-                    API.CastSpell(FlameShock);
-                    return;
-                }
-                if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange)
-                {
-                    API.CastSpell(FrostShock);
+                    API.CastSpell(LightningBolt);
                     return;
                 }
                 if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee)
@@ -296,24 +338,44 @@ namespace HyperElk.Core
                     API.CastSpell(CrashLightning);
                     return;
                 }
+                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 500 && isinrange)
+                {
+                    API.CastSpell(FlameShock);
+                    return;
+                }
+                if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange)
+                {
+                    API.CastSpell(FrostShock);
+                    return;
+                }
                 if (API.CanCast(IceStrike) && isMelee && API.PlayerMana >= 4 && TalentIceStrike)
                 {
                     API.CastSpell(IceStrike);
                     return;
                 }
-                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock))
+                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering && IsSundering)
                 {
-                    API.CastSpell(FireNova);
+                    API.CastSpell(Sundering);
                     return;
                 }
-                if (API.CanCast(EarthElemental) && isMelee && PlayerLevel >= 37 && IsCooldowns)
+                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
                 {
-                    API.CastSpell(EarthElemental);
+                    API.CastSpell(FireNova);
                     return;
                 }
                 if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(LightningBolt);
+                    return;
+                }
+                if (API.CanCast(EarthElemental) && isMelee && PlayerLevel >= 37 && IsEarthElemental)
+                {
+                    API.CastSpell(EarthElemental);
+                    return;
+                }
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                {
+                    API.CastSpell(WindfuryTotem);
                     return;
                 }
             }
@@ -325,34 +387,34 @@ namespace HyperElk.Core
                     API.CastSpell(FrostShock);
                     return;
                 }
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering)
-                {
-                    API.CastSpell(Sundering);
-                    return;
-                }
-                if (API.CanCast(FeralSpirit) && PlayerLevel >= 34 && isMelee && IsCooldowns)
-                {
-                    API.CastSpell(FeralSpirit);
-                    return;
-                }
-                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange)
+                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange && (TalentFireNova || TalentLashingFlames || PlayerCovenantSettings == "Necrolord"))
                 {
                     API.CastSpell(FlameShock);
                     return;
                 }
-                if (API.CanCast(Ascendance) && isMelee && TalentAscendance && IsCooldowns)
+                if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && !API.PlayerHasBuff(PrimordialWave) && isinrange)
                 {
-                    API.CastSpell(Ascendance);
+                    API.CastSpell(PrimordialWave);
                     return;
                 }
-                if (API.CanCast(Windstrike) && PlayerLevel >= 15 && API.PlayerHasBuff(Ascendance) && isMelee)
-                {
-                    API.CastSpell(Windstrike);
-                    return;
-                }
-                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock))
+                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
                 {
                     API.CastSpell(FireNova);
+                    return;
+                }
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isinrange)
+                {
+                    API.CastSpell(VesperTotem);
+                    return;
+                }
+                if (API.CanCast(LightningBolt) && API.PlayerHasBuff(PrimordialWave) && (API.PlayerBuffStacks(MaelstromWeapon) >= 5 || API.PlayerHasBuff(StormKeeper)) && API.PlayerMana >= 1 && isinrange)
+                {
+                    API.CastSpell(LightningBolt);
+                    return;
+                }
+                if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee && TalentLashingFlames && API.TargetDebuffRemainingTime(LashingFlames) < 150)
+                {
+                    API.CastSpell(LavaLash);
                     return;
                 }
                 if (API.CanCast(CrashLightning) && PlayerLevel >= 38 && API.PlayerMana >= 6 && isMelee)
@@ -360,9 +422,9 @@ namespace HyperElk.Core
                     API.CastSpell(CrashLightning);
                     return;
                 }
-                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerHasBuff(StormKeeper) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerMana >= 1 && isinrange)
+                if (API.CanCast(ChainHarvest) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
                 {
-                    API.CastSpell(ChainLightning);
+                    API.CastSpell(ChainHarvest);
                     return;
                 }
                 if (API.CanCast(ElementalBlast) && API.PlayerUnitInMeleeRangeCount < 3 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 3 && TalentElementalBlast)
@@ -370,19 +432,24 @@ namespace HyperElk.Core
                     API.CastSpell(ElementalBlast);
                     return;
                 }
-                if (API.CanCast(StormKeeper) && !API.PlayerIsMoving && IsCooldowns && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && TalentStormkeeper)
+                if (API.CanCast(StormKeeper) && !API.PlayerIsMoving && IsStormKeeper && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && TalentStormkeeper)
                 {
                     API.CastSpell(StormKeeper);
                     return;
                 }
-                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerMana >= 1 && isinrange)
+                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffStacks(MaelstromWeapon) == 10 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(ChainLightning);
                     return;
                 }
-                if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee && TalentLashingFlames && !API.TargetHasDebuff(LashingFlames))
+                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 100 && TalentFireNova && isinrange)
                 {
-                    API.CastSpell(LavaLash);
+                    API.CastSpell(FlameShock);
+                    return;
+                }
+                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering && IsSundering)
+                {
+                    API.CastSpell(Sundering);
                     return;
                 }
                 if (API.CanCast(Stormstrike) && PlayerLevel >= 20 && API.PlayerMana >= 2 && isMelee)
@@ -400,6 +467,11 @@ namespace HyperElk.Core
                     API.CastSpell(LavaLash);
                     return;
                 }
+                if (API.CanCast(FaeTransfusion) && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                {
+                    API.CastSpell(FaeTransfusion);
+                    return;
+                }
                 if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(FrostShock);
@@ -410,9 +482,9 @@ namespace HyperElk.Core
                     API.CastSpell(IceStrike);
                     return;
                 }
-                if (API.CanCast(EarthElemental) && isMelee && PlayerLevel >= 37 && IsCooldowns)
+                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerMana >= 1 && isinrange)
                 {
-                    API.CastSpell(EarthElemental);
+                    API.CastSpell(ChainLightning);
                     return;
                 }
                 if (API.CanCast(EarthenSpike) && isMelee && API.PlayerMana >= 4 && TalentEarthenSpike)
@@ -420,8 +492,17 @@ namespace HyperElk.Core
                     API.CastSpell(EarthenSpike);
                     return;
                 }
+                if (API.CanCast(EarthElemental) && isMelee && PlayerLevel >= 37 && IsEarthElemental)
+                {
+                    API.CastSpell(EarthElemental);
+                    return;
+                }
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                {
+                    API.CastSpell(WindfuryTotem);
+                    return;
+                }
             }
-
         }
     }
 }
