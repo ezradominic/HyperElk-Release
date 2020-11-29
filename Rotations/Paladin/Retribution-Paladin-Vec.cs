@@ -40,8 +40,18 @@ namespace HyperElk.Core
         private string VanquishersHammer = "Vanquisher's Hammer";
         private string DivineToll = "Divine Toll";
         private string AshenHallow = "Ashen Hallow";
+        private string BlessinfoftheSeasons = "Blessing of the Seasons";
+        private string RingingClarity = "Ringing Clarity";
 
         //Misc
+        private static bool PlayerHasBuff(string buff)
+        {
+            return API.PlayerHasBuff(buff, false, false);
+        }
+        private static bool TargetHasDebuff(string debuff)
+        {
+            return API.TargetHasDebuff(debuff, false, false);
+        }
         private int PlayerLevel => API.PlayerLevel;
         private int holy_power => API.PlayerCurrentHolyPower;
         private bool IsMelee => API.TargetRange < 6;
@@ -50,45 +60,13 @@ namespace HyperElk.Core
         private bool HasDefenseBuff => API.PlayerHasBuff(ShieldofVengeance, false, false) || API.PlayerHasBuff(DivineShield, false, false);
         private float CrusaderStrikeCooldown => (6 / (1 + API.PlayerGetHaste / 100)) * 100;
         private float Crusader_Strike_Fractional => (API.SpellCharges(CrusaderStrike) * 100 + ((CrusaderStrikeCooldown - API.SpellChargeCD(CrusaderStrike)) / (CrusaderStrikeCooldown / 100)));
-        private bool gcd_to_hpg => API.SpellCDDuration(CrusaderStrike) > gcd && API.SpellCDDuration(BladeofJustice) > gcd && API.SpellCDDuration(Judgment) > gcd && (API.SpellCDDuration(HammerofWrath) > gcd || API.TargetHealthPercent > 20) && API.SpellCDDuration(WakeofAshes) > gcd ;
-
-        private static bool PlayerHasBuff(string buff)
-        {
-            return API.PlayerHasBuff(buff, false, false);
-        }
+        private bool gcd_to_hpg => API.SpellCDDuration(CrusaderStrike) >= gcd && API.SpellCDDuration(BladeofJustice) >= gcd && API.SpellCDDuration(Judgment) >= gcd && (API.SpellCDDuration(HammerofWrath) >= gcd || API.TargetHealthPercent > 20) && API.SpellCDDuration(WakeofAshes) >= gcd;
 
 
         //finishers->add_action("variable,name=ds_castable,value=spell_targets.divine_storm>=2|buff.empyrean_power.up&debuff.judgment.down&buff.divine_purpose.down|spell_targets.divine_storm>=2&buff.crusade.up&buff.crusade.stack<10");
         private bool ds_castable => API.TargetUnitInRangeCount >= 2 || PlayerHasBuff(EmpyreanPower) && !API.TargetHasDebuff(Judgment) && !PlayerHasBuff(DivinePurpose) || API.TargetUnitInRangeCount >= 2 && PlayerHasBuff(Crusade) && API.PlayerBuffStacks(Crusade) < 10;
 
-        private void finishers()
-        {
-            //finishers->add_talent(this, "Seraphim", "if=((!talent.crusade.enabled&buff.avenging_wrath.up|cooldown.avenging_wrath.remains>25)|(buff.crusade.up|cooldown.crusade.remains>25))           &                (!talent.final_reckoning.enabled|cooldown.final_reckoning.remains<10)                   &                   (!talent.execution_sentence.enabled|cooldown.execution_sentence.remains<10)          &time_to_hpg=0");
-            if (Talent_Seraphim && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && API.CanCast(Seraphim) && IsMelee && (!IsCooldowns || (((!Talent_Crusade && PlayerHasBuff(AvengingWrath) || (API.SpellCDDuration(AvengingWrath) > 2500)) || (PlayerHasBuff(Crusade) || (API.SpellCDDuration(Crusade) > 2500))) && (!Talent_FinalReckoning || (API.SpellCDDuration(FinalReckoning) < 1000)) && (!API.PlayerIsTalentSelected(1, 3) || (API.SpellCDDuration(ExecutionSentence) < 1000)))))
-            {
-                API.CastSpell(Seraphim);
-                return;
-            }
-            //finishers->add_action("vanquishers_hammer,if=(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10|debuff.final_reckoning.up)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10|debuff.execution_sentence.up)|spell_targets.divine_storm>=2");
-            //finishers->add_talent(this, "Execution Sentence", "                                                                                                                                                         if=spell_targets.divine_storm<=3&((!talent.crusade.enabled|buff.crusade.down&cooldown.crusade.remains>10)                     |buff.crusade.stack>=3|cooldown.avenging_wrath.remains>10|debuff.final_reckoning.up)&time_to_hpg=0");
-            if (API.PlayerIsTalentSelected(1, 3) &&IsCooldowns && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && API.CanCast(ExecutionSentence) && API.TargetRange < 30 && (!IsCooldowns || (((!IsAOE || IsAOE && API.PlayerUnitInMeleeRangeCount <= 3) && ((!Talent_Crusade || !PlayerHasBuff(Crusade) && (API.SpellCDDuration(Crusade) > 1000)) || API.PlayerBuffStacks(Crusade) >= 3 || (API.SpellCDDuration(AvengingWrath) > 1000) || API.TargetHasDebuff(FinalReckoning))))))
-            {
-                API.CastSpell(ExecutionSentence);
-                return;
-            }
-            //finishers->add_action(this, "Divine Storm", "if=variable.ds_castable&!buff.vanquishers_hammer.up&((!talent.crusade.enabled|cooldown.crusade.remains>gcd*3)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*3|spell_targets.divine_storm>=3)|spell_targets.divine_storm>=2&(talent.holy_avenger.enabled&cooldown.holy_avenger.remains<gcd*3|buff.crusade.up&buff.crusade.stack<10))");
-            if (API.CanCast(DivineStorm) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && IsMelee && PlayerLevel >= 23 && ds_castable && !PlayerHasBuff(VanquishersHammer) && (!IsCooldowns || ((!Talent_Crusade || (API.SpellCDDuration(Crusade) > gcd * 3)) && (!API.PlayerIsTalentSelected(1, 3) || (API.SpellCDDuration(ExecutionSentence) > gcd * 3) || IsAOE && API.PlayerUnitInMeleeRangeCount >= 3) || IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 && (Talent_HolyAvenger && (API.SpellCDDuration(HolyAvenger) < gcd * 3) || PlayerHasBuff(Crusade) && API.PlayerBuffStacks(Crusade) < 10))))
-            {
-                API.CastSpell(DivineStorm);
-                return;
-            }
-            //finishers -> add_action( this, "Templar's Verdict", "if=(!talent.crusade.enabled|cooldown.crusade.remains>gcd*3)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*3&spell_targets.divine_storm<=3)&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*3)&(!covenant.necrolord.enabled|cooldown.vanquishers_hammer.remains>gcd)|talent.holy_avenger.enabled&cooldown.holy_avenger.remains<gcd*3|buff.holy_avenger.up|buff.crusade.up&buff.crusade.stack<10|buff.vanquishers_hammer.up" );
-            if (API.CanCast(TemplarsVerdict) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && IsMelee && PlayerLevel >= 10 && (!IsCooldowns || ((!Talent_Crusade || (API.SpellCDDuration(Crusade) > gcd * 3)) && (!API.PlayerIsTalentSelected(1, 3) || (API.SpellCDDuration(ExecutionSentence) > gcd * 3) && API.PlayerUnitInMeleeRangeCount <= 3) && (!Talent_FinalReckoning || (API.SpellCDDuration(FinalReckoning) > gcd * 3)) && (PlayerCovenantSettings != "Necrolord" || API.SpellCDDuration(VanquishersHammer) > gcd) || Talent_HolyAvenger && (API.SpellCDDuration(HolyAvenger) < gcd * 3) || PlayerHasBuff(HolyAvenger) || PlayerHasBuff(Crusade) && API.PlayerBuffStacks(Crusade) < 10 || PlayerHasBuff(VanquishersHammer))))
-            {
-                API.CastSpell(TemplarsVerdict);
-                return;
-            }
-        }
+
         //Talents
         private bool Talent_ExecutionSentence => API.PlayerIsTalentSelected(1, 3);
         private bool Talent_HolyAvenger => API.PlayerIsTalentSelected(5, 2);
@@ -103,7 +81,7 @@ namespace HyperElk.Core
 
         private int FlashofLightLifePercent => percentListProp[CombatRoutine.GetPropertyInt("FOLOOCPCT")];
         private bool FLashofLightOutofCombat => CombatRoutine.GetPropertyBool("FOLOOC");
-
+        private bool RingingClarity_enabled => CombatRoutine.GetPropertyBool("RingingClarity");
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("AURASWITCH");
 
         private int LayOnHandsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands)];
@@ -150,6 +128,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(WordOfGlory, "F7");
             CombatRoutine.AddSpell(DivineToll, "F8");
             CombatRoutine.AddSpell(AshenHallow, "F8");
+            CombatRoutine.AddSpell(BlessinfoftheSeasons, "F8");
+            CombatRoutine.AddSpell(VanquishersHammer, "F8");
 
             //Buffs
             CombatRoutine.AddBuff(Consecration);
@@ -177,8 +157,9 @@ namespace HyperElk.Core
             //CBProperties
             CombatRoutine.AddProp("FOLOOCPCT", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
             CombatRoutine.AddProp("FOLOOC", "Out of Combat Healing", true, "Should the bot use Flash of Light out of combat to heal you between pulls", FlashofLight);
+            CombatRoutine.AddProp("RingingClarity", "Ringing Clarity", false, "Do you have Ringing Clarity?", "Conduits");
             CombatRoutine.AddProp(FlashofLight, "Selfless Healer Life Percent", percentListProp, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", FlashofLight, 5);
-            
+
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("UseWakeofAshes", "Use " + "Wake of Ashes", CDUsageWithAOE, "Use " + WakeofAshes + " always, with Cooldowns", "Cooldowns", 0);
 
@@ -198,7 +179,7 @@ namespace HyperElk.Core
         {
             if (API.PlayerIsMounted)
             {
-                if (AutoAuraSwitch && API.CanCast(CrusaderAura) && PlayerLevel >= 21 && !PlayerHasBuff(CrusaderAura))
+                if (AutoAuraSwitch && !API.SpellISOnCooldown(CrusaderAura) && PlayerLevel >= 21 && !PlayerHasBuff(CrusaderAura))
                 {
                     API.CastSpell(CrusaderAura);
                     return;
@@ -206,12 +187,12 @@ namespace HyperElk.Core
             }
             else
             {
-                if (AutoAuraSwitch && API.CanCast(DevotionAura) && PlayerLevel >= 21 && !PlayerHasBuff(DevotionAura))
+                if (AutoAuraSwitch && !API.SpellISOnCooldown(DevotionAura) && PlayerLevel >= 21 && !PlayerHasBuff(DevotionAura))
                 {
                     API.CastSpell(DevotionAura);
                     return;
                 }
-                if (API.PlayerHealthPercent <= FlashofLightLifePercentProc && API.CanCast(FlashofLight) && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
+                if (API.PlayerHealthPercent <= FlashofLightLifePercentProc && !API.SpellISOnCooldown(FlashofLight) && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
                 {
                     API.CastSpell(FlashofLight);
                     return;
@@ -254,7 +235,7 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
-            if (FLashofLightOutofCombat && API.PlayerHealthPercent <= FlashofLightLifePercent && !API.PlayerIsMoving && API.CanCast(FlashofLight) && PlayerLevel >= 4)
+            if (FLashofLightOutofCombat && API.PlayerHealthPercent <= FlashofLightLifePercent && !API.PlayerIsMoving && !API.SpellISOnCooldown(FlashofLight) && PlayerLevel >= 4)
             {
                 API.CastSpell(FlashofLight);
                 return;
@@ -262,18 +243,16 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-           //API.WriteLog("debug: buff: " + API.CanCast(ExecutionSentence));
-            #region cooldowns
             if (IsCooldowns)
             {
                 //cds->add_action(this, "Avenging Wrath", "if=(holy_power>=4&time<5|holy_power>=3&time>5|talent.holy_avenger.enabled&cooldown.holy_avenger.remains=0)&time_to_hpg=0");
-                if (API.CanCast(AvengingWrath) && IsMelee && (holy_power >= 4 && time < 500 || holy_power >= 3 && time > 500 || Talent_HolyAvenger && !API.SpellISOnCooldown(HolyAvenger)) && PlayerLevel >= 37)
+                if (!API.SpellISOnCooldown(AvengingWrath) && !Talent_Crusade && IsMelee && (holy_power >= 4 && time < 500 || holy_power >= 3 && time > 500) && PlayerLevel >= 37)
                 {
                     API.CastSpell(AvengingWrath);
                     return;
                 }
                 //cds->add_talent(this, "Crusade", "if=(holy_power>=4&time<5|holy_power>=3&time>5|talent.holy_avenger.enabled&cooldown.holy_avenger.remains=0)&time_to_hpg=0");
-                if (API.CanCast(Crusade) && IsMelee && Talent_Crusade && (holy_power >= 4 && API.PlayerTimeInCombat < 500 || holy_power >= 300 && API.PlayerTimeInCombat > 500 || Talent_HolyAvenger && !API.SpellISOnCooldown(HolyAvenger)))
+                if (!API.SpellISOnCooldown(Crusade) && IsMelee && Talent_Crusade && (holy_power >= 4 && API.PlayerTimeInCombat < 500 || holy_power >= 3 && API.PlayerTimeInCombat > 500))
                 {
                     API.CastSpell(Crusade);
                     return;
@@ -284,87 +263,137 @@ namespace HyperElk.Core
                     API.CastSpell(AshenHallow);
                     return;
                 }
+                if (!API.SpellISOnCooldown(VanquishersHammer) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+                {
+                    API.CastSpell(VanquishersHammer);
+                    return;
+                }
+                if (!API.SpellISOnCooldown(BlessinfoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+                {
+                    API.CastSpell(BlessinfoftheSeasons);
+                    return;
+                }
+                //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
+                if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+                {
+                    API.CastSpell(DivineToll);
+                    return;
+                }
                 //cds->add_talent(this, "Holy Avenger", "if=time_to_hpg=0&((buff.avenging_wrath.up|buff.crusade.up)|(buff.avenging_wrath.down&cooldown.avenging_wrath.remains>40|buff.crusade.down&cooldown.crusade.remains>40))");
-                if (API.CanCast(HolyAvenger) && IsMelee && Talent_HolyAvenger && ((PlayerHasBuff(AvengingWrath) || PlayerHasBuff(Crusade)) || (!PlayerHasBuff(AvengingWrath) && (API.SpellCDDuration(AvengingWrath) > 4000) || !PlayerHasBuff(Crusade) && (API.SpellCDDuration(Crusade) > 4000))))
+                if (!API.SpellISOnCooldown(HolyAvenger) && IsMelee && Talent_HolyAvenger && ((PlayerHasBuff(AvengingWrath) || PlayerHasBuff(Crusade)) || API.SpellCDDuration(AvengingWrath) > API.TargetTimeToDie || API.TargetTimeToDie < API.SpellCDDuration(Crusade)))
                 {
                     API.CastSpell(HolyAvenger);
                     return;
                 }
-                //cds->add_talent(this, "Final Reckoning", "if=holy_power>=3&cooldown.avenging_wrath.remains>gcd&time_to_hpg=0&(!talent.seraphim.enabled|buff.seraphim.up)");
-                if (Talent_FinalReckoning && IsMelee && !API.SpellISOnCooldown(FinalReckoning) && API.TargetRange < 30 && API.PlayerCurrentHolyPower >= 3 && (API.SpellCDDuration(AvengingWrath) > gcd) && (!Talent_Seraphim || PlayerHasBuff(Seraphim)))
+                //Final Reckoning with at least 3HP, and if if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 10 seconds.
+                if (Talent_FinalReckoning && IsMelee && !API.SpellISOnCooldown(FinalReckoning) && API.TargetRange < 30 && API.PlayerCurrentHolyPower >= 3 && (!IsCooldowns || PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 1000 || PlayerHasBuff(Crusade) || API.SpellCDDuration(Crusade) > 1000))
                 {
                     API.CastSpell(FinalReckoning);
                     return;
                 }
             }
-            #endregion
-
-            #region Generators
-            // generators -> add_action( "call_action_list,name=finishers,if=holy_power>=5|buff.holy_avenger.up|debuff.final_reckoning.up|debuff.execution_sentence.up|buff.memory_of_lucid_dreams.up|buff.seething_rage.up" );
-            if (holy_power >= 5 || PlayerHasBuff(HolyAvenger) || API.TargetHasDebuff(FinalReckoning) || API.TargetHasDebuff(ExecutionSentence) || !IsCooldowns)
+            //Seraphim if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 25 seconds.
+            if (Talent_Seraphim && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && !API.SpellISOnCooldown(Seraphim) && IsMelee && (!IsCooldowns || PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 2500 || PlayerHasBuff(Crusade) || API.SpellCDDuration(Crusade) > 2500))
             {
-                finishers();
+                API.CastSpell(Seraphim);
+                return;
             }
-
-                //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
-                if (!API.SpellISOnCooldown(DivineToll) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <=30 && (!IsCooldowns || (!API.TargetHasDebuff(Judgment) && (holy_power <= 2 || holy_power <= 4 && (API.SpellCDDuration(BladeofJustice) > gcd * 2 || API.TargetHasDebuff(ExecutionSentence) || API.TargetHasDebuff(FinalReckoning))) && (!Talent_FinalReckoning || (API.SpellCDDuration(FinalReckoning) > gcd * 10)) && (!Talent_ExecutionSentence || (API.SpellCDDuration(ExecutionSentence) > gcd * 10)))))
+            //Execution Sentence if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 10 seconds.
+            if (API.PlayerIsTalentSelected(1, 3) && IsCooldowns && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && !API.SpellISOnCooldown(ExecutionSentence) && API.TargetRange < 30 && (!IsCooldowns || PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 1000 || PlayerHasBuff(Crusade) || API.SpellCDDuration(Crusade) > 1000))
+            {
+                API.CastSpell(ExecutionSentence);
+                return;
+            }
+            //Templar's Verdict with 5HP.
+            if (!API.SpellISOnCooldown(TemplarsVerdict) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && holy_power >= 5 && IsMelee && PlayerLevel >= 10)
+            {
+                if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
                 {
-                    API.CastSpell(DivineToll);
+                    API.CastSpell(DivineStorm);
                     return;
                 }
-                //generators->add_action(this, "Wake of Ashes", "if=(holy_power=0|holy_power<=2&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!raid_event.adds.exists|raid_event.adds.in>20)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>15)&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>15)");
-                if (API.CanCast(WakeofAshes) && IsMelee && PlayerLevel >= 39 && (UseWakeofAshes == "With Cooldowns" && IsCooldowns || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && (!IsCooldowns || ((holy_power == 0 || holy_power <= 2 && (API.SpellCDDuration(BladeofJustice) > gcd * 2 || API.TargetHasDebuff(ExecutionSentence) || API.TargetHasDebuff(FinalReckoning))) && (!API.PlayerIsTalentSelected(1, 3) || (API.SpellCDDuration(ExecutionSentence) > 1500)) && (!Talent_FinalReckoning || (API.SpellCDDuration(FinalReckoning) > 1500)))))
+                else
                 {
-                    API.CastSpell(WakeofAshes);
+                    API.CastSpell(TemplarsVerdict);
                     return;
                 }
-                //generators->add_action(this, "Blade of Justice", "if=holy_power<=3");
-                if (!API.SpellISOnCooldown(BladeofJustice) && API.TargetRange <= 12 && API.PlayerCurrentHolyPower <= 3 && PlayerLevel >= 19)
+            }
+            //Wake of Ashes at 0HP OR at 2HP or less if Blade of Justice remains on CD for greater than 2 GCDs. saved for Execution Sentence and/or Final Reckoning.
+            if (!API.SpellISOnCooldown(WakeofAshes) && (API.PlayerCurrentHolyPower == 0 || (API.PlayerCurrentHolyPower >= 2 && API.SpellCDDuration(BladeofJustice) > 2 * gcd)) && (!IsCooldowns || (!Talent_FinalReckoning || TargetHasDebuff(FinalReckoning)) && (TargetHasDebuff(ExecutionSentence) || !Talent_ExecutionSentence)) && IsMelee && PlayerLevel >= 39 && (UseWakeofAshes == "With Cooldowns" && IsCooldowns || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            {
+                API.CastSpell(WakeofAshes);
+                return;
+            }
+            //Blade of Justice at 3HP or less.
+            if (!API.SpellISOnCooldown(BladeofJustice) && API.TargetRange <= 12 && API.PlayerCurrentHolyPower <= 3 && PlayerLevel >= 19)
+            {
+                API.CastSpell(BladeofJustice);
+                return;
+            }
+            //Hammer of Wrath at 4HP or less.
+            if (!API.SpellISOnCooldown(HammerofWrath) && (API.TargetHealthPercent <= 20 || PlayerHasBuff(AvengingWrath) && API.PlayerLevel >= 58) && holy_power <= 4 && API.TargetRange <= 30 && PlayerLevel >= 46)
+            {
+                API.CastSpell(HammerofWrath);
+                return;
+            }
+            //Judgment at 4HP or less and the Judgment debuff is not up.
+            if (!API.SpellISOnCooldown(Judgment) && !TargetHasDebuff(Judgment) && holy_power <= 4 && API.TargetRange <= 30 && PlayerLevel >= 3)
+            {
+                API.CastSpell(Judgment);
+                return;
+            }
+            //Templar's Verdict if Avenging Wrath/Crusade are active, target is below 20% health, or with a Divine Purpose proc. Divine Storm with Empyrean Power proc.
+            if (!API.SpellISOnCooldown(TemplarsVerdict) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && (PlayerHasBuff(AvengingWrath) || PlayerHasBuff(Crusade) || API.TargetHealthPercent < 20 || PlayerHasBuff(DivinePurpose)) && IsMelee && PlayerLevel >= 10)
+            {
+                if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
                 {
-                    API.CastSpell(BladeofJustice);
+                    API.CastSpell(DivineStorm);
                     return;
                 }
-                //generators->add_action(this, "Hammer of Wrath", "if=holy_power<=4");
-                if (API.CanCast(HammerofWrath) && API.TargetHealthPercent <= 20 && holy_power <= 4 && API.TargetRange <= 30 && PlayerLevel >= 46)
+                else
                 {
-                    API.CastSpell(HammerofWrath);
+                    API.CastSpell(TemplarsVerdict);
                     return;
                 }
-                //generators->add_action(this, "Judgment", "if=!debuff.judgment.up&(holy_power<=2|holy_power<=4&cooldown.blade_of_justice.remains>gcd*2)");
-                if (API.CanCast(Judgment) && (!API.TargetHasDebuff(Judgment) && (holy_power <= 2 || holy_power <= 4 && API.SpellCDDuration(BladeofJustice) > gcd * 2)) && API.TargetRange <= 30 && PlayerLevel >= 3)
+            }
+            //Divine Storm with Empyrean Power proc.
+            if (!API.SpellISOnCooldown(DivineStorm) && PlayerHasBuff(EmpyreanPower) && IsMelee && PlayerLevel >= 23)
+            {
+                API.CastSpell(DivineStorm);
+                return;
+            }
+            //Crusader Strike at 2 Charges and at 4HP or less.
+            if (!API.SpellISOnCooldown(CrusaderStrike) && API.SpellCharges(CrusaderStrike) == 2 && holy_power <= 4 && IsMelee && holy_power <= 4)
+            {
+                API.CastSpell(CrusaderStrike);
+                return;
+            }
+            //Templar's Verdict at 4HP or less.
+            if (!API.SpellISOnCooldown(TemplarsVerdict) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && holy_power <= 4 && IsMelee && PlayerLevel >= 10)
+            {
+                if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
                 {
-                    API.CastSpell(Judgment);
+                    API.CastSpell(DivineStorm);
                     return;
                 }
-                //generators->add_action("call_action_list,name=finishers,if=(target.health.pct<=20|buff.avenging_wrath.up|buff.crusade.up|buff.empyrean_power.up)");
-                if (API.TargetHealthPercent <= 20 || PlayerHasBuff(AvengingWrath) || PlayerHasBuff(Crusade) || PlayerHasBuff(EmpyreanPower))
+                else
                 {
-                    finishers();
-                }
-                //generators->add_action(this, "Crusader Strike", "if=cooldown.crusader_strike.charges_fractional>=1.75&(holy_power<=2|holy_power<=3&cooldown.blade_of_justice.remains>gcd*2|holy_power=4&cooldown.blade_of_justice.remains>gcd*2&cooldown.judgment.remains>gcd*2)");
-                if (API.CanCast(CrusaderStrike) && IsMelee && (Crusader_Strike_Fractional >= 175 && (holy_power <= 2 || holy_power <= 3 && API.SpellCDDuration(BladeofJustice) > gcd * 2 || holy_power == 4 && API.SpellCDDuration(BladeofJustice) > gcd * 2 && API.SpellCDDuration(Judgment) > gcd * 2)))
-                {
-                    API.CastSpell(CrusaderStrike);
+                    API.CastSpell(TemplarsVerdict);
                     return;
                 }
-                // generators -> add_action( "call_action_list,name=finishers" );
-                finishers();
-                //generators->add_action(this, "Crusader Strike", "if=holy_power<=4");
-                if (API.CanCast(CrusaderStrike) && !(holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && IsMelee && holy_power <= 4)
-                {
-                    API.CastSpell(CrusaderStrike);
-                    return;
-                }
-                //generators->add_action("arcane_torrent,if=holy_power<=4");
-                //generators->add_action(this, "Consecration", "if=time_to_hpg>gcd");
-                if (API.CanCast(Consecration) && !(holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && IsMelee && gcd_to_hpg)
-                {
-                    API.CastSpell(Consecration);
-                    return;
-                }
-                #endregion
-            
-
+            }
+            //Crusader Strike regardless of charges at 4HP or less.
+            if (!API.SpellISOnCooldown(CrusaderStrike) && holy_power <= 4 && IsMelee && holy_power <= 4)
+            {
+                API.CastSpell(CrusaderStrike);
+                return;
+            }
+            //Consecration if all HP builders are on CD for greater than or equal to 1 GCD.
+            if (!API.SpellISOnCooldown(Consecration) && IsMelee && gcd_to_hpg)
+            {
+                API.CastSpell(Consecration);
+                return;
+            }
         }
     }
 }
