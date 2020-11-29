@@ -70,6 +70,8 @@ namespace HyperElk.Core
         private int FieryBrandLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Fiery_Brand)];
         private int SoulFragmentCount => CombatRoutine.GetPropertyInt("SoulFragmentCount");
 
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseMetamorphosis => MetamorphosisList[CombatRoutine.GetPropertyInt(Metamorphosis)];
         private string UseThrowGlaive => Throw_GlaiveList[CombatRoutine.GetPropertyInt(Throw_Glaive)];
@@ -113,6 +115,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(fodder_to_the_flame, "NumPad6");
             CombatRoutine.AddSpell(elysian_decree, "NumPad6");
 
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
             CombatRoutine.AddBuff("Demon Spikes");
             CombatRoutine.AddBuff("Soul Fragments");
@@ -136,6 +140,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Fel_Devastation, "Use " + Fel_Devastation, FelDevastationList, "Use " + Fel_Devastation + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Bulk_Extraction, "Use " + Bulk_Extraction, BulkExtractionList, "Use " + Bulk_Extraction + "always, with Cooldowns", "Cooldowns", 0);
 
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Metamorphosis, "Use " + Metamorphosis + " below:", percentListProp, "Life percent at which " + Metamorphosis + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Demon_Spikes, "Use " + Demon_Spikes + "1st Charge" + " below:", percentListProp, "Life percent at which " + Demon_Spikes + " is used, set to 0 to disable", "Defense", 8);
@@ -253,6 +259,14 @@ actions.cooldowns +=/ use_item,effect_name = cyclotronic_blast,if= buff.memory_o
 actions.cooldowns +=/ use_item,name = ashvanes_razor_coral,if= debuff.razor_coral_debuff.down | debuff.conductive_ink_debuff.up & target.health.pct < 31 | target.time_to_die < 20
 # Default fallback for usable items.
 actions.cooldowns +=/ use_items*/
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+            {
+                API.CastSpell("Trinket1");
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+            {
+                API.CastSpell("Trinket2");
+            }
             //apl_cooldown->add_action("sinful_brand,if=!dot.sinful_brand.ticking");
             if (!API.SpellISOnCooldown(SinfulBrand) && !TargetHasDebuff(SinfulBrand) && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
             {

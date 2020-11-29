@@ -75,6 +75,8 @@ private string furious_gaze = "Furious Gaze";
         private int NetherwalkLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Netherwalk)];
         private int DarknessLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Darkness)];
         private int BlurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Blur)];
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
 
         private string UseEyeBeam => EyeBeamList[CombatRoutine.GetPropertyInt(Eye_Beam)];
         private string UseMetamorphosis => MetamorphosisList[CombatRoutine.GetPropertyInt(Metamorphosis)];
@@ -196,7 +198,10 @@ private string furious_gaze = "Furious Gaze";
             CombatRoutine.AddSpell(fodder_to_the_flame, "NumPad6");
             CombatRoutine.AddSpell(elysian_decree, "NumPad6");
 
-        CombatRoutine.AddBuff(Metamorphosis);
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
+
+            CombatRoutine.AddBuff(Metamorphosis);
             CombatRoutine.AddBuff(Fel_Bombardment);
             CombatRoutine.AddBuff(furious_gaze);
 
@@ -216,6 +221,8 @@ private string furious_gaze = "Furious Gaze";
             CombatRoutine.AddProp(Throw_Glaive, "Use " + Throw_Glaive, Throw_GlaiveList, "Use " + Throw_Glaive + "On, Off", "General", 0);
             CombatRoutine.AddProp(Fel_Barrage, "Use " + Fel_Barrage, FelBarrageList, "Use " + Fel_Barrage + "On, Off", "Cooldowns", 0);
 
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Netherwalk, "Use " + Netherwalk + " below:", percentListProp, "Life percent at which " + Netherwalk + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Darkness, "Use " + Darkness + " below:", percentListProp, "Life percent at which " + Darkness + " is used, set to 0 to disable", "Defense", 6);
@@ -289,6 +296,14 @@ private string furious_gaze = "Furious Gaze";
             {
                 API.CastSpell(elysian_decree);
                 return;
+            }
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+            {
+                API.CastSpell("Trinket1");
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+            {
+                API.CastSpell("Trinket2");
             }
             //apl_cooldown->add_action("potion,if=buff.metamorphosis.remains>25|target.time_to_die<60");
             #endregion
