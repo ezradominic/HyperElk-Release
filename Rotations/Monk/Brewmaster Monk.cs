@@ -45,11 +45,14 @@ namespace HyperElk.Core
         private string UseFaelineStomp => FaelineStompList[CombatRoutine.GetPropertyInt(FaelineStomp)];
         //Venthyr 
         string[] FallenOrderList = new string[] { "always", "with Cooldowns", "AOE" };
-
         private string UseFallenOrder => FallenOrderList[CombatRoutine.GetPropertyInt(FallenOrder)];
-
-
-
+        //Trinket1
+        private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
+        string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
+        //Trinket2
+        //Trinket1
+        private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
+        string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
 
 
@@ -79,7 +82,9 @@ namespace HyperElk.Core
         private string Fleshcraft = "Fleshcraft";
         private string FaelineStomp = "FaelineStomp";
         private string FallenOrder = "Fallen Order";
-
+        private string Detox = "Detox";
+        private string trinket1 = "trinket1";
+        private string trinket2 = "trinket2";
         private string LightStagger = "Light Stagger";
         private string ModerateStagger = "Moderate Stagger";
         private string HeavyStagger = "Heavy Stagger";
@@ -108,6 +113,10 @@ namespace HyperElk.Core
             //Venthyr 
             CombatRoutine.AddProp(FallenOrder, "Use " + FallenOrder, FallenOrderList, "How to use Fallen Order", "Covenant Venthyr", 0);
 
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket", 3);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket", 3);
+
+
 
             //Spells
             CombatRoutine.AddSpell(TigerPalm, "D1");
@@ -130,11 +139,17 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FortifyingBrew, "NumPad5");
             CombatRoutine.AddSpell(BlackOxBrew, "NumPad6");
             CombatRoutine.AddSpell(HealingElixir, "NumPad7");
+            CombatRoutine.AddSpell(Detox, "NumPad8");
             CombatRoutine.AddSpell(WeaponsofOrder, "Oem6");
             CombatRoutine.AddSpell(BonedustBrew, "Oem6");
             CombatRoutine.AddSpell(Fleshcraft, "OemOpenBrackets");
             CombatRoutine.AddSpell(FaelineStomp, "Oem6");
             CombatRoutine.AddSpell(FallenOrder, "Oem6");
+
+            //Macro
+            CombatRoutine.AddMacro(trinket1);
+            CombatRoutine.AddMacro(trinket2);
+
 
             //Buffs
 
@@ -150,10 +165,13 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-
         }
         public override void CombatPulse()
         {
+            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
             //HEALING
             //NECROLORDS FLESHCRAFT
             if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc)
@@ -227,7 +245,6 @@ namespace HyperElk.Core
                 API.CastSpell(Vivify);
                 return;
             }
-
             //COOLDOWNN
             //Covenant Kyrian
             //WeaponsofOrder
@@ -269,17 +286,30 @@ namespace HyperElk.Core
                 API.CastSpell(TouchofDeath);
                 return;
             }
-
             //KICK
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
             {
                 API.CastSpell(SpearHandStrike);
                 return;
             }
-
+            rotation();
+            return;
+        }
+        private void rotation()
+        {
             //ROTATION AOE
-            if(IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
+                if (UseTrinket1 == "AOE" || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                    API.CastSpell(trinket1);
+                if (UseTrinket2 == "AOE" || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                    API.CastSpell(trinket2);
+                //Tiger Palm -> nothing else to do 
+                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40 && API.SpellCharges(PurifyingBrew) < 2)
+                {
+                    API.CastSpell(TigerPalm);
+                    return;
+                }
                 //Covenant Kyrian
                 //WeaponsofOrder
                 if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && (UseWeaponsofOrder == "AOE" || UseWeaponsofOrder == "always"))
@@ -315,11 +345,12 @@ namespace HyperElk.Core
                     return;
                 }
                 //InvokeNiuzao
-                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "On AOE"))
+                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "On AOE") || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns)
                 {
                     API.CastSpell(InvokeNiuzao);
                     return;
                 }
+
                 //KegSmash
                 if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
                 {
@@ -357,7 +388,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Tiger Palm -> nothing else to do 
-                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 50)
+                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40)
                 {
                     API.CastSpell(TigerPalm);
                     return;
@@ -369,79 +400,91 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
             //ROTATION  SINGLE TARGET
-            //Covenant Kyrian
-            //WeaponsofOrder
-            if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
+            if ((API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE))
             {
-                API.CastSpell(WeaponsofOrder);
-                return;
+                if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                    API.CastSpell(trinket1);
+                if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                    API.CastSpell(trinket2);
+                //Tiger Palm -> nothing else to do 
+                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40 && API.SpellCharges(PurifyingBrew) < 2)
+                {
+                    API.CastSpell(TigerPalm);
+                    return;
+                }
+                //Covenant Kyrian
+                //WeaponsofOrder
+                if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
+                {
+                    API.CastSpell(WeaponsofOrder);
+                    return;
+                }
+                //Covenant Necrolord
+                //BonedustBrew
+                if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "always")
+                {
+                    API.CastSpell(BonedustBrew);
+                    return;
+                }
+                //Covenant Night Fae
+                //FaelineStomp
+                if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
+                {
+                    API.CastSpell(FaelineStomp);
+                    return;
+                }
+                //Covenant Venthyr
+                //Fallen Order
+                if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && UseFaelineStomp == "always")
+                {
+                    API.CastSpell(FallenOrder);
+                    return;
+                }
+                //Touch of Death
+                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "always"))
+                {
+                    API.CastSpell(TouchofDeath);
+                    return;
+                }
+                //InvokeNiuzao
+                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns))
+                {
+                    API.CastSpell(InvokeNiuzao);
+                    return;
+                }
+                //Keg Smash
+                if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
+                {
+                    API.CastSpell(KegSmash);
+                    return;
+                }
+                //Blackout Kick
+                if (API.CanCast(BlackOutKick) && API.PlayerLevel >= 2)
+                {
+                    API.CastSpell(BlackOutKick);
+                    return;
+                }
+                //Breath of Fire
+                if (!API.SpellISOnCooldown(BreathOfFire) && API.PlayerLevel >= 29)
+                {
+                    API.CastSpell(BreathOfFire);
+                    return;
+                }
+                //ChiBurst
+                if (API.CanCast(ChiBurst) && API.PlayerIsTalentSelected(1, 3))
+                {
+                    API.CastSpell(ChiBurst);
+                    return;
+                }
+                //Tiger Palm -> nothing else to do 
+                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40)
+                {
+                    API.CastSpell(TigerPalm);
+                    return;
+                }
             }
-            //Covenant Necrolord
-            //BonedustBrew
-            if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "always")
-            {
-                API.CastSpell(BonedustBrew);
-                return;
-            }
-            //Covenant Night Fae
-            //FaelineStomp
-            if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
-            {
-                API.CastSpell(FaelineStomp);
-                return;
-            }
-            //Covenant Venthyr
-            //Fallen Order
-            if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && UseFaelineStomp == "always")
-            {
-                API.CastSpell(FallenOrder);
-                return;
-            }
-            //Touch of Death
-            if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "always"))
-            {
-                API.CastSpell(TouchofDeath);
-                return;
-            }
-            //InvokeNiuzao
-            if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns))
-            {
-                API.CastSpell(InvokeNiuzao);
-                return;
-            }
-            //Keg Smash
-            if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
-            {
-                API.CastSpell(KegSmash);
-                return;
-            }
-            //Blackout Kick
-            if (API.CanCast(BlackOutKick) && API.PlayerLevel >= 2)
-            {
-                API.CastSpell(BlackOutKick);
-                return;
-            }
-            //Breath of Fire
-            if (!API.SpellISOnCooldown(BreathOfFire) && API.PlayerLevel >= 29)
-            {
-                API.CastSpell(BreathOfFire);
-                return;
-            }
-            //ChiBurst
-            if (API.CanCast(ChiBurst) && API.PlayerIsTalentSelected(1, 3))
-            {
-                API.CastSpell(ChiBurst);
-                return;
-            }
-            //Tiger Palm -> nothing else to do 
-            if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 50)
-            {
-                API.CastSpell(TigerPalm);
-                return;
-            }
-        }
+         }
         public override void OutOfCombatPulse()
         {
             //Vivify
