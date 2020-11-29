@@ -91,6 +91,8 @@ namespace HyperElk.Core
         private int FlashofLightLifePercentProc => percentListProp[CombatRoutine.GetPropertyInt(FlashofLight)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseWakeofAshes => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseWakeofAshes")];
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
 
         public override void Initialize()
         {
@@ -154,7 +156,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(ExecutionSentence);
             CombatRoutine.AddDebuff(FinalReckoning);
 
-
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
 
             //CBProperties
             CombatRoutine.AddProp("FOLOOCPCT", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
@@ -164,7 +167,8 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("UseWakeofAshes", "Use " + "Wake of Ashes", CDUsageWithAOE, "Use " + WakeofAshes + " always, with Cooldowns", "Cooldowns", 0);
-
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("AURASWITCH", "Auto Aura Switch", true, "Auto Switch Aura between Crusader Aura and Devotion Aura", "Generic");
 
             CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense", 2);
@@ -245,7 +249,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-           // API.WriteLog(" winter " + API.SpellCDDuration(BlessingofWinter) + " summer " + API.SpellCDDuration(BlessingofSummer) + " spring " + API.SpellCDDuration(BlessingofSpring) + " autumn " + API.SpellCDDuration(BlessingofAutumn));
+            // API.WriteLog(" winter " + API.SpellCDDuration(BlessingofWinter) + " summer " + API.SpellCDDuration(BlessingofSummer) + " spring " + API.SpellCDDuration(BlessingofSpring) + " autumn " + API.SpellCDDuration(BlessingofAutumn));
             if (IsCooldowns)
             {
                 //cds->add_action(this, "Avenging Wrath", "if=(holy_power>=4&time<5|holy_power>=3&time>5|talent.holy_avenger.enabled&cooldown.holy_avenger.remains=0)&time_to_hpg=0");
@@ -276,7 +280,17 @@ namespace HyperElk.Core
                     API.CastSpell(BlessingoftheSeasons);
                     return;
                 }
-                
+
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                {
+                    API.CastSpell("Trinket1");
+                    return;
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                {
+                    API.CastSpell("Trinket2");
+                    return;
+                }
                 //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
                 if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
                 {

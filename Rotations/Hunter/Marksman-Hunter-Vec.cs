@@ -44,6 +44,7 @@ namespace HyperElk.Core
         private string Steady_Focus = "Steady Focus";
         private string Lock_and_Load = "Lock and Load";
         private string Dead_Eye = "Dead Eye";
+        private string FlayersMark = "Flayer's Mark";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 43;
@@ -165,6 +166,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Double_Tap);
             CombatRoutine.AddBuff(Lock_and_Load);
             CombatRoutine.AddBuff(Dead_Eye);
+            CombatRoutine.AddBuff(FlayersMark);
 
 
             //Debuffs
@@ -189,7 +191,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", false, "Should the rotation try to ressurect/call your Pet", "Pet");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
-            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0)
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp(Exhilaration, "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Exhilaration + "PET", "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used to heal your pet, set to 0 to disable", "Pet", 2);
             CombatRoutine.AddProp(Aspect_of_the_Turtle, "Use " + Aspect_of_the_Turtle + " below:", percentListProp, "Life percent at which " + Aspect_of_the_Turtle + " is used, set to 0 to disable", "Defense", 6);
@@ -278,12 +280,12 @@ namespace HyperElk.Core
                     return;
                 }
                 //st->add_action("kill_shot");
-                if (API.TargetHealthPercent <= 20 && API.CanCast(Kill_Shot) && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10)
+                if ((API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && API.CanCast(Kill_Shot) && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10)
                 {
                     API.CastSpell(Kill_Shot);
                     return;
                 }
-                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent <= 20) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                 {
                     API.CastSpell(Kill_Shot + "MO");
                     return;
@@ -475,12 +477,12 @@ namespace HyperElk.Core
                     return;
                 }
                 //Trick_Shots->add_action("kill_shot,if=buff.dead_eye.down");
-                if (API.CanCast(Kill_Shot) && API.TargetHealthPercent <= 20 && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10 && !API.PlayerHasBuff(Dead_Eye))
+                if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10 && !API.PlayerHasBuff(Dead_Eye))
                 {
                     API.CastSpell(Kill_Shot);
                     return;
                 }
-                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent <= 20) && API.PlayerFocus >= 10 && PlayerLevel >= 42 && !API.PlayerHasBuff(Dead_Eye))
+                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42 && !API.PlayerHasBuff(Dead_Eye))
                 {
                     API.CastSpell(Kill_Shot + "MO");
                     return;
