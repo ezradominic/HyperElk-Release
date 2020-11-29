@@ -109,6 +109,9 @@ namespace HyperElk.Core
         {
             return API.PlayerHasBuff(buff, false, false);
         }
+        private int ca_values => (Talent_CarefulAim ? 1 : 0) + (API.TargetHealthPercent > 70 ? 1 : 0);
+        private bool ca_active => ca_values == 2;
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Marksman Hunter by Vec";
@@ -356,7 +359,7 @@ namespace HyperElk.Core
                 }
                 //st->add_action("aimed_shot,if=buff.precise_shots.down|(!talent.chimaera_shot.enabled|ca_active)&buff.Trueshot.up|buff.trick_shots.remains>execute_time&(active_enemies>1|runeforge.serpentstalkers_trickery.equipped)");
                 if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) &&
-                    (!API.PlayerHasBuff(Precise_Shots, false, false) || ((!Talent_Chimaera_Shot || Talent_CarefulAim) && API.PlayerHasBuff(Trueshot)))
+                    (!API.PlayerHasBuff(Precise_Shots, false, false) || ((!Talent_Chimaera_Shot || ca_active) && API.PlayerHasBuff(Trueshot)))
                     && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35))
                 {
                     API.CastSpell(Aimed_Shot);
@@ -371,14 +374,14 @@ namespace HyperElk.Core
                 }
                 //st->add_action("chimaera_shot,if=(buff.precise_shots.up|focus>cost+action.aimed_shot.cost)&(buff.Trueshot.down|active_enemies>1|!ca_active)");
                 if (Talent_Chimaera_Shot && API.CanCast(Chimaera_Shot) && InRange && (API.PlayerHasBuff(Precise_Shots) || API.PlayerFocus > (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35)) &&
-                    (!API.PlayerHasBuff(Trueshot, false, false) || IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || !Talent_CarefulAim))
+                    (!API.PlayerHasBuff(Trueshot, false, false) || IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || !ca_active))
                 {
                     API.CastSpell(Chimaera_Shot);
                     return;
                 }
                 //st->add_action("arcane_shot,if=(buff.precise_shots.up|focus>cost+action.aimed_shot.cost)&(buff.Trueshot.down|!ca_active)");
-                if (API.CanCast(Arcane_Shot) && InRange && (API.PlayerHasBuff(Precise_Shots) || API.PlayerFocus > 20 + (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35)) &&
-                    (!API.PlayerHasBuff(Trueshot, false, false) || !Talent_CarefulAim))
+                if (API.CanCast(Arcane_Shot) && API.PlayerFocus >=20 && InRange && (API.PlayerHasBuff(Precise_Shots) || API.PlayerFocus > 20 + (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35)) &&
+                    (!API.PlayerHasBuff(Trueshot, false, false) || !ca_active))
                 {
                     API.CastSpell(Arcane_Shot);
                     return;
