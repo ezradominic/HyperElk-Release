@@ -37,7 +37,10 @@
         private string DivineToll = "Divine Toll";
         private string AshenHallow = "Ashen Hallow";
         private string ShiningLightFree = "327510";
-        private string BlessinfoftheSeasons = "Blessing of the Seasons";
+        private string BlessingofSpring = "Blessing of Spring";
+        private string BlessingofSummer = "Blessing of Summer";
+        private string BlessingofAutumn = "Blessing of Autumn";
+        private string BlessingofWinter = "Blessing of Winter";
         private string RingingClarity = "Ringing Clarity";
 
         //Misc
@@ -45,7 +48,14 @@
         private bool IsMelee => API.TargetRange < 6;
 
         private bool HasDefenseBuff => API.PlayerHasBuff(ArdentDefender, false, false) || API.PlayerHasBuff(GuardianofAncientKings, false, false) || API.PlayerHasBuff(DivineShield, false, false);
-
+        private static bool PlayerHasBuff(string buff)
+        {
+            return API.PlayerHasBuff(buff, false, false);
+        }
+        private static bool TargetHasDebuff(string debuff)
+        {
+            return API.TargetHasDebuff(debuff, false, false);
+        }
         //Talents
         private bool Talent_CrusadersJudgment => API.PlayerIsTalentSelected(2, 2);
         private bool Talent_MomentOfGlory => API.PlayerIsTalentSelected(2, 3);
@@ -64,6 +74,8 @@
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("AURASWITCH");
         private bool IsAvengingWrath => CombatRoutine.GetPropertyBool(AvengingWrath);
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
 
         private int LayOnHandsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands)];
         private int ArdentDefenderLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ArdentDefender)];
@@ -104,9 +116,14 @@
             CombatRoutine.AddSpell(SanctifiedWrath, "F1");
             CombatRoutine.AddSpell(DivineToll, "F8");
             CombatRoutine.AddSpell(AshenHallow, "F8");
-            CombatRoutine.AddSpell(BlessinfoftheSeasons, "F8");
+            CombatRoutine.AddSpell(BlessingofSummer, "F8");
+            CombatRoutine.AddSpell(BlessingofSpring, "F8");
+            CombatRoutine.AddSpell(BlessingofAutumn, "F8");
+            CombatRoutine.AddSpell(BlessingofWinter, "F8");
             CombatRoutine.AddSpell(VanquishersHammer, "F8");
 
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
             CombatRoutine.AddBuff(Consecration);
             CombatRoutine.AddBuff(CrusaderAura);
@@ -138,7 +155,8 @@
             CombatRoutine.AddProp(AvengingWrath, "Use Avenging Wrath", true, "Use Avenging Wrath with cooldowns", "Generic");
             CombatRoutine.AddProp("AOEUnitNumner", "AOE Unit Numner", 2, "How many units around to use AOE rotation", "Generic");
 
-            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(ArdentDefender, ArdentDefender + " Life Percent", percentListProp, "Life percent at which" + ArdentDefender + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", percentListProp, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 3);
@@ -246,6 +264,17 @@
                 }
                 //cds->add_action("potion,if=buff.avenging_wrath.up");
                 //cds->add_action("use_items,if=buff.seraphim.up|!talent.seraphim.enabled");
+                if(PlayerHasBuff(Seraphim) || !Talent_Seraphim)
+                {
+                    if(API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                    {
+                        API.CastSpell("Trinket1");
+                    }
+                    if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                    {
+                        API.CastSpell("Trinket2");
+                    }
+                }
                 //cds->add_talent(this, "Moment of Glory", "if=prev_gcd.1.avengers_shield&cooldown.avengers_shield.remains");
                 if (API.CanCast(MomentOfGlory) && Talent_MomentOfGlory && (API.LastSpellCastInGame == AvengersShield || API.PlayerCurrentCastSpellID == 56641) && IsMelee)
                 {
@@ -295,7 +324,7 @@
                 API.CastSpell(Judgment);
                 return;
             }
-            if (!API.SpellISOnCooldown(BlessinfoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+          /*  if (!API.SpellISOnCooldown(BlessinfoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell(BlessinfoftheSeasons);
                 return;
@@ -305,7 +334,7 @@
             {
                 API.CastSpell(VanquishersHammer);
                 return;
-            }
+            }*/
             //std->add_action(this, "Consecration", "if=!consecration.up");
             if (API.CanCast(Consecration) && IsMelee && PlayerLevel >= 14 && !API.PlayerHasBuff(Consecration))
             {
