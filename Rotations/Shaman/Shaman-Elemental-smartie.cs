@@ -82,6 +82,7 @@ namespace HyperElk.Core
 
         private static readonly Stopwatch stormwatch = new Stopwatch();
         private static readonly Stopwatch pullwatch = new Stopwatch();
+        private static readonly Stopwatch vesperwatch = new Stopwatch();
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
@@ -152,18 +153,23 @@ namespace HyperElk.Core
             if (!pullwatch.IsRunning && API.PlayerIsInCombat)
             {
                 pullwatch.Start();
-                API.WriteLog("Entering Combat, Starting opener timer.");
+                //API.WriteLog("Entering Combat, Starting opener timer.");
             }
             // Stopwatch stop
             if (!API.PlayerIsInCombat && pullwatch.ElapsedMilliseconds >= 1000)
             {
                 pullwatch.Reset();
-                API.WriteLog("Leaving Combat, Resetting opener timer.");
+                //API.WriteLog("Leaving Combat, Resetting opener timer.");
             }
             if (stormwatch.IsRunning && stormwatch.ElapsedMilliseconds > 30000)
             {
                 stormwatch.Reset();
                 API.WriteLog("Resetting Stormwatch.");
+            }
+            if (vesperwatch.IsRunning && vesperwatch.ElapsedMilliseconds > 30000)
+            {
+                vesperwatch.Reset();
+                API.WriteLog("Resetting Vespermwatch.");
             }
         }
         public override void CombatPulse()
@@ -252,9 +258,11 @@ namespace HyperElk.Core
                     API.CastSpell(PrimordialWave);
                     return;
                 }
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && IsInRange)
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && IsInRange && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
+                    vesperwatch.Start();
+                    API.WriteLog("Starting Vesperwatch.");
                     return;
                 }
                 if (API.CanCast(FaeTransfusion) && IsInRange && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
