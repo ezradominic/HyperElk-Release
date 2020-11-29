@@ -8,6 +8,7 @@
 // v1.6 covenant changes
 // v1.7 Heroic Throw toggle
 // v1.8 condemn fix
+// v1.9 back to condemn id
 
 namespace HyperElk.Core
 {
@@ -38,7 +39,7 @@ namespace HyperElk.Core
         private string Enrage = "Enrage";
         private string SuddenDeath = "Sudden Death";
         private string Victorious = "Victorious";
-        private string Condemn = "Condemn";
+        private string Condemn = "330325";
         private string SpearofBastion = "Spear of Bastion";
         private string AncientAftershock = "Ancient Aftershock";
         private string ConquerorsBanner = "Conqueror's Banner";
@@ -75,7 +76,8 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.8");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v1.9");
+            API.WriteLog("Condemn is buggy for Fury currently and was added as id instead of name to fix it");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, "D1");
