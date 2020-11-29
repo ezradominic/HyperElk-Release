@@ -41,7 +41,7 @@ namespace HyperElk.Core
         private string Resonating_Arrow = "Resonating Arrow";
         private string Flayed_Shot = "Flayed Shot";
         private string Death_Chakram = "Death Chakram";
-
+        private string FlayersMark = "Flayer's Mark";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool isMOinRange => API.MouseoverRange <= 40;
@@ -170,7 +170,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Bestial_Wrath);
             CombatRoutine.AddBuff(Barbed_Shot);
             CombatRoutine.AddBuff(Feign_Death);
-
+            CombatRoutine.AddBuff(FlayersMark);
 
             //Debuffs
 
@@ -248,7 +248,7 @@ namespace HyperElk.Core
         {
             if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
             {
-                if (API.CanCast(Misdirection) && API.PlayerHasPet && PlayerLevel >= 21 && (UseMisdirection == "On" || (UseMisdirection == "On AOE" & IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)))
+                if (API.CanCast(Misdirection) && !API.PlayerHasBuff(Misdirection) && API.PlayerHasPet && PlayerLevel >= 21 && (UseMisdirection == "On" || (UseMisdirection == "On AOE" & IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)))
                 {
                     API.CastSpell(Misdirection);
                     return;
@@ -301,12 +301,12 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("kill_shot,if=buff.flayers_mark.remains<5|target.health.pct<=20");
-                    if (API.CanCast(Kill_Shot) && API.TargetHealthPercent <= 20 && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
+                    if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot);
                         return;
                     }
-                    if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent <= 20) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                    if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot + "MO");
                         return;
@@ -444,12 +444,12 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("kill_shot");
-                    if (API.CanCast(Kill_Shot) && API.TargetHealthPercent < 20 && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
+                    if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot);
                         return;
                     }
-                    if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent < 20) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                    if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot + "MO");
                         return;
