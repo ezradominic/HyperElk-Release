@@ -24,6 +24,10 @@ namespace HyperElk.Core
         private string Bulk_Extraction = "Bulk Extraction";
         private string Frailty = "Frailty";
         private string Soul_Fragments = "Soul Fragments";
+        private string SinfulBrand = "Sinful Brand";
+        private string TheHunt = "The Hunt";
+        private string fodder_to_the_flame = "Fodder to the Flame";
+        private string elysian_decree = "Elysian Decree";
 
         //Misc
         private int PlayerLevel => API.PlayerLevel;
@@ -39,7 +43,14 @@ namespace HyperElk.Core
         private bool Talent_Fracture => API.PlayerIsTalentSelected(4, 3);
         private bool Talent_SoulBarrier => API.PlayerIsTalentSelected(6, 3);
         private bool Talent_Bulk_Extraction => API.PlayerIsTalentSelected(7, 3);
-
+        private static bool PlayerHasBuff(string buff)
+        {
+            return API.PlayerHasBuff(buff, false, false);
+        }
+        private static bool TargetHasDebuff(string debuff)
+        {
+            return API.TargetHasDebuff(debuff, false, false);
+        }
 
 
 
@@ -59,6 +70,9 @@ namespace HyperElk.Core
         private int FieryBrandLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Fiery_Brand)];
         private int SoulFragmentCount => CombatRoutine.GetPropertyInt("SoulFragmentCount");
 
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseMetamorphosis => MetamorphosisList[CombatRoutine.GetPropertyInt(Metamorphosis)];
         private string UseThrowGlaive => Throw_GlaiveList[CombatRoutine.GetPropertyInt(Throw_Glaive)];
         private string UseSigilofFlame => SigilofFlameList[CombatRoutine.GetPropertyInt(Sigil_of_Flame)];
@@ -96,7 +110,13 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Soul Barrier", "F2");
             CombatRoutine.AddSpell("Bulk Extraction", "F3");
             CombatRoutine.AddSpell("Felblade", "NumPad2");
+            CombatRoutine.AddSpell(SinfulBrand, "NumPad6");
+            CombatRoutine.AddSpell(TheHunt, "NumPad6");
+            CombatRoutine.AddSpell(fodder_to_the_flame, "NumPad6");
+            CombatRoutine.AddSpell(elysian_decree, "NumPad6");
 
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
             CombatRoutine.AddBuff("Demon Spikes");
             CombatRoutine.AddBuff("Soul Fragments");
@@ -106,6 +126,7 @@ namespace HyperElk.Core
             //Debuffs
             CombatRoutine.AddDebuff("Frailty");
             CombatRoutine.AddDebuff("Fiery Brand");
+            CombatRoutine.AddDebuff(SinfulBrand);
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
@@ -119,7 +140,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Fel_Devastation, "Use " + Fel_Devastation, FelDevastationList, "Use " + Fel_Devastation + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Bulk_Extraction, "Use " + Bulk_Extraction, BulkExtractionList, "Use " + Bulk_Extraction + "always, with Cooldowns", "Cooldowns", 0);
 
-
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Metamorphosis, "Use " + Metamorphosis + " below:", percentListProp, "Life percent at which " + Metamorphosis + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Demon_Spikes, "Use " + Demon_Spikes + "1st Charge" + " below:", percentListProp, "Life percent at which " + Demon_Spikes + " is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(Demon_Spikes+"2", "Use " + Demon_Spikes + "2nd Charge" + " below:", percentListProp, "Life percent at which " + Demon_Spikes + " is used, set to 0 to disable", "Defense", 5);
@@ -236,6 +259,38 @@ actions.cooldowns +=/ use_item,effect_name = cyclotronic_blast,if= buff.memory_o
 actions.cooldowns +=/ use_item,name = ashvanes_razor_coral,if= debuff.razor_coral_debuff.down | debuff.conductive_ink_debuff.up & target.health.pct < 31 | target.time_to_die < 20
 # Default fallback for usable items.
 actions.cooldowns +=/ use_items*/
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+            {
+                API.CastSpell("Trinket1");
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+            {
+                API.CastSpell("Trinket2");
+            }
+            //apl_cooldown->add_action("sinful_brand,if=!dot.sinful_brand.ticking");
+            if (!API.SpellISOnCooldown(SinfulBrand) && !TargetHasDebuff(SinfulBrand) && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+            {
+                API.CastSpell(SinfulBrand);
+                return;
+            }
+            //apl_cooldown->add_action("the_hunt");
+            if (!API.SpellISOnCooldown(TheHunt) && API.TargetRange <= 50 && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+            {
+                API.CastSpell(TheHunt);
+                return;
+            }
+            //apl_cooldown->add_action("fodder_to_the_flame");
+            if (!API.SpellISOnCooldown(fodder_to_the_flame) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+            {
+                API.CastSpell(fodder_to_the_flame);
+                return;
+            }
+            //apl_cooldown->add_action("elysian_decree");
+            if (!API.SpellISOnCooldown(elysian_decree) && API.TargetRange <= 30 && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+            {
+                API.CastSpell(elysian_decree);
+                return;
+            }
             //actions +=/ call_action_list,name = normal
             //actions.normal = infernal_strike
             if (API.CanCast("Infernal Strike") && API.SpellCharges(Infernal_Strike) >= 1 && API.SpellChargeCD(Infernal_Strike) < 150 && API.LastSpellCastInGame != Infernal_Strike && API.PlayerCurrentCastSpellID != 189110 && UseInfernalStrike == "On" && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))

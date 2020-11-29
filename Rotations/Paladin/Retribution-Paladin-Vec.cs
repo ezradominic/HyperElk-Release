@@ -40,7 +40,7 @@ namespace HyperElk.Core
         private string VanquishersHammer = "Vanquisher's Hammer";
         private string DivineToll = "Divine Toll";
         private string AshenHallow = "Ashen Hallow";
-        private string BlessinfoftheSeasons = "Blessing of the Seasons";
+        private string BlessingoftheSeasons = "328282";
         private string RingingClarity = "Ringing Clarity";
 
         //Misc
@@ -128,7 +128,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(WordOfGlory, "F7");
             CombatRoutine.AddSpell(DivineToll, "F8");
             CombatRoutine.AddSpell(AshenHallow, "F8");
-            CombatRoutine.AddSpell(BlessinfoftheSeasons, "F8");
+            CombatRoutine.AddSpell(BlessingoftheSeasons, "F8");
+
+
             CombatRoutine.AddSpell(VanquishersHammer, "F8");
 
             //Buffs
@@ -243,6 +245,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
+           // API.WriteLog(" winter " + API.SpellCDDuration(BlessingofWinter) + " summer " + API.SpellCDDuration(BlessingofSummer) + " spring " + API.SpellCDDuration(BlessingofSpring) + " autumn " + API.SpellCDDuration(BlessingofAutumn));
             if (IsCooldowns)
             {
                 //cds->add_action(this, "Avenging Wrath", "if=(holy_power>=4&time<5|holy_power>=3&time>5|talent.holy_avenger.enabled&cooldown.holy_avenger.remains=0)&time_to_hpg=0");
@@ -268,11 +271,12 @@ namespace HyperElk.Core
                     API.CastSpell(VanquishersHammer);
                     return;
                 }
-                if (!API.SpellISOnCooldown(BlessinfoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+                if (!API.SpellISOnCooldown(BlessingoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
                 {
-                    API.CastSpell(BlessinfoftheSeasons);
+                    API.CastSpell(BlessingoftheSeasons);
                     return;
                 }
+                
                 //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
                 if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
                 {
