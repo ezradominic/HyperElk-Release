@@ -37,10 +37,7 @@
         private string DivineToll = "Divine Toll";
         private string AshenHallow = "Ashen Hallow";
         private string ShiningLightFree = "327510";
-        private string BlessingofSpring = "Blessing of Spring";
-        private string BlessingofSummer = "Blessing of Summer";
-        private string BlessingofAutumn = "Blessing of Autumn";
-        private string BlessingofWinter = "Blessing of Winter";
+        private string BlessingoftheSeasons = "328282";
         private string RingingClarity = "Ringing Clarity";
 
         //Misc
@@ -116,11 +113,8 @@
             CombatRoutine.AddSpell(SanctifiedWrath, "F1");
             CombatRoutine.AddSpell(DivineToll, "F8");
             CombatRoutine.AddSpell(AshenHallow, "F8");
-            CombatRoutine.AddSpell(BlessingofSummer, "F8");
-            CombatRoutine.AddSpell(BlessingofSpring, "F8");
-            CombatRoutine.AddSpell(BlessingofAutumn, "F8");
-            CombatRoutine.AddSpell(BlessingofWinter, "F8");
-            CombatRoutine.AddSpell(VanquishersHammer, "F8");
+            CombatRoutine.AddSpell(BlessingoftheSeasons, "F8");
+
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -324,9 +318,9 @@
                 API.CastSpell(Judgment);
                 return;
             }
-          /*  if (!API.SpellISOnCooldown(BlessinfoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (!API.SpellISOnCooldown(BlessingoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
-                API.CastSpell(BlessinfoftheSeasons);
+                API.CastSpell(BlessingoftheSeasons);
                 return;
             }
             //std->add_action("vanquishers_hammer");
@@ -334,7 +328,7 @@
             {
                 API.CastSpell(VanquishersHammer);
                 return;
-            }*/
+            }
             //std->add_action(this, "Consecration", "if=!consecration.up");
             if (API.CanCast(Consecration) && IsMelee && PlayerLevel >= 14 && !API.PlayerHasBuff(Consecration))
             {
