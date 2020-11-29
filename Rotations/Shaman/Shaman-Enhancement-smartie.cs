@@ -1,6 +1,7 @@
 ﻿// Changelog
 // v1.0 First release
 // v1.1 covenants and cd managment
+// v1.2 vesper totem fix
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -94,7 +95,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.1");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.2");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, "D3");
@@ -165,6 +166,11 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            if (!vesperwatch.IsRunning && API.LastSpellCastInGame == VesperTotem)
+            {
+                vesperwatch.Restart();
+                API.WriteLog("Starting Vespermwatch.");
+            }
             if (vesperwatch.IsRunning && vesperwatch.ElapsedMilliseconds > 30000)
             {
                 vesperwatch.Reset();
@@ -271,11 +277,9 @@ namespace HyperElk.Core
                     API.CastSpell(FlameShock);
                     return;
                 }
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isinrange && !vesperwatch.IsRunning)
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
-                    vesperwatch.Start();
-                    API.WriteLog("Starting Vesperwatch.");
                     return;
                 }
                 if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange && API.PlayerHasBuff(Hailstorm))
@@ -412,11 +416,9 @@ namespace HyperElk.Core
                     API.CastSpell(FireNova);
                     return;
                 }
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isinrange && !vesperwatch.IsRunning)
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
-                    vesperwatch.Start();
-                    API.WriteLog("Starting Vesperwatch.");
                     return;
                 }
                 if (API.CanCast(LightningBolt) && API.PlayerHasBuff(PrimordialWave) && (API.PlayerBuffStacks(MaelstromWeapon) >= 5 || API.PlayerHasBuff(StormKeeper)) && API.PlayerMana >= 1 && isinrange)

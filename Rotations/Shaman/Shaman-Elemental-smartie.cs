@@ -1,6 +1,7 @@
 ﻿// Changelog
 // v1.0 First release
 // v1.1 covenants + cd managment
+// v1.2 vesper totem fix
 using System.Diagnostics;
 
 
@@ -86,7 +87,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.1");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.2");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, "D7");
@@ -165,6 +166,11 @@ namespace HyperElk.Core
             {
                 stormwatch.Reset();
                 API.WriteLog("Resetting Stormwatch.");
+            }
+            if (!vesperwatch.IsRunning && API.LastSpellCastInGame == VesperTotem)
+            {
+                vesperwatch.Restart();
+                API.WriteLog("Starting Vespermwatch.");
             }
             if (vesperwatch.IsRunning && vesperwatch.ElapsedMilliseconds > 30000)
             {
@@ -261,8 +267,6 @@ namespace HyperElk.Core
                 if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && IsInRange && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
-                    vesperwatch.Start();
-                    API.WriteLog("Starting Vesperwatch.");
                     return;
                 }
                 if (API.CanCast(FaeTransfusion) && IsInRange && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
