@@ -131,8 +131,6 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DivineToll, "F8");
             CombatRoutine.AddSpell(AshenHallow, "F8");
             CombatRoutine.AddSpell(BlessingoftheSeasons, "F8");
-
-
             CombatRoutine.AddSpell(VanquishersHammer, "F8");
 
             //Buffs
@@ -264,39 +262,6 @@ namespace HyperElk.Core
                     API.CastSpell(Crusade);
                     return;
                 }
-                //cds->add_action("ashen_hallow");
-                if (!API.SpellISOnCooldown(AshenHallow) && !API.PlayerIsMoving && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
-                {
-                    API.CastSpell(AshenHallow);
-                    return;
-                }
-                if (!API.SpellISOnCooldown(VanquishersHammer) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
-                {
-                    API.CastSpell(VanquishersHammer);
-                    return;
-                }
-                if (!API.SpellISOnCooldown(BlessingoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
-                {
-                    API.CastSpell(BlessingoftheSeasons);
-                    return;
-                }
-
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
-                {
-                    API.CastSpell("Trinket1");
-                    return;
-                }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
-                {
-                    API.CastSpell("Trinket2");
-                    return;
-                }
-                //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
-                if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
-                {
-                    API.CastSpell(DivineToll);
-                    return;
-                }
                 //cds->add_talent(this, "Holy Avenger", "if=time_to_hpg=0&((buff.avenging_wrath.up|buff.crusade.up)|(buff.avenging_wrath.down&cooldown.avenging_wrath.remains>40|buff.crusade.down&cooldown.crusade.remains>40))");
                 if (!API.SpellISOnCooldown(HolyAvenger) && IsMelee && Talent_HolyAvenger && ((PlayerHasBuff(AvengingWrath) || PlayerHasBuff(Crusade)) || API.SpellCDDuration(AvengingWrath) > API.TargetTimeToDie || API.TargetTimeToDie < API.SpellCDDuration(Crusade)))
                 {
@@ -309,6 +274,38 @@ namespace HyperElk.Core
                     API.CastSpell(FinalReckoning);
                     return;
                 }
+            }
+            //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
+            if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+            {
+                API.CastSpell(DivineToll);
+                return;
+            }
+            //cds->add_action("ashen_hallow");
+            if (!API.SpellISOnCooldown(AshenHallow) && !API.PlayerIsMoving && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            {
+                API.CastSpell(AshenHallow);
+                return;
+            }
+            if (!API.SpellISOnCooldown(VanquishersHammer) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            {
+                API.CastSpell(VanquishersHammer);
+                return;
+            }
+            if (!API.SpellISOnCooldown(BlessingoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            {
+                API.CastSpell(BlessingoftheSeasons);
+                return;
+            }
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+            {
+                API.CastSpell("Trinket1");
+                return;
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+            {
+                API.CastSpell("Trinket2");
+                return;
             }
             //Seraphim if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 25 seconds.
             if (Talent_Seraphim && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && !API.SpellISOnCooldown(Seraphim) && IsMelee && (!IsCooldowns || PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 2500 || PlayerHasBuff(Crusade) || API.SpellCDDuration(Crusade) > 2500))
