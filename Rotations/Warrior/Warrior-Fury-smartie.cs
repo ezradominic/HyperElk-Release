@@ -7,12 +7,16 @@
 // v1.5 covenant ability always or with cds
 // v1.6 covenant changes
 // v1.7 Heroic Throw toggle
+// v1.8 condemn fix
+// v1.9 back to condemn id
+// v2.0 Bladestorm toggle and execute/condemn mouseover
 
 namespace HyperElk.Core
 {
     public class FuryWarrior : CombatRoutine
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool BladestormToggle => API.ToggleIsEnabled("Bladestorm");
         //Spell,Auras
         private string Bloodthirst = "Bloodthirst";
         private string Onslaught = "Onslaught";
@@ -57,6 +61,12 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
 
+        bool IsRecklessness => UseRecklessness == "with Cooldowns" && IsCooldowns || UseRecklessness == "always";
+        bool IsSiegebreaker => UseSiegebreaker == "with Cooldowns" && IsCooldowns || UseSiegebreaker == "always";
+        bool IsDragonRoar => UseDragonRoar == "with Cooldowns" && IsCooldowns || UseDragonRoar == "always" || UseDragonRoar == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsBladestorm => UseBladestorm == "with Cooldowns" && IsCooldowns || UseBladestorm == "always" || UseBladestorm == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+
+
         //CBProperties
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private string UseHeroicThrow => heroiclist[CombatRoutine.GetPropertyInt(HeroicThrow)];
@@ -70,12 +80,14 @@ namespace HyperElk.Core
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseRecklessness => CDUsage[CombatRoutine.GetPropertyInt(Recklessness)];
         private string UseSiegebreaker => CDUsage[CombatRoutine.GetPropertyInt(Siegebreaker)];
+        private string UseDragonRoar => CDUsageWithAOE[CombatRoutine.GetPropertyInt(DragonRoar)];
+        private string UseBladestorm => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Bladestorm)];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v1.7");
-            API.WriteLog("Condemn is currently bugging - therfore it has been added with id instead of Name");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.0");
+            API.WriteLog("Condemn is buggy for Fury currently and was added as id instead of name to fix it");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, "D1");
@@ -105,6 +117,8 @@ namespace HyperElk.Core
 
             //Macros
             CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
+            CombatRoutine.AddMacro(Execute + "MO", "D6");
+            CombatRoutine.AddMacro(Condemn + "MO", "D6");
 
             //Buffs
             CombatRoutine.AddBuff(Enrage);
@@ -121,13 +135,16 @@ namespace HyperElk.Core
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Bladestorm");
 
             //Prop
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp(HeroicThrow, "Use Heroic Throw", heroiclist, "Use " + HeroicThrow + " ,when out of melee, only Mousover or both", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, CDUsage, "Use " + Recklessness + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsage, "Use " + Siegebreaker+ " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsage, "Use " + Siegebreaker + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(DragonRoar, "Use " + DragonRoar, CDUsageWithAOE, "Use " + DragonRoar + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Bladestorm, "Use " + Bladestorm, CDUsageWithAOE, "Use " + Bladestorm + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, " Lineup Recklessness and Siegebreaker", "Cooldowns");
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", percentListProp, " Life percent at which" + EnragedRegeneration + " is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 8);
@@ -157,7 +174,7 @@ namespace HyperElk.Core
                 API.CastSpell(EnragedRegeneration);
                 return;
             }
-            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious))
+            if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious) && IsMelee)
             {
                 API.CastSpell(VictoryRush);
                 return;
@@ -205,7 +222,7 @@ namespace HyperElk.Core
                     API.CastSpell(AncientAftershock);
                     return;
                 }
-                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && (IsCooldowns && UseRecklessness == "with Cooldowns" || UseRecklessness == "always" ))
+                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && IsRecklessness)
                 {
                     API.CastSpell(Recklessness);
                     return;
@@ -225,7 +242,7 @@ namespace HyperElk.Core
                     API.CastSpell(Whirlwind);
                     return;
                 }
-                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && (IsCooldowns && UseSiegebreaker== "with Cooldowns" || UseSiegebreaker == "always"))
+                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
                 {
                     API.CastSpell(Siegebreaker);
                     return;
@@ -235,7 +252,7 @@ namespace HyperElk.Core
                     API.CastSpell(Rampage);
                     return;
                 }
-                if (API.CanCast(Bladestorm) && IsCooldowns && API.PlayerLastSpell == Rampage && TalentBladestorm)
+                if (API.CanCast(Bladestorm) && API.PlayerLastSpell == Rampage && TalentBladestorm && IsBladestorm && BladestormToggle)
                 {
                     API.CastSpell(Bladestorm);
                     return;
@@ -245,12 +262,25 @@ namespace HyperElk.Core
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && !API.SpellISOnCooldown(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
+                if (!API.SpellISOnCooldown(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Condemn);
                     return;
                 }
-                if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage))
+                if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                {
+                    if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && (!TalentMassacre && API.MouseoverHealthPercent < 20 || TalentMassacre && API.MouseoverHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
+                    {
+                        API.CastSpell(Execute + "MO");
+                        return;
+                    }
+                    if (!API.SpellISOnCooldown(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.MouseoverHealthPercent < 20 || API.MouseoverHealthPercent > 80) || TalentMassacre && (API.MouseoverHealthPercent < 35 || API.MouseoverHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
+                    {
+                        API.CastSpell(Condemn + "MO");
+                        return;
+                    }
+                }
+                if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage) && IsDragonRoar)
                 {
                     API.CastSpell(DragonRoar);
                     return;

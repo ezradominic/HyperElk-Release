@@ -32,8 +32,11 @@ namespace HyperElk.Core
         private string Volley = "Volley";
         private string Explosive_Shot = "Explosive Shot";
         private string Serpent_Sting = "Serpent Sting";
+        private string Wild_Spirits = "Wild Spirits";
+        private string Resonating_Arrow = "Resonating Arrow";
+        private string Flayed_Shot = "Flayed Shot";
+        private string Death_Chakram = "Death Chakram";
 
-        
 
         private string Aspect_of_the_Turtle = "Aspect of the Turtle";
         private string Precise_Shots = "Precise Shots";
@@ -41,6 +44,7 @@ namespace HyperElk.Core
         private string Steady_Focus = "Steady Focus";
         private string Lock_and_Load = "Lock and Load";
         private string Dead_Eye = "Dead Eye";
+        private string FlayersMark = "Flayer's Mark";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 43;
@@ -83,6 +87,10 @@ namespace HyperElk.Core
         private string UseAMurderofCrows => AMurderofCrowsList[CombatRoutine.GetPropertyInt(A_Murder_of_Crows)];
         private string UseVolley => VolleyList[CombatRoutine.GetPropertyInt(Volley)];
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+
+        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
 
         private bool LastSpell_AimedShot()
         {
@@ -101,6 +109,9 @@ namespace HyperElk.Core
         {
             return API.PlayerHasBuff(buff, false, false);
         }
+        private int ca_values => (Talent_CarefulAim ? 1 : 0) + (API.TargetHealthPercent > 70 ? 1 : 0);
+        private bool ca_active => ca_values == 2;
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Marksman Hunter by Vec";
@@ -137,6 +148,15 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Aspect_of_the_Turtle, "G");
 
             CombatRoutine.AddSpell(Mend_Pet, "F5");
+
+            CombatRoutine.AddSpell(Wild_Spirits, "F10");
+            CombatRoutine.AddSpell(Resonating_Arrow, "F10");
+            CombatRoutine.AddSpell(Flayed_Shot, "F10");
+            CombatRoutine.AddSpell(Death_Chakram, "F10");
+
+
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
 
             CombatRoutine.AddBuff(Aspect_of_the_Turtle);
@@ -149,6 +169,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Double_Tap);
             CombatRoutine.AddBuff(Lock_and_Load);
             CombatRoutine.AddBuff(Dead_Eye);
+            CombatRoutine.AddBuff(FlayersMark);
 
 
             //Debuffs
@@ -161,7 +182,7 @@ namespace HyperElk.Core
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", true, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
 
             //Settings
             CombatRoutine.AddProp(Survival_of_the_Fittest,"Use " + Survival_of_the_Fittest + " below:", percentListProp, "Life percent at which " + Survival_of_the_Fittest + " is used, set to 0 to disable", "Defense", 7);
@@ -171,13 +192,15 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(A_Murder_of_Crows, "Use " + A_Murder_of_Crows, AMurderofCrowsList, "Use " + A_Murder_of_Crows + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Volley, "Use " + Volley, VolleyList, "Use " + Volley + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
 
-            CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", true, "Should the rotation try to ressurect/call your Pet", "Pet");
-
+            CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", false, "Should the rotation try to ressurect/call your Pet", "Pet");
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp(Exhilaration, "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Exhilaration + "PET", "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used to heal your pet, set to 0 to disable", "Pet", 2);
             CombatRoutine.AddProp(Aspect_of_the_Turtle, "Use " + Aspect_of_the_Turtle + " below:", percentListProp, "Life percent at which " + Aspect_of_the_Turtle + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Feign_Death, "Use " + Feign_Death + " below:", percentListProp, "Life percent at which " + Feign_Death + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(Mend_Pet, "Use " + Mend_Pet + " below:", percentListProp, "Life percent at which " + Mend_Pet + " is used, set to 0 to disable", "Pet", 6);
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
         }
 
         public override void Pulse()
@@ -186,12 +209,12 @@ namespace HyperElk.Core
             {
                 return;
             }
-            if (UseCallPet && !API.PlayerHasPet)
+            if (UseCallPet && (!API.PlayerHasPet || API.PetHealthPercent <1))
             {
                 API.CastSpell(Mend_Pet);
                 return;
             }
-            if (API.PlayerHasPet && API.PetHealthPercent <= MendPetLifePercent && API.CanCast(Mend_Pet))
+            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= MendPetLifePercent && API.CanCast(Mend_Pet))
             {
                 API.CastSpell(Mend_Pet);
                 return;
@@ -260,12 +283,12 @@ namespace HyperElk.Core
                     return;
                 }
                 //st->add_action("kill_shot");
-                if (API.TargetHealthPercent <= 20 && API.CanCast(Kill_Shot) && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10)
+                if ((API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && API.CanCast(Kill_Shot) && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10)
                 {
                     API.CastSpell(Kill_Shot);
                     return;
                 }
-                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent <= 20) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                 {
                     API.CastSpell(Kill_Shot + "MO");
                     return;
@@ -279,8 +302,31 @@ namespace HyperElk.Core
                 //st->add_action("tar_trap,if=runeforge.soulforge_embers.equipped&tar_trap.remains<gcd&cooldown.flare.remains<gcd");
                 //st->add_action("flare,if=tar_trap.up");
                 //st->add_action("wild_spirits");
+                if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Wild_Spirits);
+                    return;
+                }
                 //st->add_action("flayed_shot");
+                if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Flayed_Shot);
+                    return;
+                }
                 //st->add_action("death_chakram,if=focus+cast_regen<focus.max");
+                if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + FocusRegen * gcd / 100 < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Death_Chakram);
+                    return;
+                }
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell("Trinket2");
+                }
                 //st->add_action("explosive_shot");
                 if (API.CanCast(Explosive_Shot) && InRange && Talent_Explosive_Shot)
                 {
@@ -300,6 +346,11 @@ namespace HyperElk.Core
                     return;
                 }
                 //st->add_action("resonating_arrow,if=buff.precise_shots.down|!talent.chimaera_shot.enabled");
+                if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (!PlayerHasBuff(Precise_Shots) || !Talent_Chimaera_Shot) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Resonating_Arrow);
+                    return;
+                }
                 //st->add_action("Trueshot,if=buff.precise_shots.down|!talent.chimaera_shot.enabled");
                 if (API.CanCast(Trueshot) && (UseTrueshot == "always" || (UseTrueshot == "with Cooldowns" && IsCooldowns)) && InRange && (!API.PlayerHasBuff(Precise_Shots, false, false) || !Talent_Chimaera_Shot))
                 {
@@ -308,7 +359,7 @@ namespace HyperElk.Core
                 }
                 //st->add_action("aimed_shot,if=buff.precise_shots.down|(!talent.chimaera_shot.enabled|ca_active)&buff.Trueshot.up|buff.trick_shots.remains>execute_time&(active_enemies>1|runeforge.serpentstalkers_trickery.equipped)");
                 if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) &&
-                    (!API.PlayerHasBuff(Precise_Shots, false, false) || ((!Talent_Chimaera_Shot || Talent_CarefulAim) && API.PlayerHasBuff(Trueshot)))
+                    (!API.PlayerHasBuff(Precise_Shots, false, false) || ((!Talent_Chimaera_Shot || ca_active) && API.PlayerHasBuff(Trueshot)))
                     && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35))
                 {
                     API.CastSpell(Aimed_Shot);
@@ -323,14 +374,14 @@ namespace HyperElk.Core
                 }
                 //st->add_action("chimaera_shot,if=(buff.precise_shots.up|focus>cost+action.aimed_shot.cost)&(buff.Trueshot.down|active_enemies>1|!ca_active)");
                 if (Talent_Chimaera_Shot && API.CanCast(Chimaera_Shot) && InRange && (API.PlayerHasBuff(Precise_Shots) || API.PlayerFocus > (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35)) &&
-                    (!API.PlayerHasBuff(Trueshot, false, false) || IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || !Talent_CarefulAim))
+                    (!API.PlayerHasBuff(Trueshot, false, false) || IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || !ca_active))
                 {
                     API.CastSpell(Chimaera_Shot);
                     return;
                 }
                 //st->add_action("arcane_shot,if=(buff.precise_shots.up|focus>cost+action.aimed_shot.cost)&(buff.Trueshot.down|!ca_active)");
-                if (API.CanCast(Arcane_Shot) && InRange && (API.PlayerHasBuff(Precise_Shots) || API.PlayerFocus > 20 + (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35)) &&
-                    (!API.PlayerHasBuff(Trueshot, false, false) || !Talent_CarefulAim))
+                if (API.CanCast(Arcane_Shot) && API.PlayerFocus >=20 && InRange && (API.PlayerHasBuff(Precise_Shots) || API.PlayerFocus > 20 + (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35)) &&
+                    (!API.PlayerHasBuff(Trueshot, false, false) || !ca_active))
                 {
                     API.CastSpell(Arcane_Shot);
                     return;
@@ -372,6 +423,11 @@ namespace HyperElk.Core
                     return;
                 }
                 //Trick_Shots->add_action("wild_spirits");
+                if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Wild_Spirits);
+                    return;
+                }
                 //Trick_Shots->add_action("volley");
                 if (API.CanCast(Volley) && UseVolley != "never" && (UseVolley == "always" || (UseVolley == "with Cooldowns" && IsCooldowns) || UseVolley == "On AOE") && InRange && Talent_Volley)
                 {
@@ -379,6 +435,11 @@ namespace HyperElk.Core
                     return;
                 }
                 //Trick_Shots->add_action("resonating_arrow");
+                if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian"  && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Resonating_Arrow);
+                    return;
+                }
                 //Trick_Shots->add_action("barrage");
                 if (Talent_Barrage && API.CanCast(Barrage) && InRange && API.PlayerFocus >= 30)
                 {
@@ -401,7 +462,12 @@ namespace HyperElk.Core
                     API.CastSpell(Aimed_Shot);
                     return;
                 }//Trick_Shots->add_action("death_chakram,if=focus+cast_regen<focus.max");
-                 //Trick_Shots->add_action("rapid_fire,if=(buff.trick_shots.remains>=execute_time)&buff.double_tap.down");
+                if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + FocusRegen * gcd / 100 < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Death_Chakram);
+                    return;
+                }
+                //Trick_Shots->add_action("rapid_fire,if=(buff.trick_shots.remains>=execute_time)&buff.double_tap.down");
                 if (API.CanCast(Rapid_Fire) && !LastSpell_AimedShot() && !LastSpell_RapidFire() && InRange && !API.PlayerHasBuff(Double_Tap, false, false) && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime)
                 {
                     API.CastSpell(Rapid_Fire);
@@ -414,12 +480,12 @@ namespace HyperElk.Core
                     return;
                 }
                 //Trick_Shots->add_action("kill_shot,if=buff.dead_eye.down");
-                if (API.CanCast(Kill_Shot) && API.TargetHealthPercent <= 20 && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10 && !API.PlayerHasBuff(Dead_Eye))
+                if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10 && !API.PlayerHasBuff(Dead_Eye))
                 {
                     API.CastSpell(Kill_Shot);
                     return;
                 }
-                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent <= 20) && API.PlayerFocus >= 10 && PlayerLevel >= 42 && !API.PlayerHasBuff(Dead_Eye))
+                if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42 && !API.PlayerHasBuff(Dead_Eye))
                 {
                     API.CastSpell(Kill_Shot + "MO");
                     return;
@@ -437,6 +503,11 @@ namespace HyperElk.Core
                     return;
                 }
                 // Trick_Shots->add_action("flayed_shot");
+                if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Flayed_Shot);
+                    return;
+                }
                 //Trick_Shots->add_action("serpent_sting,target_if=min:dot.serpent_sting.remains,if=refreshable");
                 if (Talent_Serpent_Sting && API.CanCast(Serpent_Sting) && API.PlayerFocus > 10 && InRange && !API.TargetHasDebuff(Serpent_Sting) && API.TargetTimeToDie > 1800)
                 {
