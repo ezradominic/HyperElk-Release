@@ -247,7 +247,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-             API.WriteLog("cancast "+API.CanCast(DivineToll) +" cooldown " + API.SpellCDDuration(DivineToll) + " targetdebuff judg " + TargetHasDebuff(Judgment) + " ES? " + Talent_ExecutionSentence + " buff? " + TargetHasDebuff(ExecutionSentence));
+             //API.WriteLog("cancast "+API.CanCast(DivineToll) +" cooldown " + API.SpellCDDuration(DivineToll) + " targetdebuff judg " + TargetHasDebuff(Judgment) + " ES? " + Talent_ExecutionSentence + " buff? " + TargetHasDebuff(ExecutionSentence));
             if (IsCooldowns)
             {
                 //cds->add_action(this, "Avenging Wrath", "if=(holy_power>=4&time<5|holy_power>=3&time>5|talent.holy_avenger.enabled&cooldown.holy_avenger.remains=0)&time_to_hpg=0");
