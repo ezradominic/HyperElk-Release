@@ -247,7 +247,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            // API.WriteLog(" winter " + API.SpellCDDuration(BlessingofWinter) + " summer " + API.SpellCDDuration(BlessingofSummer) + " spring " + API.SpellCDDuration(BlessingofSpring) + " autumn " + API.SpellCDDuration(BlessingofAutumn));
+             //API.WriteLog("cancast "+API.CanCast(DivineToll) +" cooldown " + API.SpellCDDuration(DivineToll) + " targetdebuff judg " + TargetHasDebuff(Judgment) + " ES? " + Talent_ExecutionSentence + " buff? " + TargetHasDebuff(ExecutionSentence));
             if (IsCooldowns)
             {
                 //cds->add_action(this, "Avenging Wrath", "if=(holy_power>=4&time<5|holy_power>=3&time>5|talent.holy_avenger.enabled&cooldown.holy_avenger.remains=0)&time_to_hpg=0");
@@ -276,7 +276,7 @@ namespace HyperElk.Core
                 }
             }
             //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
-            if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+            if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
             {
                 API.CastSpell(DivineToll);
                 return;
