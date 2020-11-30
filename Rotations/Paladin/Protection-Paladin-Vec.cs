@@ -114,6 +114,7 @@
             CombatRoutine.AddSpell(DivineToll, "F8");
             CombatRoutine.AddSpell(AshenHallow, "F8");
             CombatRoutine.AddSpell(BlessingoftheSeasons, "F8");
+            CombatRoutine.AddSpell(VanquishersHammer, "F8");
 
 
             CombatRoutine.AddMacro("Trinket1", "F9");
@@ -132,10 +133,12 @@
             CombatRoutine.AddBuff(ShiningLightFree);
             CombatRoutine.AddBuff(HolyAvenger);
             CombatRoutine.AddBuff(VanquishersHammer);
+            CombatRoutine.AddBuff(Seraphim);
             //Debuffs
             CombatRoutine.AddDebuff(Forbearance);
             CombatRoutine.AddDebuff(Judgment);
             CombatRoutine.AddDebuff(vengeful_shock);
+
 
 
             //CBProperties
