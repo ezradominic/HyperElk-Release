@@ -92,13 +92,9 @@ namespace HyperElk.Core
 
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
 
-        private bool LastSpell_AimedShot()
+        private bool LastSpell(string spellname, int spellid)
         {
-            return API.LastSpellCastInGame == Aimed_Shot || API.PlayerCurrentCastSpellID == 19434;
-        }
-        private bool LastSpell_RapidFire()
-        {
-            return API.LastSpellCastInGame == Rapid_Fire || API.PlayerCurrentCastSpellID == 257044;
+            return API.LastSpellCastInGame == spellname || API.PlayerCurrentCastSpellID == spellid;
         }
         private float FocusRegen => 10f * (1f + API.PlayerGetHaste);
         private float FocusTimeToMax => (API.PlayerMaxFocus - API.PlayerFocus) * 100f / FocusRegen;
@@ -275,8 +271,8 @@ namespace HyperElk.Core
                 #endregion
                 #region ST
                 //st->add_action("steady_shot,if=Talent_.steady_focus.enabled&prev_gcd.1.steady_shot&buff.steady_focus.remains<5");
-                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && (API.LastSpellCastInGame == Steady_Shot || API.PlayerCurrentCastSpellID == 56641) && API.PlayerHasBuff(Steady_Focus, false, false)
-                    && API.PlayerBuffTimeRemaining(Steady_Focus) < 500
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && (API.LastSpellCastInGame == Steady_Shot || API.PlayerCurrentCastSpellID == 56641) && (API.PlayerHasBuff(Steady_Focus, false, false)
+                    && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 || !PlayerHasBuff(Steady_Focus))
                     && InRange)
                 {
                     API.CastSpell(Steady_Shot);
@@ -359,7 +355,7 @@ namespace HyperElk.Core
                 }
                 //st->add_action("aimed_shot,if=buff.precise_shots.down|(!talent.chimaera_shot.enabled|ca_active)&buff.Trueshot.up|buff.trick_shots.remains>execute_time&(active_enemies>1|runeforge.serpentstalkers_trickery.equipped)");
                 if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) &&
-                    (!API.PlayerHasBuff(Precise_Shots, false, false) || ((!Talent_Chimaera_Shot || ca_active) && API.PlayerHasBuff(Trueshot)))
+                    ((!API.PlayerHasBuff(Precise_Shots, false, false)&& !LastSpell(Aimed_Shot, 19434) && !LastSpell(Rapid_Fire, 257044)) || ((!Talent_Chimaera_Shot || ca_active) && API.PlayerHasBuff(Trueshot)))
                     && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35))
                 {
                     API.CastSpell(Aimed_Shot);
@@ -455,7 +451,7 @@ namespace HyperElk.Core
                 }
                 //Trick_Shots->add_action("aimed_shot,if=(buff.trick_shots.remains>=execute_time)&(buff.precise_shots.down|full_recharge_time<cast_time+gcd|buff.Trueshot.up)");
 
-                if (API.CanCast(Aimed_Shot) && !LastSpell_AimedShot() && !LastSpell_RapidFire() && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= AimedShotCastTime &&
+                if (API.CanCast(Aimed_Shot) && !LastSpell(Aimed_Shot, 19434) && !LastSpell(Rapid_Fire, 257044) && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= AimedShotCastTime &&
                  (!API.PlayerHasBuff(Precise_Shots, false, false) || (API.SpellCharges(Aimed_Shot) >= 1 && API.SpellChargeCD(Aimed_Shot) < AimedShotCastTime+gcd)|| API.PlayerHasBuff(Trueshot))
                  && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving))
                 {
@@ -468,7 +464,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Trick_Shots->add_action("rapid_fire,if=(buff.trick_shots.remains>=execute_time)&buff.double_tap.down");
-                if (API.CanCast(Rapid_Fire) && !LastSpell_AimedShot() && !LastSpell_RapidFire() && InRange && !API.PlayerHasBuff(Double_Tap, false, false) && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime)
+                if (API.CanCast(Rapid_Fire) && !LastSpell(Aimed_Shot, 19434) && !LastSpell(Rapid_Fire, 257044) && InRange && !API.PlayerHasBuff(Double_Tap, false, false) && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime)
                 {
                     API.CastSpell(Rapid_Fire);
                     return;
