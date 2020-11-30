@@ -34,7 +34,7 @@ namespace HyperElk.Core
         private string BloodBoil = "Blood Boil";
         private string DeathStrike = "Death Strike";
         private string HeartStrike = "Heart Strike";
-        private string AntiMagicShell = "Anti-Magic-Shell";
+        private string AntiMagicShell = "Anti-Magic Shell";
         private string VampiricBlood = "Vampiric Blood";
         private string IceboundFortitude = "Icebound Fortitude";
         private string DancingRuneWeapon = "Dancing Rune Weapon";
