@@ -107,7 +107,6 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Mind Freeze", "F");
             CombatRoutine.AddSpell("Blooddrinker", "F3");
             CombatRoutine.AddSpell("Death's Caress", "F8");
-            CombatRoutine.AddSpell("Healthstone", "NumPad1");
             CombatRoutine.AddSpell("Rune Tap", "F7");
             CombatRoutine.AddSpell("Raise Dead", "NumPad5");
             CombatRoutine.AddSpell("Concentrated Flame", "NumPad2");
