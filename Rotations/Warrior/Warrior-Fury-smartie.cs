@@ -10,6 +10,7 @@
 // v1.8 condemn fix
 // v1.9 back to condemn id
 // v2.0 Bladestorm toggle and execute/condemn mouseover
+// v2.1 update for legendarys
 
 namespace HyperElk.Core
 {
@@ -86,7 +87,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.0");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.1");
             API.WriteLog("Condemn is buggy for Fury currently and was added as id instead of name to fix it");
 
             //Spells
@@ -129,6 +130,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(VictoryRush);
             CombatRoutine.AddBuff(BattleShout);
             CombatRoutine.AddBuff(Victorious);
+            CombatRoutine.AddBuff(Bladestorm);
 
             //Debuff
             CombatRoutine.AddDebuff(Siegebreaker);
@@ -222,7 +224,7 @@ namespace HyperElk.Core
                     API.CastSpell(AncientAftershock);
                     return;
                 }
-                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && IsRecklessness)
+                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && !API.PlayerHasBuff(Recklessness) && IsRecklessness)
                 {
                     API.CastSpell(Recklessness);
                     return;
@@ -242,7 +244,7 @@ namespace HyperElk.Core
                     API.CastSpell(Whirlwind);
                     return;
                 }
-                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
+                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && !API.TargetHasDebuff(Siegebreaker) && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
                 {
                     API.CastSpell(Siegebreaker);
                     return;
@@ -252,7 +254,7 @@ namespace HyperElk.Core
                     API.CastSpell(Rampage);
                     return;
                 }
-                if (API.CanCast(Bladestorm) && API.PlayerLastSpell == Rampage && TalentBladestorm && IsBladestorm && BladestormToggle)
+                if (API.CanCast(Bladestorm) && API.PlayerLastSpell == Rampage && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle)
                 {
                     API.CastSpell(Bladestorm);
                     return;
