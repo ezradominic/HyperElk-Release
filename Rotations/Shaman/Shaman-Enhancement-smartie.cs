@@ -9,6 +9,8 @@ namespace HyperElk.Core
 {
     public class EnhancementShaman : CombatRoutine
     {
+        private bool WindfuryToggle => API.ToggleIsEnabled("Windfury Totem");
+        private bool SunderingToggle => API.ToggleIsEnabled("Sundering");
         //Spell,Auras
         private string LavaLash = "Lava Lash";
         private string CrashLightning = "Crash Lightning";
@@ -152,6 +154,10 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(LashingFlames);
             CombatRoutine.AddDebuff(DoomWinds);
 
+            //Toggle
+            CombatRoutine.AddToggle("Windfury Totem");
+            CombatRoutine.AddToggle("Sundering");
+
             //Prop
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Ascendance, "Use " + Ascendance, CDUsage, "Use " + Ascendance + " always, with Cooldowns", "Cooldowns", 0);
@@ -249,12 +255,12 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && !DoomWindLeggy && API.PlayerMana >= 12 && !API.PlayerHasBuff(WindfuryTotem) && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && !API.PlayerHasBuff(WindfuryTotem) && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
             }
-            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && DoomWindLeggy && !API.PlayerHasDebuff(DoomWinds) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && DoomWindLeggy && !API.PlayerHasDebuff(DoomWinds) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
@@ -377,7 +383,7 @@ namespace HyperElk.Core
                     API.CastSpell(IceStrike);
                     return;
                 }
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering && IsSundering)
+                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
@@ -397,7 +403,7 @@ namespace HyperElk.Core
                     API.CastSpell(EarthElemental);
                     return;
                 }
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
@@ -471,7 +477,7 @@ namespace HyperElk.Core
                     API.CastSpell(FlameShock);
                     return;
                 }
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering && IsSundering)
+                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
@@ -521,7 +527,7 @@ namespace HyperElk.Core
                     API.CastSpell(EarthElemental);
                     return;
                 }
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
