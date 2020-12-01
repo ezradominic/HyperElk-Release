@@ -129,7 +129,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && NotCasting && NotChanneling &&)
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && NotCasting && NotChanneling)
             {
                 API.CastSpell("Counterspell");
                 return;
