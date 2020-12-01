@@ -82,7 +82,7 @@ namespace HyperElk.Core
         private string ChiWave = "Chi Wave";
         private string MarkoftheCrane = "Mark of the Crane";
         private string DanceofChiJi = "Dance of Chi-Ji";
-        private string StormEarthandFire = "Storm Earth and Fire";
+        private string StormEarthandFire = "Storm,  Earth,  and Fire";
         private string Serenity = "Serenity";
         private string DampenHarm = "Dampen Harm";
         private string EnergizingElixir = "Energizing Elixir";
@@ -150,7 +150,7 @@ namespace HyperElk.Core
             //Buffs
             CombatRoutine.AddBuff("Blackout Kick!");
             CombatRoutine.AddBuff("Dance of Chi-Ji");
-            CombatRoutine.AddBuff("Storm Earth and Fire");
+            CombatRoutine.AddBuff("Storm,  Earth,  and Fire");
             CombatRoutine.AddBuff("Serenity");
 
             //Debuffs
@@ -293,7 +293,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //Spinnging Crane Kick
-                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >=7 && API.PlayerCurrentChi >=2 && API.TargetHasDebuff(MarkoftheCrane) && API.PlayerHasBuff(DanceofChiJi))
+                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >=7 && API.PlayerCurrentChi >=2 && API.PlayerIsTalentSelected(6, 3) && API.TargetHasDebuff(MarkoftheCrane) && API.PlayerHasBuff(DanceofChiJi))
+                {
+                    API.CastSpell(SpinningCraneKick);
+                    return;
+                }
+                //Spinnging Crane Kick
+                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >= 7 && API.PlayerCurrentChi >= 2)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -329,7 +335,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Tiger Palm
-                if (API.CanCast(TigerPalm) && !LastTigerPalm && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+                if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
                 {
                     API.CastSpell(TigerPalm);
                     return;
@@ -456,7 +462,7 @@ namespace HyperElk.Core
                 return;
             }   
             //Tiger Palm
-            if (API.CanCast(TigerPalm) && !LastTigerPalm && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+            if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -578,7 +584,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //Tiger Palm
-                    if (API.CanCast(TigerPalm) && !LastTigerPalm && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
+                    if (API.CanCast(TigerPalm) && NotChanneling && IsMelee && API.PlayerEnergy >= 50 && API.PlayerCurrentChi <= 3)
                     {
                         API.CastSpell(TigerPalm);
                         return;
