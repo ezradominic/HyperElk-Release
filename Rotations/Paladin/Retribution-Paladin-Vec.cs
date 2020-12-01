@@ -43,6 +43,7 @@ namespace HyperElk.Core
         private string BlessingoftheSeasons = "328282";
         private string RingingClarity = "Ringing Clarity";
 
+        private bool UseSmallCD => API.ToggleIsEnabled("Small CDs");
         //Misc
         private static bool PlayerHasBuff(string buff)
         {
@@ -52,6 +53,11 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, false, false);
         }
+        private static bool Buff_or_CDmorethan(string spellname, int time)
+        {
+            return PlayerHasBuff(spellname) || API.SpellCDDuration(spellname) > time;
+        }
+
         private int PlayerLevel => API.PlayerLevel;
         private int holy_power => API.PlayerCurrentHolyPower;
         private bool IsMelee => API.TargetRange < 6;
@@ -157,6 +163,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
 
+            CombatRoutine.AddToggle("Small CDs");
             //CBProperties
             CombatRoutine.AddProp("FOLOOCPCT", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
             CombatRoutine.AddProp("FOLOOC", "Out of Combat Healing", true, "Should the bot use Flash of Light out of combat to heal you between pulls", FlashofLight);
@@ -247,7 +254,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-             //API.WriteLog("cancast "+API.CanCast(DivineToll) +" cooldown " + API.SpellCDDuration(DivineToll) + " targetdebuff judg " + TargetHasDebuff(Judgment) + " ES? " + Talent_ExecutionSentence + " buff? " + TargetHasDebuff(ExecutionSentence));
+            //API.WriteLog("cancast "+API.CanCast(DivineToll) +" cooldown " + API.SpellCDDuration(DivineToll) + " targetdebuff judg " + TargetHasDebuff(Judgment) + " ES? " + Talent_ExecutionSentence + " buff? " + TargetHasDebuff(ExecutionSentence));
             if (IsCooldowns)
             {
                 //cds->add_action(this, "Avenging Wrath", "if=(holy_power>=4&time<5|holy_power>=3&time>5|talent.holy_avenger.enabled&cooldown.holy_avenger.remains=0)&time_to_hpg=0");
@@ -267,16 +274,16 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(HolyAvenger);
                     return;
-                }
-                //Final Reckoning with at least 3HP, and if if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 10 seconds.
-                if (Talent_FinalReckoning && IsMelee && !API.SpellISOnCooldown(FinalReckoning) && API.TargetRange < 30 && API.PlayerCurrentHolyPower >= 3 && (!IsCooldowns || PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 1000 || PlayerHasBuff(Crusade) || API.SpellCDDuration(Crusade) > 1000))
-                {
-                    API.CastSpell(FinalReckoning);
-                    return;
-                }
+                }              
+            }
+            //Final Reckoning with at least 3HP, and if if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 10 seconds.
+            if (Talent_FinalReckoning && (IsCooldowns || UseSmallCD) && !gcd_to_hpg && IsMelee && !API.SpellISOnCooldown(FinalReckoning) && API.TargetRange < 30 && API.PlayerCurrentHolyPower >= 3 && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 1000) || Buff_or_CDmorethan(Crusade, 1000)) && (PlayerHasBuff(Seraphim) || !Talent_Seraphim))
+            {
+                API.CastSpell(FinalReckoning);
+                return;
             }
             //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
-            if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+            if (!API.SpellISOnCooldown(DivineToll) && holy_power <= 4 && (!RingingClarity_enabled || !IsAOE || API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE || ( RingingClarity_enabled || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)&& holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
             {
                 API.CastSpell(DivineToll);
                 return;
@@ -308,13 +315,13 @@ namespace HyperElk.Core
                 return;
             }
             //Seraphim if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 25 seconds.
-            if (Talent_Seraphim && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && !API.SpellISOnCooldown(Seraphim) && IsMelee && (!IsCooldowns || PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 2500 || PlayerHasBuff(Crusade) || API.SpellCDDuration(Crusade) > 2500))
+            if (Talent_Seraphim && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && !API.SpellISOnCooldown(Seraphim) && IsMelee && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 2500) || Buff_or_CDmorethan(Crusade, 2500)))
             {
                 API.CastSpell(Seraphim);
                 return;
             }
             //Execution Sentence if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 10 seconds.
-            if (API.PlayerIsTalentSelected(1, 3) && IsCooldowns && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && !API.SpellISOnCooldown(ExecutionSentence) && API.TargetRange < 30 && (!IsCooldowns || PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 1000 || PlayerHasBuff(Crusade) || API.SpellCDDuration(Crusade) > 1000))
+            if (API.PlayerIsTalentSelected(1, 3) && (!Talent_FinalReckoning ||TargetHasDebuff(FinalReckoning) ) && (IsCooldowns || UseSmallCD) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && !API.SpellISOnCooldown(ExecutionSentence) && API.TargetRange < 30 && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 1000) || Buff_or_CDmorethan(Crusade, 1000)))
             {
                 API.CastSpell(ExecutionSentence);
                 return;
@@ -334,7 +341,7 @@ namespace HyperElk.Core
                 }
             }
             //Wake of Ashes at 0HP OR at 2HP or less if Blade of Justice remains on CD for greater than 2 GCDs. saved for Execution Sentence and/or Final Reckoning.
-            if (!API.SpellISOnCooldown(WakeofAshes) && (API.PlayerCurrentHolyPower == 0 || (API.PlayerCurrentHolyPower >= 2 && API.SpellCDDuration(BladeofJustice) > 2 * gcd)) && (!IsCooldowns || (!Talent_FinalReckoning || TargetHasDebuff(FinalReckoning)) && (TargetHasDebuff(ExecutionSentence) || !Talent_ExecutionSentence)) && IsMelee && PlayerLevel >= 39 && (UseWakeofAshes == "With Cooldowns" && IsCooldowns || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (!API.SpellISOnCooldown(WakeofAshes) && (API.PlayerCurrentHolyPower == 0 || (API.PlayerCurrentHolyPower <= 2 && API.SpellCDDuration(BladeofJustice) > 2 * gcd)) && (!IsCooldowns || (!Talent_FinalReckoning || TargetHasDebuff(FinalReckoning)) && (TargetHasDebuff(ExecutionSentence) || !Talent_ExecutionSentence)) && IsMelee && PlayerLevel >= 39 && (UseWakeofAshes == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell(WakeofAshes);
                 return;
