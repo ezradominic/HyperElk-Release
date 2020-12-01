@@ -184,12 +184,12 @@ namespace HyperElk.Core
                 API.CastSpell(EmpowerRuneWeapon);
                 return;
             }
-            if (IsCooldowns && TalentBreathOfSindra && RPDeficit > 40 && CurrentRune < 5 && API.PlayerHasBuff(BreathofSindragosa) && IsMelee)
+            if (IsCooldowns && TalentBreathOfSindra && API.CanCast(EmpowerRuneWeapon) && RPDeficit > 40 && CurrentRune < 5 && API.PlayerHasBuff(BreathofSindragosa) && IsMelee)
             {
                 API.CastSpell(EmpowerRuneWeapon);
                 return;
             }
-            if (IsCooldowns && TalentIcecap &&API.CanCast(EmpowerRuneWeapon) && API.PlayerCurrentRunes < 3 && IsMelee)
+            if (IsCooldowns && TalentIcecap && API.CanCast(EmpowerRuneWeapon) && API.CanCast(EmpowerRuneWeapon) && API.PlayerCurrentRunes < 3 && IsMelee)
             {
                 API.CastSpell(EmpowerRuneWeapon);
                 return;
