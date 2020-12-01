@@ -28,7 +28,7 @@ namespace HyperElk.Core
         private string TheHunt = "The Hunt";
         private string fodder_to_the_flame = "Fodder to the Flame";
         private string elysian_decree = "Elysian Decree";
-
+        private string Fel_Bombardment = "Fel Bombardment";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -38,9 +38,13 @@ namespace HyperElk.Core
         private int Current_Soul_Fragments => API.PlayerBuffStacks(Soul_Fragments);
 
         //Talents
+        private bool Talent_agonizing_flames => API.PlayerIsTalentSelected(1, 2);
         private bool Talent_Felblade => API.PlayerIsTalentSelected(1, 3);
+        private bool Talent_burning_alive => API.PlayerIsTalentSelected(2, 3);
+        private bool Talent_charred_flesh => API.PlayerIsTalentSelected(3, 2);
         private bool Talent_SpiritBomb => API.PlayerIsTalentSelected(3, 3);
         private bool Talent_Fracture => API.PlayerIsTalentSelected(4, 3);
+        private bool Talent_Demonic => API.PlayerIsTalentSelected(6, 2);
         private bool Talent_SoulBarrier => API.PlayerIsTalentSelected(6, 3);
         private bool Talent_Bulk_Extraction => API.PlayerIsTalentSelected(7, 3);
         private static bool PlayerHasBuff(string buff)
@@ -51,7 +55,8 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, false, false);
         }
-
+        //( "variable,name=brand_build,value=talent.agonizing_flames.enabled&talent.burning_alive.enabled&talent.charred_flesh.enabled" );
+        private bool brand_build => Talent_agonizing_flames&&Talent_burning_alive&&Talent_charred_flesh;
 
 
         //CBProperties
@@ -69,6 +74,8 @@ namespace HyperElk.Core
         private int SoulBarrierLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Soul_Barrier)];
         private int FieryBrandLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Fiery_Brand)];
         private int SoulFragmentCount => CombatRoutine.GetPropertyInt("SoulFragmentCount");
+
+        private bool razelikhs_defilement_equipped => CombatRoutine.GetPropertyBool("razelikhs_defilement");
 
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
@@ -122,6 +129,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Soul Fragments");
             CombatRoutine.AddBuff("Metamorphosis");
             CombatRoutine.AddBuff("Fiery Brand");
+            CombatRoutine.AddBuff(Fel_Bombardment);
+            CombatRoutine.AddBuff(Immolation_Aura);
 
             //Debuffs
             CombatRoutine.AddDebuff("Frailty");
@@ -130,9 +139,11 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            AddProp("razelikhs_defilement", "have razelikhs_defilement", false, "if you have razelikhs_defilement", "Legendary");
+            
 
             //Settings
-            
+
             CombatRoutine.AddProp(Metamorphosis, "Use " + Metamorphosis, MetamorphosisList, "Use " + Metamorphosis + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Throw_Glaive, "Use " + Throw_Glaive, Throw_GlaiveList, "Use " + Throw_Glaive + "On, Off", "General", 0);
             CombatRoutine.AddProp(Sigil_of_Flame, "Use " + Sigil_of_Flame, SigilofFlameList, "Use " + Sigil_of_Flame + "On, Off", "Cooldowns", 0);
@@ -155,214 +166,180 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (API.PlayerIsMounted || API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
             {
-                return;
-            }
-            if (API.CanCast(Metamorphosis) && API.PlayerHealthPercent <= MetamorphosisLifePercent)
-            {
-                API.CastSpell(Metamorphosis);
-                return;
+                if (API.CanCast(Metamorphosis) && API.PlayerHealthPercent <= MetamorphosisLifePercent)
+                {
+                    API.CastSpell(Metamorphosis);
+                    return;
+                }
             }
 
         }
         public override void CombatPulse()
         {
-
-            if (isInterrupt && API.CanCast(Disrupt) && MeleeRange && PlayerLevel >= 29)
+            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
             {
-                API.CastSpell(Disrupt);
-                return;
-            }
-            //actions +=/ consume_magic
-         /*   if (API.CanCast("Consume Magic") && DispelWhiteList && API.TargetRange <= 5)
-            {
-                API.CastSpell("Consume Magic");
-                return;
-            }*/
-            //actions +=/ call_action_list,name = brand
-
-            //actions.brand = sigil_of_flame,if= cooldown.fiery_brand.remains < 2
-            if (API.CanCast("Sigil of Flame") && UseSigilofFlame == "On" && API.SpellCDDuration("Fiery Brand") < 200 && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Sigil of Flame");
-                return;
-            }
-            //actions.brand +=/ infernal_strike,if= cooldown.fiery_brand.remains = 0
-            if (API.CanCast("Infernal Strike") && API.SpellCharges(Infernal_Strike) >= 1 && API.SpellChargeCD(Infernal_Strike) < 150 && API.LastSpellCastInGame != Infernal_Strike && API.PlayerCurrentCastSpellID != 189110 && UseInfernalStrike == "On" && API.CanCast("Fiery Brand") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Infernal Strike");
-                return;
-            }
-            //actions.brand +=/ fiery_brand
-            if (API.CanCast("Fiery Brand") && API.PlayerHealthPercent <= FieryBrandLifePercent && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Fiery Brand");
-                return;
-            }
-            //actions.brand +=/ immolation_aura,if= dot.fiery_brand.ticking
-            if (API.CanCast("Immolation Aura") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 8) && API.TargetHasDebuff("Fiery Brand"))
-            {
-                API.CastSpell("Immolation Aura");
-                return;
-            }
-            //actions.brand +=/ infernal_strike,if= dot.fiery_brand.ticking
-            if (API.CanCast("Infernal Strike") && API.SpellCharges(Infernal_Strike) >= 1 && API.SpellChargeCD(Infernal_Strike) < 150 && API.LastSpellCastInGame != Infernal_Strike && API.PlayerCurrentCastSpellID != 189110 && UseInfernalStrike == "On" && API.TargetHasDebuff("Fiery Brand") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Infernal Strike");
-                return;
-            }
-            //actions.brand +=/ sigil_of_flame,if= dot.fiery_brand.ticking
-            if (API.CanCast("Sigil of Flame") && UseSigilofFlame == "On" && API.TargetHasDebuff("Fiery Brand") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Sigil of Flame");
-                return;
-            }
-
-            //actions +=/ call_action_list,name = defensives
-            //actions.defensives +=/ metamorphosis
-            if (API.CanCast("Metamorphosis") && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && API.PlayerHealthPercent <= MetamorphosisLifePercent)
-            {
-                API.CastSpell("Metamorphosis");
-            }
-            //actions.defensives = demon_spikes
-            if (API.CanCast(Demon_Spikes) && API.SpellCharges(Demon_Spikes) >= 2 && API.PlayerHealthPercent <= DemonSpikes1LifePercent && API.PlayerLevel >= 14)
-            {
-                API.CastSpell(Demon_Spikes);
-                return;
-            }
-            if (API.CanCast(Demon_Spikes) && API.SpellCharges(Demon_Spikes) >= 1 && !API.PlayerHasBuff(Demon_Spikes) && API.PlayerHealthPercent <= DemonSpikes2LifePercent && API.PlayerLevel >= 14)
-            {
-                API.CastSpell(Demon_Spikes);
-                return;
-            }
-            if (API.CanCast("Soul Barrier") && Current_Soul_Fragments >= SoulFragmentCount && API.PlayerHealthPercent <= SoulBarrierLifePercent && Talent_SoulBarrier)
-            {
-                API.CastSpell("Soul Barrier");
-                return;
-            }
-            //actions.defensives +=/ fiery_brand
-            if (API.CanCast("Fiery Brand") && API.PlayerHealthPercent < FieryBrandLifePercent && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Fiery Brand");
-                return;
-            }
-            // actions +=/ call_action_list,name = cooldowns
-            /*
-actions.cooldowns = potion
-actions.cooldowns +=/ concentrated_flame,if= (!dot.concentrated_flame_burn.ticking & !action.concentrated_flame.in_flight | full_recharge_time < gcd.max)
-actions.cooldowns +=/ worldvein_resonance,if= buff.lifeblood.stack < 3
-actions.cooldowns +=/ memory_of_lucid_dreams
-# Default fallback for usable essences.
-actions.cooldowns +=/ heart_essence
-actions.cooldowns +=/ use_item,effect_name = cyclotronic_blast,if= buff.memory_of_lucid_dreams.down
-actions.cooldowns +=/ use_item,name = ashvanes_razor_coral,if= debuff.razor_coral_debuff.down | debuff.conductive_ink_debuff.up & target.health.pct < 31 | target.time_to_die < 20
-# Default fallback for usable items.
-actions.cooldowns +=/ use_items*/
-            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
-            {
-                API.CastSpell("Trinket1");
-            }
-            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
-            {
-                API.CastSpell("Trinket2");
-            }
-            //apl_cooldown->add_action("sinful_brand,if=!dot.sinful_brand.ticking");
-            if (!API.SpellISOnCooldown(SinfulBrand) && !TargetHasDebuff(SinfulBrand) && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
-            {
-                API.CastSpell(SinfulBrand);
-                return;
-            }
-            //apl_cooldown->add_action("the_hunt");
-            if (!API.SpellISOnCooldown(TheHunt) && API.TargetRange <= 50 && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
-            {
-                API.CastSpell(TheHunt);
-                return;
-            }
-            //apl_cooldown->add_action("fodder_to_the_flame");
-            if (!API.SpellISOnCooldown(fodder_to_the_flame) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
-            {
-                API.CastSpell(fodder_to_the_flame);
-                return;
-            }
-            //apl_cooldown->add_action("elysian_decree");
-            if (!API.SpellISOnCooldown(elysian_decree) && API.TargetRange <= 30 && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
-            {
-                API.CastSpell(elysian_decree);
-                return;
-            }
-            //actions +=/ call_action_list,name = normal
-            //actions.normal = infernal_strike
-            if (API.CanCast("Infernal Strike") && API.SpellCharges(Infernal_Strike) >= 1 && API.SpellChargeCD(Infernal_Strike) < 150 && API.LastSpellCastInGame != Infernal_Strike && API.PlayerCurrentCastSpellID != 189110 && UseInfernalStrike == "On" && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Infernal Strike");
-                return;
-            }
-            //actions.normal +=/ bulk_extraction
-            if (API.CanCast("Bulk Extraction") && (UseBulkExtraction == "always" || UseBulkExtraction == "with Cooldowns" && IsCooldowns) && Talent_Bulk_Extraction && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Bulk Extraction");
-                return;
-            }
-            //actions.normal +=/ spirit_bomb,if= ((buff.metamorphosis.up & soul_fragments >= 3) | soul_fragments >= 4)
-            if (API.CanCast("Spirit Bomb") && API.PlayerFury >= 30 && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5) && Talent_SpiritBomb && ((API.PlayerHasBuff("Metamorphosis") && Current_Soul_Fragments == 3) || Current_Soul_Fragments >= 4))
-            {
-                API.CastSpell("Spirit Bomb");
-                return;
-            }
-            //actions.normal +=/ soul_cleave,if= (!talent.spirit_bomb.enabled & ((buff.metamorphosis.up & soul_fragments >= 3) | soul_fragments >= 4))
-            if (API.CanCast("Soul Cleave") && API.PlayerFury >= 30 && (!Talent_SpiritBomb && ((API.PlayerHasBuff("Metamorphosis") && Current_Soul_Fragments >= 3) || Current_Soul_Fragments >= 4 || API.PlayerFury >= 100)) && API.TargetRange <= 5)
-            {
-                API.CastSpell("Soul Cleave");
-                return;
-            }
-            //actions.normal +=/ soul_cleave,if= talent.spirit_bomb.enabled & soul_fragments = 0
-            if (API.CanCast("Soul Cleave") && API.PlayerFury >= 30 && Talent_SpiritBomb && Current_Soul_Fragments == 0 && API.TargetRange <= 5)
-            {
-                API.CastSpell("Soul Cleave");
-                return;
-            }
-            //actions.normal +=/ immolation_aura,if= pain <= 90
-            if (API.CanCast("Immolation Aura") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 8) && API.PlayerFury <= 90)
-            {
-                API.CastSpell("Immolation Aura");
-                return;
-            }
-            //actions.normal +=/ felblade,if= pain <= 70
-            if (API.CanCast("Felblade") && Talent_Felblade && API.PlayerFury <= 70 && API.TargetRange <= 15)
-            {
-                API.CastSpell("Felblade");
-                return;
-            }
-            //actions.normal +=/ fracture,if= soul_fragments <= 3
-            if (API.CanCast("Fracture") && Talent_Fracture && (Current_Soul_Fragments <= 3 || API.PlayerFury < 30) && API.TargetRange <= 5)
-            {
-                API.CastSpell("Fracture");
-                return;
-            }
-            //actions.normal +=/ fel_devastation
-            if (API.CanCast("Fel Devastation")  && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange >= 1)
-            {
-                API.CastSpell("Fel Devastation");
-                return;
-            }
-            //actions.normal +=/ sigil_of_flame
-            if (API.CanCast("Sigil of Flame") && UseSigilofFlame == "On" && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
-            {
-                API.CastSpell("Sigil of Flame");
-                return;
-            }
-            //actions.normal +=/ shear
-            if (API.CanCast("Shear") && !Talent_Fracture && API.TargetRange <= 5)
-            {
-                API.CastSpell("Shear");
-                return;
-            }
-            //actions.normal +=/ throw_glaive
-            if (API.CanCast("Throw Glaive") && UseThrowGlaive == "On" && API.TargetRange <= 30)
-            {
-                API.CastSpell("Throw Glaive");
-                return;
+                // apl_default->add_action(this, "Disrupt");
+                if (isInterrupt && API.CanCast(Disrupt) && MeleeRange && PlayerLevel >= 29)
+                {
+                    API.CastSpell(Disrupt);
+                    return;
+                }
+                // apl_default->add_action(this, "Consume Magic");
+                /*   if (API.CanCast("Consume Magic") && DispelWhiteList && API.TargetRange <= 5)
+   {
+       API.CastSpell("Consume Magic");
+       return;
+   }*/
+                // apl_default->add_action(this, "Throw Glaive", "if=buff.fel_bombardment.stack=5&(buff.immolation_aura.up|!buff.metamorphosis.up)");
+                if (API.CanCast("Throw Glaive") && API.PlayerBuffStacks(Fel_Bombardment) == 5&& (PlayerHasBuff(Immolation_Aura)||!PlayerHasBuff(Metamorphosis)) && API.TargetRange <= 30)
+                {
+                    API.CastSpell("Throw Glaive");
+                    return;
+                }
+                // apl_default->add_action("call_action_list,name=brand,if=variable.brand_build");
+                if (brand_build)
+                {
+                    // apl_brand->add_action(this, "Fiery Brand");
+                    if (API.CanCast("Fiery Brand") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
+                    {
+                        API.CastSpell("Fiery Brand");
+                        return;
+                    }
+                    //apl_brand->add_action(this, "Immolation Aura", "if=dot.fiery_brand.ticking");
+                    if (API.CanCast("Immolation Aura") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 8) && API.TargetHasDebuff("Fiery Brand"))
+                    {
+                        API.CastSpell("Immolation Aura");
+                        return;
+                    }
+                }
+                // apl_default->add_action("call_action_list,name=defensives");
+                ////apl_defensives->add_action(this, "Demon Spikes");
+               if (API.CanCast(Demon_Spikes) && API.SpellCharges(Demon_Spikes) >= 2 && API.PlayerHealthPercent <= DemonSpikes1LifePercent && API.PlayerLevel >= 14)
+                {
+                    API.CastSpell(Demon_Spikes);
+                    return;
+                }
+                if (API.CanCast(Demon_Spikes) && API.SpellCharges(Demon_Spikes) >= 1 && !API.PlayerHasBuff(Demon_Spikes) && API.PlayerHealthPercent <= DemonSpikes2LifePercent && API.PlayerLevel >= 14)
+                {
+                    API.CastSpell(Demon_Spikes);
+                    return;
+                }
+                //apl_defensives->add_action(this, "Metamorphosis", "if=!(talent.demonic.enabled)&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)|target.time_to_die<15");
+                if (API.CanCast("Metamorphosis") && !((Talent_Demonic)&&(PlayerCovenantSettings !="Venthyr" || !TargetHasDebuff(SinfulBrand) || API.TargetTimeToDie <1500)) && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns))
+                {
+                    API.CastSpell("Metamorphosis");
+                }
+                //apl_defensives->add_action(this, "Fiery Brand");
+                if (API.CanCast("Fiery Brand") && API.PlayerHealthPercent <= FieryBrandLifePercent && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
+                {
+                    API.CastSpell("Fiery Brand");
+                    return;
+                }
+                // apl_default->add_action("call_action_list,name=cooldowns");
+                // cooldowns->add_action("potion");
+                // cooldowns->add_action("use_items", "Default fallback for usable items.");
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && MeleeRange)
+                {
+                    API.CastSpell("Trinket2");
+                }
+                // cooldowns->add_action("sinful_brand,if=!dot.sinful_brand.ticking");
+                if (!API.SpellISOnCooldown(SinfulBrand) && !TargetHasDebuff(SinfulBrand) && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+                {
+                    API.CastSpell(SinfulBrand);
+                    return;
+                }
+                // cooldowns->add_action("the_hunt");
+                if (!API.SpellISOnCooldown(TheHunt) && API.TargetRange <= 50 && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+                {
+                    API.CastSpell(TheHunt);
+                    return;
+                }
+                // cooldowns->add_action("fodder_to_the_flame");
+                if (!API.SpellISOnCooldown(fodder_to_the_flame) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+                {
+                    API.CastSpell(fodder_to_the_flame);
+                    return;
+                }
+                // cooldowns->add_action("elysian_decree");
+                if (!API.SpellISOnCooldown(elysian_decree) && API.TargetRange <= 30 && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber))
+                {
+                    API.CastSpell(elysian_decree);
+                    return;
+                }
+                // apl_default->add_action("call_action_list,name=normal");
+                //action_priority_list_t* apl_normal = get_action_priority_list("normal", "Normal Rotation");
+                // apl_normal->add_action(this, "Infernal Strike");
+                if (API.CanCast("Infernal Strike") && API.SpellCharges(Infernal_Strike) >= 1 && API.SpellChargeCD(Infernal_Strike) < 150 && API.LastSpellCastInGame != Infernal_Strike && API.PlayerCurrentCastSpellID != 189110 && UseInfernalStrike == "On" && API.CanCast("Fiery Brand") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
+                {
+                    API.CastSpell("Infernal Strike");
+                    return;
+                }
+                //apl_normal->add_talent(this, "Bulk Extraction");
+                if (API.CanCast("Bulk Extraction") && (UseBulkExtraction == "always" || UseBulkExtraction == "with Cooldowns" && IsCooldowns) && Talent_Bulk_Extraction && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
+                {
+                    API.CastSpell("Bulk Extraction");
+                    return;
+                }
+                //apl_normal->add_talent(this, "Spirit Bomb", "if=((buff.metamorphosis.up&talent.fracture.enabled&soul_fragments>=3)|soul_fragments>=4)");
+                if (API.CanCast("Spirit Bomb") && API.PlayerFury >= 30 && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5) && Talent_SpiritBomb && ((API.PlayerHasBuff("Metamorphosis") && Current_Soul_Fragments == 3) || Current_Soul_Fragments >= 4))
+                {
+                    API.CastSpell("Spirit Bomb");
+                    return;
+                }
+                // apl_normal->add_action(this, "Fel Devastation");
+                if (!API.SpellISOnCooldown("Fel Devastation") && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange >= 1)
+                {
+                    API.CastSpell("Fel Devastation");
+                    return;
+                }
+                // apl_normal->add_action(this, "Soul Cleave", "if=((talent.spirit_bomb.enabled&soul_fragments=0)|!talent.spirit_bomb.enabled)&((talent.fracture.enabled&fury>=55)|(!talent.fracture.enabled&fury>=70)|cooldown.fel_devastation.remains>target.time_to_die|(buff.metamorphosis.up&((talent.fracture.enabled&fury>=35)|(!talent.fracture.enabled&fury>=50))))");
+                if (API.CanCast("Soul Cleave") && API.PlayerFury >= 30 && API.TargetRange <= 5 && (((Talent_SpiritBomb && Current_Soul_Fragments == 0) || !Talent_SpiritBomb) && ((Talent_Fracture && API.PlayerFury >= 55) || (!Talent_Fracture && API.PlayerFury >= 70) || API.SpellCDDuration(Fel_Devastation) > API.TargetTimeToDie || (PlayerHasBuff(Metamorphosis) && ((Talent_Fracture && API.PlayerFury >= 35) || (!Talent_Fracture && API.PlayerFury >= 50))))))
+                {
+                    API.CastSpell("Soul Cleave");
+                    return;
+                }
+                // apl_normal->add_action(this, "Immolation Aura", "if=((variable.brand_build&cooldown.fiery_brand.remains>10)|!variable.brand_build)&fury<=90");
+                if (API.CanCast("Immolation Aura") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 8) && (((brand_build && API.SpellCDDuration(Fiery_Brand) > 1000) || !brand_build) && API.PlayerFury <= 90))
+                {
+                    API.CastSpell("Immolation Aura");
+                    return;
+                }
+                // apl_normal->add_talent(this, "Felblade", "if=fury<=60");
+                if (API.CanCast("Felblade") && Talent_Felblade && API.PlayerFury <= 60 && API.TargetRange <= 15)
+                {
+                    API.CastSpell("Felblade");
+                    return;
+                }
+                //apl_normal->add_talent(this, "Fracture", "if=((talent.spirit_bomb.enabled&soul_fragments<=3)|(!talent.spirit_bomb.enabled&((buff.metamorphosis.up&fury<=55)|(buff.metamorphosis.down&fury<=70))))");
+                if (API.CanCast("Fracture") && Talent_Fracture && API.TargetRange <= 5 && ((Talent_SpiritBomb && Current_Soul_Fragments <= 3) || (!Talent_SpiritBomb && ((PlayerHasBuff(Metamorphosis) && API.PlayerFury <= 55) || (!PlayerHasBuff(Metamorphosis) && API.PlayerFury <= 70)))))
+                {
+                    API.CastSpell("Fracture");
+                    return;
+                }
+                // apl_normal->add_action(this, "Sigil of Flame", "if=!(covenant.kyrian.enabled&runeforge.razelikhs_defilement.equipped)");
+                if (API.CanCast("Sigil of Flame") && UseSigilofFlame == "On" && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5) && !(PlayerCovenantSettings == "Kyrian" && razelikhs_defilement_equipped))
+                {
+                    API.CastSpell("Sigil of Flame");
+                    return;
+                }
+                // apl_normal->add_action(this, "Shear");
+                if (API.CanCast("Shear") && !Talent_Fracture && API.TargetRange <= 5)
+                {
+                    API.CastSpell("Shear");
+                    return;
+                }
+                // apl_normal->add_action(this, "Throw Glaive");
+                if (API.CanCast("Throw Glaive") && UseThrowGlaive == "On" && API.TargetRange <= 30)
+                {
+                    API.CastSpell("Throw Glaive");
+                    return;
+                }
             }
         }
 
