@@ -99,7 +99,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Blood Boil", "D2");
             CombatRoutine.AddSpell("Death Strike", "D3");
             CombatRoutine.AddSpell("Heart Strike", "D4");
-            CombatRoutine.AddSpell("Anti-Magic-Shell", "D6");
+            CombatRoutine.AddSpell("Anti-Magic Shell", "D6");
             CombatRoutine.AddSpell("Vampiric Blood", "D7");
             CombatRoutine.AddSpell("Icebound Fortitude", "D8");
             CombatRoutine.AddSpell("Dancing Rune Weapon", "F10");
