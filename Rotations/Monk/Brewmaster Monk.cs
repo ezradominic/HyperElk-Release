@@ -14,6 +14,7 @@ namespace HyperElk.Core
         //General
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
+        private bool NotChanneling => !API.PlayerIsChanneling;
 
 
         //CLASS SPECIFIC
@@ -26,7 +27,6 @@ namespace HyperElk.Core
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
         string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
-
         private string UseInvokeNiuzao => InvokeNiuzaoList[CombatRoutine.GetPropertyInt(InvokeNiuzao)];
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
         private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
@@ -168,84 +168,84 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
-                API.CastSpell(trinket1);
-            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
-                API.CastSpell(trinket2);
             //HEALING
             //NECROLORDS FLESHCRAFT
-            if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc)
+            if (API.CanCast(Fleshcraft) && Covenant == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotChanneling)
             {
                 API.CastSpell(Fleshcraft);
                 return;
             }
             //Healing Elixir
-            if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2))
+            if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2) && NotChanneling)
             {
                 API.CastSpell(HealingElixir);
                 return;
             }
             //Expel Harm
-            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8)
+            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8 && NotChanneling)
             {
                 API.CastSpell(ExpelHarm);
                 return;
             }
             //Celestial Brew
-            if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27)
+            if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27 && NotChanneling)
             {
                 API.CastSpell(CelestialBrew);
                 return;
             }
             //Purifying Brew
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23 && PlayerLevel <= 47)
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23 && PlayerLevel <= 47 && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && API.SpellCharges(PurifyingBrew) >= 2)
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && API.SpellCharges(PurifyingBrew) >= 2 && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "always"))
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "always") && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge Light stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Light Stagger") && API.PlayerHasDebuff(LightStagger))
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Light Stagger") && API.PlayerHasDebuff(LightStagger) && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge Moderate stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Moderate Stagger") && API.PlayerHasDebuff(ModerateStagger))
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Moderate Stagger") && API.PlayerHasDebuff(ModerateStagger) && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge Heavy stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Heavy Stagger") && API.PlayerHasDebuff(HeavyStagger))
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Heavy Stagger") && API.PlayerHasDebuff(HeavyStagger) && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Fortifying Brew
-            if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && !API.SpellISOnCooldown(FortifyingBrew) && PlayerLevel >= 28)
+            if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && !API.SpellISOnCooldown(FortifyingBrew) && PlayerLevel >= 28 && NotChanneling)
             {
                 API.CastSpell(FortifyingBrew);
                 return;
             }
             //Vivify
-            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
+            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4 && NotChanneling)
             {
                 API.CastSpell(Vivify);
                 return;
             }
             //COOLDOWNN
+            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
             //Covenant Kyrian
             //WeaponsofOrder
             if (API.CanCast(WeaponsofOrder) && IsCooldowns && Covenant == "Kyrian" && UseWeaponsofOrder == "with Cooldowns")
@@ -277,8 +277,8 @@ namespace HyperElk.Core
             //BlackOxBrew
             if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && API.PlayerIsTalentSelected(3, 3))
             {
-            API.CastSpell(BlackOxBrew);
-            return;
+                API.CastSpell(BlackOxBrew);
+                return;
             }
             //Touch of Death
             if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
@@ -298,13 +298,19 @@ namespace HyperElk.Core
         private void rotation()
         {
             //ROTATION AOE
-            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && NotChanneling)
             {
                 if (UseTrinket1 == "AOE" || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                     API.CastSpell(trinket1);
                 if (UseTrinket2 == "AOE" || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
                     API.CastSpell(trinket2);
-                //Tiger Palm -> nothing else to do 
+                //InvokeNiuzao
+                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "On AOE" || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns))
+                {
+                    API.CastSpell(InvokeNiuzao);
+                    return;
+                }
+                //Tiger Palm -> refresh brew
                 if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40 && API.SpellCharges(PurifyingBrew) < 2)
                 {
                     API.CastSpell(TigerPalm);
@@ -338,29 +344,10 @@ namespace HyperElk.Core
                     API.CastSpell(FallenOrder);
                     return;
                 }
-                //Rushing Jade Wind
-                if (API.CanCast(RushingJadeWind) && !API.SpellISOnCooldown(RushingJadeWind) && API.PlayerIsTalentSelected(6, 2))
-                {
-                    API.CastSpell(RushingJadeWind);
-                    return;
-                }
-                //InvokeNiuzao
-                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "On AOE") || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns)
-                {
-                    API.CastSpell(InvokeNiuzao);
-                    return;
-                }
-
                 //KegSmash
                 if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
                 {
                     API.CastSpell(KegSmash);
-                    return;
-                }
-                //BlackOutKick
-                if (API.CanCast(BlackOutKick) && API.PlayerLevel >= 2)
-                {
-                    API.CastSpell(BlackOutKick);
                     return;
                 }
                 //BlackOutKick
@@ -381,10 +368,22 @@ namespace HyperElk.Core
                     API.CastSpell(ChiBurst);
                     return;
                 }
+                //Rushing Jade Wind
+                if (API.CanCast(RushingJadeWind) && !API.SpellISOnCooldown(RushingJadeWind) && API.PlayerIsTalentSelected(6, 2))
+                {
+                    API.CastSpell(RushingJadeWind);
+                    return;
+                }
                 //Exploping Kek
                 if (API.CanCast(ExplodingKeg) && API.PlayerIsTalentSelected(6, 3))
                 {
                     API.CastSpell(ExplodingKeg);
+                    return;
+                }
+                // Sinning Crane Kick
+                if (API.CanCast(SpinningCraneKick) && API.PlayerEnergy >= 50 && API.SpellISOnCooldown(BreathOfFire) && API.SpellISOnCooldown(BreathOfFire))
+                {
+                    API.CastSpell(SpinningCraneKick);
                     return;
                 }
                 //Tiger Palm -> nothing else to do 
@@ -393,15 +392,9 @@ namespace HyperElk.Core
                     API.CastSpell(TigerPalm);
                     return;
                 }
-                //Spinning Crane Kick
-                if (API.CanCast(SpinningCraneKick) && API.PlayerEnergy >= 40 && API.PlayerEnergy > 40 && API.PlayerLevel >= 7)
-                {
-                    API.CastSpell(SpinningCraneKick);
-                    return;
-                }
             }
             //ROTATION  SINGLE TARGET
-            if ((API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE))
+            if ((API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && NotChanneling)
             {
                 if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                     API.CastSpell(trinket1);
