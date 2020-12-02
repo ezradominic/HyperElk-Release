@@ -24,6 +24,8 @@ namespace HyperElk.Core
         private int CelestialBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
+        private int ChiWaveLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
+
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
         string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
@@ -88,12 +90,15 @@ namespace HyperElk.Core
         private string LightStagger = "Light Stagger";
         private string ModerateStagger = "Moderate Stagger";
         private string HeavyStagger = "Heavy Stagger";
+        private string ChiWave = "Chi Wave";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
             API.WriteLog("Welcome to Brewmaster Monk rotation @ Mufflon12");
 
             CombatRoutine.AddProp(Vivify, "Vivify", numbList, "Life percent at which " + Vivify + " is used, set to 0 to disable", "Healing", 5);
+            CombatRoutine.AddProp(ChiWave, "Chi Wave", numbList, "Life percent at which " + ChiWave + " is used, set to 0 to disable", "Healing", 5);
+
             CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 10);
             CombatRoutine.AddProp(CelestialBrew, "Celestial Brew", numbList, "Life percent at which " + CelestialBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 5);
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
@@ -133,6 +138,8 @@ namespace HyperElk.Core
 
 
             CombatRoutine.AddSpell(Vivify, "NumPad1");
+            CombatRoutine.AddSpell(ChiWave, "NumPad1");
+
             CombatRoutine.AddSpell(ExpelHarm, "NumPad2");
             CombatRoutine.AddSpell(PurifyingBrew, "NumPad3");
             CombatRoutine.AddSpell(CelestialBrew, "NumPad4");
@@ -179,6 +186,12 @@ namespace HyperElk.Core
             if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2) && NotChanneling)
             {
                 API.CastSpell(HealingElixir);
+                return;
+            }
+            //Healing Elixir
+            if (API.PlayerHealthPercent <= ChiWaveLifePercentProc && !API.SpellISOnCooldown(ChiWave) && API.PlayerIsTalentSelected(1, 2) && NotChanneling)
+            {
+                API.CastSpell(ChiWave);
                 return;
             }
             //Expel Harm
@@ -310,12 +323,6 @@ namespace HyperElk.Core
                     API.CastSpell(InvokeNiuzao);
                     return;
                 }
-                //Tiger Palm -> refresh brew
-                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40 && API.SpellCharges(PurifyingBrew) < 2)
-                {
-                    API.CastSpell(TigerPalm);
-                    return;
-                }
                 //Covenant Kyrian
                 //WeaponsofOrder
                 if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && (UseWeaponsofOrder == "AOE" || UseWeaponsofOrder == "always"))
@@ -400,12 +407,6 @@ namespace HyperElk.Core
                     API.CastSpell(trinket1);
                 if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
                     API.CastSpell(trinket2);
-                //Tiger Palm -> nothing else to do 
-                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40 && API.SpellCharges(PurifyingBrew) < 2)
-                {
-                    API.CastSpell(TigerPalm);
-                    return;
-                }
                 //Covenant Kyrian
                 //WeaponsofOrder
                 if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
