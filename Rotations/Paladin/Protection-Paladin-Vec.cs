@@ -260,18 +260,6 @@
                     return;
                 }
                 //cds->add_action("potion,if=buff.avenging_wrath.up");
-                //cds->add_action("use_items,if=buff.seraphim.up|!talent.seraphim.enabled");
-                if(PlayerHasBuff(Seraphim) || !Talent_Seraphim)
-                {
-                    if(API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
-                    {
-                        API.CastSpell("Trinket1");
-                    }
-                    if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
-                    {
-                        API.CastSpell("Trinket2");
-                    }
-                }
                 //cds->add_talent(this, "Moment of Glory", "if=prev_gcd.1.avengers_shield&cooldown.avengers_shield.remains");
                 if (API.CanCast(MomentOfGlory) && Talent_MomentOfGlory && (API.LastSpellCastInGame == AvengersShield || API.PlayerCurrentCastSpellID == 56641) && IsMelee)
                 {
@@ -279,17 +267,32 @@
                     return;
                 }
             }
-            //std->add_action(this, "Shield of the Righteous", "if=debuff.judgment.up&(debuff.vengeful_shock.up|!conduit.vengeful_shock.enabled)");
-            if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && API.TargetHasDebuff(Judgment) && (API.TargetHasDebuff(vengeful_shock) || !VengefulShockConduit))
+            //cds->add_action("use_items,if=buff.seraphim.up|!talent.seraphim.enabled");
+            if (PlayerHasBuff(Seraphim) || !Talent_Seraphim)
             {
-                API.CastSpell(ShieldoftheRighteous);
-                return;
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                {
+                    API.CastSpell("Trinket2");
+                }
             }
-            //std->add_action(this, "Shield of the Righteous", "if=holy_power=5|buff.holy_avenger.up|holy_power=4&talent.sanctified_wrath.enabled&buff.avenging_wrath.up");
-            if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && (API.PlayerCurrentHolyPower == 5 || API.PlayerHasBuff(HolyAvenger) || API.PlayerCurrentHolyPower == 4 && Talent_SanctifiedWrath || API.PlayerHasBuff(AvengingWrath)))
+            if (API.SpellCDDuration(Seraphim)>API.SpellGCDDuration || !Talent_Seraphim || !IsCooldowns)
             {
-                API.CastSpell(ShieldoftheRighteous);
-                return;
+                //std->add_action(this, "Shield of the Righteous", "if=debuff.judgment.up&(debuff.vengeful_shock.up|!conduit.vengeful_shock.enabled)");
+                if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && API.TargetHasDebuff(Judgment) && (API.TargetHasDebuff(vengeful_shock) || !VengefulShockConduit))
+                {
+                    API.CastSpell(ShieldoftheRighteous);
+                    return;
+                }
+                //std->add_action(this, "Shield of the Righteous", "if=holy_power=5|buff.holy_avenger.up|holy_power=4&talent.sanctified_wrath.enabled&buff.avenging_wrath.up");
+                if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && (API.PlayerCurrentHolyPower == 5 || API.PlayerHasBuff(HolyAvenger) || API.PlayerCurrentHolyPower == 4 && Talent_SanctifiedWrath || API.PlayerHasBuff(AvengingWrath)))
+                {
+                    API.CastSpell(ShieldoftheRighteous);
+                    return;
+                }
             }
             //std->add_action(this, "Judgment", "target_if=min:debuff.judgment.remains,if=charges=2|!talent.crusaders_judgment.enabled");
             if (API.CanCast(Judgment) && API.TargetRange <= 30 && PlayerLevel >= 3 && (API.SpellCharges(Judgment) == 2 || !Talent_CrusadersJudgment))
@@ -316,7 +319,7 @@
                 return;
             }
             //std->add_action(this, "Judgment", "target_if=min:debuff.judgment.remains");
-            if (API.CanCast(Judgment) && API.TargetRange <= 30 && PlayerLevel >= 3 && API.TargetHasDebuff(Judgment))
+            if (API.CanCast(Judgment) && API.TargetRange <= 30 && PlayerLevel >= 3)
             {
                 API.CastSpell(Judgment);
                 return;
