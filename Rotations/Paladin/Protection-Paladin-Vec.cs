@@ -64,8 +64,10 @@
         //CBProperties
 
 
-        private int FlashofLightLifePercent => percentListProp[CombatRoutine.GetPropertyInt("FOLOOCPCT")];
+        private int FlashofLightLifePercentooc => percentListProp[CombatRoutine.GetPropertyInt("FOLOOCPCTOOC")];
+        private int FlashofLightLifePercentic => percentListProp[CombatRoutine.GetPropertyInt("FOLOOCPCTIC")];
         private bool FLashofLightOutofCombat => CombatRoutine.GetPropertyBool("FOLOOC");
+        private bool FLashofLightInCombat => CombatRoutine.GetPropertyBool("FOLIC");
         private bool VengefulShockConduit => CombatRoutine.GetPropertyBool("VengefulShockConduit");
         private int WordOfGloryLifePercent => percentListProp[CombatRoutine.GetPropertyInt("WOGPCT")];
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("AURASWITCH");
@@ -142,9 +144,11 @@
 
 
             //CBProperties
-            CombatRoutine.AddProp("FOLOOCPCT", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
+            CombatRoutine.AddProp("FOLOOCPCTOOC", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
             CombatRoutine.AddProp("FOLOOC", "Out of Combat Healing", true, "Should the bot use Flash of Light out of combat to heal you between pulls", FlashofLight);
-            CombatRoutine.AddProp("VengefulShockConduit", "Vengeful Shock Conduit", false, "Do you have the Vengeful Shock Conduit?", FlashofLight);
+            CombatRoutine.AddProp("FOLIC", "Combat Healing", true, "Should the bot use Flash of Light in combat to heal yo", FlashofLight);
+            CombatRoutine.AddProp("FOLOOCPCTIC", "In combat Life Percent", percentListProp, "Life percent at which Flash of Light is used in combat to heal you", FlashofLight, 7);
+            CombatRoutine.AddProp("VengefulShockConduit", "Vengeful Shock Conduit", false, "Do you have the Vengeful Shock Conduit?", "Conduit");
 
 
 
@@ -158,7 +162,7 @@
             CombatRoutine.AddProp(ArdentDefender, ArdentDefender + " Life Percent", percentListProp, "Life percent at which" + ArdentDefender + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", percentListProp, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(GuardianofAncientKings, GuardianofAncientKings + " Life Percent", percentListProp, "Life percent at which" + GuardianofAncientKings + "is used, set to 0 to disable", "Defense", 4);
-            CombatRoutine.AddProp("WOGPCT", "Life Percent", percentListProp, "Life percent at which Word of Glory is used", "Defense", 5);
+            CombatRoutine.AddProp("WOGPCT", WordOfGlory, percentListProp, "Life percent at which Word of Glory is used", "Defense", 5);
 
 
         }
@@ -224,7 +228,7 @@
 
         public override void OutOfCombatPulse()
         {
-            if (FLashofLightOutofCombat && API.PlayerHealthPercent <= FlashofLightLifePercent && !API.PlayerIsMoving && API.CanCast(FlashofLight) && PlayerLevel >= 4)
+            if (FLashofLightOutofCombat && API.PlayerHealthPercent <= FlashofLightLifePercentooc && !API.PlayerIsMoving && API.CanCast(FlashofLight) && PlayerLevel >= 4)
             {
                 API.CastSpell(FlashofLight);
                 return;
@@ -232,12 +236,16 @@
         }
         private void rotation()
         {
-            if (API.PlayerHealthPercent <= WordOfGloryLifePercent && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLightFree)) && API.CanCast(WordOfGlory, true, true) && PlayerLevel >= 7)
+            if (API.PlayerHealthPercent <= WordOfGloryLifePercent && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLightFree)) && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
             }
-
+            if (FLashofLightOutofCombat && API.PlayerHealthPercent <= FlashofLightLifePercentic && !API.PlayerIsMoving && API.CanCast(FlashofLight) && PlayerLevel >= 4)
+            {
+                API.CastSpell(FlashofLight);
+                return;
+            }
             if (IsCooldowns)
             {
                 //cds->add_action("fireblood,if=buff.avenging_wrath.up");
