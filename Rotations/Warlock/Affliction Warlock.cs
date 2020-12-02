@@ -77,8 +77,6 @@ namespace HyperElk.Core
         bool LastMR => API.PlayerLastSpell == MaleficRapture;
 
         bool LastUnstableAffliction => API.PlayerLastSpell == UnstableAffliction;
-        private static readonly Stopwatch DumpWatch = new Stopwatch();
-
         //Trinket1
         private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
         string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
@@ -338,7 +336,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Malefic Rapture Check
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberDrainSoul && DotCheck && PlayerLevel >= 11)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -533,7 +531,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Malefic Rapture Check
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberDrainSoul && DotCheck && PlayerLevel >= 11)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
                         return;
