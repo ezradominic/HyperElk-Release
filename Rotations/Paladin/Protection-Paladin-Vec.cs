@@ -242,7 +242,7 @@
             {
                 //cds->add_action("fireblood,if=buff.avenging_wrath.up");
                 //cds->add_talent(this, "Seraphim");
-                if (API.CanCast(Seraphim) && Talent_Seraphim && IsMelee)
+                if (API.CanCast(Seraphim) && API.PlayerCurrentHolyPower>=3 && Talent_Seraphim && IsMelee)
                 {
                     API.CastSpell(Seraphim);
                     return;
