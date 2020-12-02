@@ -158,7 +158,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("Test" + API.PlayerIsConduitSelected("Impenetrable Gloom") + " " + API.PlayerIsConduitSelected("WHATEVER"));
         }
 
         public override void CombatPulse()
