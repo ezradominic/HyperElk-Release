@@ -5,6 +5,7 @@
 // v1.3 big apl update + heroic throw stuff
 // v1.4 condemn fix
 // v1.5 Bladestorm toggle added
+// v1.6 colossus smash toogle and legendary prep
 
 namespace HyperElk.Core
 {
@@ -12,6 +13,7 @@ namespace HyperElk.Core
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool BladestormToggle => API.ToggleIsEnabled("Bladestorm");
+        private bool ColossusToggle => API.ToggleIsEnabled("Colossus Smash");
         //Spell,Auras
         private string MortalStrike = "Mortal Strike";
         private string ColossusSmash = "Colossus Smash";
@@ -37,13 +39,13 @@ namespace HyperElk.Core
         private string StormBolt = "Storm Bolt";
         private string SuddenDeath = "Sudden Death";
         private string DeepWounds = "Deep Wounds";
-        private string StoneHeart = "Stone Heart";
         private string Victorious = "Victorious";
         private string Condemn = "Condemn";
         private string SpearofBastion = "Spear of Bastion";
         private string AncientAftershock = "Ancient Aftershock";
         private string ConquerorsBanner = "Conqueror's Banner";
         private string HeroicThrow = "Heroic Throw";
+        private string Exploiter = "Exploiter";
 
         //Talents
         bool TalentSkullsplitter => API.PlayerIsTalentSelected(1, 3);
@@ -96,7 +98,9 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v1.5");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v1.6");
+            API.WriteLog("The Bladestorm toggle will also toggle Ravager");
+            API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
             //Spells
             CombatRoutine.AddSpell(MortalStrike, "D4");
@@ -138,6 +142,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SweepingStrikes);
             CombatRoutine.AddBuff(VictoryRush);
             CombatRoutine.AddBuff(Victorious);
+            CombatRoutine.AddBuff(Avatar);
+            CombatRoutine.AddBuff(Exploiter);
 
             //Debuff
             CombatRoutine.AddDebuff(ColossusSmash);
@@ -147,6 +153,7 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("Bladestorm");
+            CombatRoutine.AddToggle("Colossus Smash");
 
             //Prop
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
@@ -256,7 +263,7 @@ namespace HyperElk.Core
                         API.CastSpell(Skullsplitter);
                         return;
                     }
-                    if (API.CanCast(Avatar) && TalentAvatar && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
+                    if (API.CanCast(Avatar) && TalentAvatar && !API.PlayerHasBuff(Avatar) && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
                     {
                         API.CastSpell(Avatar);
                         return;
@@ -266,12 +273,12 @@ namespace HyperElk.Core
                         API.CastSpell(Cleave);
                         return;
                     }
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker)
+                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
                     {
                         API.CastSpell(Warbreaker);
                         return;
                     }
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash)
+                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
@@ -296,6 +303,11 @@ namespace HyperElk.Core
                         API.CastSpell(Overpower);
                         return;
                     }
+                    if (API.CanCast(MortalStrike) && PlayerLevel >= 10 && API.PlayerBuffStacks(Exploiter) == 2 && (API.PlayerRage >= 30 || API.PlayerHasBuff(DeadlyCalm)) && (API.PlayerHasBuff(SweepingStrikes) || !TalentCleave && API.TargetDebuffRemainingTime(DeepWounds) < 150))
+                    {
+                        API.CastSpell(MortalStrike);
+                        return;
+                    }
                     if (API.CanCast(Execute) && PlayerLevel >= 10 && PlayerCovenantSettings != "Venthyr" && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(Execute);
@@ -306,12 +318,12 @@ namespace HyperElk.Core
                         API.CastSpell(Condemn);
                         return;
                     }
-                    if (API.CanCast(Ravager) && TalentRavager && API.PlayerRage < 80 && IsRavager)
+                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.PlayerRage < 80 && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && API.PlayerRage < 80 && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !API.PlayerHasBuff(DeadlyCalm) && !TalentRavager && API.PlayerRage < 80 && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
@@ -319,7 +331,7 @@ namespace HyperElk.Core
                 }
                 if ((API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (!IsExecute))
                 {
-                    if (API.CanCast(Avatar) && TalentAvatar && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
+                    if (API.CanCast(Avatar) && TalentAvatar && !API.PlayerHasBuff(Avatar) && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
                     {
                         API.CastSpell(Avatar);
                         return;
@@ -329,22 +341,22 @@ namespace HyperElk.Core
                         API.CastSpell(Rend);
                         return;
                     }
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash)
+                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
                     }
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker)
+                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
                     {
                         API.CastSpell(Warbreaker);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
                     }
-                    if (API.CanCast(Ravager) && TalentRavager && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsRavager)
+                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
@@ -394,12 +406,12 @@ namespace HyperElk.Core
                         API.CastSpell(MortalStrike);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings == "Venthyr" && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings == "Venthyr" && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
                     }
-                    if (API.CanCast(Ravager) && TalentRavager && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings == "Venthyr" && IsRavager)
+                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings == "Venthyr" && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
@@ -427,7 +439,7 @@ namespace HyperElk.Core
                         API.CastSpell(Skullsplitter);
                         return;
                     }
-                    if (API.CanCast(Avatar) && TalentAvatar && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
+                    if (API.CanCast(Avatar) && TalentAvatar && !API.PlayerHasBuff(Avatar) && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
                     {
                         API.CastSpell(Avatar);
                         return;
@@ -437,7 +449,7 @@ namespace HyperElk.Core
                         API.CastSpell(Cleave);
                         return;
                     }
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker)
+                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
                     {
                         API.CastSpell(Warbreaker);
                         return;
@@ -447,12 +459,12 @@ namespace HyperElk.Core
                         API.CastSpell(Bladestorm);
                         return;
                     }
-                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && IsRavager)
+                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash)
+                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
                     {
                         API.CastSpell(ColossusSmash);
                         return;

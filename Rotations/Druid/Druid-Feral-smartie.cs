@@ -5,6 +5,7 @@
 // v1.3 low level fix
 // v1.4 improved bloodtalons code and alot of small fixes
 // v1.5 covenant update :-)
+// v1.6 legendary prep
 
 using System.Diagnostics;
 
@@ -54,6 +55,7 @@ namespace HyperElk.Core
         private string LoneEmpowerment= "Lone Empowerment";
         private string LoneSpirit = "Lone Spirit";
         private string Soulshape = "Soulshape";
+        private string ApexPredatorsCraving = "Apex Predator's Craving";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
@@ -108,7 +110,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v1.5");
+            API.WriteLog("Welcome to smartie`s Feral Druid v1.6");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -176,6 +178,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(RavenousFrenzy);
             CombatRoutine.AddBuff(LoneSpirit);
             CombatRoutine.AddBuff(Soulshape);
+            CombatRoutine.AddBuff(ApexPredatorsCraving);
 
             //Debuff
             CombatRoutine.AddDebuff(Rip);
@@ -436,6 +439,11 @@ namespace HyperElk.Core
                         }
                         if (!Bloodytalons)
                         {
+                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerHasBuff(ApexPredatorsCraving))
+                            {
+                                API.CastSpell(FerociousBite);
+                                return;
+                            }
                             if (TalentBrutalSlash && API.TargetDebuffRemainingTime(Thrash) > 300 && !API.PlayerHasBuff(Prowl) && isThrashMelee && API.CanCast(BrutalSlash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Clearcasting)))
                             {
                                 API.CastSpell(BrutalSlash);
@@ -532,6 +540,11 @@ namespace HyperElk.Core
                         }
                         if (!Bloodytalons)
                         {
+                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerHasBuff(ApexPredatorsCraving))
+                            {
+                                API.CastSpell(FerociousBite);
+                                return;
+                            }
                             if (isThrashMelee && !API.PlayerHasBuff(Prowl) && API.TargetDebuffRemainingTime(Rake) > 360 && TalentBrutalSlash && API.CanCast(BrutalSlash) && (API.TargetHasDebuff(Thrash) || PlayerLevel < 11) && (API.PlayerHasBuff(Clearcasting) || !API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 15))
                             {
                                 API.CastSpell(BrutalSlash);

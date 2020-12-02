@@ -2,12 +2,15 @@
 // v1.0 First release
 // v1.1 covenants and cd managment
 // v1.2 vesper totem fix
+// v1.3 legendary preperation
 
 using System.Diagnostics;
 namespace HyperElk.Core
 {
     public class EnhancementShaman : CombatRoutine
     {
+        private bool WindfuryToggle => API.ToggleIsEnabled("Windfury Totem");
+        private bool SunderingToggle => API.ToggleIsEnabled("Sundering");
         //Spell,Auras
         private string LavaLash = "Lava Lash";
         private string CrashLightning = "Crash Lightning";
@@ -44,6 +47,7 @@ namespace HyperElk.Core
         private string VesperTotem = "Vesper Totem";
         private string FaeTransfusion = "Fae Transfusion";
         private string ChainHarvest = "Chain Harvest";
+        private string DoomWinds = "Doom Winds";
 
         //Talents
         bool TalentLashingFlames => API.PlayerIsTalentSelected(1, 1);
@@ -83,6 +87,7 @@ namespace HyperElk.Core
         private string UseFireNova => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FireNova)];
         private string UseStormKeeper => CDUsageWithAOE[CombatRoutine.GetPropertyInt(StormKeeper)];
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
+        private bool DoomWindLeggy => CombatRoutine.GetPropertyBool("Doom Winds");
         private bool SelfLightningShield => CombatRoutine.GetPropertyBool("LightningShield");
         private bool SelfEarthShield => CombatRoutine.GetPropertyBool("EarthShield");
         private int AstralShiftLifePercent => percentListProp[CombatRoutine.GetPropertyInt(AstralShift)];
@@ -95,7 +100,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.2");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.3");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, "D3");
@@ -147,6 +152,11 @@ namespace HyperElk.Core
             //Debuff
             CombatRoutine.AddDebuff(FlameShock);
             CombatRoutine.AddDebuff(LashingFlames);
+            CombatRoutine.AddDebuff(DoomWinds);
+
+            //Toggle
+            CombatRoutine.AddToggle("Windfury Totem");
+            CombatRoutine.AddToggle("Sundering");
 
             //Prop
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
@@ -159,6 +169,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
+            CombatRoutine.AddProp("Doom Winds", "Doom Winds Legendary", false, "Pls enable if you have that Legendary", "Generic");
             CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", percentListProp, "Life percent at which" + AstralShift + " is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", percentListProp, "Life percent at which" + HealingStreamTotem + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp("InstantHealingSurge", "Instant HealingSurge" + "Life Percent", percentListProp, "Life percent at which" + HealingSurge + " is used with Maelstorm Weapon Stacks, set to 0 to disable", "Defense", 6);
@@ -244,7 +255,12 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && API.PlayerMana >= 12 && !API.PlayerHasBuff(WindfuryTotem) && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && !API.PlayerHasBuff(WindfuryTotem) && isMelee && !API.PlayerIsMoving)
+            {
+                API.CastSpell(WindfuryTotem);
+                return;
+            }
+            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && DoomWindLeggy && !API.PlayerHasDebuff(DoomWinds) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
@@ -277,7 +293,7 @@ namespace HyperElk.Core
                     API.CastSpell(FlameShock);
                     return;
                 }
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
                     return;
@@ -367,7 +383,7 @@ namespace HyperElk.Core
                     API.CastSpell(IceStrike);
                     return;
                 }
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering && IsSundering)
+                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
@@ -387,7 +403,7 @@ namespace HyperElk.Core
                     API.CastSpell(EarthElemental);
                     return;
                 }
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
@@ -416,7 +432,7 @@ namespace HyperElk.Core
                     API.CastSpell(FireNova);
                     return;
                 }
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
                     return;
@@ -461,7 +477,7 @@ namespace HyperElk.Core
                     API.CastSpell(FlameShock);
                     return;
                 }
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && isMelee && TalentSundering && IsSundering)
+                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
@@ -511,7 +527,7 @@ namespace HyperElk.Core
                     API.CastSpell(EarthElemental);
                     return;
                 }
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
