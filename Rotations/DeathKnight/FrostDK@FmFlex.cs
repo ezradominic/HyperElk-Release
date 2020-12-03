@@ -40,7 +40,17 @@ namespace HyperElk.Core
         private string KillingMachine = "Killing Machine";
         private string SacrificialPact = "Sacrificial Pact";
 
+        //Cove Spell
         private string FrostFever = "Frost Fever";
+        private string DeathsDue= "Death\'s Due";
+        private string AbominationLimb = "Abomination Limb";
+        private string ShackletheUnworthy = "Shackle the Unworthy";
+
+        //Conduit
+        private string Everfrost = "Everfrost";
+        private string EradicatingBlow = "Eradicating Blow";
+        private string UnleashedFrenzy = "Unleashed Frenzy";
+
 
         //Talent
 
@@ -104,12 +114,23 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(HornofWinter, "D1");
             CombatRoutine.AddSpell(EmpowerRuneWeapon, "D1");
             CombatRoutine.AddSpell(MindFreeze, "D1");
+
             CombatRoutine.AddSpell(SwarmingMist, "NumPad2");
+            CombatRoutine.AddSpell(DeathsDue);
+            CombatRoutine.AddSpell(AbominationLimb);
+            CombatRoutine.AddSpell(ShackletheUnworthy);
 
             CombatRoutine.AddSpell(IceboundFortitude, "D1");
             CombatRoutine.AddSpell(AntiMagicShell, "D1");
             CombatRoutine.AddSpell(Lichborne, "D1");
             CombatRoutine.AddSpell(SacrificialPact);
+
+
+            //Conduit
+
+            CombatRoutine.AddConduit(Everfrost);
+            CombatRoutine.AddConduit(EradicatingBlow);
+            CombatRoutine.AddConduit(UnleashedFrenzy);
 
             CombatRoutine.AddBuff(ColdHeart);
             CombatRoutine.AddBuff(DarkSuccor);
@@ -118,9 +139,14 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(PillarofFrost);
             CombatRoutine.AddBuff(BreathofSindragosa);
             CombatRoutine.AddBuff(RemorselessWinter);
+            CombatRoutine.AddBuff(EradicatingBlow);
+            CombatRoutine.AddBuff(UnleashedFrenzy);
 
             CombatRoutine.AddDebuff(FrostFever);
 
+
+
+            
             CombatRoutine.AddProp(AntiMagicShell, AntiMagicShell + " Life Percent", percentListProp, "Life percent at which" + AntiMagicShell + "is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp(DeathStrike, DeathStrike + " Life Percent", percentListProp, "Life percent at which" + DeathStrike + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(DeathStrike + "PROC", DeathStrike + " Life % Proc", percentListProp, "Life percent at which" + DeathStrike + "with free proc, set to 0 to disable", "Defense", 7);
@@ -138,7 +164,7 @@ namespace HyperElk.Core
         {
             if (API.PlayerIsCasting)
                 return;
-
+            //DEF
             if (API.PlayerHealthPercent <= AntiMagicShellLifePercent && !API.SpellISOnCooldown(AntiMagicShell))
             {
                 API.CastSpell(AntiMagicShell);
@@ -154,7 +180,7 @@ namespace HyperElk.Core
                 API.CastSpell(IceboundFortitude);
                 return;
             }
-
+            //Interrupt
             if (isInterrupt && !API.SpellISOnCooldown(MindFreeze) && PlayerLevel >= 27)
             {
                 API.CastSpell(MindFreeze);
@@ -166,9 +192,58 @@ namespace HyperElk.Core
                 API.CastSpell(DeathStrike);
                 return;
             }
-            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && API.CanCast(SwarmingMist) && CurrentRune >= 1 && IsMelee && CurrentRune <= 40)
+
+            //COVE
+            //covenants->add_action("deaths_due,if=raid_event.adds.in>15|!raid_event.adds.exists|active_enemies>=2", "Covenant Abilities");
+            if (PlayerCovenantSettings == "Night Fae" &&API.CanCast(DeathsDue) && API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && CurrentRune >= 1 && IsMelee && CurrentRP > 10)
+            {
+                API.CastSpell(DeathsDue);
+                return;
+            }
+            //covenants->add_action("swarming_mist,if=active_enemies=1&runic_power.deficit>3&cooldown.pillar_of_frost.remains<3&!talent.breath_of_sindragosa&(!raid_event.adds.exists|raid_event.adds.in>15)");
+            if (IsCooldowns && PlayerCovenantSettings == "Venthyr"&& !TalentBreathOfSindra && API.CanCast(SwarmingMist) && CurrentRune >= 1 && IsMelee && RPDeficit > 3 && API.SpellCDDuration(PillarofFrost) <30)
             {
                 API.CastSpell(SwarmingMist);
+                return;
+            }
+            //covenants->add_action("swarming_mist,if=active_enemies>=2&!talent.breath_of_sindragosa");
+            if (IsAOE && IsCooldowns && API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && PlayerCovenantSettings == "Venthyr" && !TalentBreathOfSindra && API.CanCast(SwarmingMist) && CurrentRune >= 1 && IsMelee)
+            {
+                API.CastSpell(SwarmingMist);
+                return;
+            }
+            //covenants->add_action("swarming_mist,if=talent.breath_of_sindragosa&
+            //(buff.breath_of_sindragosa.up&(active_enemies=1&runic_power.deficit>40|active_enemies>=2&runic_power.deficit>60)
+            //|!buff.breath_of_sindragosa.up&cooldown.breath_of_sindragosa.remains)");
+            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && TalentBreathOfSindra && API.CanCast(SwarmingMist) && CurrentRune >= 1 && IsMelee 
+                && ((API.PlayerHasBuff(BreathofSindragosa,false,false) && API.PlayerUnitInMeleeRangeCount>AOEUnitNumber?RPDeficit>60:RPDeficit>40 ) ||
+                (!API.PlayerHasBuff(BreathofSindragosa, false, false) && API.SpellISOnCooldown(BreathofSindragosa))))
+            {
+                API.CastSpell(SwarmingMist);
+                return;
+            }
+            //covenants->add_action("abomination_limb,if=active_enemies=1&cooldown.pillar_of_frost.remains<3&(!raid_event.adds.exists|raid_event.adds.in>15)");
+            if (IsCooldowns && PlayerCovenantSettings == "Necrolord" && API.PlayerUnitInMeleeRangeCount == 1 && API.CanCast(AbominationLimb) && IsMelee && API.SpellCDDuration(PillarofFrost) < 30)
+            {
+                API.CastSpell(AbominationLimb);
+                return;
+            }
+            //covenants->add_action("abomination_limb,if=active_enemies>=2");
+            if (IsCooldowns && PlayerCovenantSettings == "Necrolord" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.CanCast(AbominationLimb) && IsMelee)
+            {
+                API.CastSpell(AbominationLimb);
+                return;
+            }
+            //covenants->add_action("shackle_the_unworthy,if=active_enemies=1&cooldown.pillar_of_frost.remains<3&(!raid_event.adds.exists|raid_event.adds.in>15)");
+            if (IsCooldowns && PlayerCovenantSettings == "Kyrian" && API.PlayerUnitInMeleeRangeCount == 1 && API.CanCast(ShackletheUnworthy) && IsMelee && API.SpellCDDuration(PillarofFrost) < 30)
+            {
+                API.CastSpell(ShackletheUnworthy);
+                return;
+            }
+            //covenants->add_action("shackle_the_unworthy,if=active_enemies>=2");
+            if (IsCooldowns && PlayerCovenantSettings == "Kyrian" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.CanCast(ShackletheUnworthy) && IsMelee)
+            {
+                API.CastSpell(ShackletheUnworthy);
                 return;
             }
             //CD
@@ -258,7 +333,7 @@ namespace HyperElk.Core
                 return;
             }
             //  cooldowns -> add_action( this, "Death and Decay", "if=active_enemies>5|runeforge.phearomones" );
-            if (UseDND && IsAOE && API.PlayerUnitInMeleeRangeCount >= 5 && CurrentRune >= 1 && API.CanCast(DeathandDecay) && IsMelee)
+            if (UseDND && IsAOE && API.PlayerUnitInMeleeRangeCount >= 5 && CurrentRune >= 1 && PlayerCovenantSettings!="Night Fae" && API.CanCast(DeathandDecay) && IsMelee)
             {
                 API.CastSpell(DeathandDecay);
                 return;

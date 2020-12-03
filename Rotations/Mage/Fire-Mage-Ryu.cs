@@ -129,7 +129,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7)
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && NotCasting && NotChanneling)
             {
                 API.CastSpell("Counterspell");
                 return;
@@ -266,7 +266,8 @@ namespace HyperElk.Core
             }
             if (API.CanCast("Scorch") && !API.PlayerHasBuff("Heating Up") && API.PlayerHasBuff("Combustion") && InRange && Level >= 13 && NotCasting && NotChanneling && !CastShifting)
             {
-                API.CastSpell("Scorch with Combustion");
+                API.CastSpell("Scorch");
+                API.WriteLog("Scorch While Combustion is up");
                 return;
             }
             if (API.CanCast("Scorch") && SearingTouch && API.TargetHealthPercent <= 30 && !API.PlayerHasBuff("Heating Up") && InRange && Level >= 13 && NotCasting && NotChanneling)
@@ -281,13 +282,13 @@ namespace HyperElk.Core
                 API.WriteLog("Scorch while moving");
                 return;
             }
-            if (API.CanCast("Scorch") && NotCasting && NotChanneling && SearingTouch && InRange && API.TargetHealthPercent <= 30 && (!API.PlayerHasBuff("Heating Up") || API.SpellCharges("Fire Blast") == 0) && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Pyroclasm") && Level >= 19 && !CastShifting)
+            if (API.CanCast("Scorch") && NotCasting && NotChanneling && SearingTouch && InRange && API.TargetHealthPercent <= 30 && (API.PlayerHasBuff("Heating Up") || API.SpellCharges("Fire Blast") == 0) && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Pyroclasm") && Level >= 19 && !CastShifting)
             {
                 API.CastSpell("Scorch");
                 API.WriteLog("Scorch when no Fire Blast Charges");
                 return;
             }
-            if (API.CanCast("Fireball") && NotCasting && NotChanneling && !API.PlayerIsMoving && InRange && API.TargetHealthPercent > 30.0 && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff("Combustion") && Level >= 10)
+            if (API.CanCast("Fireball") && NotCasting && NotChanneling && !API.PlayerIsMoving && InRange && (API.TargetHealthPercent > 30.0 && SearingTouch || !SearingTouch) && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff("Combustion") && Level >= 10)
             {
                 API.CastSpell("Fireball");
                 return;
