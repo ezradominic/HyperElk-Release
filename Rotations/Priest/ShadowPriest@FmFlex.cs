@@ -100,6 +100,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(SWPain);
             CombatRoutine.AddDebuff(WeakenedSoul);
             CombatRoutine.AddDebuff(VampiricTouch);
+            CombatRoutine.AddDebuff(ShadowCrash);
 
             //Spell
             CombatRoutine.AddSpell(Smite, "D1");
