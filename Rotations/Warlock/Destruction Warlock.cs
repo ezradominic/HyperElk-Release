@@ -148,7 +148,7 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             //AOE
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)
             {
                 if (API.CanCast(Cataclysm) && !API.MouseoverHasDebuff(Immolate) && API.PlayerCanAttackMouseover && API.CanCast(Cataclysm) && API.TargetDebuffRemainingTime(Immolate) <= 500 && IsRange && TalentCataclysm && NotMoving && NotCasting && IsRange && NotChanneling)
                 {
@@ -333,8 +333,8 @@ namespace HyperElk.Core
                     }
                 }
             }
-            //AOE
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
+            //SINGLE TARGET
+            if (API.TargetUnitInRangeCount <= AOEUnitNumber)
             {
                 if (API.CanCast(Cataclysm) && !API.MouseoverHasDebuff(Immolate) && API.PlayerCanAttackMouseover && API.CanCast(Cataclysm) && API.TargetDebuffRemainingTime(Immolate) <= 500 && IsRange && TalentCataclysm && NotMoving && NotCasting && IsRange && NotChanneling)
                 {
