@@ -8,6 +8,7 @@
 // v1.5 legendary prep
 // v1.6 eclipse update
 // v1.65 another eclipse update
+// v1.7 convoke update
 
 using System.Diagnostics;
 
@@ -109,7 +110,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.65");
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.7");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -334,7 +335,7 @@ namespace HyperElk.Core
                     API.CastSpell(FuryofElune);
                     return;
                 }
-                if (API.CanCast(ForceofNature) && TalentForceOfNature && IsForceofNature && (IncaCelestial || (API.SpellCDDuration(Incarnation) > 3000 && TalentIncarnation || API.SpellCDDuration(CelestialAlignment) > 3000 && !TalentIncarnation)))
+                if (API.CanCast(ForceofNature) && TalentForceOfNature && IsForceofNature && (IncaCelestial || ((API.SpellCDDuration(Incarnation) > 3000 && TalentIncarnation && IsIncarnation || !IsIncarnation) || (API.SpellCDDuration(CelestialAlignment) > 3000 && !TalentIncarnation && IsCelestialAlignment || !IsCelestialAlignment))))
                 {
                     API.CastSpell(ForceofNature);
                     return;
@@ -344,7 +345,8 @@ namespace HyperElk.Core
                     API.CastSpell(RavenousFrenzy);
                     return;
                 }
-                if (API.CanCast(ConvoketheSpirits) && isinRange && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                //actions.st+=/convoke_the_spirits,if=(variable.convoke_desync&!cooldown.ca_inc.ready|buff.ca_inc.up)&astral_power<50&(buff.eclipse_lunar.remains>10|buff.eclipse_solar.remains>10)|fight_remains<10
+                if (API.CanCast(ConvoketheSpirits) && isinRange && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant && ((!API.CanCast(CelestialAlignment) && !TalentIncarnation && IsCelestialAlignment || !IsCelestialAlignment) || (!API.CanCast(Incarnation) && TalentIncarnation && IsIncarnation || !IsIncarnation) || IncaCelestial) && API.PlayerAstral < 50 && (API.PlayerBuffTimeRemaining(EclipseSolar) > 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) > 1000))
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;
