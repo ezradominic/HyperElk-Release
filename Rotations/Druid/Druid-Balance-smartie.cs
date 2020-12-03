@@ -6,6 +6,10 @@
 // v1.35 small hotfix
 // v1.4 covenant update
 // v1.5 legendary prep
+// v1.6 eclipse update
+// v1.65 another eclipse update
+
+using System.Diagnostics;
 
 namespace HyperElk.Core
 {
@@ -67,6 +71,8 @@ namespace HyperElk.Core
         bool TalentNewMoon => API.PlayerIsTalentSelected(7, 3);
 
         //General
+        private static readonly Stopwatch Solarwatch = new Stopwatch();
+        private static readonly Stopwatch Lunarwatch = new Stopwatch();
         private int PlayerLevel => API.PlayerLevel;
         private bool isinRange => API.TargetRange < 45;
         private bool isMOinRange => API.MouseoverRange < 45;
@@ -103,7 +109,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.5");
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.65");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -197,6 +203,34 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            if (!Lunarwatch.IsRunning && API.PlayerHasBuff(EclipseLunar) && !API.PlayerHasBuff(EclipseSolar))
+            {
+                Solarwatch.Stop();
+                Solarwatch.Reset();
+                Lunarwatch.Start();
+                API.WriteLog("Starting Lunarwatch.");
+            }
+            if (!Solarwatch.IsRunning && API.PlayerHasBuff(EclipseSolar) && !API.PlayerHasBuff(EclipseLunar))
+            {
+                Lunarwatch.Stop();
+                Lunarwatch.Reset();
+                Solarwatch.Start();
+                API.WriteLog("Starting Solarwatch.");
+            }
+            if (API.PlayerHasBuff(EclipseLunar) && API.PlayerHasBuff(EclipseSolar))
+            {
+                Lunarwatch.Stop();
+                Lunarwatch.Reset();
+                Solarwatch.Stop();
+                Solarwatch.Reset();
+            }
+            if (!API.PlayerIsInCombat)
+            {
+                Lunarwatch.Stop();
+                Lunarwatch.Reset();
+                Solarwatch.Stop();
+                Solarwatch.Reset();
+            }
         }
         public override void CombatPulse()
         {
@@ -358,19 +392,9 @@ namespace HyperElk.Core
                         API.CastSpell(Starsurge);
                         return;
                     }
-                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && (!IsCelestialAlignment && !TalentIncarnation && API.PlayerAstral > 40 || !IsIncarnation && TalentIncarnation && API.PlayerAstral > 40) || API.PlayerAstral > 40 && API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.PlayerAstral > 40 && API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && (API.PlayerAstral > 30 && IncaCelestial || API.PlayerAstral > 30 && (!IsCelestialAlignment && !TalentIncarnation && API.PlayerAstral > 30 || !IsIncarnation && TalentIncarnation && API.PlayerAstral > 30) || API.PlayerAstral > 30 && API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.PlayerAstral > 30 && API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
                     {
                         API.CastSpell(Starsurge);
-                        return;
-                    }
-                    if (API.CanCast(Wrath) && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerHasBuff(EclipseSolar))
-                    {
-                        API.CastSpell(Wrath);
-                        return;
-                    }
-                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerHasBuff(EclipseLunar))
-                    {
-                        API.CastSpell(Starfire);
                         return;
                     }
                     if (API.CanCast(NewMoon) && TalentNewMoon && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentNewMoon) && API.PlayerAstral <= 90)
@@ -379,6 +403,26 @@ namespace HyperElk.Core
                         return;
                     }
                     if (API.CanCast(Starfire) && PlayerLevel >= 10 && API.PlayerHasBuff(WarriorofElune))
+                    {
+                        API.CastSpell(Starfire);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && IncaCelestial)
+                    {
+                        API.CastSpell(Wrath);
+                        return;
+                    }
+                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !API.PlayerHasBuff(EclipseSolar) && !API.PlayerHasBuff(EclipseLunar))
+                    {
+                        API.CastSpell(Starfire);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !API.PlayerHasBuff(EclipseSolar) && !API.PlayerHasBuff(EclipseLunar))
+                    {
+                        API.CastSpell(Wrath);
+                        return;
+                    }
+                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerHasBuff(EclipseLunar))
                     {
                         API.CastSpell(Starfire);
                         return;
@@ -445,19 +489,9 @@ namespace HyperElk.Core
                         API.CastSpell(Starfall);
                         return;
                     }
-                    if (API.CanCast(Starsurge) && (API.PlayerBuffTimeRemaining(Starfall) > 400 || PlayerLevel < 34) && PlayerLevel >= 12 && (API.PlayerAstral > 40 && IncaCelestial || API.PlayerAstral > 40 && (!IsCelestialAlignment && !TalentIncarnation && API.PlayerAstral > 40 || !IsIncarnation && TalentIncarnation && API.PlayerAstral > 40) || API.PlayerAstral > 40 && API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.PlayerAstral > 40 && API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                    if (API.CanCast(Starsurge) && (API.PlayerBuffTimeRemaining(Starfall) > 400 || PlayerLevel < 34) && PlayerLevel >= 12 && (API.PlayerAstral > 30 && IncaCelestial || API.PlayerAstral > 30 && (!IsCelestialAlignment && !TalentIncarnation && API.PlayerAstral > 30 || !IsIncarnation && TalentIncarnation && API.PlayerAstral > 30) || API.PlayerAstral > 30 && API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.PlayerAstral > 30 && API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
                     {
                         API.CastSpell(Starsurge);
-                        return;
-                    }
-                    if (API.CanCast(Wrath) && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerHasBuff(EclipseSolar))
-                    {
-                        API.CastSpell(Wrath);
-                        return;
-                    }
-                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerHasBuff(EclipseLunar))
-                    {
-                        API.CastSpell(Starfire);
                         return;
                     }
                     if (API.CanCast(NewMoon) && TalentNewMoon && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerAstral <= 90)
@@ -470,13 +504,32 @@ namespace HyperElk.Core
                         API.CastSpell(Starfire);
                         return;
                     }
+                    if (API.CanCast(Starfire) && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && IncaCelestial)
+                    {
+                        API.CastSpell(Starfire);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !API.PlayerHasBuff(EclipseSolar) && !API.PlayerHasBuff(EclipseLunar))
+                    {
+                        API.CastSpell(Wrath);
+                        return;
+                    }
+                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !API.PlayerHasBuff(EclipseSolar) && !API.PlayerHasBuff(EclipseLunar))
+                    {
+                        API.CastSpell(Starfire);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerHasBuff(EclipseSolar))
+                    {
+                        API.CastSpell(Wrath);
+                        return;
+                    }
                     if (API.CanCast(Starfire) && PlayerLevel >= 10 && (!API.PlayerIsMoving || API.PlayerHasBuff(Starfall) && TalentStellarDrift))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
                 }
-
             }
         }
     }
