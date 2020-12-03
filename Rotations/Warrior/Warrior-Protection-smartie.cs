@@ -191,7 +191,7 @@ namespace HyperElk.Core
                 API.CastSpell(ShieldWall);
                 return;
             }
-            if (API.CanCast(DemoralizingShout) && API.PlayerHealthPercent <= DemoralizingShoutLifePercent && PlayerLevel >= 27 && !TalentBoomingVoice)
+            if (API.CanCast(DemoralizingShout) && API.PlayerHealthPercent <= DemoralizingShoutLifePercent && IsMelee && PlayerLevel >= 27 && !TalentBoomingVoice)
             {
                 API.CastSpell(DemoralizingShout);
                 return;
