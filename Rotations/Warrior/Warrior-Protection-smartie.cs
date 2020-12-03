@@ -6,6 +6,7 @@
 // v1.4 heroic throw update
 // v1.5 condemn fix
 // v1.6 dps toggle and alot more fine tuning for more defensives
+// v1.7 rage update
 
 namespace HyperElk.Core
 {
@@ -79,7 +80,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.6");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.7");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam, "D4");
@@ -243,22 +244,22 @@ namespace HyperElk.Core
                     API.CastSpell(AncientAftershock);
                     return;
                 }
-                if (API.CanCast(Avatar) && IsCooldowns && PlayerLevel >= 32)
+                if (API.CanCast(Avatar) && IsCooldowns && PlayerLevel >= 32 && API.PlayerRage < 70)
                 {
                     API.CastSpell(Avatar);
                     return;
                 }
-                if (API.CanCast(DemoralizingShout) && TalentBoomingVoice)
+                if (API.CanCast(DemoralizingShout) && TalentBoomingVoice && API.PlayerRage < 60)
                 {
                     API.CastSpell(DemoralizingShout);
                     return;
                 }
-                if (API.CanCast(Ravager) && TalentRavager)
+                if (API.CanCast(Ravager) && TalentRavager && API.PlayerRage < 70)
                 {
                     API.CastSpell(Ravager);
                     return;
                 }
-                if (API.CanCast(DragonRoar) && TalentDragonRoar)
+                if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerRage < 80)
                 {
                     API.CastSpell(DragonRoar);
                     return;
