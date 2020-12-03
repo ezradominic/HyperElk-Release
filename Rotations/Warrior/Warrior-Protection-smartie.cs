@@ -5,12 +5,14 @@
 // v1.3 covenant update
 // v1.4 heroic throw update
 // v1.5 condemn fix
+// v1.6 dps toggle and alot more fine tuning for more defensives
 
 namespace HyperElk.Core
 {
     public class ProtWarrior : CombatRoutine
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool IsDPS => API.ToggleIsEnabled("DPS");
         //Spell,Auras
         private string ShieldSlam = "Shield Slam";
         private string Devastate = "Devastate";
@@ -77,7 +79,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.5");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.6");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam, "D4");
@@ -129,6 +131,7 @@ namespace HyperElk.Core
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("DPS");
 
             //Prop
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
@@ -162,17 +165,27 @@ namespace HyperElk.Core
                 API.CastSpell(Pummel);
                 return;
             }
-            if (API.CanCast(IgnorePain) && (API.PlayerRage >= 40 || API.PlayerRage >= 26 && API.PlayerHasBuff(VengeanceIgnorePain)) && (!API.PlayerHasBuff(IgnorePain) || API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) < 200) && API.PlayerHealthPercent <= IgnorePainLifePercent && PlayerLevel >= 17)
+            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockFirstChargeLifePercent && !IsDPS && API.SpellCharges(ShieldBlock) == 2 && PlayerLevel >= 6 && API.PlayerRage >= 30 && !API.PlayerHasBuff(ShieldBlock))
+            {
+                API.CastSpell(ShieldBlock);
+                return;
+            }
+            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockSecondChargeLifePercent && !IsDPS && API.SpellCharges(ShieldBlock) < 2 && PlayerLevel >= 6 && API.PlayerRage >= 30 && !API.PlayerHasBuff(ShieldBlock))
+            {
+                API.CastSpell(ShieldBlock);
+                return;
+            }
+            if (API.CanCast(IgnorePain) && !IsDPS && (API.PlayerRage >= 40 || API.PlayerRage >= 26 && API.PlayerHasBuff(VengeanceIgnorePain)) && (!API.PlayerHasBuff(IgnorePain) || API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) < 200) && API.PlayerHealthPercent <= IgnorePainLifePercent && PlayerLevel >= 17)
             {
                 API.CastSpell(IgnorePain);
                 return;
             }
-            if (API.CanCast(LastStand) && API.PlayerHealthPercent <= LastStandLifePercent && PlayerLevel >= 38)
+            if (API.CanCast(LastStand) && API.PlayerHealthPercent <= LastStandLifePercent && !IsDPS && PlayerLevel >= 38)
             {
                 API.CastSpell(LastStand);
                 return;
             }
-            if (API.CanCast(ShieldWall) && API.PlayerHealthPercent <= ShieldWallLifePercent && PlayerLevel >= 23 && !API.PlayerHasBuff(LastStand))
+            if (API.CanCast(ShieldWall) && API.PlayerHealthPercent <= ShieldWallLifePercent && !IsDPS && PlayerLevel >= 23 && !API.PlayerHasBuff(LastStand))
             {
                 API.CastSpell(ShieldWall);
                 return;
@@ -182,22 +195,12 @@ namespace HyperElk.Core
                 API.CastSpell(DemoralizingShout);
                 return;
             }
-            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockFirstChargeLifePercent && API.SpellCharges(ShieldBlock) == 2 && PlayerLevel >= 6 && API.PlayerRage >= 30 && !API.PlayerHasBuff(ShieldBlock))
-            {
-                API.CastSpell(ShieldBlock);
-                return;
-            }
-            if (API.CanCast(ShieldBlock) && API.PlayerHealthPercent <= ShieldBlockSecondChargeLifePercent && API.SpellCharges(ShieldBlock) < 2 && PlayerLevel >= 6 && API.PlayerRage >= 30 && !API.PlayerHasBuff(ShieldBlock))
-            {
-                API.CastSpell(ShieldBlock);
-                return;
-            }
             if (API.CanCast(VictoryRush) && API.PlayerHealthPercent <= VictoryRushLifePercent && API.PlayerHasBuff(Victorious) && PlayerLevel >= 5 && IsMelee)
             {
                 API.CastSpell(VictoryRush);
                 return;
             }
-            if (API.CanCast(ImpendingVictory) && API.PlayerHealthPercent <= ImpendingVictoryLifePercent && TalentImpendingVictory)
+            if (API.CanCast(ImpendingVictory) && API.PlayerHealthPercent <= ImpendingVictoryLifePercent && !IsDPS && TalentImpendingVictory)
             {
                 API.CastSpell(ImpendingVictory);
                 return;
@@ -260,9 +263,19 @@ namespace HyperElk.Core
                     API.CastSpell(DragonRoar);
                     return;
                 }
-                if (API.CanCast(Revenge) && API.PlayerRage >= 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && PlayerLevel >= 12)
+                if (API.CanCast(Revenge) && API.PlayerRage >= 20 && IsDPS && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && PlayerLevel >= 12)
                 {
                     API.CastSpell(Revenge);
+                    return;
+                }
+                if (API.CanCast(Revenge) && API.PlayerRage >= 70 && !IsDPS && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && PlayerLevel >= 12)
+                {
+                    API.CastSpell(Revenge);
+                    return;
+                }
+                if (API.CanCast(ThunderClap) && PlayerLevel >= 19 && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
+                {
+                    API.CastSpell(ThunderClap);
                     return;
                 }
                 if (API.CanCast(ShieldSlam) && PlayerLevel >= 3)
@@ -275,12 +288,22 @@ namespace HyperElk.Core
                     API.CastSpell(ThunderClap);
                     return;
                 }
-                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 10)
+                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && IsDPS && PlayerLevel >= 10)
                 {
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent))
+                if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && IsDPS)
+                {
+                    API.CastSpell(Condemn);
+                    return;
+                }
+                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 70 && API.TargetHealthPercent < 20 && !IsDPS && PlayerLevel >= 10)
+                {
+                    API.CastSpell(Execute);
+                    return;
+                }
+                if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 70 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && !IsDPS)
                 {
                     API.CastSpell(Condemn);
                     return;
@@ -290,7 +313,12 @@ namespace HyperElk.Core
                     API.CastSpell(Revenge);
                     return;
                 }
-                if (API.CanCast(Revenge) && TalentDevastator && API.PlayerRage >= 20 && (API.PlayerHasBuff(IgnorePain) && API.PlayerBuffTimeRemaining(IgnorePain) > 300 || API.PlayerHealthPercent > IgnorePainLifePercent) && PlayerLevel >= 14)
+                if (API.CanCast(Revenge) && TalentDevastator && API.PlayerRage >= 20 && IsDPS && PlayerLevel >= 14)
+                {
+                    API.CastSpell(Revenge);
+                    return;
+                }
+                if (API.CanCast(Revenge) && TalentDevastator && API.PlayerRage >= 70 && !IsDPS && PlayerLevel >= 14)
                 {
                     API.CastSpell(Revenge);
                     return;
