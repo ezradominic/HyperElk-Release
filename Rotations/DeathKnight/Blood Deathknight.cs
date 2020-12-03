@@ -242,7 +242,7 @@ namespace HyperElk.Core
 
         }
 
-
+        bool boneshieldneedrefresh => (API.PlayerBuffStacks(BoneShield) <= (API.PlayerHasBuff(DancingRuneWeapon) ? 4 : 7)) || API.PlayerBuffTimeRemaining(BoneShield) < 300;
         private void rotation()
         {
             if (API.PlayerHealthPercent >= 80 && API.CanCast(BloodforBlood,true,true) && IsMelee && !API.PlayerHasBuff(BloodforBlood))
@@ -360,7 +360,7 @@ namespace HyperElk.Core
                 return;
             }
             //Hearth Strike
-            if (API.CanCast(HeartStrike) && IsMelee && PlayerLevel >= 10)
+            if (API.CanCast(HeartStrike)&& !boneshieldneedrefresh && IsMelee && PlayerLevel >= 10)
             {
                 API.CastSpell(HeartStrike);
                 return;
