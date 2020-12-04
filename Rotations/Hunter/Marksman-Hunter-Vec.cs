@@ -327,7 +327,7 @@ namespace HyperElk.Core
                 //st->add_action("flare,if=tar_trap.up&runeforge.soulforge_embers");
                 //st->add_action("tar_trap,if=runeforge.soulforge_embers&tar_trap.remains<gcd&cooldown.flare.remains<gcd");
                 //st->add_action("explosive_shot");
-                if (API.CanCast(Explosive_Shot) && InRange && Talent_Explosive_Shot)
+                if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                 {
                     API.CastSpell(Explosive_Shot);
                     return;
@@ -456,7 +456,7 @@ namespace HyperElk.Core
                 //trickshots->add_action("tar_trap,if=runeforge.soulforge_embers&tar_trap.remains<gcd&cooldown.flare.remains<gcd");
                 //trickshots->add_action("flare,if=tar_trap.up&runeforge.soulforge_embers");
                 //trickshots->add_action("explosive_shot");
-                if (API.CanCast(Explosive_Shot) && InRange && Talent_Explosive_Shot)
+                if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                 {
                     API.CastSpell(Explosive_Shot);
                     return;
