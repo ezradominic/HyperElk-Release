@@ -148,7 +148,7 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             //AOE
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && NotCasting)
             {
                 if (API.CanCast(Cataclysm) && !API.MouseoverHasDebuff(Immolate) && API.PlayerCanAttackMouseover && API.CanCast(Cataclysm) && API.TargetDebuffRemainingTime(Immolate) <= 500 && IsRange && TalentCataclysm && NotMoving && NotCasting && IsRange && NotChanneling)
                 {
@@ -201,7 +201,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.havoc+=/shadowburn
-                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.SpellCharges(ShadowBurn) >= 1)
+                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.SpellCharges(ShadowBurn) >= 1 && API.PlayerCurrentSoulShards >= 4)
                 {
                     API.CastSpell(ShadowBurn);
                     return;
@@ -288,7 +288,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions+=/shadowburn,if=!variable.pool_soul_shards|soul_shard>=4.5
-                    if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.PlayerCurrentSoulShards >= 4.5 && API.SpellCharges(ShadowBurn) >= 1)
+                    if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.PlayerCurrentSoulShards >= 4 && API.SpellCharges(ShadowBurn) >= 1)
                     {
                         API.CastSpell(ShadowBurn);
                         return;
@@ -334,7 +334,7 @@ namespace HyperElk.Core
                 }
             }
             //SINGLE TARGET
-            if (API.TargetUnitInRangeCount <= AOEUnitNumber)
+            if (API.TargetUnitInRangeCount <= AOEUnitNumber && NotCasting)
             {
                 if (API.CanCast(Cataclysm) && !API.MouseoverHasDebuff(Immolate) && API.PlayerCanAttackMouseover && API.CanCast(Cataclysm) && API.TargetDebuffRemainingTime(Immolate) <= 500 && IsRange && TalentCataclysm && NotMoving && NotCasting && IsRange && NotChanneling)
                 {
@@ -387,7 +387,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.havoc+=/shadowburn
-                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.SpellCharges(ShadowBurn) >= 1)
+                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.SpellCharges(ShadowBurn) >= 1 && API.PlayerCurrentSoulShards >= 4)
                 {
                     API.CastSpell(ShadowBurn);
                     return;
