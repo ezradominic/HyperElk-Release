@@ -53,21 +53,21 @@ namespace HyperElk.Core
 
         //Talents
 
-        bool TalentWeaponmast = API.PlayerIsTalentSelected(1, 1);
-        bool TalentPremeditation= API.PlayerIsTalentSelected(1, 2);
-        bool TalentGloomblade = API.PlayerIsTalentSelected(1, 3);
-        bool TalentNightstalker = API.PlayerIsTalentSelected(2, 1);
-        bool TalentSubterfuge= API.PlayerIsTalentSelected(2, 2);
-        bool TalentShadowFocus = API.PlayerIsTalentSelected(2, 3);
-        bool TalentVigor = API.PlayerIsTalentSelected(3, 1);
-        bool TalentMarkedForDeath = API.PlayerIsTalentSelected(3, 3);
-        bool TalentDeeperStratagem = API.PlayerIsTalentSelected(3, 2);
-        bool TalentDarkShadow = API.PlayerIsTalentSelected(6, 1);
-        bool TalentAlacrity = API.PlayerIsTalentSelected(6, 2);
-        bool TalentEnvelopingShadows = API.PlayerIsTalentSelected(6, 3);
-        bool TalentMasterOfShadows = API.PlayerIsTalentSelected(7, 1);
-        bool TalentSecretTechnique = API.PlayerIsTalentSelected(7, 2);
-        bool TalentShurikenTornado = API.PlayerIsTalentSelected(7, 3);
+        bool TalentWeaponmast => API.PlayerIsTalentSelected(1, 1);
+        bool TalentPremeditation => API.PlayerIsTalentSelected(1, 2);
+        bool TalentGloomblade => API.PlayerIsTalentSelected(1, 3);
+        bool TalentNightstalker => API.PlayerIsTalentSelected(2, 1);
+        bool TalentSubterfuge => API.PlayerIsTalentSelected(2, 2);
+        bool TalentShadowFocus => API.PlayerIsTalentSelected(2, 3);
+        bool TalentVigor => API.PlayerIsTalentSelected(3, 1);
+        bool TalentMarkedForDeath => API.PlayerIsTalentSelected(3, 3);
+        bool TalentDeeperStratagem => API.PlayerIsTalentSelected(3, 2);
+        bool TalentDarkShadow => API.PlayerIsTalentSelected(6, 1);
+        bool TalentAlacrity => API.PlayerIsTalentSelected(6, 2);
+        bool TalentEnvelopingShadows => API.PlayerIsTalentSelected(6, 3);
+        bool TalentMasterOfShadows => API.PlayerIsTalentSelected(7, 1);
+        bool TalentSecretTechnique => API.PlayerIsTalentSelected(7, 2);
+        bool TalentShurikenTornado => API.PlayerIsTalentSelected(7, 3);
 
 
         //Rotation Utilities
@@ -226,7 +226,7 @@ namespace HyperElk.Core
                     API.CastSpell(SymbolsofDeath);
                 }
                 //cds->add_action("flagellation,if=variable.snd_condition&!stealthed.mantle");
-                if (PlayerCovenantSettings == "Venthyr" && IsMelee && SnDCondition && !isStealth && API.CanCast(Flagellation) && IsMelee)
+                if (PlayerCovenantSettings == "Venthyr" && IsMelee && !API.TargetHasDebuff(Flagellation) && SnDCondition && !isStealth && API.CanCast(Flagellation) && IsMelee)
                 {
                     API.CastSpell(Flagellation);
                     return;
