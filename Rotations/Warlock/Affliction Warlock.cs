@@ -419,7 +419,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/shadow_bolt
                 //ShadowBolt
-                if (API.CanCast(ShadowBolt) && !TalentDrainSoul && PlayerLevel >= 1)
+                if (API.CanCast(ShadowBolt) && NotCasting && !TalentDrainSoul && PlayerLevel >= 1)
                 {
                     API.CastSpell(ShadowBolt);
                     return;
