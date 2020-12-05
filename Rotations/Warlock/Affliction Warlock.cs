@@ -161,7 +161,6 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
-            CombatRoutine.AddMacro(VileTaint + "MO", "D8");
             CombatRoutine.AddMacro(Agony + "MO", "F1");
             CombatRoutine.AddMacro(Corruption + "MO", "F2");
             CombatRoutine.AddMacro(SiphonLife + "MO", "F3");
