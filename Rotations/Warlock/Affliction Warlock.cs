@@ -152,7 +152,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Haunt, "D8");
             CombatRoutine.AddSpell(DarkSoulMisery, "D8");
             CombatRoutine.AddSpell(MortalCoil, "D9");
-
+            CombatRoutine.AddSpell(VileTaint, "D8");
             CombatRoutine.AddSpell(ScouringTithe, "F1");
             CombatRoutine.AddSpell(SoulRot, "F1");
             CombatRoutine.AddSpell(ImpendingCatastrophe, "F1");
