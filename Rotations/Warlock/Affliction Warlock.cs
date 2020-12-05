@@ -430,7 +430,7 @@ namespace HyperElk.Core
             //ROTATION SINGLE TARGET
             if (API.TargetUnitInRangeCount <= AOEUnitNumber && IsRange)
             {
-                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
+                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
