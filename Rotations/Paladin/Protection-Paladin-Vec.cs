@@ -39,6 +39,7 @@
         private string ShiningLightFree = "327510";
         private string BlessingoftheSeasons = "328282";
         private string RingingClarity = "Ringing Clarity";
+        private string RoyalDecree = "Royal Decree";
 
         //Misc
         private int PlayerLevel => API.PlayerLevel;
@@ -51,7 +52,7 @@
         }
         private static bool TargetHasDebuff(string debuff)
         {
-            return API.TargetHasDebuff(debuff, false, false);
+            return API.TargetHasDebuff(debuff, true, false);
         }
         //Talents
         private bool Talent_CrusadersJudgment => API.PlayerIsTalentSelected(2, 2);
@@ -136,6 +137,7 @@
             CombatRoutine.AddBuff(HolyAvenger);
             CombatRoutine.AddBuff(VanquishersHammer);
             CombatRoutine.AddBuff(Seraphim);
+            CombatRoutine.AddBuff(RoyalDecree);
             //Debuffs
             CombatRoutine.AddDebuff(Forbearance);
             CombatRoutine.AddDebuff(Judgment);
@@ -400,7 +402,7 @@
                 return;
             }
             //std->add_action(this, "Word of Glory", "if=buff.shining_light_free.up&!covenant.necrolord");
-            if (API.PlayerHasBuff(ShiningLightFree) && PlayerCovenantSettings != "Necrolord" && API.CanCast(WordOfGlory, true, true) && PlayerLevel >= 7)
+            if ((API.PlayerHasBuff(ShiningLightFree) || API.PlayerHasBuff(RoyalDecree)) && PlayerCovenantSettings != "Necrolord" && API.CanCast(WordOfGlory, true, true) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
