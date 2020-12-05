@@ -89,7 +89,7 @@ namespace HyperElk.Core
 
 
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
-        string[] MisdirectionList = new string[] { "Imp", "Voidwalker", "Succubus", "Felhunter", };
+        string[] MisdirectionList = new string[] { "None", "Imp", "Voidwalker", "Succubus", "Felhunter", };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private bool UseUA => (bool)CombatRoutine.GetProperty("UseUA");
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
@@ -352,9 +352,9 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/siphon_life,cycle_targets=1,if=active_dot.siphon_life<=3,target_if=!dot.siphon_life.ticking
-                if (API.CanCast(SiphonLife) && !API.TargetHasDebuff(SiphonLife) && TalentSiphonLife)
+                if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                 {
-                    API.CanCast(SiphonLife);
+                    API.CastSpell(SiphonLife);
                     return;
                 }
                 //ImpendingCatastrophe
@@ -499,9 +499,9 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/siphon_life,if=dot.siphon_life.remains<4
-                if (API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400)
+                if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                 {
-                    API.CanCast(SiphonLife);
+                    API.CastSpell(SiphonLife);
                     return;
                 }
                 //SoulRot
