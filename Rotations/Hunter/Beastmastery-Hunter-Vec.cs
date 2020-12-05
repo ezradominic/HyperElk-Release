@@ -43,6 +43,7 @@ namespace HyperElk.Core
         private string Flayed_Shot = "Flayed Shot";
         private string Death_Chakram = "Death Chakram";
         private string FlayersMark = "Flayer's Mark";
+
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool isMOinRange => API.MouseoverRange <= 40;
@@ -55,9 +56,10 @@ namespace HyperElk.Core
         private float RealFocusTimeToMax => ((120f - API.PlayerFocus) / ((FocusRegen + BarbedShotCount * 2.5f) + (5 * API.PlayerBuffStacks(Aspect_of_the_Wild)))) * 100f;
         private float Barrage_ExecuteTime => 300f / (1f + (API.PlayerGetHaste / 100f));
         private float BarbedShotCooldown => 1200f / (1f + (API.PlayerGetHaste / 100f));
-        private float Barbed_Shot_Fractional => (API.SpellCharges(Barbed_Shot) * 100 + ((BarbedShotCooldown - API.SpellChargeCD(Barbed_Shot)) / (BarbedShotCooldown/100)));
+        private float Barbed_Shot_Fractional => (API.SpellCharges(Barbed_Shot) * 100 + ((BarbedShotCooldown - API.SpellChargeCD(Barbed_Shot)) / (BarbedShotCooldown / 100)));
         private float Barbed_Shot_FullRechargeTime => (2 - API.SpellCharges(Barbed_Shot)) * BarbedShotCooldown + API.SpellCDDuration(Barbed_Shot);
         //Talents
+        private bool Talent_KillerInstinct => API.PlayerIsTalentSelected(1, 1);
         private bool Talent_DireBeast => API.PlayerIsTalentSelected(1, 3);
         private bool Talent_ScentOfBlood => API.PlayerIsTalentSelected(2, 1);
         private bool Talent_OnewiththePack => API.PlayerIsTalentSelected(2, 2);
@@ -67,6 +69,8 @@ namespace HyperElk.Core
         private bool Talent_Stampede => API.PlayerIsTalentSelected(6, 3);
         private bool Talent_Bloodshed => API.PlayerIsTalentSelected(7, 3);
 
+
+
         private static void CastSpell(string spell)
         {
             if (API.CanCast(spell))
@@ -75,7 +79,10 @@ namespace HyperElk.Core
                 return;
             }
         }
-
+        private bool Race(string race)
+        {
+            return API.PlayerRaceName == race && PlayerRaceSettings == race;
+        }
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -85,10 +92,10 @@ namespace HyperElk.Core
             return API.PetHasBuff(buff, false, false);
         }
 
-        //CBProperties
+    //CBProperties
 
 
-        string[] MisdirectionList = new string[] { "Off", "On AOE", "On" };
+    string[] MisdirectionList = new string[] { "Off", "On AOE", "On" };
         string[] AlwaysCooldownsList = new string[] { "always", "with Cooldowns" };
         string[] AspectoftheWildList = new string[] { "always", "with Cooldowns" };
         string[] AMurderofCrowsList = new string[] { "always", "with Cooldowns" };
@@ -153,8 +160,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Flayed_Shot, "F10");
             CombatRoutine.AddSpell(Death_Chakram, "F10");
 
-            //Macros
-            CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
+
+
+
+        //Macros
+        CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -172,9 +182,10 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Barbed_Shot);
             CombatRoutine.AddBuff(Feign_Death);
             CombatRoutine.AddBuff(FlayersMark);
+            CombatRoutine.AddBuff(Wild_Spirits);
 
             //Debuffs
-
+            CombatRoutine.AddDebuff("Wild Mark");
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Mouseover");
@@ -198,11 +209,14 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Aspect_of_the_Turtle, "Use " + Aspect_of_the_Turtle + " below:", percentListProp, "Life percent at which " + Aspect_of_the_Turtle + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Feign_Death, "Use " + Feign_Death + " below:", percentListProp, "Life percent at which " + Feign_Death + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(Mend_Pet, "Use " + Mend_Pet + " below:", percentListProp, "Life percent at which " + Mend_Pet + " is used, set to 0 to disable", "Pet", 6);
+
+
+
         }
 
         public override void Pulse()
         {
-             //API.WriteLog("wild spirits  " + !API.SpellISOnCooldown(Wild_Spirits)+ " Cov: "+PlayerCovenantSettings + " use "+ UseCovenant);
+             //API.WriteLog("race  " +PlayerRaceSettings + " cd " + API.CanCast(RacialSpell1) );
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
                 CallPetTimer.Stop();
@@ -260,6 +274,44 @@ namespace HyperElk.Core
                     API.CastSpell(Counter_Shot);
                     return;
                 }
+                if (isRacial && IsCooldowns)
+                {
+                    // cds->add_action("ancestral_call,if=cooldown.bestial_wrath.remains>30");
+                    /*    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && API.SpellCDDuration(Bestial_Wrath) > 3000 && InRange)
+                        {
+                            API.CastSpell(RacialSpell1);
+                            return;
+                        }
+                        // cds->add_action("fireblood,if=cooldown.bestial_wrath.remains>30");
+                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(Bestial_Wrath) > 3000 && InRange)
+                        {
+                            API.CastSpell(RacialSpell1);
+                            return;
+                        }
+                        // cds->add_action("berserking,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.berserking.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<13");
+                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                        {
+                            API.CastSpell(RacialSpell1);
+                            return;
+                        }
+                                            // cds->add_action("lights_judgment");
+                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Lightforged Draenei" && InRange)
+                        {
+                            API.CastSpell(RacialSpell1);
+                            return;
+                        }
+                        
+                    // cds->add_action("blood_fury,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.blood_fury.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<16");
+
+                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                        {
+                            API.CastSpell(RacialSpell1);
+                            return;
+                        }
+                        */
+
+                }
+                // cds->add_action("potion,if=buff.aspect_of_the_wild.up|target.time_to_die<26");
                 if (!IsAOE || API.TargetUnitInRangeCount < AOEUnitNumber)
                 {
                     //st->add_action("aspect_of_the_wild");
@@ -291,7 +343,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("wild_spirits");
-                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Wild_Spirits);
                         return;
@@ -303,12 +355,12 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("kill_shot,if=buff.flayers_mark.remains<5|target.health.pct<=20");
-                    if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
+                    if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent < 20 || PlayerHasBuff(FlayersMark)) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot);
                         return;
                     }
-                    if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                    if (!API.SpellISOnCooldown(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent < 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot + "MO");
                         return;
@@ -369,12 +421,17 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("cobra_shot,if=(focus-cost+focus.regen*(cooldown.kill_command.remains-1)>action.kill_command.cost|cooldown.kill_command.remains>1+gcd)|(buff.bestial_wrath.up|buff.nesingwarys_trapping_apparatus.up)&!runeforge.qapla_eredun_war_order|target.time_to_die<3");
-                    if (API.CanCast(Cobra_Shot) && API.PlayerLevel >= 14 && API.PlayerLevel >= 14 && InRange && (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300)
+                    if (API.CanCast(Cobra_Shot) && API.PlayerFocus >= 35 && API.PlayerLevel >= 14  && InRange && (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300)
                     {
                         API.CastSpell(Cobra_Shot);
                         return;
                     }
                     //st->add_action("barbed_shot,if=buff.wild_spirits.up");
+                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && API.TargetHasDebuff("Wild Mark"))
+                    {
+                        API.CastSpell(Barbed_Shot);
+                        return;
+                    }
                     //st->add_action("arcane_pulse,if=buff.bestial_wrath.down|target.time_to_die<5");
                     //st->add_action("tar_trap,if=runeforge.soulforge_embers|runeforge.nessingwarys_trapping_apparatus");
                     //st->add_action("freezing_trap,if=runeforge.nessingwarys_trapping_apparatus");
@@ -410,7 +467,7 @@ namespace HyperElk.Core
                     }
 
                     //cleave->add_action("wild_spirits");
-                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Wild_Spirits);
                         return;
@@ -446,12 +503,12 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("kill_shot");
-                    if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
+                    if (API.CanCast(Kill_Shot) && (API.TargetHealthPercent < 20 || PlayerHasBuff(FlayersMark)) && API.PlayerFocus >= 10 && InRange && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot);
                         return;
                     }
-                    if (API.CanCast(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent <= 20 || PlayerHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                    if (!API.SpellISOnCooldown(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent < 20 || PlayerHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot + "MO");
                         return;
@@ -500,7 +557,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("cobra_shot,if=focus.time_to_max<gcd*2");
-                    if (API.CanCast(Cobra_Shot) && API.PlayerBuffTimeRemaining(Beast_Cleave) > gcd && API.PlayerLevel >= 14 && InRange && API.PlayerFocus >= 35 && RealFocusTimeToMax < gcd * 2)
+                    if (API.CanCast(Cobra_Shot) && API.PlayerFocus >= 355 && API.PlayerBuffTimeRemaining(Beast_Cleave) > gcd && API.PlayerLevel >= 14 && InRange && API.PlayerFocus >= 35 && RealFocusTimeToMax < gcd * 2)
                     {
                         API.CastSpell(Cobra_Shot);
                         return;
