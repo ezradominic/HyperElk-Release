@@ -324,7 +324,7 @@ namespace HyperElk.Core
                 //VileTaint
                 if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
                 {
-                    API.CastSpell(VileTaint + "MO");
+                    API.CastSpell(VileTaint);
                     return;
                 }
                 //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
@@ -459,7 +459,7 @@ namespace HyperElk.Core
                 //VileTaint
                 if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
                 {
-                    API.CastSpell(VileTaint + "MO");
+                    API.CastSpell(VileTaint);
                     return;
                 }
 
