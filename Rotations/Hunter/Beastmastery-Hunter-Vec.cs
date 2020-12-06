@@ -34,7 +34,7 @@ namespace HyperElk.Core
         private string Bloodshed = "Bloodshed";
         private string Frenzy = "Frenzy";
         private string Beast_Cleave = "Beast Cleave";
-        private string Aspect_of_the_Turtle = "Aspect of the Turtle";      
+        private string Aspect_of_the_Turtle = "Aspect of the Turtle";
         private string Revive_Pet = "Revive Pet";
         private string Wild_Spirits = "Wild Spirits";
         private string Resonating_Arrow = "Resonating Arrow";
@@ -90,10 +90,10 @@ namespace HyperElk.Core
             return API.PetHasBuff(buff, false, false);
         }
 
-    //CBProperties
+        //CBProperties
 
 
-    string[] MisdirectionList = new string[] { "Off", "On AOE", "On" };
+        string[] MisdirectionList = new string[] { "Off", "On AOE", "On" };
         string[] AlwaysCooldownsList = new string[] { "always", "with Cooldowns" };
         string[] AspectoftheWildList = new string[] { "always", "with Cooldowns" };
         string[] AMurderofCrowsList = new string[] { "always", "with Cooldowns" };
@@ -161,8 +161,8 @@ namespace HyperElk.Core
 
 
 
-        //Macros
-        CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
+            //Macros
+            CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -214,7 +214,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-             //API.WriteLog("race  " +PlayerRaceSettings + " cd " + API.CanCast(RacialSpell1) );
+            //API.WriteLog("race  " +PlayerRaceSettings + " cd " + API.CanCast(RacialSpell1) );
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
                 CallPetTimer.Stop();
@@ -275,38 +275,38 @@ namespace HyperElk.Core
                 if (isRacial && IsCooldowns)
                 {
                     // cds->add_action("ancestral_call,if=cooldown.bestial_wrath.remains>30");
-                    /*    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && API.SpellCDDuration(Bestial_Wrath) > 3000 && InRange)
-                        {
-                            API.CastSpell(RacialSpell1);
-                            return;
-                        }
-                        // cds->add_action("fireblood,if=cooldown.bestial_wrath.remains>30");
-                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(Bestial_Wrath) > 3000 && InRange)
-                        {
-                            API.CastSpell(RacialSpell1);
-                            return;
-                        }
-                        // cds->add_action("berserking,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.berserking.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<13");
-                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
-                        {
-                            API.CastSpell(RacialSpell1);
-                            return;
-                        }
-                                            // cds->add_action("lights_judgment");
-                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Lightforged Draenei" && InRange)
-                        {
-                            API.CastSpell(RacialSpell1);
-                            return;
-                        }
-                        
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && API.SpellCDDuration(Bestial_Wrath) > 3000 && InRange)
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    // cds->add_action("fireblood,if=cooldown.bestial_wrath.remains>30");
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(Bestial_Wrath) > 3000 && InRange)
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    // cds->add_action("berserking,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.berserking.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<13");
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    // cds->add_action("lights_judgment");
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Lightforged Draenei" && InRange)
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+
                     // cds->add_action("blood_fury,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.blood_fury.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<16");
 
-                        if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
-                        {
-                            API.CastSpell(RacialSpell1);
-                            return;
-                        }
-                        */
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+
 
                 }
                 // cds->add_action("potion,if=buff.aspect_of_the_wild.up|target.time_to_die<26");
@@ -341,13 +341,13 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("wild_spirits");
-                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Wild_Spirits);
                         return;
                     }
                     //st->add_action("flayed_shot");
-                    if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Flayed_Shot);
                         return;
@@ -364,13 +364,13 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("barbed_shot,if=(cooldown.wild_spirits.remains>full_recharge_time|!covenant.night_fae)&(cooldown.bestial_wrath.remains<12*charges_fractional+gcd&talent.scent_of_blood|full_recharge_time<gcd&cooldown.bestial_wrath.remains)|target.time_to_die<9");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && (API.SpellCDDuration(Wild_Spirits) > Barbed_Shot_FullRechargeTime || PlayerCovenantSettings != "Night Fae") && ((API.SpellCDDuration(Bestial_Wrath) < (12 * Barbed_Shot_Fractional/100 + gcd/100)*100 && Talent_ScentOfBlood || (API.SpellCharges(Barbed_Shot) >= 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath))) || API.TargetTimeToDie < 900))
+                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && (API.SpellCDDuration(Wild_Spirits) > Barbed_Shot_FullRechargeTime || PlayerCovenantSettings != "Night Fae") && ((API.SpellCDDuration(Bestial_Wrath) < (12 * Barbed_Shot_Fractional / 100 + gcd / 100) * 100 && Talent_ScentOfBlood || (API.SpellCharges(Barbed_Shot) >= 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath))) || API.TargetTimeToDie < 900))
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
                     }
                     //st->add_action("death_chakram,if=focus+cast_regen<focus.max");
-                    if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Death_Chakram);
                         return;
@@ -388,7 +388,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("resonating_arrow,if=buff.bestial_wrath.up|target.time_to_die<10");
-                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1000) && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (PlayerHasBuff(Bestial_Wrath) || API.TargetTimeToDie < 1000) && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Resonating_Arrow);
                         return;
@@ -419,7 +419,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("cobra_shot,if=(focus-cost+focus.regen*(cooldown.kill_command.remains-1)>action.kill_command.cost|cooldown.kill_command.remains>1+gcd)|(buff.bestial_wrath.up|buff.nesingwarys_trapping_apparatus.up)&!runeforge.qapla_eredun_war_order|target.time_to_die<3");
-                    if (API.CanCast(Cobra_Shot) && API.PlayerFocus >= 35 && API.PlayerLevel >= 14  && InRange && (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300)
+                    if (API.CanCast(Cobra_Shot) && API.PlayerFocus >= 35 && API.PlayerLevel >= 14 && InRange && (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300)
                     {
                         API.CastSpell(Cobra_Shot);
                         return;
@@ -458,14 +458,14 @@ namespace HyperElk.Core
                     //cleave->add_action("tar_trap,if=runeforge.soulforge_embers&tar_trap.remains<gcd&cooldown.flare.remains<gcd");
                     //cleave->add_action("flare,if=tar_trap.up&runeforge.soulforge_embers");
                     //cleave->add_action("death_chakram,if=focus+cast_regen<focus.max");
-                    if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 + 3 * API.TargetUnitInRangeCount < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Death_Chakram) && API.PlayerFocus + RealFocusRegen * gcd / 100 + 3 * API.TargetUnitInRangeCount < API.PlayerMaxFocus && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Death_Chakram);
                         return;
                     }
 
                     //cleave->add_action("wild_spirits");
-                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Wild_Spirits) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Wild_Spirits);
                         return;
@@ -483,7 +483,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("resonating_arrow");
-                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Resonating_Arrow) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Resonating_Arrow);
                         return;
@@ -495,7 +495,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("flayed_shot");
-                    if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) ||  UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    if (!API.SpellISOnCooldown(Flayed_Shot) && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                     {
                         API.CastSpell(Flayed_Shot);
                         return;
