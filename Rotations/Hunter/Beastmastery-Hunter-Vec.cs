@@ -34,9 +34,7 @@ namespace HyperElk.Core
         private string Bloodshed = "Bloodshed";
         private string Frenzy = "Frenzy";
         private string Beast_Cleave = "Beast Cleave";
-        private string Aspect_of_the_Turtle = "Aspect of the Turtle";
-        private string Blood_Fury = "Blood Fury";
-        private string Bag_of_Tricks = "Bag of Tricks";
+        private string Aspect_of_the_Turtle = "Aspect of the Turtle";      
         private string Revive_Pet = "Revive Pet";
         private string Wild_Spirits = "Wild Spirits";
         private string Resonating_Arrow = "Resonating Arrow";
@@ -557,7 +555,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("cobra_shot,if=focus.time_to_max<gcd*2");
-                    if (API.CanCast(Cobra_Shot) && API.PlayerFocus >= 355 && API.PlayerBuffTimeRemaining(Beast_Cleave) > gcd && API.PlayerLevel >= 14 && InRange && API.PlayerFocus >= 35 && RealFocusTimeToMax < gcd * 2)
+                    if (API.CanCast(Cobra_Shot) && API.PlayerFocus >= 35 && API.PlayerBuffTimeRemaining(Beast_Cleave) > gcd && API.PlayerLevel >= 14 && InRange && API.PlayerFocus >= 35 && RealFocusTimeToMax < gcd * 2)
                     {
                         API.CastSpell(Cobra_Shot);
                         return;
