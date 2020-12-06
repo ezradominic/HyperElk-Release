@@ -165,23 +165,23 @@ namespace HyperElk.Core
             if (API.PlayerIsCasting)
                 return;
             //DEF
-            if (API.PlayerHealthPercent <= AntiMagicShellLifePercent && !API.SpellISOnCooldown(AntiMagicShell))
+            if (API.PlayerHealthPercent <= AntiMagicShellLifePercent && API.CanCast(AntiMagicShell))
             {
                 API.CastSpell(AntiMagicShell);
                 return;
             }
-            if (API.PlayerHealthPercent <= LichborneLifePercent && !API.SpellISOnCooldown(Lichborne))
+            if (API.PlayerHealthPercent <= LichborneLifePercent && API.CanCast(Lichborne))
             {
                 API.CastSpell(Lichborne);
                 return;
             }
-            if (API.PlayerHealthPercent <= IceboundFortitudeLifePercent && !API.SpellISOnCooldown(IceboundFortitude))
+            if (API.PlayerHealthPercent <= IceboundFortitudeLifePercent && API.CanCast(IceboundFortitude))
             {
                 API.CastSpell(IceboundFortitude);
                 return;
             }
             //Interrupt
-            if (isInterrupt && !API.SpellISOnCooldown(MindFreeze) && PlayerLevel >= 27)
+            if (isInterrupt && API.CanCast(MindFreeze) && PlayerLevel >= 27)
             {
                 API.CastSpell(MindFreeze);
                 return;

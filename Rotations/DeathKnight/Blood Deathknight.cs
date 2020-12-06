@@ -45,7 +45,6 @@ namespace HyperElk.Core
         private string RuneTap = "Rune Tap";
         private string RuneTap2 = "Rune Tap2";
         private string RaiseDead = "Raise Dead";
-        private string ConcentratedFlame = "Concentrated Flame";
         private string AntiMagicZone = "Anti-Magic Zone";
         private string Tombstone = "Tombstone";
         private string Consumption = "Consumption";
