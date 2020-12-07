@@ -3,6 +3,7 @@
 // v1.1 covenants + cd managment
 // v1.2 vesper totem fix
 // v1.3 complete new apl
+// v1.4 Racials and Trinkets
 using System.Diagnostics;
 
 
@@ -69,8 +70,12 @@ namespace HyperElk.Core
         bool IsStormkeeper => (UseStormkeeper == "with Cooldowns" && IsCooldowns || UseStormkeeper == "always" || UseStormkeeper == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
 
         bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsInRange;
+        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsInRange;
 
         //CBProperties
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
@@ -93,7 +98,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.3");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.4");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, "D7");
@@ -125,6 +130,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FaeTransfusion, "D1");
             CombatRoutine.AddSpell(ChainHarvest, "D1");
 
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
+
             //Buffs
             CombatRoutine.AddBuff(LavaSurge);
             CombatRoutine.AddBuff(MasteroftheElements);
@@ -146,6 +154,8 @@ namespace HyperElk.Core
 
 
             //Prop
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Ascendance, "Use " + Ascendance, CDUsage, "Use " + Ascendance + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(StormElemental, "Use " + StormElemental, CDUsage, "Use " + StormElemental + " always, with Cooldowns", "Cooldowns", 0);
@@ -242,6 +252,44 @@ namespace HyperElk.Core
         {
             if (IsInRange)
             {
+                //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions +=/ berserking,if= !talent.ascendance.enabled | buff.ascendance.up
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance)))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions +=/ fireblood,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions +=/ ancestral_call,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions +=/ bag_of_tricks,if= !talent.ascendance.enabled | !buff.ascendance.up
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Vulpera" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance)))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                {
+                    API.CastSpell("Trinket2");
+                }
                 //actions+=/fire_elemental
                 if (API.CanCast(FireElemental) && PlayerLevel >= 34 && !TalentStormElemental && IsFireElemental)
                 {

@@ -11,6 +11,7 @@
 // v1.9 back to condemn id
 // v2.0 Bladestorm toggle and execute/condemn mouseover
 // v2.1 update for legendarys
+// v2.2 Racials and Trinkets
 
 namespace HyperElk.Core
 {
@@ -66,9 +67,13 @@ namespace HyperElk.Core
         bool IsSiegebreaker => UseSiegebreaker == "with Cooldowns" && IsCooldowns || UseSiegebreaker == "always";
         bool IsDragonRoar => UseDragonRoar == "with Cooldowns" && IsCooldowns || UseDragonRoar == "always" || UseDragonRoar == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
         bool IsBladestorm => UseBladestorm == "with Cooldowns" && IsCooldowns || UseBladestorm == "always" || UseBladestorm == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
+        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
 
 
         //CBProperties
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private string UseHeroicThrow => heroiclist[CombatRoutine.GetPropertyInt(HeroicThrow)];
         private bool IsLineUp => CombatRoutine.GetPropertyBool("LineUp");
@@ -87,7 +92,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.1");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.2");
             API.WriteLog("Condemn is buggy for Fury currently and was added as id instead of name to fix it");
 
             //Spells
@@ -120,6 +125,8 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
             CombatRoutine.AddMacro(Execute + "MO", "D6");
             CombatRoutine.AddMacro(Condemn + "MO", "D6");
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
 
             //Buffs
             CombatRoutine.AddBuff(Enrage);
@@ -140,6 +147,8 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("Bladestorm");
 
             //Prop
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp(HeroicThrow, "Use Heroic Throw", heroiclist, "Use " + HeroicThrow + " ,when out of melee, only Mousover or both", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
@@ -166,9 +175,14 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (isInterrupt && API.CanCast(Pummel) && PlayerLevel >= 7)
+            if (isInterrupt && API.CanCast(Pummel) && IsMelee && PlayerLevel >= 7)
             {
                 API.CastSpell(Pummel);
+                return;
+            }
+            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
+            {
+                API.CastSpell(RacialSpell1);
                 return;
             }
             if (API.PlayerHealthPercent <= EnragedRegenerationLifePercent && PlayerLevel >= 23 && API.CanCast(EnragedRegeneration))
@@ -209,6 +223,50 @@ namespace HyperElk.Core
             }
             if (IsMelee)
             {
+                //actions+=/blood_fury
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/berserking,if=buff.recklessness.up
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && IsMelee && API.PlayerHasBuff(Recklessness))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/lights_judgment,if=buff.recklessness.down&debuff.siegebreaker.down
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Lightforged" && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(Siegebreaker) && !API.PlayerHasBuff(Recklessness))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/fireblood
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/ancestral_call
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/bag_of_tricks,if=buff.recklessness.down&debuff.siegebreaker.down&buff.enrage.up
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Vulpera" && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(Siegebreaker) && !API.PlayerHasBuff(Recklessness) && API.PlayerHasBuff(Enrage))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                {
+                    API.CastSpell("Trinket2");
+                }
                 if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(ConquerorsBanner);
@@ -229,11 +287,6 @@ namespace HyperElk.Core
                     API.CastSpell(Recklessness);
                     return;
                 }
-                /*if(API.CanCast(RacialSpell1) && IsCooldowns && API.PlayerHasBuff(Recklessness) && API.PlayerRaceName == "Orc")
-                {
-                    API.CastSpell(RacialSpell1);
-                    return;
-                }*/
                 if (API.CanCast(Rampage) && PlayerLevel >= 19 && API.PlayerRage >= 80 && API.SpellCDDuration(Recklessness) < 300)
                 {
                     API.CastSpell(Rampage);
@@ -254,7 +307,7 @@ namespace HyperElk.Core
                     API.CastSpell(Rampage);
                     return;
                 }
-                if (API.CanCast(Bladestorm) && API.PlayerLastSpell == Rampage && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle)
+                if (API.CanCast(Bladestorm) /*&& API.PlayerHasBuff(Enrage)*/ && API.LastSpellCastInGame == Rampage && TalentBladestorm && IsBladestorm && BladestormToggle)
                 {
                     API.CastSpell(Bladestorm);
                     return;

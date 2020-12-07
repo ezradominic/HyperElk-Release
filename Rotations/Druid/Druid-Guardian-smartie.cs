@@ -3,6 +3,7 @@
 // v1.1 frenzied regeneration fix
 // v1.2 covenants added + cd managment
 // v1.3 covenant update :-)
+// v1.4 Racials and Trinkets
 
 namespace HyperElk.Core
 {
@@ -61,8 +62,12 @@ namespace HyperElk.Core
         bool IsBerserk => (UseBerserk == "with Cooldowns" && IsCooldowns || UseBerserk == "always");
         bool IsIncarnation => (UseIncarnation == "with Cooldowns" && IsCooldowns || UseIncarnation == "always");
         bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isMelee;
+        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isMelee;
 
         //CBProperties
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
@@ -81,7 +86,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.3");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.4");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, "D3");
@@ -108,6 +113,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
             CombatRoutine.AddSpell(LoneProtection, "D1");
 
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
+
             //Buffs
             CombatRoutine.AddBuff(GalacticGuardian);
             CombatRoutine.AddBuff(CatForm);
@@ -132,6 +140,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(AdaptiveSwarm);
 
             //Prop
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsage, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Berserk, "Use " + Berserk, CDUsage, "Use " + Berserk + " always, with Cooldowns", "Cooldowns", 0);
@@ -158,6 +168,11 @@ namespace HyperElk.Core
                 if (isInterrupt && API.CanCast(SkullBash) && PlayerLevel >= 26 && isKickRange)
                 {
                     API.CastSpell(SkullBash);
+                    return;
+                }
+                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
+                {
+                    API.CastSpell(RacialSpell1);
                     return;
                 }
                 if (API.PlayerHealthPercent <= BarkskinLifePercent && PlayerLevel >= 24 && API.CanCast(Barkskin))
@@ -228,6 +243,20 @@ namespace HyperElk.Core
             }
             if (API.PlayerHasBuff(BearForm) && PlayerLevel >= 8)
             {
+                //actions.cooldown +=/ berserking,if= buff.tigers_fury.up | buff.bs_inc.up
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && isMelee &&  IncaBerserk)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                {
+                    API.CastSpell("Trinket2");
+                }
                 if (API.CanCast(Incarnation) && TalentIncarnation && isMelee && IsIncarnation)
                 {
                     API.CastSpell(Incarnation);

@@ -9,6 +9,7 @@
 // v1.6 eclipse update
 // v1.65 another eclipse update
 // v1.7 convoke update
+// v1.8 Racials and Trinkets
 
 using System.Diagnostics;
 
@@ -84,9 +85,12 @@ namespace HyperElk.Core
         bool IsWarriorofElune => (UseWarriorofElune == "with Cooldowns" && IsCooldowns || UseWarriorofElune == "always" || UseWarriorofElune == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
         bool IsForceofNature => (UseForceofNature == "with Cooldowns" && IsCooldowns || UseForceofNature == "always" || UseForceofNature == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
         bool IsFuryofElune => (UseFuryofElune == "with Cooldowns" && IsCooldowns || UseFuryofElune == "always" || UseFuryofElune == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
-
+        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isinRange;
+        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isinRange;
 
         //CBProperties
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
@@ -110,7 +114,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.7");
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.8");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -153,6 +157,8 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(Moonfire+"MO", "NumPad7");
             CombatRoutine.AddMacro(Sunfire+"MO", "NumPad8");
             CombatRoutine.AddMacro(StellarFlare+"MO", "NumPad9");
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
 
             //Buffs
             CombatRoutine.AddBuff(EclipseLunar);
@@ -185,6 +191,8 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("Mouseover");
 
             //Prop
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsage, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
@@ -315,6 +323,20 @@ namespace HyperElk.Core
             }
             if (isinRange && (API.PlayerHasBuff(MoonkinForm) || PlayerLevel < 21))
             {
+                //actions+=/berserking,if=(!covenant.night_fae|!cooldown.convoke_the_spirits.up)&buff.ca_inc.up
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && isinRange && (PlayerCovenantSettings != "Night Fae" || API.CanCast(ConvoketheSpirits)) && IncaCelestial)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                {
+                    API.CastSpell("Trinket2");
+                }
                 if (API.CanCast(WarriorofElune) && !API.PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune)
                 {
                     API.CastSpell(WarriorofElune);
