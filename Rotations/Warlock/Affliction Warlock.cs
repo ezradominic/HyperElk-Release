@@ -118,6 +118,8 @@ namespace HyperElk.Core
             API.WriteLog("/cast [@mouseover] Corruption");
             API.WriteLog("/cast [@cursor] Vile Taint");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
+            API.WriteLog("Put a Meele Pet Ability on your Action Bar for the AOE Detection");
+
 
             CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 5);
             CombatRoutine.AddProp(MortalCoil, "Mortal Coil", numbList, "Life percent at which " + MortalCoil + " is used, set to 0 to disable", "Healing", 5);
@@ -269,7 +271,7 @@ namespace HyperElk.Core
         {
 
             //ROTATION AOE
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && IsRange)
+            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
                 if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
                 {
@@ -424,11 +426,8 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
-
-
             //ROTATION SINGLE TARGET
-            if (API.TargetUnitInRangeCount <= AOEUnitNumber && IsRange)
+            if (IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
             {
                 if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
                 {
@@ -533,12 +532,12 @@ namespace HyperElk.Core
                 if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
-                        return;
+                    return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >=11)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
-                        return;
+                    return;
                 }
                 //DecimatingBolt
                 if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always")
@@ -551,14 +550,14 @@ namespace HyperElk.Core
                 if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards <= 4 && NotChanneling)
                 {
                     API.CastSpell(DrainSoul);
-                    return;   
+                    return;
                 }
                 //actions+=/drain_soul,interrupt=1
 
                 if (!DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && NotChanneling)
                 {
-                        API.CastSpell(DrainSoul);
-                        return;
+                    API.CastSpell(DrainSoul);
+                    return;
                 }
                 //actions+=/shadow_bolt
                 //ShadowBolt
