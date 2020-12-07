@@ -307,11 +307,6 @@ namespace HyperElk.Core
                     API.CastSpell(Rampage);
                     return;
                 }
-                if (API.CanCast(Bladestorm) /*&& API.PlayerHasBuff(Enrage)*/ && API.LastSpellCastInGame == Rampage && TalentBladestorm && IsBladestorm && BladestormToggle)
-                {
-                    API.CastSpell(Bladestorm);
-                    return;
-                }
                 if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && (!TalentMassacre && API.TargetHealthPercent < 20 || TalentMassacre && API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Execute);
@@ -334,6 +329,11 @@ namespace HyperElk.Core
                         API.CastSpell(Condemn + "MO");
                         return;
                     }
+                }
+                if (API.CanCast(Bladestorm) && API.PlayerBuffTimeRemaining(Enrage) >= 200 && TalentBladestorm && IsBladestorm && BladestormToggle)
+                {
+                    API.CastSpell(Bladestorm);
+                    return;
                 }
                 if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage) && IsDragonRoar)
                 {
