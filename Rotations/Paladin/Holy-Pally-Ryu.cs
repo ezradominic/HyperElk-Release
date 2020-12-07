@@ -73,12 +73,18 @@ public class HolyPally : CombatRoutine
         //CBProperties
         int[] numbList = new int[] { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
-        private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40",};
+        private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
 
 
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent);
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent);
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
+
+        private bool LoDAoE => UnitBelowHealthPercent(LoDLifePercent) >= 3;
+        private bool BoVAoE => UnitBelowHealthPercent(BoVLifePercent) >= 3;
+        private bool HPAoE => UnitBelowHealthPercent(HPLifePercent) >= 3;
+        private bool DTAoE => UnitBelowHealthPercent(DTLifePercent) >= 3;
+
         private bool LodParty(int i)
         {
 
@@ -86,13 +92,13 @@ public class HolyPally : CombatRoutine
         }
 
         private bool LoDParty1 => LodParty(1);
-        private bool LodRaid(int i)
+        private bool LoDRaid(int i)
         {
 
             return API.UnitHealthPercent(units[i]) <= LoDLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= LoDLifePercent) >= 3;
         }
 
-        private bool LoDRaid1 => LodRaid(1);
+        private bool LoDRaid1 => LoDRaid(1);
         private bool BoVParty(int i)
         {
 
@@ -131,7 +137,7 @@ public class HolyPally : CombatRoutine
         private bool DTRaid(int i)
         {
 
-            return API.UnitHealthPercent(units[i]) <= HPLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= HPLifePercent) >= 3;
+            return API.UnitHealthPercent(units[i]) <= DTLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= DTLifePercent) >= 3;
 
         }
         private bool DTRaid1 => DTRaid(1);
@@ -168,6 +174,7 @@ public class HolyPally : CombatRoutine
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool DTHealing => CombatRoutine.GetPropertyBool(DivineTollHealing);
+        private bool IsOOC => CombatRoutine.GetPropertyBool("OOC");
 
 
         //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
@@ -177,7 +184,7 @@ public class HolyPally : CombatRoutine
         {
             CombatRoutine.Name = "Holy Pally by Ryu";
             API.WriteLog("Welcome to Holy Pally by Ryu");
-            API.WriteLog("Be advised this a Beta Rotation");
+            API.WriteLog("Be advised this a Beta Rotation: Out of Combat Healing is turned on by default. Please use your Pause key when not in a party.");
             API.WriteLog("All Talents expect PVP Talents and Row 3 talents are supported. All Cooldowns are associated with Cooldown toggle.");
             API.WriteLog("Will add settings for CDs soon, however all CDs will be used when CD on one. If you wish to contorl when to use them, please use the toggle off fuction and use /break marco to cast them when needed");
             API.WriteLog("If you use Lights Hammer Macro, you need to use an /addonname break to stop the rotation to be able to cast it.");
@@ -216,52 +223,53 @@ public class HolyPally : CombatRoutine
             CombatRoutine.AddSpell(AvengingCrusader, "F2");
             CombatRoutine.AddSpell(HolyPrism, "None");
             CombatRoutine.AddSpell(WoG, "None");
-            CombatRoutine.AddSpell(Player);
-            CombatRoutine.AddSpell(Party1);
-            CombatRoutine.AddSpell(Party2);
-            CombatRoutine.AddSpell(Party3);
-            CombatRoutine.AddSpell(Party4);
+           // CombatRoutine.AddSpell(Player);
+           // CombatRoutine.AddSpell(Party1);
+           // CombatRoutine.AddSpell(Party2);
+           // CombatRoutine.AddSpell(Party3);
+           // CombatRoutine.AddSpell(Party4);
             CombatRoutine.AddSpell(Fleshcraft);
             CombatRoutine.AddSpell(DivineToll);
             CombatRoutine.AddSpell(VanqusihersHammer);
             CombatRoutine.AddSpell(AshenHallow);
 
             //Mouseover
-            CombatRoutine.AddSpell(HolyLight + "MO", "None");
-            CombatRoutine.AddSpell(FoL + "MO", "None");
-            CombatRoutine.AddSpell(HolyShock + "MO", "None");
-            CombatRoutine.AddSpell(BoS + "MO", "None");
-            CombatRoutine.AddSpell(LoH + "MO", "None");
-            CombatRoutine.AddSpell(BoV + "MO", "None");
-            CombatRoutine.AddSpell(HolyPrism + "MO", "None");
-            CombatRoutine.AddSpell(LoD + "MO", "R");
-            CombatRoutine.AddSpell(CrusaderStrike + "MO", "D6");
-            CombatRoutine.AddSpell(Judgement + "MO", "D5");
-            CombatRoutine.AddSpell(HammerofWrath + "MO");
+            CombatRoutine.AddMacro(HolyLight + "MO", "None");
+            CombatRoutine.AddMacro(FoL + "MO", "None");
+            CombatRoutine.AddMacro(HolyShock + "MO", "None");
+            CombatRoutine.AddMacro(BoS + "MO", "None");
+            CombatRoutine.AddMacro(LoH + "MO", "None");
+            CombatRoutine.AddMacro(BoV + "MO", "None");
+            CombatRoutine.AddMacro(HolyPrism + "MO", "None");
+            CombatRoutine.AddMacro(LoD + "MO", "R");
+            CombatRoutine.AddMacro(CrusaderStrike + "MO", "D6");
+            CombatRoutine.AddMacro(Judgement + "MO", "D5");
+            CombatRoutine.AddMacro(HammerofWrath + "MO");
             CombatRoutine.AddToggle("Mouseover");
 
 
             //Prop
-            CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(DivineProtection, DivineProtection + " Life Percent", numbList, "Life percent at which" + DivineProtection + "is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
-            CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
+            CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(DivineProtection, DivineProtection + " Life Percent", numbList, "Life percent at which" + DivineProtection + "is used, set to 0 to disable", "Defense", 50);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 0);
+            CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 0);
 
-            CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 17);
-            CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 10);
-            CombatRoutine.AddProp(HolyLight, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "is used, set to 0 to disable", "Healing", 11);
-            CombatRoutine.AddProp(HoLI, HoLI + " Life Percent", numbList, "Life percent at which" + HoLI + "is used, set to 0 to disable", "Healing", 12);
-            CombatRoutine.AddProp(FoL, FoL + " Life Percent", numbList, "Life percent at which" + FoL + "is used, set to 0 to disable", "Healing", 13);
-            CombatRoutine.AddProp(FoLI, FoLI + " Life Percent", numbList, "Life percent at which" + FoLI + "is used, set to 0 to disable", "Healing", 14);
-            CombatRoutine.AddProp(WoG, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used, set to 0 to disable", "Healing", 15);
-            CombatRoutine.AddProp(BoS, BoS + " Life Percent", numbList, "Life percent at which" + BoS + "is used, set to 0 to disable", "Healing", 16);
-            CombatRoutine.AddProp(LoH, LoH + " Life Percent", numbList, "Life percent at which" + LoH + "is used, set to 0 to disable", "Healing", 17);
-            CombatRoutine.AddProp(BF, BF + " Life Percent", numbList, "Life percent at which" + BF + "is used, set to 0 to disable", "Healing", 18);
-            CombatRoutine.AddProp(LoD, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when three members are at life percent, set to 0 to disable", "Healing", 19);
-            CombatRoutine.AddProp(BoV, BoV + " Life Percent", numbList, "Life percent at which" + BoV + "is used when three members are at life percent, set to 0 to disable", "Healing", 20);
-            CombatRoutine.AddProp(HolyPrism, HolyPrism + " Life Percent", numbList, "Life percent at which" + HolyPrism + "is used when three members are at life percent, set to 0 to disable", "Healing", 21);
-            CombatRoutine.AddProp(DivineToll, DivineToll + " Life Percent", numbList, "Life percent at which" + DivineToll + "is used when three members are at life percent, set to 0 to disable", "Healing", 21);
-            CombatRoutine.AddProp(DivineTollHealing, DivineToll, true, "If Divine Tool should be on Healing, if for dps, change to false, set to true by default for healing", "Healing");
+            CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
+            CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
+            CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 95);
+            CombatRoutine.AddProp(HolyLight, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "is used, set to 0 to disable", "Healing", 85);
+            CombatRoutine.AddProp(HoLI, HoLI + " Life Percent", numbList, "Life percent at which" + HoLI + "is used, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(FoL, FoL + " Life Percent", numbList, "Life percent at which" + FoL + "is used, set to 0 to disable", "Healing", 75);
+            CombatRoutine.AddProp(FoLI, FoLI + " Life Percent", numbList, "Life percent at which" + FoLI + "is used, set to 0 to disable", "Healing", 90);
+            CombatRoutine.AddProp(WoG, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(BoS, BoS + " Life Percent", numbList, "Life percent at which" + BoS + "is used, set to 0 to disable", "Healing", 20);
+            CombatRoutine.AddProp(LoH, LoH + " Life Percent", numbList, "Life percent at which" + LoH + "is used, set to 0 to disable", "Healing", 10);
+            CombatRoutine.AddProp(BF, BF + " Life Percent", numbList, "Life percent at which" + BF + "is used, set to 0 to disable", "Healing", 95);
+            CombatRoutine.AddProp(LoD, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(BoV, BoV + " Life Percent", numbList, "Life percent at which" + BoV + "is used when three members are at life percent, set to 0 to disable", "Healing", 75);
+            CombatRoutine.AddProp(HolyPrism, HolyPrism + " Life Percent", numbList, "Life percent at which" + HolyPrism + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(DivineToll, DivineToll + " Life Percent", numbList, "Life percent at which" + DivineToll + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(DivineTollHealing, DivineToll, true, "If Divine Toll should be on Healing, if for dps, change to false, set to true by default for healing", "Healing");
 
             //                 if (PlayerSwap && API.TargetHealthPercent <= PartySwapPercent)
             //{
@@ -292,7 +300,7 @@ public class HolyPally : CombatRoutine
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && API.PlayerIsInCombat)
+            if (!API.PlayerIsMounted && (IsOOC || API.PlayerIsInCombat))
             {
                 if (API.CanCast(AvengingWrath) && !API.PlayerHasBuff(AvengingWrath) && InRange && IsCooldowns)
                 {
@@ -324,22 +332,22 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(DivineProtection);
                     return;
                 }
-                if (API.CanCast(DivineToll) && DTHealing && (DTRaid1 || DTParty1) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget)
+                if (API.CanCast(DivineToll) && DTHealing && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(DivineToll);
                     return;
                 }
-                if (API.CanCast(BoV) && BeaconofVirtue && InRange && (BoVParty1 || BoVRaid1 && API.PlayerIsInRaid) && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                if (API.CanCast(BoV) && BeaconofVirtue && InRange && BoVAoE && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(BoV);
                     return;
                 }
-                if (API.CanCast(HolyPrism) && HolyPrismT && InRange && (HPParty1 || HPRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                if (API.CanCast(HolyPrism) && HolyPrismT && InRange && HPAoE && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(HolyPrism);
                     return;
                 }
-                if (API.CanCast(LoD) && API.PlayerCurrentHolyPower >= 3 && InRange && (LoDParty1 || LoDRaid1 && API.PlayerIsInRaid) && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                if (API.CanCast(LoD) && API.PlayerCurrentHolyPower >= 3 && InRange && LoDAoE && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(LoD);
                     return;
@@ -390,17 +398,17 @@ public class HolyPally : CombatRoutine
                     return;
                 }
                 /// Mouseover
-                if (API.CanCast(BoV) && BeaconofVirtue && InRange && IsMouseover && (BoVParty1 || BoVRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                if (API.CanCast(BoV) && BeaconofVirtue && InRange && IsMouseover && BoVAoE && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(BoV + "MO");
                     return;
                 }
-                if (API.CanCast(HolyPrism) && HolyPrismT && InRange && IsMouseover && (HPParty1 || HPRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                if (API.CanCast(HolyPrism) && HolyPrismT && InRange && IsMouseover && HPAoE && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(HolyPrism + "MO");
                     return;
                 }
-                if (API.CanCast(LoD) && InRange && IsMouseover && (LoDParty1 || LoDRaid1 && API.PlayerIsInRaid) && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
+                if (API.CanCast(LoD) && InRange && IsMouseover && LoDAoE && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(LoD + "MO");
                     return;

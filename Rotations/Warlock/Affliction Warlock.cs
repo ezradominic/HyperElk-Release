@@ -89,7 +89,7 @@ namespace HyperElk.Core
 
 
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
-        string[] MisdirectionList = new string[] { "Imp", "Voidwalker", "Succubus", "Felhunter", };
+        string[] MisdirectionList = new string[] { "None", "Imp", "Voidwalker", "Succubus", "Felhunter", };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private bool UseUA => (bool)CombatRoutine.GetProperty("UseUA");
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
@@ -152,7 +152,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Haunt, "D8");
             CombatRoutine.AddSpell(DarkSoulMisery, "D8");
             CombatRoutine.AddSpell(MortalCoil, "D9");
-
+            CombatRoutine.AddSpell(VileTaint, "D8");
             CombatRoutine.AddSpell(ScouringTithe, "F1");
             CombatRoutine.AddSpell(SoulRot, "F1");
             CombatRoutine.AddSpell(ImpendingCatastrophe, "F1");
@@ -161,7 +161,6 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
-            CombatRoutine.AddMacro(VileTaint + "MO", "D8");
             CombatRoutine.AddMacro(Agony + "MO", "F1");
             CombatRoutine.AddMacro(Corruption + "MO", "F2");
             CombatRoutine.AddMacro(SiphonLife + "MO", "F3");
@@ -272,7 +271,7 @@ namespace HyperElk.Core
             //ROTATION AOE
             if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && IsRange)
             {
-                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
+                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -325,7 +324,7 @@ namespace HyperElk.Core
                 //VileTaint
                 if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
                 {
-                    API.CastSpell(VileTaint + "MO");
+                    API.CastSpell(VileTaint);
                     return;
                 }
                 //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
@@ -353,9 +352,9 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/siphon_life,cycle_targets=1,if=active_dot.siphon_life<=3,target_if=!dot.siphon_life.ticking
-                if (API.CanCast(SiphonLife) && !API.TargetHasDebuff(SiphonLife) && TalentSiphonLife)
+                if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                 {
-                    API.CanCast(SiphonLife);
+                    API.CastSpell(SiphonLife);
                     return;
                 }
                 //ImpendingCatastrophe
@@ -419,7 +418,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/shadow_bolt
                 //ShadowBolt
-                if (API.CanCast(ShadowBolt) && !TalentDrainSoul && PlayerLevel >= 1)
+                if (API.CanCast(ShadowBolt) && NotCasting && !TalentDrainSoul && PlayerLevel >= 1)
                 {
                     API.CastSpell(ShadowBolt);
                     return;
@@ -431,7 +430,7 @@ namespace HyperElk.Core
             //ROTATION SINGLE TARGET
             if (API.TargetUnitInRangeCount <= AOEUnitNumber && IsRange)
             {
-                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
+                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -460,7 +459,7 @@ namespace HyperElk.Core
                 //VileTaint
                 if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
                 {
-                    API.CastSpell(VileTaint + "MO");
+                    API.CastSpell(VileTaint);
                     return;
                 }
 
@@ -500,9 +499,9 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/siphon_life,if=dot.siphon_life.remains<4
-                if (API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400)
+                if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                 {
-                    API.CanCast(SiphonLife);
+                    API.CastSpell(SiphonLife);
                     return;
                 }
                 //SoulRot
