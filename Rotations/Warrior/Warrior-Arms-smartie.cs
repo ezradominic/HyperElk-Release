@@ -7,6 +7,7 @@
 // v1.5 Bladestorm toggle added
 // v1.6 colossus smash toogle and legendary prep
 // v1.7 Racials and Trinkets
+// v1.8 sweeping strikes fix
 
 namespace HyperElk.Core
 {
@@ -103,7 +104,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v1.7");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v1.8");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -387,7 +388,7 @@ namespace HyperElk.Core
                         API.CastSpell(Ravager);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !API.PlayerHasBuff(DeadlyCalm) && !TalentRavager && API.PlayerRage < 80 && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && !TalentRavager && API.PlayerRage < 80 && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
@@ -415,7 +416,7 @@ namespace HyperElk.Core
                         API.CastSpell(Warbreaker);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
@@ -470,7 +471,7 @@ namespace HyperElk.Core
                         API.CastSpell(MortalStrike);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings == "Venthyr" && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings == "Venthyr" && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
@@ -518,7 +519,7 @@ namespace HyperElk.Core
                         API.CastSpell(Warbreaker);
                         return;
                     }
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
