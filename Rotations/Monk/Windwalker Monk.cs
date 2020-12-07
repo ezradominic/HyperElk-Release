@@ -46,8 +46,6 @@ namespace HyperElk.Core
 
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
         string[] InvokeXuenList = new string[] { "always", "with Cooldowns" };
-        private string Covenant => CovenantList[CombatRoutine.GetPropertyInt("Covenant")];
-        string[] CovenantList = new string[] { "None", "Venthyr", "Night Fae", "Kyrian", "Necrolord" };
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
@@ -168,28 +166,28 @@ namespace HyperElk.Core
             //COOLDOWNS
             //Covenant Kyrian
             //WeaponsofOrder
-            if (API.CanCast(WeaponsofOrder) && IsCooldowns && Covenant == "Kyrian" && UseWeaponsofOrder == "with Cooldowns")
+            if (API.CanCast(WeaponsofOrder) && IsCooldowns && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "with Cooldowns")
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
             }
             //Covenant Necrolord
             //BonedustBrew
-            if (API.CanCast(BonedustBrew) && IsCooldowns && Covenant == "Necrolord" && UseBonedustBrew == "with Cooldowns")
+            if (API.CanCast(BonedustBrew) && IsCooldowns && PlayerCovenantSettings == "Necrolord" && UseBonedustBrew == "with Cooldowns")
             {
                 API.CastSpell(BonedustBrew);
                 return;
             }
             //Covenant Night Fae
             //FaelineStomp
-            if (API.CanCast(FaelineStomp) && IsCooldowns && Covenant == "Night Fae" && UseFaelineStomp == "with Cooldowns")
+            if (API.CanCast(FaelineStomp) && IsCooldowns && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "with Cooldowns")
             {
                 API.CastSpell(FaelineStomp);
                 return;
             }
             //Covenant Venthyr
             //Fallen Order
-            if (API.CanCast(FallenOrder) && IsCooldowns && Covenant == "Venthyr" && UseFallenOrder == "with Cooldowns")
+            if (API.CanCast(FallenOrder) && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "with Cooldowns")
             {
                 API.CastSpell(FallenOrder);
                 return;
@@ -236,28 +234,28 @@ namespace HyperElk.Core
             {
                 //Covenant Kyrian
                 //WeaponsofOrder
-                if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && (UseWeaponsofOrder == "AOE" || UseWeaponsofOrder == "always"))
+                if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && (UseWeaponsofOrder == "AOE" || UseWeaponsofOrder == "always"))
                 {
                     API.CastSpell(WeaponsofOrder);
                     return;
                 }
                 //Covenant Necrolord
                 //BonedustBrew
-                if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && (UseBonedustBrew == "AOE" || UseBonedustBrew == "always"))
+                if (API.CanCast(BonedustBrew) && PlayerCovenantSettings == "Necrolord" && (UseBonedustBrew == "AOE" || UseBonedustBrew == "always"))
                 {
                     API.CastSpell(BonedustBrew);
                     return;
                 }
                 //Covenant Night Fae
                 //FaelineStomp
-                if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
+                if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
                 {
                     API.CastSpell(FaelineStomp);
                     return;
                 }
                 //Covenant Venthyr
                 //Fallen Order
-                if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
+                if (API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
                 {
                     API.CastSpell(FallenOrder);
                     return;
@@ -381,28 +379,28 @@ namespace HyperElk.Core
             //ROTATION
             //Covenant Kyrian
             //WeaponsofOrder
-            if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
+            if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "always")
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
             }
             //Covenant Necrolord
             //BonedustBrew
-            if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "always")
+            if (API.CanCast(BonedustBrew) && PlayerCovenantSettings == "Necrolord" && UseBonedustBrew == "always")
             {
                 API.CastSpell(BonedustBrew);
                 return;
             }
             //Covenant Night Fae
             //FaelineStomp
-            if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
+            if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "always")
             {
                 API.CastSpell(FaelineStomp);
                 return;
             }
             //Covenant Venthyr
             //Fallen Order
-            if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && UseFaelineStomp == "always")
+            if (API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && UseFaelineStomp == "always")
             {
                 API.CastSpell(FallenOrder);
                 return;
@@ -503,28 +501,28 @@ namespace HyperElk.Core
                 {
                     //Covenant Kyrian
                     //WeaponsofOrder
-                    if (API.CanCast(WeaponsofOrder) && Covenant == "Kyrian" && UseWeaponsofOrder == "always")
+                    if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "always")
                     {
                         API.CastSpell(WeaponsofOrder);
                         return;
                     }
                     //Covenant Necrolord
                     //BonedustBrew
-                    if (API.CanCast(BonedustBrew) && Covenant == "Necrolord" && UseBonedustBrew == "always")
+                    if (API.CanCast(BonedustBrew) && PlayerCovenantSettings == "Necrolord" && UseBonedustBrew == "always")
                     {
                         API.CastSpell(BonedustBrew);
                         return;
                     }
                     //Covenant Night Fae
                     //FaelineStomp
-                    if (API.CanCast(FaelineStomp) && Covenant == "Night Fae" && UseFaelineStomp == "always")
+                    if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "always")
                     {
                         API.CastSpell(FaelineStomp);
                         return;
                     }
                     //Covenant Venthyr
                     //Fallen Order
-                    if (API.CanCast(FallenOrder) && Covenant == "Venthyr" && UseFaelineStomp == "always")
+                    if (API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && UseFaelineStomp == "always")
                     {
                         API.CastSpell(FallenOrder);
                         return;
