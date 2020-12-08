@@ -23,6 +23,7 @@ namespace HyperElk.Core
         bool BlastWave => API.PlayerIsTalentSelected(2, 3);
         bool RuneOfPower => API.PlayerIsTalentSelected(3, 3);
         bool AlexstraszaFury => API.PlayerIsTalentSelected(4, 2);
+        bool FlamePatchTalent => API.PlayerIsTalentSelected(6, 1);
         bool LivingBomb => API.PlayerIsTalentSelected(6, 3);
         bool Pyroclasm => API.PlayerIsTalentSelected(7, 2);
         bool Meteor => API.PlayerIsTalentSelected(7, 3);
@@ -196,7 +197,7 @@ namespace HyperElk.Core
                 API.CastSpell("Combustion");
                 return;
             }
-            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Combustion") && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Hot Streak!") && API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") > 0 && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion)
+            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Combustion") && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") > 0 && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion)
             {
                 API.CastSpell(ShiftingPower);
                 return;
@@ -206,7 +207,13 @@ namespace HyperElk.Core
                 API.CastSpell("Living Bomb");
                 return;
             }
-            if (API.CanCast("Flamestrike") && InRange && API.PlayerHasBuff("Hot Streak!") && API.TargetUnitInRangeCount >= 3 && Level >= 17  && IsAOE && !ChannelingShift)
+            if (API.CanCast("Flamestrike") && InRange && API.PlayerHasBuff("Hot Streak!") && (FlamePatchTalent && API.TargetUnitInRangeCount >= 2 || API.TargetUnitInRangeCount >= 3) && Level >= 17  && IsAOE && !ChannelingShift)
+            {
+                API.CastSpell("Flamestrike");
+                API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
+                return;
+            }
+            if (API.CanCast("Flamestrike") && InRange && API.PlayerHasBuff("Hot Streak!") && API.PlayerHasBuff("Combustion") && (FlamePatchTalent && API.TargetUnitInRangeCount >= 3 || API.TargetUnitInRangeCount >= 6) && Level >= 17 && IsAOE && !ChannelingShift)
             {
                 API.CastSpell("Flamestrike");
                 API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
@@ -222,7 +229,7 @@ namespace HyperElk.Core
                 API.CastSpell("Fire Blast");
                 return;
             }
-            if (RuneOfPower && API.CanCast("Rune of Power") && API.TargetRange <= 40 && !CastCombustion && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && !ChannelingShift)
+            if (RuneOfPower && API.CanCast("Rune of Power") && API.TargetRange <= 40 && !CastCombustion && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && API.SpellCDDuration("Combustion") > 1200 && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && !ChannelingShift)
             {
                 API.CastSpell("Rune of Power");
                 return;
