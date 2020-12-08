@@ -6,6 +6,8 @@ using System.Diagnostics;
 
 
 
+
+
 namespace HyperElk.Core
 {
     public class AfflictionWarlock : CombatRoutine
@@ -64,6 +66,7 @@ namespace HyperElk.Core
         private int ShoulShardNumberDrainSoul => CombatRoutine.GetPropertyInt("SoulShardNumberDrainSoul");
         private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
         private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
+
 
 
         //CBProperties      
@@ -198,6 +201,7 @@ namespace HyperElk.Core
 
 
         }
+
 
         public override void Pulse()
         {
@@ -427,7 +431,7 @@ namespace HyperElk.Core
                 }
             }
             //ROTATION SINGLE TARGET
-            if (IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
+            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
             {
                 if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
                 {

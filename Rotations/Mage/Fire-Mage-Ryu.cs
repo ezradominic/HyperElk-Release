@@ -43,7 +43,7 @@ namespace HyperElk.Core
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
-        bool CastShifting => API.PlayerLastSpell == ShiftingPower;
+        bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         bool CastCombustion => API.PlayerLastSpell == "Combustion";
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
 
@@ -129,38 +129,38 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && NotCasting && NotChanneling)
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && NotCasting )
             {
                 API.CastSpell("Counterspell");
                 return;
             }
-            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22 && NotCasting && NotChanneling && !CastShifting)
+            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22 && NotCasting  && !ChannelingShift)
             {
                 API.CastSpell("Ice Block");
                 return;
             }
-            if (API.CanCast("Mirror Image") && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent != 0 && Level >= 44 && NotCasting && NotChanneling && !CastShifting)
+            if (API.CanCast("Mirror Image") && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent != 0 && Level >= 44 && NotCasting  && !ChannelingShift)
             {
                 API.CastSpell("Mirror Image");
                 return;
             }
-            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotCasting && NotChanneling && !CastShifting)
+            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotCasting  && !ChannelingShift)
             {
                 API.CastSpell(Fleshcraft);
                 return;
             }
-            if (API.CanCast("Blazing Barrier") && Level >= 21 && !API.PlayerHasBuff("Blazing Barrier") && API.PlayerHealthPercent <= BBPercentProc && API.PlayerHealthPercent != 0 && NotCasting && NotChanneling && !CastShifting)
+            if (API.CanCast("Blazing Barrier") && Level >= 21 && !API.PlayerHasBuff("Blazing Barrier") && API.PlayerHealthPercent <= BBPercentProc && API.PlayerHealthPercent != 0 && NotCasting  && !ChannelingShift)
             {
                 API.CastSpell("Blazing Barrier");
                 return;
             }
-            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !CastShifting)
+            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift)
                 API.CastSpell(trinket1);
-            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !CastShifting)
+            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift)
                 API.CastSpell(trinket1);
-            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !CastShifting)
+            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift)
                 API.CastSpell(trinket2);
-            if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !CastShifting)
+            if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift)
                 API.CastSpell(trinket2);
             if (Level <= 60)
             {
@@ -176,119 +176,113 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && NotCasting)
+            if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE)  && !ChannelingShift)
             {
                 API.CastSpell(RadiantSpark);
                 return;
             }
-            if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && NotCasting)
+            if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE)  && !ChannelingShift)
             {
                 API.CastSpell(MirrorsofTorment);
                 return;
             }
-            if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && NotCasting)
+            if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE)  && !ChannelingShift)
             {
                 API.CastSpell(Deathborne);
                 return;
             }
-            if (API.CanCast("Combustion") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29 && NotChanneling && !CastShifting)
+            if (API.CanCast("Combustion") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29  && !ChannelingShift)
             {
                 API.CastSpell("Combustion");
                 return;
             }
-            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Combustion") && !API.PlayerHasBuff("Combustion") && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && NotCasting)
+            if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Combustion") && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Hot Streak!") && API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") > 0 && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion)
             {
                 API.CastSpell(ShiftingPower);
                 return;
             }
-            if (RuneOfPower && API.CanCast("Rune of Power") && API.TargetRange <= 40 && !CastCombustion && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && NotCasting && NotChanneling && !CastShifting)
-            {
-                API.CastSpell("Rune of Power");
-                return;
-            }
-            if (API.CanCast("Living Bomb") && LivingBomb && API.TargetUnitInRangeCount >= 2 && InRange && NotChanneling && NotCasting && !CastShifting)
+            if (API.CanCast("Living Bomb") && LivingBomb && API.TargetUnitInRangeCount >= 2 && InRange  && !ChannelingShift)
             {
                 API.CastSpell("Living Bomb");
                 return;
             }
-            if (API.CanCast("Flamestrike") && InRange && API.PlayerHasBuff("Hot Streak!") && API.TargetUnitInRangeCount >= 3 && Level >= 17 && NotChanneling && IsAOE && NotCasting && !CastShifting)
+            if (API.CanCast("Flamestrike") && InRange && API.PlayerHasBuff("Hot Streak!") && API.TargetUnitInRangeCount >= 3 && Level >= 17  && IsAOE && !ChannelingShift)
             {
                 API.CastSpell("Flamestrike");
                 API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
                 return;
             }
-            if (API.CanCast("Pyroblast") && API.PlayerHasBuff("Hot Streak!") && InRange && Level >= 12 && NotChanneling && NotCasting && !CastShifting)
+            if (API.CanCast("Pyroblast") && API.PlayerHasBuff("Hot Streak!") && InRange && Level >= 12  && !ChannelingShift)
             {
                 API.CastSpell("Pyroblast");
                 return;
             }
-            if (API.CanCast("Fire Blast") && API.SpellCharges("Fire Blast") > 0 && API.PlayerHasBuff("Combustion") && API.PlayerHasBuff("Heating Up") && InRange && Level >= 33 && NotChanneling && NotCasting && !CastShifting)
+            if (API.CanCast("Fire Blast") && API.SpellCharges("Fire Blast") > 0 && API.PlayerHasBuff("Combustion") && API.PlayerHasBuff("Heating Up") && InRange && Level >= 33  && !ChannelingShift)
             {
                 API.CastSpell("Fire Blast");
                 return;
             }
-            if (Meteor && API.CanCast("Meteor") && InRange && NotChanneling && NotCasting && !CastShifting)
+            if (RuneOfPower && API.CanCast("Rune of Power") && API.TargetRange <= 40 && !CastCombustion && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && !ChannelingShift)
+            {
+                API.CastSpell("Rune of Power");
+                return;
+            }
+            if (Meteor && API.CanCast("Meteor") && InRange  && !ChannelingShift)
             {
                 API.CastSpell("Meteor");
                 return;
             }
-            if (API.CanCast("Fire Blast") && API.SpellCharges("Fire Blast") > 0 && API.PlayerHasBuff("Heating Up") && InRange && Level >= 33 && NotChanneling && NotCasting && !CastShifting)
+            if (API.CanCast("Fire Blast") && API.SpellCharges("Fire Blast") > 0 && API.PlayerHasBuff("Heating Up") && InRange && Level >= 33  && !ChannelingShift)
             {
                 API.CastSpell("Fire Blast");
                 return;
             }
-            if (API.CanCast("Dragon's Breath") && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 10 && Level >= 27 && NotChanneling && IsAOE && NotCasting && !CastShifting)
-            {
-                API.CastSpell("Dragon's Breath");
-                API.WriteLog("Dragon's Breath Targets :" + API.TargetUnitInRangeCount);
-                return;
-            }
-            if (BlastWave && API.CanCast("Blast Wave") && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && NotChanneling && IsAOE && NotCasting && !CastShifting)
+            if (BlastWave && API.CanCast("Blast Wave") && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8  && IsAOE && !ChannelingShift)
             {
                 API.CastSpell("Blast Wave");
                 API.WriteLog("Blast Wave Targets :" + API.TargetUnitInRangeCount);
                 return;
             }
-            if (API.CanCast("Pyroblast") && InRange && Pyroclasm && API.PlayerHasBuff("Pyroclasm") && !API.PlayerIsMoving && !API.PlayerHasBuff("Combustion") && Level >= 12 && NotChanneling && NotCasting && !CastShifting)
+            if (API.CanCast("Pyroblast") && InRange && Pyroclasm && API.PlayerHasBuff("Pyroclasm") && !API.PlayerIsMoving && !API.PlayerHasBuff("Combustion") && Level >= 12  && !ChannelingShift)
             {
                 API.CastSpell("Pyroblast");
                 return;
             }
-            if (API.CanCast("Phoenix Flames") && InRange && API.SpellCharges("Phoenix Flames") >= 1 && API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") == 0 && Level >= 19 && NotChanneling && NotCasting && !CastShifting)
+            if (API.CanCast("Phoenix Flames") && InRange && API.SpellCharges("Phoenix Flames") >= 1 && API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") == 0 && Level >= 19  && !ChannelingShift)
             {
                 API.CastSpell("Phoenix Flames");
                 return;
             }
-            if (API.CanCast("Phoenix Flames") && InRange && !API.PlayerHasBuff("Heating Up") && API.SpellCharges("Phoenix Flames") > 0 && Level >= 19 && NotChanneling && NotCasting && !CastShifting)
+            if (API.CanCast("Phoenix Flames") && InRange && !API.PlayerHasBuff("Heating Up") && API.SpellCharges("Phoenix Flames") > 0 && Level >= 19  && !ChannelingShift)
             {
                 API.CastSpell("Phoenix Flames");
                 return;
             }
-            if (API.CanCast("Scorch") && !API.PlayerHasBuff("Heating Up") && API.PlayerHasBuff("Combustion") && InRange && Level >= 13 && NotCasting && NotChanneling && !CastShifting)
+            if (API.CanCast("Scorch") && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0) && API.PlayerHasBuff("Combustion") && InRange && Level >= 13  && !ChannelingShift)
             {
                 API.CastSpell("Scorch");
                 API.WriteLog("Scorch While Combustion is up");
                 return;
             }
-            if (API.CanCast("Scorch") && SearingTouch && API.TargetHealthPercent <= 30 && !API.PlayerHasBuff("Heating Up") && InRange && Level >= 13 && NotCasting && NotChanneling)
-            {
-                API.CastSpell("Scorch");
-                API.WriteLog("Scorch under 30%");
-                return;
-            }
-            if (API.PlayerIsMoving && API.CanCast("Scorch") && InRange && Level >= 19 && NotCasting && NotChanneling)
+            if (API.PlayerIsMoving && API.CanCast("Scorch") && InRange && Level >= 19  && !ChannelingShift)
             {
                 API.CastSpell("Scorch");
                 API.WriteLog("Scorch while moving");
                 return;
             }
-            if (API.CanCast("Scorch") && NotCasting && NotChanneling && SearingTouch && InRange && API.TargetHealthPercent <= 30 && (API.PlayerHasBuff("Heating Up") || API.SpellCharges("Fire Blast") == 0) && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Pyroclasm") && Level >= 19 && !CastShifting)
+            if (API.CanCast("Scorch") && SearingTouch && API.TargetHealthPercent <= 30 && !API.PlayerHasBuff("Heating Up") && InRange && Level >= 13  && !ChannelingShift)
+            {
+                API.CastSpell("Scorch");
+                API.WriteLog("Scorch under 30%");
+                return;
+            }
+            if (API.CanCast("Scorch")  && SearingTouch && InRange && API.TargetHealthPercent <= 30 && (API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 || API.PlayerHasBuff("Heating Up")) && (!API.PlayerHasBuff("Combustion") || API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Pyroclasm") && Level >= 19 && !ChannelingShift)
             {
                 API.CastSpell("Scorch");
                 API.WriteLog("Scorch when no Fire Blast Charges");
                 return;
             }
-            if (API.CanCast("Fireball") && NotCasting && NotChanneling && !API.PlayerIsMoving && InRange && (API.TargetHealthPercent > 30.0 && SearingTouch || !SearingTouch) && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff("Combustion") && Level >= 10)
+            if (API.CanCast("Fireball") && !API.PlayerIsMoving && InRange && (API.TargetHealthPercent > 30.0 && SearingTouch || !SearingTouch) && (API.SpellCharges("Phoenix Flames") == 0 && API.SpellCharges("Fire Blast") == 0 || !API.PlayerHasBuff("Heating Up")) && !API.PlayerHasBuff("Combustion")  && Level >= 10 && !ChannelingShift)
             {
                 API.CastSpell("Fireball");
                 return;
