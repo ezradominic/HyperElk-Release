@@ -66,7 +66,6 @@ namespace HyperElk.Core
         private int ShoulShardNumberDrainSoul => CombatRoutine.GetPropertyInt("SoulShardNumberDrainSoul");
         private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
         private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
-        private static System.Timers.Timer timer;
 
 
 
@@ -206,7 +205,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("InRange" + API.TargetUnitInRangeCount);
 
         }
         public override void CombatPulse()
