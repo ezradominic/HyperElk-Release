@@ -4,6 +4,7 @@
 // v1.2 vesper totem fix
 // v1.3 complete new apl
 // v1.4 Racials and Trinkets
+// v1.5 mouseover flameshock
 using System.Diagnostics;
 
 
@@ -11,6 +12,7 @@ namespace HyperElk.Core
 {
     public class ElementalShaman : CombatRoutine
     {
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spell,Auras
         private string ChainLightning = "Chain Lightning";
         private string Earthquake = "Earthquake";
@@ -62,6 +64,7 @@ namespace HyperElk.Core
         //General
         private int PlayerLevel => API.PlayerLevel;
         private bool IsInRange => API.TargetRange < 41;
+        private bool isMOinRange => API.MouseoverRange < 41;
         private bool IsInKickRange => API.TargetRange < 31;
         bool IsAscendance => (UseAscendance == "with Cooldowns" && IsCooldowns || UseAscendance == "always");
         bool IsStormElemental => (UseStormElemental == "with Cooldowns" && IsCooldowns || UseStormElemental == "always");
@@ -84,6 +87,7 @@ namespace HyperElk.Core
         private string UseEarthElemental => CDUsage[CombatRoutine.GetPropertyInt(EarthElemental)];
         private string UseFireElemental => CDUsage[CombatRoutine.GetPropertyInt(FireElemental)];
         private string UseStormkeeper => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Stormkeeper)];
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
         private bool EchoLeggy => CombatRoutine.GetPropertyBool("EchoLeggy");
         private bool SelfLightningShield => CombatRoutine.GetPropertyBool("LightningShield");
@@ -98,7 +102,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.4");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.5");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, "D7");
@@ -130,6 +134,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FaeTransfusion, "D1");
             CombatRoutine.AddSpell(ChainHarvest, "D1");
 
+            //Macros
+            CombatRoutine.AddMacro(FlameShock + "MO", "NumPad7");
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
 
@@ -152,8 +158,12 @@ namespace HyperElk.Core
             //Debuff
             CombatRoutine.AddDebuff(FlameShock);
 
+            //Toggle
+            CombatRoutine.AddToggle("Mouseover");
+
 
             //Prop
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
@@ -604,6 +614,14 @@ namespace HyperElk.Core
                     {
                         API.CastSpell(FlameShock);
                         return;
+                    }
+                    if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                    {
+                        if (API.MouseoverDebuffRemainingTime(FlameShock) < gcd*2 && API.CanCast(FlameShock) && isMOinRange)
+                        {
+                            API.CastSpell(FlameShock + "MO");
+                            return;
+                        }
                     }
                     //actions.aoe +=/ echoing_shock,if= talent.echoing_shock.enabled & maelstrom >= 60
                     if (API.CanCast(EchoingShock) && API.PlayerMaelstrom >= 60 && TalentEchoingShock)
