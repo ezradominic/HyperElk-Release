@@ -8,6 +8,7 @@
 // v1.6 colossus smash toogle and legendary prep
 // v1.7 Racials and Trinkets
 // v1.8 sweeping strikes fix
+// v1.9 condemn fix hopefully
 
 namespace HyperElk.Core
 {
@@ -104,7 +105,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v1.8");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v1.9");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -378,7 +379,7 @@ namespace HyperElk.Core
                         API.CastSpell(Execute);
                         return;
                     }
-                    if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath)))
+                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(Condemn);
                         return;
@@ -456,7 +457,7 @@ namespace HyperElk.Core
                         API.CastSpell(MortalStrike);
                         return;
                     }
-                    if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
+                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
                     {
                         API.CastSpell(Condemn);
                         return;
@@ -554,7 +555,7 @@ namespace HyperElk.Core
                         API.CastSpell(Overpower);
                         return;
                     }
-                    if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
+                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
                     {
                         API.CastSpell(Condemn);
                         return;

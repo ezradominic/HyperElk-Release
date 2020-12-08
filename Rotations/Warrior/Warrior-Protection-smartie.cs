@@ -8,6 +8,7 @@
 // v1.6 dps toggle and alot more fine tuning for more defensives
 // v1.7 rage update
 // v1.8 Racials and Trinkets
+// v1.9 condemn fix hopefully
 
 namespace HyperElk.Core
 {
@@ -86,7 +87,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.8");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v1.9");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam, "D4");
@@ -358,7 +359,7 @@ namespace HyperElk.Core
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && IsDPS)
+                if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && IsDPS)
                 {
                     API.CastSpell(Condemn);
                     return;
@@ -368,7 +369,7 @@ namespace HyperElk.Core
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 70 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && !IsDPS)
+                if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 70 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && !IsDPS)
                 {
                     API.CastSpell(Condemn);
                     return;
