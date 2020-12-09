@@ -41,6 +41,11 @@ namespace HyperElk.Core
         private string GerminationHoT = "Rejuvenation (Germination)";
         private string Clear = "Clearcasting";
         private string HeartoftheWild = "Heart of the Wild";
+        private string TravelForm = "Travel Form";
+        private string Soulshape = "Soulshape";
+        private string CatForm = "Cat Form";
+        private string BearForm = "Bear Form";
+        private string MoonkinForm = "Moonkin Form";
 
 
         //Talents
@@ -91,16 +96,16 @@ namespace HyperElk.Core
         bool ChannelingCov => API.CurrentCastSpellID("player") == 323764;
         bool ChannelingTranq => API.CurrentCastSpellID("player") == 740;
 
-        private bool WGAoE => UnitBelowHealthPercent(WGLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
+        private bool WGAoE => UnitBelowHealthPercent(WGLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !API.PlayerIsMoving;
         private bool ToLAoE => UnitBelowHealthPercent(ToLLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
-        private bool TranqAoE => UnitBelowHealthPercent(TranqLifePercent) >= AoENumber && !API.PlayerCanAttackTarget;
+        private bool TranqAoE => UnitBelowHealthPercent(TranqLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && !API.PlayerIsMoving;
         private bool FloruishTracking => FlourishTrackingRej(Rejuvenation) >= AoENumber;
         private bool FloruishAoE => UnitBelowHealthPercent(FloruishLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool CWCheck => CenarionWardTalent && API.TargetHealthPercent <= CWLifePercent && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool IBCheck => API.TargetHealthPercent <= IronBarkLifePercent && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool NourishCheck => NourishTalent && API.TargetHealthPercent <= NourishLifePercent && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving;
         private bool RegrowthCheck => (API.PlayerHasBuff(Clear) && API.TargetHealthPercent <= 90 ||API.TargetHealthPercent <= RegrowthLifePercent) && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving;
-        private bool RejCheck => API.TargetHealthPercent <= RejLifePercent && !API.PlayerCanAttackTarget && (!API.TargetHasBuff(Rejuvenation) || API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT)) && !ChannelingCov && !ChannelingTranq && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool RejCheck => API.TargetHealthPercent <= RejLifePercent && !API.PlayerCanAttackTarget && (!API.TargetHasBuff(Rejuvenation) && !GerminationTalent || API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT) || !API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT)) && !ChannelingCov && !ChannelingTranq && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool SwiftCheck => API.TargetHealthPercent <= SwiftmendLifePercent && !API.PlayerCanAttackTarget && API.SpellCharges(Swiftmend) > 0 && (API.TargetHasBuff(Rejuvenation) || API.TargetHasBuff(Regrowth) || API.TargetHasBuff(WildGrowth)) && (!API.PlayerIsMoving || API.PlayerIsMoving);
         // (PhotosynthesisTalent && API.TargetRoleSpec == 998 || API.TargetRoleSpec == 999) &&
         private bool LifeBloomCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Lifebloom) && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
@@ -109,6 +114,7 @@ namespace HyperElk.Core
         private bool NightFaeCheck => PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !ChannelingCov && !ChannelingTranq;
         private bool NecrolordCheck => PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingCov && !ChannelingTranq;
         private bool VenthyrCheck => PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingCov && !ChannelingTranq;
+        private bool Forms => !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(MoonkinForm) || !API.PlayerHasBuff(Soulshape);
         private bool WGParty(int i)
         {
 
@@ -225,6 +231,11 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(WildGrowth);
             CombatRoutine.AddBuff(GerminationHoT);
             CombatRoutine.AddBuff(Clear);
+            CombatRoutine.AddBuff(BearForm);
+            CombatRoutine.AddBuff(Catform);
+            CombatRoutine.AddBuff(MoonkinForm);
+            CombatRoutine.AddBuff(TravelForm);
+            CombatRoutine.AddBuff(Soulshape);
 
 
             //Debuff
@@ -293,7 +304,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && (IsOOC || API.PlayerIsInCombat))
+            if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm) && Forms && (IsOOC || API.PlayerIsInCombat))
             {
                 if (API.CanCast(KindredSprirts) && KyrianCheck)
                 {
@@ -398,6 +409,11 @@ namespace HyperElk.Core
             if (API.CanCast(Sunfire) && InRange && !API.TargetHasDebuff(Sunfire) && API.PlayerCanAttackTarget && NotChanneling && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingTranq && ChannelingCov)
             {
                 API.CastSpell(Sunfire);
+                return;
+            }
+            if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving)
+            {
+                API.CastSpell(Wrath);
                 return;
             }
         }

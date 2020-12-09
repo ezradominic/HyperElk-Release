@@ -279,7 +279,7 @@ namespace HyperElk.Core
                     API.CastSpell("Switch Target");
                     return;
                 }
-                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc))
+                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount >= 1)
                 {
                     API.CastSpell(Havoc);
                     return;
@@ -393,6 +393,27 @@ namespace HyperElk.Core
                     API.CastSpell(Incinerate);
                     return;
                 }
+                //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
+                if (API.CanCast(Conflagrate) && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
+                {
+                    API.CastSpell(Conflagrate);
+                    return;
+                }
+
+                //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
+
+                //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
+
+                //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
+
+                //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
+
+                //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
+
+                //actions.havoc+=/shadowburn
+
+                //actions.havoc+=/incinerate,if=cast_time<havoc_remains
+
             }
         }
         public override void OutOfCombatPulse()
