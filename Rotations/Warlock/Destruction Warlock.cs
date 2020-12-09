@@ -117,7 +117,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ShadowBurn, "D5");
             CombatRoutine.AddSpell(Cataclysm, "D6");
             CombatRoutine.AddSpell(Havoc, "D7");
-            CombatRoutine.AddMacro(RainOfFire, "D8");
+            CombatRoutine.AddSpell(RainOfFire, "D8");
             CombatRoutine.AddSpell(SoulFire, "D9");
             CombatRoutine.AddSpell(ChannelDemonFire, "D0");
             CombatRoutine.AddSpell(darkSoulInstability, "OemOpenBrackets");
