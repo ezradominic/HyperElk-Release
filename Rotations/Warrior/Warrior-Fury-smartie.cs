@@ -12,6 +12,7 @@
 // v2.0 Bladestorm toggle and execute/condemn mouseover
 // v2.1 update for legendarys
 // v2.2 Racials and Trinkets
+// v2.3 new apl
 
 namespace HyperElk.Core
 {
@@ -62,6 +63,7 @@ namespace HyperElk.Core
         //General
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
+        private float gcd => API.SpellGCDTotalDuration;
 
         bool IsRecklessness => UseRecklessness == "with Cooldowns" && IsCooldowns || UseRecklessness == "always";
         bool IsSiegebreaker => UseSiegebreaker == "with Cooldowns" && IsCooldowns || UseSiegebreaker == "always";
@@ -92,7 +94,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.2");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.3");
             API.WriteLog("Condemn is buggy for Fury currently and was added as id instead of name to fix it");
 
             //Spells
@@ -297,21 +299,25 @@ namespace HyperElk.Core
                     API.CastSpell(Whirlwind);
                     return;
                 }
+                //actions.single_target+=/siegebreaker,if=spell_targets.whirlwind>1|raid_event.adds.in>15
                 if (API.CanCast(Siegebreaker) && TalentSiegebreaker && !API.TargetHasDebuff(Siegebreaker) && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
                 {
                     API.CastSpell(Siegebreaker);
                     return;
                 }
-                if (API.CanCast(Rampage) && PlayerLevel >= 19 && (API.PlayerRage >= 80 && !API.PlayerHasBuff(Enrage) || API.PlayerRage >= 90))
+                //actions.single_target+=/rampage,if=buff.recklessness.up|(buff.enrage.remains<gcd|rage>90)|buff.frenzy.remains<1.5
+                if (API.CanCast(Rampage) && PlayerLevel >= 19 && (API.PlayerHasBuff(Recklessness) && API.PlayerRage >= 80 || API.PlayerBuffTimeRemaining(Enrage) < gcd && API.PlayerRage >= 80 || API.PlayerRage > 90))
                 {
                     API.CastSpell(Rampage);
                     return;
                 }
+                //actions.single_target+=/execute
                 if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && (!TalentMassacre && API.TargetHealthPercent < 20 || TalentMassacre && API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Execute);
                     return;
                 }
+                //actions.single_target+=/condemn
                 if (!API.SpellISOnCooldown(Condemn) && PlayerCovenantSettings == "Venthyr" && (!TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) || TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80) || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Condemn);
@@ -330,36 +336,48 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-                if (API.CanCast(Bladestorm) && API.PlayerBuffTimeRemaining(Enrage) >= 200 && TalentBladestorm && IsBladestorm && BladestormToggle)
+                //actions.single_target+=/bladestorm,if=buff.enrage.up&(spell_targets.whirlwind>1|raid_event.adds.in>45)
+                if (API.CanCast(Bladestorm) && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle)
                 {
                     API.CastSpell(Bladestorm);
                     return;
                 }
+                //actions.single_target +=/ bloodthirst,if= buff.enrage.down | conduit.vicious_contempt.rank > 5 & target.health.pct < 35 & !talent.cruelty.enabled
+                //actions.single_target +=/ bloodbath,if= buff.enrage.down | conduit.vicious_contempt.rank > 5 & target.health.pct < 35 & !talent.cruelty.enabled
+                //actions.single_target +=/ dragon_roar,if= buff.enrage.up & (spell_targets.whirlwind > 1 | raid_event.adds.in> 15)
                 if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage) && IsDragonRoar)
                 {
                     API.CastSpell(DragonRoar);
                     return;
                 }
-                if (API.CanCast(RagingBlow) && PlayerLevel >= 12 && API.SpellCharges(RagingBlow) == 2)
-                {
-                    API.CastSpell(RagingBlow);
-                    return;
-                }
-                if (API.CanCast(Bloodthirst) && PlayerLevel >= 10)
-                {
-                    API.CastSpell(Bloodthirst);
-                    return;
-                }
+                //actions.single_target+=/onslaught
                 if (API.CanCast(Onslaught) && API.PlayerHasBuff(Enrage) && TalentOnslaught)
                 {
                     API.CastSpell(Onslaught);
                     return;
                 }
+                //actions.single_target+=/raging_blow,if=charges=2
+                if (API.CanCast(RagingBlow) && PlayerLevel >= 12 && API.SpellCharges(RagingBlow) == 2)
+                {
+                    API.CastSpell(RagingBlow);
+                    return;
+                }
+                //actions.single_target+=/crushing_blow,if=charges=2
+                //actions.single_target+=/bloodthirst
+                if (API.CanCast(Bloodthirst) && PlayerLevel >= 10)
+                {
+                    API.CastSpell(Bloodthirst);
+                    return;
+                }
+                //actions.single_target+=/bloodbath
+                //actions.single_target+=/raging_blow
                 if (API.CanCast(RagingBlow) && PlayerLevel >= 12)
                 {
                     API.CastSpell(RagingBlow);
                     return;
                 }
+                //actions.single_target+=/crushing_blow
+                //actions.single_target+=/whirlwind
                 if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22))
                 {
                     API.CastSpell(Whirlwind);
