@@ -130,7 +130,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(trinket2);
 
             //Toggle
-            CombatRoutine.AddMacro(TimeWarp);
+            CombatRoutine.AddToggle(TimeWarp);
 
             //Prop
             CombatRoutine.AddProp(PB, PB, percentListProp, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
