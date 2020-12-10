@@ -322,7 +322,7 @@ namespace HyperElk.Core
                 return;
             }
             //Seraphim if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 25 seconds.
-            if (Talent_Seraphim && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && UseSeraphim != "Not Used" && (UseSeraphim == "On Cooldown" || UseSeraphim == "With Cooldowns" && (IsCooldowns|| UseSmallCD)) && !API.SpellISOnCooldown(Seraphim) && IsMelee && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 2500) || Buff_or_CDmorethan(Crusade, 2500)))
+            if (Talent_Seraphim && API.CanCast(Seraphim) && UseSeraphim != "Not Used" && (UseSeraphim == "On Cooldown" || UseSeraphim == "With Cooldowns" && (IsCooldowns|| UseSmallCD)) && IsMelee && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 2500) || Buff_or_CDmorethan(Crusade, 2500)))
             {
                 API.CastSpell(Seraphim);
                 return;
@@ -360,7 +360,7 @@ namespace HyperElk.Core
                 return;
             }
             //Hammer of Wrath at 4HP or less.
-            if (API.CanCast(HammerofWrath) && API.PlayerLevel >= 58 && holy_power <= 4 && API.TargetRange <= 30 && PlayerLevel >= 46)
+            if (API.CanCast(HammerofWrath) && holy_power <= 4 && API.TargetRange <= 30 && PlayerLevel >= 46)
             {
                 API.CastSpell(HammerofWrath);
                 return;
