@@ -17,6 +17,14 @@ namespace HyperElk.Core
         private string Fleshcraft = "Fleshcraft";
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
+        private string Firestorm = "Firestorm";
+        private string TimeWarp = "Time Warp";
+        private string Temp = "Temporal Displacement";
+        private string Exhaustion = "Exhaustion";
+        private string Fatigued = "Fatigued";
+        private string BL = "Bloodlust";
+        private string AH = "Ancient Hysteria";
+        private string TW = "Temporal Warp";
 
         //Talents
         bool SearingTouch => API.PlayerIsTalentSelected(1, 3);
@@ -29,12 +37,14 @@ namespace HyperElk.Core
         bool Meteor => API.PlayerIsTalentSelected(7, 3);
 
         //CBProperties
+        public string[] LegendaryList = new string[] { "None", "Temporal Warp" };
         private int BBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(BB)];
         private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
         private int FleshcraftPercentProc => percentListProp[CombatRoutine.GetPropertyInt(Fleshcraft)];
         private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
         private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
+        private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         //General
         private int Level => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 40;
@@ -46,7 +56,10 @@ namespace HyperElk.Core
         private bool NotChanneling => !API.PlayerIsChanneling;
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         bool CastCombustion => API.PlayerLastSpell == "Combustion";
+        private bool BLDebuffs => (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued));
+        private bool BLBuFfs => (!API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW));
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
 
 
         public override void Initialize()
@@ -58,7 +71,7 @@ namespace HyperElk.Core
             API.WriteLog("Meteor -- /cast [@cursor] Meteor");
             API.WriteLog("Create Macro /cast [@player] Arcane Intellect to buff Arcane Intellect so you don't require a target");
             API.WriteLog("All Talents expect Ring of Frost and Alexstrasza's Fury supported. All Cooldowns are associated with Cooldown toggle.");
-            API.WriteLog("Will add settings and customizing later");
+            API.WriteLog("Will Firestrom is auto supported, no need to select in Legendary List.");
             //Buff
             CombatRoutine.AddBuff("Heating Up");
             CombatRoutine.AddBuff("Pyroclasm");
@@ -67,9 +80,17 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Rune of Power");
             CombatRoutine.AddBuff("Blazing Barrier");
             CombatRoutine.AddBuff("Arcane Intellect");
+            CombatRoutine.AddBuff(Firestorm);
+            CombatRoutine.AddBuff(TimeWarp);
+            CombatRoutine.AddBuff(BL);
+            CombatRoutine.AddBuff(AH);
+            CombatRoutine.AddBuff(TW);
 
             //Debuff
             CombatRoutine.AddDebuff("Ignite");
+            CombatRoutine.AddDebuff(Temp);
+            CombatRoutine.AddDebuff(Fatigued);
+            CombatRoutine.AddDebuff(Exhaustion);
 
             //Spell
             CombatRoutine.AddSpell("Rune of Power", "None");
@@ -96,10 +117,14 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Deathborne);
             CombatRoutine.AddSpell(MirrorsofTorment);
             CombatRoutine.AddSpell(Fleshcraft);
+            CombatRoutine.AddSpell(TimeWarp);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
+
+            //Toggle
+            CombatRoutine.AddToggle("TimeWarp");
 
 
             //Prop
@@ -112,6 +137,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Combustion", "Use " + "Combustion", CDUsage, "Use " + "Combustion" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
 
 
@@ -153,6 +179,11 @@ namespace HyperElk.Core
             if (API.CanCast("Blazing Barrier") && Level >= 21 && !API.PlayerHasBuff("Blazing Barrier") && API.PlayerHealthPercent <= BBPercentProc && API.PlayerHealthPercent != 0 && NotCasting  && !ChannelingShift)
             {
                 API.CastSpell("Blazing Barrier");
+                return;
+            }
+            if (IsTimeWarp && API.CanCast(TimeWarp) && (BLDebuffs || UseLeg == "Temporal Warp") && BLBuFfs)
+            {
+                API.CastSpell(TimeWarp);
                 return;
             }
             if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift)
@@ -207,19 +238,19 @@ namespace HyperElk.Core
                 API.CastSpell("Living Bomb");
                 return;
             }
-            if (API.CanCast("Flamestrike") && InRange && API.PlayerHasBuff("Hot Streak!") && (FlamePatchTalent && API.TargetUnitInRangeCount >= 2 || API.TargetUnitInRangeCount >= 3) && Level >= 17  && IsAOE && !ChannelingShift)
+            if (API.CanCast("Flamestrike") && InRange && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && (FlamePatchTalent && API.TargetUnitInRangeCount >= 2 || API.TargetUnitInRangeCount >= 3) && Level >= 17  && IsAOE && !ChannelingShift)
             {
                 API.CastSpell("Flamestrike");
                 API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
                 return;
             }
-            if (API.CanCast("Flamestrike") && InRange && API.PlayerHasBuff("Hot Streak!") && API.PlayerHasBuff("Combustion") && (FlamePatchTalent && API.TargetUnitInRangeCount >= 3 || API.TargetUnitInRangeCount >= 6) && Level >= 17 && IsAOE && !ChannelingShift)
+            if (API.CanCast("Flamestrike") && InRange && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && API.PlayerHasBuff("Combustion") && (FlamePatchTalent && API.TargetUnitInRangeCount >= 3 || API.TargetUnitInRangeCount >= 6) && Level >= 17 && IsAOE && !ChannelingShift)
             {
                 API.CastSpell("Flamestrike");
                 API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
                 return;
             }
-            if (API.CanCast("Pyroblast") && API.PlayerHasBuff("Hot Streak!") && InRange && Level >= 12  && !ChannelingShift)
+            if (API.CanCast("Pyroblast") && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && InRange && Level >= 12  && !ChannelingShift)
             {
                 API.CastSpell("Pyroblast");
                 return;

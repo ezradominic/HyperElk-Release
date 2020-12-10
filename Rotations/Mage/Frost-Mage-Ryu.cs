@@ -39,6 +39,13 @@ namespace HyperElk.Core
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
         private string SlickIce = "Slick Ice";
+        private string TimeWarp = "Time Warp";
+        private string Temp = "Temporal Displacement";
+        private string Exhaustion = "Exhaustion";
+        private string Fatigued = "Fatigued";
+        private string BL = "Bloodlust";
+        private string AH = "Ancient Hysteria";
+        private string TW = "Temporal Warp";
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
         bool IceNova => API.PlayerIsTalentSelected(1, 3);
@@ -51,6 +58,7 @@ namespace HyperElk.Core
         bool FreezingRain => API.PlayerIsTalentSelected(6, 1);
 
         //CBProperties
+        public string[] LegendaryList = new string[] { "None", "Temporal Warp" };
         private int IceBarrierPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IceBarrier)];
         private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
@@ -59,14 +67,18 @@ namespace HyperElk.Core
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt(RoP)];
         private string UseIV => CDUsage[CombatRoutine.GetPropertyInt(IV)];
+        private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         private int FleshcraftPercentProc => percentListProp[CombatRoutine.GetPropertyInt(Fleshcraft)];
         //General
+        private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         bool CastShifting => API.PlayerLastSpell == ShiftingPower;
         bool CastIV => API.PlayerLastSpell == IV;
         private int Level => API.PlayerLevel;
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
+        private bool BLDebuffs => (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued));
+        private bool BLBuFfs => (!API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW));
 
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         private bool InRange => API.TargetRange <= 40;
@@ -81,6 +93,7 @@ namespace HyperElk.Core
             API.WriteLog("Blizzard -- /cast [@cursor] Blizzard");
             API.WriteLog("Create Macro /cast [@Player] Arcane Intellect to buff Arcane Intellect so you don't require a target");
             API.WriteLog("All Talents expect Ring of Frost supported. All Cooldowns are associated with Cooldown toggle.");
+            API.WriteLog("Legendary Support for Temporal Warp added. If you have it please select it in the settings.");
             //Buff
 
             CombatRoutine.AddBuff(Icicles);
@@ -93,9 +106,16 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(IV);
             CombatRoutine.AddBuff(FR);
             CombatRoutine.AddBuff(SlickIce);
+            CombatRoutine.AddBuff(TimeWarp);
+            CombatRoutine.AddBuff(BL);
+            CombatRoutine.AddBuff(AH);
+            CombatRoutine.AddBuff(TW);
 
             //Debuff
             CombatRoutine.AddDebuff(WC);
+            CombatRoutine.AddDebuff(Temp);
+            CombatRoutine.AddDebuff(Fatigued);
+            CombatRoutine.AddDebuff(Exhaustion);
 
             //Spell
             CombatRoutine.AddSpell(RoP, "None");
@@ -125,10 +145,14 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(MirrorsofTorment);
             CombatRoutine.AddSpell(AE);
             CombatRoutine.AddSpell(Fleshcraft);
+            CombatRoutine.AddSpell(TimeWarp);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
+
+            //Toggle
+            CombatRoutine.AddToggle("TimeWarp");
 
             //Prop
             CombatRoutine.AddProp(IceBarrier, IceBarrier, percentListProp, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
@@ -140,6 +164,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(IV, "Use " + IV, CDUsage, "Use " + IV + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
         }
 
@@ -179,6 +204,11 @@ namespace HyperElk.Core
             if (API.CanCast(IceBarrier) && Level >= 21 && !API.PlayerHasBuff(IceBarrier) && API.PlayerHealthPercent <= IceBarrierPercentProc && API.PlayerHealthPercent != 0  && !ChannelingShift)
             {
                 API.CastSpell(IceBarrier);
+                return;
+            }
+            if (IsTimeWarp && API.CanCast(TimeWarp) && (BLDebuffs || UseLeg == "Temporal Warp") && BLBuFfs)
+            {
+                API.CastSpell(TimeWarp);
                 return;
             }
             if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift) 

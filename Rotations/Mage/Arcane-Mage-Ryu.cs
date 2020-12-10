@@ -24,6 +24,9 @@ namespace HyperElk.Core
         private string Temp = "Temporal Displacement";
         private string Exhaustion = "Exhaustion";
         private string Fatigued = "Fatigued";
+        private string BL = "Bloodlust";
+        private string AH = "Ancient Hysteria";
+        private string TW = "Temporal Warp";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -70,14 +73,15 @@ namespace HyperElk.Core
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         bool ChannelingEvo => API.CurrentCastSpellID("player") == 12051;
         bool ChannelingMissile => API.CurrentCastSpellID("player") == 5143;
-        private bool BLDebuffs => (API.PlayerHasDebuff(Temp) || API.PlayerHasDebuff(Exhaustion) || API.PlayerHasDebuff(Fatigued));
+        private bool BLDebuffs => (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued));
+        private bool BLBuFfs => (!API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW));
         public override void Initialize()
         {
             CombatRoutine.Name = "Arcane Mage by Ryu";
-            API.WriteLog("Welcome to Arcane Mage v1.2 by Ryu989");
+            API.WriteLog("Welcome to Arcane Mage v1.4 by Ryu989");
             API.WriteLog("Presence of Mind(PoM) will by default cast when Arcane Power as less than 3 seconds left, otherwise, you can check box in settings to cast on CD");
             API.WriteLog("All Talents expect Ice Ward, Ring of Frost, Supernova and Mirror Image are supported");
-            API.WriteLog("Current Mana :" + API.PlayerMana);
+            API.WriteLog("Legendary Support for Temporal Warp added. If you have it please select it in the settings.");
 
             // API.WriteLog("Supported Essences are Memory of Lucids, Concerated Flame and Worldvein");
             //Buff
@@ -91,7 +95,10 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Arcane Intellect");
             CombatRoutine.AddBuff("Arcane Familiar");
             CombatRoutine.AddBuff("Evocation");
-
+            CombatRoutine.AddBuff(TimeWarp);
+            CombatRoutine.AddBuff(BL);
+            CombatRoutine.AddBuff(AH);
+            CombatRoutine.AddBuff(TW);
             //Debuff
             CombatRoutine.AddDebuff("Nether Tempest");
             CombatRoutine.AddDebuff("Touch of the Magi");
@@ -186,7 +193,7 @@ namespace HyperElk.Core
                 API.CastSpell("Prismatic Barrier");
                 return;
             }
-            if (IsTimeWarp && API.CanCast(TimeWarp) && (!BLDebuffs || UseLeg == "Temporal Warp"))
+            if (IsTimeWarp && API.CanCast(TimeWarp) && (BLDebuffs || UseLeg == "Temporal Warp") && BLBuFfs)
             {
                 API.CastSpell(TimeWarp);
                 return;
