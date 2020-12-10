@@ -46,7 +46,7 @@ namespace HyperElk.Core
 
         // public string[] CDUsage = new string[] { "Not Used", "With Cooldowns", "On Cooldown" };
         // public string[] CDUsageWithAOE = new string[] { "Not Used", "With Cooldowns", "on AOE", "On Cooldown" };
-        public string[] LegendaryList = new string[] { "Temporal Warp" };
+        public string[] LegendaryList = new string[] { "None", "Temporal Warp" };
         private string UseAP => CDUsage[CombatRoutine.GetPropertyInt("Arcane Power")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt("Rune of Power")];
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
@@ -59,7 +59,7 @@ namespace HyperElk.Core
         private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
-        private bool IsTimeWarp => API.ToggleIsEnabled(TimeWarp);
+        private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
         private bool InRange => API.TargetRange <= 40;
         private bool Burn => API.PlayerMana >= 10;
         private bool Conserve => API.PlayerMana <= 59 && API.SpellISOnCooldown("Evocation");
@@ -130,7 +130,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(trinket2);
 
             //Toggle
-            CombatRoutine.AddToggle(TimeWarp);
+            CombatRoutine.AddToggle("TimeWarp");
 
             //Prop
             CombatRoutine.AddProp(PB, PB, percentListProp, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
