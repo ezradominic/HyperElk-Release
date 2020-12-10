@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics;
 
 
 
@@ -28,6 +29,7 @@ namespace HyperElk.Core
         private string MortalCoil = "Mortal Coil";
         private string HowlofTerror = "Howl Of Terror";
         private string GrimoireOfSacrifice = "Grimoire Of Sacrifice";
+        private string DemonFire = "Demon Fire";
         private string SummonInfernal = "Summon Infernal";
         private string ChangeTarget = "Change Target";
         private string SoulFire = "Soul Fire";
@@ -63,6 +65,7 @@ namespace HyperElk.Core
         private bool SwitchTarget => (bool)CombatRoutine.GetProperty("SwitchTarget");
 
         //Misc
+        private static readonly Stopwatch HavocWatch = new Stopwatch();
 
 
         //CBProperties
@@ -82,6 +85,10 @@ namespace HyperElk.Core
         private bool NotChanneling => !API.PlayerIsChanneling;
         bool LastCastImmolate => API.PlayerLastSpell == Immolate;
         bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate;
+        bool LastCastSummonVoidwalker => API.PlayerLastSpell == SummonVoidwalker;
+        bool LastCastSummonImp => API.PlayerLastSpell == SummonImp;
+        bool LastCastSummonSuccubus => API.PlayerLastSpell == SummonSuccubus;
+        bool LastCastSummonFelhunter => API.PlayerLastSpell == SummonFelhunter;
         bool LastCastShadowBurn => API.PlayerLastSpell == ShadowBurn;
         private string UseCovenantAbility => CovenantAbilityList[CombatRoutine.GetPropertyInt(CovenantAbility)];
         string[] CovenantAbilityList = new string[] { "always", "Cooldowns", "AOE" };
@@ -91,9 +98,10 @@ namespace HyperElk.Core
             CombatRoutine.Name = "Destruction Warlock @Mufflon12";
             API.WriteLog("Welcome to Destruction Warlock rotation @ Mufflon12");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-
+            API.WriteLog("Use /cast [@cursor] Rain of Fire");
+            API.WriteLog("Use /cast [@cursor] Cataclysm");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-
+            API.WriteLog("This is a TEMP FIXED Rotation , you need to toggle AOE/SINGLE Target manualy");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
             //Options
@@ -163,12 +171,23 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cds+=/dark_soul_instability
-                if (API.CanCast(darkSoulInstability))
+                if (API.CanCast(darkSoulInstability) && TalentDarkSoulInstability)
                 {
                     API.CastSpell(darkSoulInstability);
                     return;
                 }
-
+            }
+            // Drain Life
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
+            {
+                API.CastSpell(DrainLife);
+                return;
+            }
+            // Health Funnel
+            if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+            {
+                API.CastSpell(HealthFunnel);
+                return;
             }
             rotation();
             return;
@@ -178,7 +197,7 @@ namespace HyperElk.Core
         {
             //AOE
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && NotCasting)
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && NotCasting && NotChanneling)
             {
                 //actions.aoe=rain_of_fire,if=pet.infernal.active&(!cooldown.havoc.ready|active_enemies>3)
 
@@ -190,7 +209,7 @@ namespace HyperElk.Core
                 }
 
                 //actions.aoe+=/channel_demonfire,if=dot.immolate.remains>cast_time
-                if (API.CanCast(Immolate) && API.TargetDebuffRemainingTime(Immolate) <= 400)
+                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400)
                 {
                     API.CastSpell(Immolate);
                     return;
@@ -237,13 +256,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/conflagrate,if=buff.backdraft.down
-                if (API.CanCast(Conflagrate) && LastCastConflagrate && !API.PlayerHasBuff(Backdraft))
+                if (API.CanCast(Conflagrate) && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft))
                 {
                     API.CastSpell(Conflagrate);
                     return;
                 }
                 //actions.aoe+=/shadowburn,if=target.health.pct<20
-                if (API.CanCast(ShadowBurn) && TalentShadowBurn && API.TargetHealthPercent <= 20)
+                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.TargetHealthPercent <= 20)
                 {
                     API.CastSpell(ShadowBurn);
                     return;
@@ -268,10 +287,21 @@ namespace HyperElk.Core
                 }
             }
             //SINGLE TARGET
-            if (IsAOE || !IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && NotCasting && IsRange)
+            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && NotCasting && IsRange && NotChanneling)
             {
+                //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
+                if (SwitchTarget && API.TargetHasDebuff(Havoc))
+                {
+                    API.CastSpell("Switch Target");
+                    return;
+                }
+                if (API.TargetUnitInRangeCount >= 2 && API.CanCast(Havoc))
+                {
+                    API.CastSpell(Havoc);
+                    return;
+                }
                 //actions+=/conflagrate,if=talent.roaring_blaze.enabled&debuff.roaring_blaze.remains<1.5
-                if (API.CanCast(Conflagrate) && LastCastConflagrate && TalentRoaringBlaze && API.TargetDebuffRemainingTime(RoaringBlaze) <= 150)
+                if (API.CanCast(Conflagrate) && !LastCastConflagrate && TalentRoaringBlaze && API.TargetDebuffRemainingTime(RoaringBlaze) <= 150)
                 {
                     API.CastSpell(Conflagrate);
                     return;
@@ -285,7 +315,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/immolate,cycle_targets=1,if=refreshable&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
-                if (API.CanCast(Immolate) && API.TargetDebuffRemainingTime(Immolate) <= 400 && (!TalentCataclysm | API.SpellISOnCooldown(Cataclysm)))
+                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400 && (!TalentCataclysm | API.SpellISOnCooldown(Cataclysm)))
                 {
                     API.CastSpell(Immolate);
                     return;
@@ -332,7 +362,7 @@ namespace HyperElk.Core
                 //actions+=/havoc,if=runeforge.odr_shawl_of_the_ymirjar.equipped
                 //actions+=/variable,name=pool_soul_shards,value=active_enemies>1&cooldown.havoc.remains<=10|cooldown.summon_infernal.remains<=15&talent.dark_soul_instability.enabled&cooldown.dark_soul_instability.remains<=15|talent.dark_soul_instability.enabled&cooldown.dark_soul_instability.remains<=15&(cooldown.summon_infernal.remains>target.time_to_die|cooldown.summon_infernal.remains+cooldown.summon_infernal.duration>target.time_to_die)
                 //actions+=/conflagrate,if=buff.backdraft.down&soul_shard>=1.5-0.3*talent.flashover.enabled&!variable.pool_soul_shards
-                if (API.CanCast(Conflagrate) && LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && TalentFlashover)
+                if (API.CanCast(Conflagrate) && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && TalentFlashover)
                 {
                     API.CastSpell(Conflagrate);
                     return;
@@ -356,7 +386,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/shadowburn,if=!variable.pool_soul_shards|soul_shard>=4.5
-                if (API.CanCast(ShadowBurn) && TalentShadowBurn && API.PlayerCurrentSoulShards >= 1)
+                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.PlayerCurrentSoulShards >= 1)
                 {
                     API.CastSpell(ShadowBurn);
                     return;
@@ -368,7 +398,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/conflagrate,if=charges>1
-                if (API.CanCast(Conflagrate) && LastCastConflagrate && API.SpellCharges(Conflagrate) >= 1)
+                if (API.CanCast(Conflagrate) && !LastCastConflagrate && API.SpellCharges(Conflagrate) >= 1)
                 {
                     API.CastSpell(Conflagrate);
                     return;
@@ -380,7 +410,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
-                if (API.CanCast(Conflagrate) && LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
+                if (API.CanCast(Conflagrate) && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
                 {
                     API.CastSpell(Conflagrate);
                     return;
@@ -410,25 +440,25 @@ namespace HyperElk.Core
                 return;
             }
             //Summon Imp
-            if (API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (API.CanCast(SummonImp) && !LastCastSummonImp && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 3)
             {
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (API.CanCast(SummonVoidwalker) && !LastCastSummonVoidwalker && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 10)
             {
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (API.CanCast(SummonSuccubus) && !LastCastSummonSuccubus && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 19)
             {
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (API.CanCast(SummonFelhunter) && !LastCastSummonFelhunter && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
             {
                 API.CastSpell(SummonFelhunter);
                 return;
