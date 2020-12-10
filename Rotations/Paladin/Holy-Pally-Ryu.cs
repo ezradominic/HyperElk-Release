@@ -223,8 +223,8 @@ namespace HyperElk.Core
         private bool HolyPrismCheckMO => API.CanCast(HolyPrism) && HolyPrismT && InRange && IsMouseover && HPAoE && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget;
         private bool LoHCheck => API.CanCast(LoH) && InRange && !IsMouseover && API.TargetHealthPercent <= LoHLifePercent && API.TargetHealthPercent != 0 && !API.TargetHasBuff(Forbearance) && !API.PlayerCanAttackTarget;
         private bool LoHCheckMO => API.CanCast(LoH) && InRange && IsMouseover && API.MouseoverHealthPercent <= LoHLifePercent && API.MouseoverHealthPercent != 0 && !API.TargetHasBuff(Forbearance) && !API.PlayerCanAttackTarget;
-        private bool BoSCheck => API.CanCast(BoS) && InRange && !IsMouseover && API.TargetHealthPercent <= BoSLifePercent && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget;
-        private bool BoSCheckMO => API.CanCast(BoS) && InRange && IsMouseover && API.MouseoverHealthPercent <= BoSLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget;
+        private bool BoSCheck => API.CanCast(BoS) && InRange && !IsMouseover && API.TargetHealthPercent <= BoSLifePercent && API.TargetHealthPercent != 0 && !API.PlayerCanAttackTarget && !API.PlayerIsTargetTarget;
+        private bool BoSCheckMO => API.CanCast(BoS) && InRange && IsMouseover && API.MouseoverHealthPercent <= BoSLifePercent && API.MouseoverHealthPercent != 0 && !API.PlayerCanAttackTarget && !API.PlayerIsTargetTarget;
         //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
         //  public int interruptDelay => random.Next((int)(CombatRoutine.GetPropertyInt("KICKTime") * 0.9), (int)(CombatRoutine.GetPropertyInt("KICKTime") * 1.1));
 
