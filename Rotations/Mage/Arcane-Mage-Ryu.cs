@@ -27,6 +27,7 @@ namespace HyperElk.Core
         private string BL = "Bloodlust";
         private string AH = "Ancient Hysteria";
         private string TW = "Temporal Warp";
+        private string AHL = "Arcane Harmony";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -49,7 +50,7 @@ namespace HyperElk.Core
 
         // public string[] CDUsage = new string[] { "Not Used", "With Cooldowns", "On Cooldown" };
         // public string[] CDUsageWithAOE = new string[] { "Not Used", "With Cooldowns", "on AOE", "On Cooldown" };
-        public string[] LegendaryList = new string[] { "None", "Temporal Warp" };
+        public string[] LegendaryList = new string[] { "None", "Temporal Warp", "Arcane Harmony", "Arcane Bombardment" };
         private string UseAP => CDUsage[CombatRoutine.GetPropertyInt("Arcane Power")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt("Rune of Power")];
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
@@ -81,7 +82,7 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Arcane Mage v1.4 by Ryu989");
             API.WriteLog("Presence of Mind(PoM) will by default cast when Arcane Power as less than 3 seconds left, otherwise, you can check box in settings to cast on CD");
             API.WriteLog("All Talents expect Ice Ward, Ring of Frost, Supernova and Mirror Image are supported");
-            API.WriteLog("Legendary Support for Temporal Warp added. If you have it please select it in the settings.");
+            API.WriteLog("Legendary Support for Temporal Warp, Arcane Harmory and Arcane Bombardment added. If you have it please select it in the settings.");
 
             // API.WriteLog("Supported Essences are Memory of Lucids, Concerated Flame and Worldvein");
             //Buff
@@ -99,6 +100,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(BL);
             CombatRoutine.AddBuff(AH);
             CombatRoutine.AddBuff(TW);
+            CombatRoutine.AddBuff(AHL);
             //Debuff
             CombatRoutine.AddDebuff("Nether Tempest");
             CombatRoutine.AddDebuff("Touch of the Magi");
@@ -315,7 +317,7 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Explosion");
                 return;
             }
-            if (API.CanCast("Arcane Barrage") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (API.SpellISOnCooldown("Evocation") && API.PlayerCurrentArcaneCharges <= 4 && Mana <= 60 || !API.SpellISOnCooldown("Touch of the Magi") && API.PlayerCurrentArcaneCharges == 4)  && (!API.PlayerHasBuff("Rune of Power") || !API.PlayerHasBuff("Arcane Power")) && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Barrage") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (API.SpellISOnCooldown("Evocation") && API.PlayerCurrentArcaneCharges <= 4 && Mana <= 60 || !API.SpellISOnCooldown("Touch of the Magi") && API.PlayerCurrentArcaneCharges == 4 || API.PlayerBuffStacks(AHL) == 15 && API.PlayerCurrentArcaneCharges >= 4 && UseLeg == "Arcane Harmony"  || API.TargetHealthPercent <= 35 && UseLeg == "Arcane Bombardment" && API.PlayerCurrentArcaneCharges == 4)  && (!API.PlayerHasBuff("Rune of Power") || !API.PlayerHasBuff("Arcane Power")) && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Barrage");
                 return;
