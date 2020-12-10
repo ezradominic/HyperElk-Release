@@ -70,7 +70,7 @@ namespace HyperElk.Core
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         bool ChannelingEvo => API.CurrentCastSpellID("player") == 12051;
         bool ChannelingMissile => API.CurrentCastSpellID("player") == 5143;
-        private bool BLDebuffs => API.PlayerHasDebuff(Temp) && API.PlayerHasDebuff(Exhaustion) && API.PlayerHasDebuff(Fatigued);
+        private bool BLDebuffs => (API.PlayerHasDebuff(Temp) || API.PlayerHasDebuff(Exhaustion) || API.PlayerHasDebuff(Fatigued));
         public override void Initialize()
         {
             CombatRoutine.Name = "Arcane Mage by Ryu";
