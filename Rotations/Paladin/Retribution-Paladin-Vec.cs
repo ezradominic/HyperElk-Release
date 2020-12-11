@@ -42,8 +42,9 @@ namespace HyperElk.Core
         private string AshenHallow = "Ashen Hallow";
         private string BlessingoftheSeasons = "328282";
         private string RingingClarity = "Ringing Clarity";
+        private string Mindgames = "Mindgames";
 
-       
+
 
         private bool UseSmallCD => API.ToggleIsEnabled("Small CDs");
         //Misc
@@ -210,7 +211,7 @@ namespace HyperElk.Core
                     API.CastSpell(DevotionAura);
                     return;
                 }
-                if (API.PlayerHealthPercent <= FlashofLightLifePercentProc && !API.SpellISOnCooldown(FlashofLight) && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
+                if (API.PlayerHealthPercent <= FlashofLightLifePercentProc && !PlayerHasBuff(Mindgames) && !API.SpellISOnCooldown(FlashofLight) && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
                 {
                     API.CastSpell(FlashofLight);
                     return;
@@ -242,7 +243,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (API.SpellIsCanbeCast(WordOfGlory) && API.PlayerHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
+            if (API.SpellIsCanbeCast(WordOfGlory) && !PlayerHasBuff(Mindgames) && API.PlayerHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
