@@ -188,7 +188,7 @@ namespace HyperElk.Core
             //API.WriteLog("Deadly Calm?: "+ API.PlayerHasBuff(DeadlyCalm));
             if (!API.PlayerIsMounted)
             {
-                if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
+                if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout,false) < 30000)
                 {
                     API.CastSpell(BattleShout);
                     return;
