@@ -164,6 +164,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Judgment);
             CombatRoutine.AddDebuff(ExecutionSentence);
             CombatRoutine.AddDebuff(FinalReckoning);
+            CombatRoutine.AddDebuff(Mindgames);
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -211,7 +212,7 @@ namespace HyperElk.Core
                     API.CastSpell(DevotionAura);
                     return;
                 }
-                if (API.PlayerHealthPercent <= FlashofLightLifePercentProc && !PlayerHasBuff(Mindgames) && !API.SpellISOnCooldown(FlashofLight) && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
+                if (API.PlayerHealthPercent <= FlashofLightLifePercentProc && !API.PlayerHasDebuff(Mindgames) && !API.SpellISOnCooldown(FlashofLight) && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
                 {
                     API.CastSpell(FlashofLight);
                     return;
@@ -243,7 +244,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (API.SpellIsCanbeCast(WordOfGlory) && !PlayerHasBuff(Mindgames) && API.PlayerHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
+            if (API.SpellIsCanbeCast(WordOfGlory) && !API.PlayerHasDebuff(Mindgames) && API.PlayerHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
