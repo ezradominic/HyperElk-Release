@@ -10,6 +10,7 @@
 // v1.8 sweeping strikes fix
 // v1.9 condemn fix hopefully
 // v2.0 new apl
+// v2.1 small adjustments
 
 namespace HyperElk.Core
 {
@@ -107,7 +108,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.0");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.1");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -185,10 +186,9 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Deadly Calm?: "+ API.PlayerHasBuff(DeadlyCalm));
             if (!API.PlayerIsMounted)
             {
-                if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout,false) < 30000)
+                if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
                 {
                     API.CastSpell(BattleShout);
                     return;
@@ -202,7 +202,7 @@ namespace HyperElk.Core
                 API.CastSpell(Pummel);
                 return;
             }
-            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
+            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
             {
                 API.CastSpell(RacialSpell1);
                 return;
@@ -442,7 +442,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/ravager,if=buff.avatar.remains<18&!dot.ravager.remains
-                    if (API.CanCast(Ravager) && TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsRavager && BladestormToggle)
+                    if (API.CanCast(Ravager) && TalentRavager && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
@@ -508,7 +508,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/slam
-                    if (API.CanCast(Slam) && !TalentFevorofBattle && API.PlayerRage > 50)
+                    if (API.CanCast(Slam) && !TalentFevorofBattle && API.PlayerRage > 20)
                     {
                         API.CastSpell(Slam);
                         return;

@@ -209,6 +209,11 @@ namespace HyperElk.Core
                     API.CastSpell(WindShear);
                     return;
                 }
+                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && API.TargetRange < 8 && API.SpellISOnCooldown(WindShear))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
                 if (API.CanCast(AstralShift) && PlayerLevel >= 42 && API.PlayerHealthPercent <= AstralShiftLifePercent)
                 {
                     API.CastSpell(AstralShift);

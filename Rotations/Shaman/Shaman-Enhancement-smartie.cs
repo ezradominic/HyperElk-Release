@@ -209,7 +209,7 @@ namespace HyperElk.Core
                     API.CastSpell(WindShear);
                     return;
                 }
-                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && isMelee && API.SpellISOnCooldown(WindShear))
+                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(WindShear))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
