@@ -77,7 +77,7 @@ namespace HyperElk.Core
         //actions+=/variable,name=searing_nightmare_cutoff,op=set,value=spell_targets.mind_sear>3
         bool searing_nightmare_cutoff => API.TargetUnitInRangeCount > 3;
         //actions+=/variable,name=pi_or_vf_sync_condition,op=set,value=(priest.self_power_infusion|runeforge.twins_of_the_sun_priestess.equipped)&level>=58&cooldown.power_infusion.up|(level<58|!priest.self_power_infusion&!runeforge.twins_of_the_sun_priestess.equipped)&cooldown.void_eruption.up
-        bool pi_or_vf_sync_condition => (PlayerLevel >= 58 && API.CanCast(PowerInfusion) && API.CanCast(VoidEruption)) || (PlayerLevel < 58 && PlayerLevel >= 23 && API.CanCast(VoidEruption));
+        bool pi_or_vf_sync_condition => (PlayerLevel >= 58 && (API.CanCast(PowerInfusion)|| API.PlayerHasBuff(PowerInfusion)) && API.CanCast(VoidEruption)) || (PlayerLevel < 58 && PlayerLevel >= 23 && API.CanCast(VoidEruption));
 
         public override void Initialize()
         {
@@ -95,6 +95,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(DarkThoughts);
             CombatRoutine.AddBuff(UnfurlingDarkness);
             CombatRoutine.AddBuff(BoonOfTheAscended);
+            CombatRoutine.AddBuff(PowerInfusion);
             //Debuff
             CombatRoutine.AddDebuff(DevouringPlague);
             CombatRoutine.AddDebuff(SWPain);
