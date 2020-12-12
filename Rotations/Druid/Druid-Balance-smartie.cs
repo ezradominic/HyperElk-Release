@@ -10,6 +10,7 @@
 // v1.65 another eclipse update
 // v1.7 convoke update
 // v1.8 Racials and Trinkets
+// v1.9 Mighty bash added
 
 using System.Diagnostics;
 
@@ -58,6 +59,7 @@ namespace HyperElk.Core
         private string Soulshape = "Soulshape";
         private string OnethsClearVision = "Oneth's Clear Vision";
         private string OnethsPerception = "Oneth's Perception";
+        private string MightyBash = "Mighty Bash";
 
         //Talents
         bool TalentNatureBalance => API.PlayerIsTalentSelected(1, 1);
@@ -71,6 +73,7 @@ namespace HyperElk.Core
         bool TalentStellarFlare => API.PlayerIsTalentSelected(6, 3);
         bool TalentFuryOfElune => API.PlayerIsTalentSelected(7, 2);
         bool TalentNewMoon => API.PlayerIsTalentSelected(7, 3);
+        bool TalentMightyBash => API.PlayerIsTalentSelected(4, 1);
 
         //General
         private static readonly Stopwatch Solarwatch = new Stopwatch();
@@ -114,7 +117,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.8");
+            API.WriteLog("Welcome to smartie`s Balance Druid v1.9");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -141,6 +144,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Regrowth, "F6");
             CombatRoutine.AddSpell(Barkskin, "F1");
             CombatRoutine.AddSpell(SolarBeam, "F12");
+            CombatRoutine.AddSpell(MightyBash, "D1");
             CombatRoutine.AddSpell(Typhoon, "D0");
             CombatRoutine.AddSpell(BearForm, "NumPad5");
             CombatRoutine.AddSpell(Thrash, "D4");
@@ -250,6 +254,16 @@ namespace HyperElk.Core
                 if (isInterrupt && API.CanCast(SolarBeam) && PlayerLevel >= 26 && isinRange)
                 {
                     API.CastSpell(SolarBeam);
+                    return;
+                }
+                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && API.TargetRange < 8 && API.SpellISOnCooldown(SolarBeam))
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                if (API.CanCast(MightyBash) && isInterrupt && TalentMightyBash && API.TargetRange < 10 && API.SpellISOnCooldown(SolarBeam))
+                {
+                    API.CastSpell(MightyBash);
                     return;
                 }
                 if (API.PlayerHealthPercent <= RegrowthLifePercent && PlayerLevel >= 3 && API.CanCast(Regrowth))

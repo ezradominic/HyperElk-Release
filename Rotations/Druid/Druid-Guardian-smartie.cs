@@ -4,6 +4,7 @@
 // v1.2 covenants added + cd managment
 // v1.3 covenant update :-)
 // v1.4 Racials and Trinkets
+// v1.5 Mighty Bash added
 
 namespace HyperElk.Core
 {
@@ -38,12 +39,14 @@ namespace HyperElk.Core
         private string LoneProtection = "Lone Protection";
         private string LoneSpirit = "Lone Spirit";
         private string Soulshape = "Soulshape";
+        private string MightyBash = "Mighty Bash";
 
 
         //Talents
         bool TalentBristlingFur => API.PlayerIsTalentSelected(1, 3);
         bool TalentRenewal => API.PlayerIsTalentSelected(2, 2);
         bool TalentBalanceAffinity => API.PlayerIsTalentSelected(3, 1);
+        bool TalentMightyBash => API.PlayerIsTalentSelected(4, 1);
         bool TalentSouloftheForest => API.PlayerIsTalentSelected(5, 1);
         bool TalentGalacticGuardian => API.PlayerIsTalentSelected(5, 2);
         bool TalentIncarnation => API.PlayerIsTalentSelected(5, 3);
@@ -86,7 +89,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.4");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.5");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, "D3");
@@ -108,6 +111,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SkullBash, "F12");
             CombatRoutine.AddSpell(StampedingRoar, "NumPad5");
             CombatRoutine.AddSpell(Typhoon, "F8");
+            CombatRoutine.AddSpell(MightyBash, "D1");
             CombatRoutine.AddSpell(RavenousFrenzy, "D1");
             CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
             CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
@@ -170,9 +174,14 @@ namespace HyperElk.Core
                     API.CastSpell(SkullBash);
                     return;
                 }
-                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
+                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
                 {
                     API.CastSpell(RacialSpell1);
+                    return;
+                }
+                if (API.CanCast(MightyBash) && isInterrupt && TalentMightyBash && isMelee && API.SpellISOnCooldown(SkullBash))
+                {
+                    API.CastSpell(MightyBash);
                     return;
                 }
                 if (API.PlayerHealthPercent <= BarkskinLifePercent && PlayerLevel >= 24 && API.CanCast(Barkskin))
