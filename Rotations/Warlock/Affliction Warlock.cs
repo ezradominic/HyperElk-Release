@@ -56,6 +56,8 @@ namespace HyperElk.Core
 
 
         //Misc
+        private static readonly Stopwatch DumpWatch = new Stopwatch();
+
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
@@ -209,6 +211,17 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerCurrentSoulShards <= 0)
+            {
+                API.WriteLog("No More Shards left.");
+                DumpWatch.Stop();
+                DumpWatch.Reset();
+            }
+            if (DumpShards && DumpWatch.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
+            {
+                API.CastSpell(MaleficRapture);
+                return;
+            }
             if (IsMouseover)
             {
                 if (UseCO)
@@ -277,11 +290,6 @@ namespace HyperElk.Core
             //ROTATION AOE
             if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
-                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
                 //actions.aoe=phantom_singularity
                 //PhantomSingularity
                 if (TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity))
@@ -348,7 +356,8 @@ namespace HyperElk.Core
                 }
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11)
                 {
-                    API.CastSpell(MaleficRapture);
+                    DumpWatch.Start();
+                    API.WriteLog("Starting Dump Shards.");
                     return;
                 }
                 //DecimatingBolt
@@ -433,11 +442,6 @@ namespace HyperElk.Core
             //ROTATION SINGLE TARGET
             if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
             {
-                if (DumpShards && LastMR && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 1 && PlayerLevel >= 11)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
                 //actions+=/agony,if=dot.agony.remains<4
                 //Agony
                 if (!CastingAgony && !CastingSOC && !LastSeed && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
@@ -540,7 +544,8 @@ namespace HyperElk.Core
                 }
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11)
                 {
-                    API.CastSpell(MaleficRapture);
+                    DumpWatch.Start();
+                    API.WriteLog("Starting Dump Shards.");
                     return;
                 }
                 //DecimatingBolt
