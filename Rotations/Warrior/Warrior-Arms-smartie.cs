@@ -11,6 +11,7 @@
 // v1.9 condemn fix hopefully
 // v2.0 new apl
 // v2.1 small adjustments
+// v2.2 ravager fix
 
 namespace HyperElk.Core
 {
@@ -108,7 +109,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.1");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.2");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -442,7 +443,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/ravager,if=buff.avatar.remains<18&!dot.ravager.remains
-                    if (API.CanCast(Ravager) && TalentRavager && API.TargetHasDebuff(ColossusSmash) && PlayerCovenantSettings != "Venthyr" && IsRavager && BladestormToggle)
+                    if (API.CanCast(Ravager) && TalentRavager && API.TargetHasDebuff(ColossusSmash) && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
