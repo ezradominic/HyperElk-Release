@@ -13,6 +13,7 @@
 // v2.1 small adjustments
 // v2.2 ravager fix
 // v2.25 small apl change
+// v2.3 another ravager fix
 
 namespace HyperElk.Core
 {
@@ -110,7 +111,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.25");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.3");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -345,7 +346,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.execute+=/ravager,if=buff.avatar.remains<18&!dot.ravager.remains
-                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && API.PlayerBuffTimeRemaining(Avatar) < 1800 && API.PlayerHasBuff(Avatar))
+                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && (API.PlayerBuffTimeRemaining(Avatar) < 1800 || !TalentAvatar))
                     {
                         API.CastSpell(Ravager);
                         return;
@@ -444,7 +445,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/ravager,if=buff.avatar.remains<18&!dot.ravager.remains
-                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && API.PlayerBuffTimeRemaining(Avatar) < 1800 && API.PlayerHasBuff(Avatar))
+                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && (API.PlayerBuffTimeRemaining(Avatar) < 1800 || !TalentAvatar))
                     {
                         API.CastSpell(Ravager);
                         return;
