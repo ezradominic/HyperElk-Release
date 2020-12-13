@@ -113,9 +113,9 @@ namespace HyperElk.Core
         }
         private float FocusRegen => (10f * (1f + API.PlayerGetHaste)) * (PlayerHasBuff(Trueshot) ? 15 / 10 : 1);
         private float FocusTimeToMax => (API.PlayerMaxFocus - API.PlayerFocus) * 100f / FocusRegen;
-        private float AimedShotCastTime => (250f / (1f + (API.PlayerGetHaste))) / (PlayerHasBuff(Trueshot) ? 2 : 1);
-        private float RapidFireChannelTime => 300f / (1f + (API.PlayerGetHaste));
-        private float SteadyShot_CastTime => 180f / (1f + (API.PlayerGetHaste));
+        private float AimedShotCastTime => ((250f / (1f + (API.PlayerGetHaste))) / (PlayerHasBuff(Trueshot) ? 2 : 1) * (PlayerHasBuff(Lock_and_Load) ? 0 : 1));
+        private float RapidFireChannelTime => 200f / (1f + (API.PlayerGetHaste));
+        private float SteadyShot_CastTime => 175f / (1f + (API.PlayerGetHaste));
         private float gcd => API.SpellGCDTotalDuration;
         private static bool PlayerHasBuff(string buff)
         {
@@ -125,8 +125,7 @@ namespace HyperElk.Core
         {
             return API.PlayerRaceName == race && PlayerRaceSettings == race;
         }
-        private int ca_values => (Talent_CarefulAim ? 1 : 0) + (API.TargetHealthPercent > 70 ? 1 : 0);
-        private bool ca_active => ca_values == 2;
+        private bool ca_active => (Talent_CarefulAim ? true : false) && (API.TargetHealthPercent > 70 ? true : false);
 
         private float AimedShotCooldown => (1200f / (1f + (API.PlayerGetHaste))) / (PlayerHasBuff(Trueshot) ? 22 / 10 : 1);
         private float FullRechargeTime(string spellname, float spellcooldown_max)
@@ -234,6 +233,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+           // API.WriteLog("debug: " + ca_active);
             if (API.PlayerIsMounted || API.PlayerIsCasting || API.PlayerHasBuff(Aspect_of_the_Turtle) || API.PlayerHasBuff(Feign_Death))
             {
                 return;
@@ -315,70 +315,78 @@ namespace HyperElk.Core
             }
             #region opener
 
-                if (API.PlayerTimeInCombat <= 1700 && IsCooldowns && (!IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE)))
+            if (API.PlayerTimeInCombat <= 1700 && IsCooldowns && (!IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE)))
+            {
+                if (API.CanCast(Double_Tap))
                 {
-                    if (API.CanCast(Double_Tap))
-                    {
-                        API.CastSpell(Double_Tap);
-                        return;
-                    }
-                    if (API.CanCast(Aimed_Shot) && API.SpellCharges(Aimed_Shot) >= 2 && !PlayerHasBuff(Trueshot))
-                    {
-                        API.CastSpell(Aimed_Shot);
-                        return;
-                    }
-                    if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && (API.LastSpellCastInGame == Steady_Shot || API.PlayerCurrentCastSpellID == 56641) && (PlayerHasBuff(Steady_Focus) && !IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE)
-    && (API.PlayerBuffTimeRemaining(Steady_Focus) < 500 || !PlayerHasBuff(Steady_Focus)))
-    && InRange)
-                    {
-                        API.CastSpell(Steady_Shot);
-                        return;
-                    }
-                    if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
-                    {
-                        API.CastSpell(Explosive_Shot);
-                        return;
-                    }
-                    if (API.CanCast(Wild_Spirits) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                    {
-                        API.CastSpell(Wild_Spirits);
-                        return;
-                    }
-                    if (API.CanCast(Resonating_Arrow) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                    {
-                        API.CastSpell(Resonating_Arrow);
-                        return;
-                    }
-                    if (API.CanCast(Volley) && InRange)
-                    {
-                        API.CastSpell(Volley);
-                        return;
-                    }
-                    if (API.CanCast(Arcane_Shot) && PlayerHasBuff(Precise_Shots) && API.PlayerFocus > 80 && InRange)
-                    {
-                        API.CastSpell(Arcane_Shot);
-                        return;
-                    }
-                    if (API.CanCast(Trueshot) && InRange && (API.TargetHasDebuff(Resonating_Arrow) || API.TargetHasDebuff(Wild_Mark) || (API.SpellCDDuration(Resonating_Arrow) >gcd && API.SpellCDDuration(Wild_Mark) > gcd)))
-                    {
-                        API.CastSpell(Trueshot);
-                        return;
-                    }
-                    if (API.CanCast(Aimed_Shot) && InRange)
-                    {
-                        API.CastSpell(Aimed_Shot);
-                        return;
-                    }
-                    if (API.CanCast(Rapid_Fire) && InRange)
-                    {
-                        API.CastSpell(Rapid_Fire);
-                        return;
-                    }
-                    if (API.CanCast(Steady_Shot) && (API.PlayerFocus < (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.SpellCDDuration(Aimed_Shot) > SteadyShot_CastTime && API.SpellCDDuration(Rapid_Fire) > SteadyShot_CastTime) && InRange)
-                    {
-                        API.CastSpell(Steady_Shot);
-                        return;
-                    }
+                    API.CastSpell(Double_Tap);
+                    return;
+                }
+                if (API.CanCast(Aimed_Shot) && API.SpellCharges(Aimed_Shot) >= 2 && !PlayerHasBuff(Trueshot))
+                {
+                    API.CastSpell(Aimed_Shot);
+                    return;
+                }
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame == Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
+                if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                {
+                    API.CastSpell(Explosive_Shot);
+                    return;
+                }
+                if (API.CanCast(Wild_Spirits) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Wild_Spirits);
+                    return;
+                }
+                if (API.CanCast(Resonating_Arrow) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell(Resonating_Arrow);
+                    return;
+                }
+                if (API.CanCast(Volley) && InRange)
+                {
+                    API.CastSpell(Volley);
+                    return;
+                }
+                if (API.CanCast(Arcane_Shot) && PlayerHasBuff(Precise_Shots) && API.PlayerFocus > 80 && InRange)
+                {
+                    API.CastSpell(Arcane_Shot);
+                    return;
+                }
+                if (API.CanCast(Trueshot) && InRange && (API.TargetHasDebuff(Resonating_Arrow) || API.TargetHasDebuff(Wild_Mark) || (API.SpellCDDuration(Resonating_Arrow) > gcd && API.SpellCDDuration(Wild_Mark) > gcd)))
+                {
+                    API.CastSpell(Trueshot);
+                    return;
+                }
+                if (API.CanCast(Aimed_Shot) && InRange)
+                {
+                    API.CastSpell(Aimed_Shot);
+                    return;
+                }
+                if (API.CanCast(Rapid_Fire) && InRange)
+                {
+                    API.CastSpell(Rapid_Fire);
+                    return;
+                }
+                if (API.CanCast(Steady_Shot) && (API.PlayerFocus < (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.SpellCDDuration(Aimed_Shot) > SteadyShot_CastTime && API.SpellCDDuration(Rapid_Fire) > SteadyShot_CastTime) && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
             }
 
             
@@ -436,9 +444,17 @@ namespace HyperElk.Core
                 #endregion
                 #region ST
                 //actions.st = steady_shot,if= talent.steady_focus & (prev_gcd.1.steady_shot & buff.steady_focus.remains < 5 | buff.steady_focus.down)
-                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && (API.LastSpellCastInGame == Steady_Shot || API.PlayerCurrentCastSpellID == 56641) && (PlayerHasBuff(Steady_Focus)
-    && (API.PlayerBuffTimeRemaining(Steady_Focus) < 500 || !PlayerHasBuff(Steady_Focus)))
-    && InRange)
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame == Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                 {
                     API.CastSpell(Steady_Shot);
                     return;
@@ -571,9 +587,17 @@ namespace HyperElk.Core
             else
             {
                 //actions.trickshots = steady_shot,if= talent.steady_focus & in_flight & buff.steady_focus.remains < 5
-                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && (API.LastSpellCastInGame == Steady_Shot || API.PlayerCurrentCastSpellID == 56641) && (API.PlayerHasBuff(Steady_Focus, false, false)
-&& API.PlayerBuffTimeRemaining(Steady_Focus) < 500 || !PlayerHasBuff(Steady_Focus))
-&& InRange)
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                {
+                    API.CastSpell(Steady_Shot);
+                    return;
+                }
+                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame == Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                 {
                     API.CastSpell(Steady_Shot);
                     return;
