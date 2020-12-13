@@ -12,6 +12,7 @@
 // v2.0 new apl
 // v2.1 small adjustments
 // v2.2 ravager fix
+// v2.25 small apl change
 
 namespace HyperElk.Core
 {
@@ -109,7 +110,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.2");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.25");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -311,8 +312,8 @@ namespace HyperElk.Core
                     API.CastSpell(AncientAftershock);
                     return;
                 }
-                //actions+=/sweeping_strikes,if=spell_targets.whirlwind>1&cooldown.bladestorm.remains>12
-                if (API.CanCast(SweepingStrikes) && PlayerLevel >= 22 && !API.PlayerHasBuff(SweepingStrikes) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE && (API.SpellCDDuration(Bladestorm) > 1200 && IsBladestorm && BladestormToggle && !TalentRavager || !BladestormToggle || !IsBladestorm || TalentRavager)))
+                //actions+=/sweeping_strikes,if=spell_targets.whirlwind>1&(cooldown.bladestorm.remains>15|talent.ravager.enabled)
+                if (API.CanCast(SweepingStrikes) && PlayerLevel >= 22 && !API.PlayerHasBuff(SweepingStrikes) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE && (API.SpellCDDuration(Bladestorm) > 1500 && IsBladestorm && BladestormToggle && !TalentRavager || !BladestormToggle || !IsBladestorm || TalentRavager)))
                 {
                     API.CastSpell(SweepingStrikes);
                     return;
@@ -344,7 +345,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.execute+=/ravager,if=buff.avatar.remains<18&!dot.ravager.remains
-                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && API.PlayerBuffTimeRemaining(Avatar) < 1800)
+                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && API.PlayerBuffTimeRemaining(Avatar) < 1800 && API.PlayerHasBuff(Avatar))
                     {
                         API.CastSpell(Ravager);
                         return;
@@ -443,7 +444,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/ravager,if=buff.avatar.remains<18&!dot.ravager.remains
-                    if (API.CanCast(Ravager) && TalentRavager && API.TargetHasDebuff(ColossusSmash) && IsRavager && BladestormToggle)
+                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && API.PlayerBuffTimeRemaining(Avatar) < 1800 && API.PlayerHasBuff(Avatar))
                     {
                         API.CastSpell(Ravager);
                         return;
