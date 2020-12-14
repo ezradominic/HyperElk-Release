@@ -243,7 +243,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {
@@ -308,7 +308,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (ProwlOOC && API.CanCast(Prowl) && PlayerLevel >= 17 && !API.PlayerHasBuff(Prowl) && !API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {

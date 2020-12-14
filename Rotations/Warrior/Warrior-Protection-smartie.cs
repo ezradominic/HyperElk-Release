@@ -175,6 +175,8 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerCurrentCastTimeRemaining > 40)
+                return;
             if (isInterrupt && API.CanCast(Pummel) && IsMelee && PlayerLevel >= 7)
             {
                 API.CastSpell(Pummel);

@@ -200,7 +200,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (!API.PlayerIsMounted)
             {
@@ -250,7 +250,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (AutoWolf && API.CanCast(GhostWolf) && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
             {

@@ -11,6 +11,7 @@
 // v1.7 convoke update
 // v1.8 Racials and Trinkets
 // v1.9 Mighty bash added
+// v2.0 core update
 
 using System.Diagnostics;
 
@@ -117,7 +118,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v1.9");
+            API.WriteLog("Welcome to smartie`s Balance Druid v2.0");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -247,7 +248,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {
@@ -307,7 +308,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (API.CanCast(TravelForm) && AutoTravelForm && API.PlayerIsOutdoor && !API.PlayerHasBuff(TravelForm))
             {
