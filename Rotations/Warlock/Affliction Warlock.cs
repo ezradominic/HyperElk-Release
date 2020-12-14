@@ -61,7 +61,7 @@ namespace HyperElk.Core
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
-        private bool NotCasting => !API.PlayerIsCasting;
+//        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int ShoulShardNumberMaleficRapture => CombatRoutine.GetPropertyInt("SoulShardNumberMaleficRapture");
@@ -211,7 +211,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerCurrentSoulShards <= 0)
+            if (DumpShards && API.PlayerCurrentSoulShards <= 0)
             {
                 API.WriteLog("No More Shards left.");
                 DumpWatch.Stop();
@@ -268,7 +268,7 @@ namespace HyperElk.Core
                     return;
                 }
                 // Health Funnel
-                if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+                if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
                 {
                     API.CastSpell(HealthFunnel);
                     return;
@@ -299,7 +299,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/haunt
                 //Haunt 
-                if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && TalentHaunt && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 45)
+                if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && API.PlayerCurrentCastTimeRemaining > 40 && TalentHaunt && NotMoving && IsRange && NotChanneling && PlayerLevel >= 45)
                 {
                     API.CastSpell(Haunt);
                     return;
@@ -328,7 +328,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
@@ -433,7 +433,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/shadow_bolt
                 //ShadowBolt
-                if (API.CanCast(ShadowBolt) && NotCasting && !TalentDrainSoul && PlayerLevel >= 1)
+                if (API.CanCast(ShadowBolt) && !TalentDrainSoul && API.PlayerCurrentCastTimeRemaining > 40 && PlayerLevel >= 1)
                 {
                     API.CastSpell(ShadowBolt);
                     return;
@@ -570,7 +570,7 @@ namespace HyperElk.Core
                 }
                 //actions+=/shadow_bolt
                 //ShadowBolt
-                if (API.CanCast(ShadowBolt) && NotMoving && NotCasting && IsRange && NotChanneling && !TalentDrainSoul && PlayerLevel >= 1)
+                if (API.CanCast(ShadowBolt) && NotMoving && IsRange && NotChanneling && !TalentDrainSoul && PlayerLevel >= 1)
                 {
                     API.CastSpell(ShadowBolt);
                     return;
@@ -588,27 +588,27 @@ namespace HyperElk.Core
                 return;
             }
             //Summon Imp
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
             {
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
             {
                 API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
             {
                 API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
             {
                 API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonFelhunter);

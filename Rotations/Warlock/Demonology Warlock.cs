@@ -53,7 +53,7 @@ namespace HyperElk.Core
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
-        private bool NotCasting => !API.PlayerIsCasting;
+//        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
 
@@ -138,7 +138,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (NotMoving && NotCasting && IsRange && NotChanneling)
+            if (NotMoving && IsRange && API.PlayerCurrentCastTimeRemaining > 40 && NotChanneling)
             {
                 //actions+=/run_action_list,name=summon_tyrant,if=variable.tyrant_ready
                 if (API.CanCast(SummonDemonicTyrant))
@@ -318,31 +318,31 @@ namespace HyperElk.Core
         public override void OutOfCombatPulse()
         {
             //Summon Imp
-            if (API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (API.CanCast(SummonImp) && !API.PlayerHasPet && API.PlayerCurrentCastTimeRemaining > 40 && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
             {
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && API.PlayerCurrentCastTimeRemaining > 40 && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
             {
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (API.CanCast(SummonSuccubus) && !API.PlayerHasPet && API.PlayerCurrentCastTimeRemaining > 40 && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
             {
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (API.CanCast(SummonFelhunter) && !API.PlayerHasPet && API.PlayerCurrentCastTimeRemaining > 40 && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
             {
                 API.CastSpell(SummonFelhunter);
                 return;
             }
             //Summon Felguard
-            if (API.CanCast(SummonFelguard) && !API.PlayerHasPet && (isMisdirection == "Felguard") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (API.CanCast(SummonFelguard) && !API.PlayerHasPet && API.PlayerCurrentCastTimeRemaining > 40 && (isMisdirection == "Felguard") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
             {
                 API.CastSpell(SummonFelguard);
                 return;
