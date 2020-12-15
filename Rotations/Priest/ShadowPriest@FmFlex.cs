@@ -170,7 +170,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerIsCasting && !ChannelingMindFlay && !ChannelingMindSear)
+            if (API.PlayerIsCasting(true) && !ChannelingMindFlay && !ChannelingMindSear)
                 return;
             if (isInterrupt && API.CanCast(Silence) && PlayerLevel >= 27)
             {
@@ -318,14 +318,14 @@ namespace HyperElk.Core
                     return;
                 }
 
-                if (!API.PlayerIsCasting && PlayerCovenantSettings == "Venthyr" && API.CanCast(Mindgames))
+                if (!API.PlayerIsCasting(true) && PlayerCovenantSettings == "Venthyr" && API.CanCast(Mindgames))
                 {
                     API.CastSpell(Mindgames);
                     return;
                 }
             }
 
-            if ((!API.PlayerIsCasting || ChannelingMindFlay) && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if ((!API.PlayerIsCasting(true) || ChannelingMindFlay) && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) &&
                     (TalentMindbender ? API.SpellISOnCooldown(Mindbender) : API.SpellISOnCooldown(Shadowfiend)))
@@ -441,7 +441,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,if=buff.dark_thoughts.up&variable.dots_up,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if ((!API.PlayerIsCasting || ChannelingMindSear) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if ((!API.PlayerIsCasting(true) || ChannelingMindSear) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 if (API.PlayerHasBuff(DarkThoughts))
                 {
@@ -517,7 +517,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_sear,target_if=spell_targets.mind_sear>variable.mind_sear_cutoff,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2
-            if ((!API.PlayerIsCasting || ChannelingMindFlay) && IsAOE && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if ((!API.PlayerIsCasting(true) || ChannelingMindFlay) && IsAOE && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (API.TargetUnitInRangeCount > 1)
                 {
@@ -527,7 +527,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if ((!API.PlayerIsCasting) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if ((!API.PlayerIsCasting(true)) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 API.CastSpell(MindFlay);
                 return;

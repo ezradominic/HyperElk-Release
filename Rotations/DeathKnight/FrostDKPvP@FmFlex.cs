@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace HyperElk.Core
 {
-    public class PvpFrostDK : CombatRoutine
+    public class LevelingDK : CombatRoutine
     {
 
         //CBProperties
@@ -27,6 +27,7 @@ namespace HyperElk.Core
         private string EmpowerRuneWeapon = "Empower Rune Weapon";
         private string FrostwyrmsFury = "Frostwyrm's Fury";
         private string Frostscythe = "Frostscythe";
+        private string BreathofSindragosa = "Breath of Sindragosa";
         private string GlacialAdvance = "Glacial Advance";
         private string HornofWinter = "Horn of Winter";
         private string ChillStreak = "Chill Streak";
@@ -110,6 +111,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ChillStreak, "D9", "None");
             CombatRoutine.AddSpell(FrostwyrmsFury, "F6", "None");
             CombatRoutine.AddSpell(Frostscythe, "D1");
+            CombatRoutine.AddSpell(BreathofSindragosa, "D1");
             CombatRoutine.AddSpell(GlacialAdvance, "D1");
             CombatRoutine.AddSpell(HornofWinter, "D1");
             CombatRoutine.AddSpell(EmpowerRuneWeapon, "D1");
@@ -137,11 +139,16 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Rime);
             CombatRoutine.AddBuff(KillingMachine);
             CombatRoutine.AddBuff(PillarofFrost);
+            CombatRoutine.AddBuff(BreathofSindragosa);
             CombatRoutine.AddBuff(RemorselessWinter);
             CombatRoutine.AddBuff(EradicatingBlow);
             CombatRoutine.AddBuff(UnleashedFrenzy);
 
             CombatRoutine.AddDebuff(FrostFever);
+            CombatRoutine.AddDebuff(ChainsofIce);
+
+
+
 
 
             CombatRoutine.AddProp(AntiMagicShell, AntiMagicShell + " Life Percent", percentListProp, "Life percent at which" + AntiMagicShell + "is used, set to 0 to disable", "Defense", 4);
@@ -159,6 +166,9 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            try
+            {
+
                 if (API.PlayerIsCasting())
                     return;
                 //DEF
@@ -184,14 +194,26 @@ namespace HyperElk.Core
                     API.CastSpell(MindFreeze);
                     return;
                 }
-
-            if (((API.PlayerHealthPercent < DeathStrikeLifePercent) || (API.PlayerHealthPercent <= DeathStrikeProcLifePercent && API.PlayerHasBuff(DarkSuccor))) && API.CanCast(DeathStrike, true, true) && IsMelee)
+                if (API.CanCast(ChainsofIce) && CurrentRune >= 1 && !API.TargetHasDebuff(ChainsofIce, false, false) && API.TargetRange > 8)
+                {
+                    API.CastSpell(ChainsofIce);
+                    return;
+                }
+                if (((API.PlayerHealthPercent < DeathStrikeLifePercent && CurrentRP >= 45) || (API.PlayerHealthPercent <= DeathStrikeProcLifePercent && API.PlayerHasBuff(DarkSuccor))) && API.CanCast(DeathStrike, true, true) && IsMelee)
                 {
                     API.CastSpell(DeathStrike);
                     return;
                 }
+            }
+            catch (System.IndexOutOfRangeException e)  // CS0168
+            {
+                API.WriteLog("test1");
+                API.WriteLog(e.StackTrace);
+            }
             //COVE
             //covenants->add_action("deaths_due,if=raid_event.adds.in>15|!raid_event.adds.exists|active_enemies>=2", "Covenant Abilities");
+            try
+            {
                 if (PlayerCovenantSettings == "Night Fae" && API.CanCast(DeathsDue) && API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && CurrentRune >= 1 && IsMelee && CurrentRP > 10)
                 {
                     API.CastSpell(DeathsDue);
@@ -205,6 +227,16 @@ namespace HyperElk.Core
                 }
                 //covenants->add_action("swarming_mist,if=active_enemies>=2&!talent.breath_of_sindragosa");
                 if (IsAOE && IsCooldowns && API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && PlayerCovenantSettings == "Venthyr" && !TalentBreathOfSindra && API.CanCast(SwarmingMist) && CurrentRune >= 1 && IsMelee)
+                {
+                    API.CastSpell(SwarmingMist);
+                    return;
+                }
+                //covenants->add_action("swarming_mist,if=talent.breath_of_sindragosa&
+                //(buff.breath_of_sindragosa.up&(active_enemies=1&runic_power.deficit>40|active_enemies>=2&runic_power.deficit>60)
+                //|!buff.breath_of_sindragosa.up&cooldown.breath_of_sindragosa.remains)");
+                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && TalentBreathOfSindra && API.CanCast(SwarmingMist) && CurrentRune >= 1 && IsMelee
+                    && ((API.PlayerHasBuff(BreathofSindragosa, false, false) && API.PlayerUnitInMeleeRangeCount > AOEUnitNumber ? RPDeficit > 60 : RPDeficit > 40) ||
+                    (!API.PlayerHasBuff(BreathofSindragosa, false, false) && API.SpellISOnCooldown(BreathofSindragosa))))
                 {
                     API.CastSpell(SwarmingMist);
                     return;
@@ -246,6 +278,11 @@ namespace HyperElk.Core
                     API.CastSpell(EmpowerRuneWeapon);
                     return;
                 }
+                if (IsCooldowns && TalentBreathOfSindra && API.CanCast(EmpowerRuneWeapon) && RPDeficit > 40 && CurrentRune < 5 && API.PlayerHasBuff(BreathofSindragosa) && IsMelee)
+                {
+                    API.CastSpell(EmpowerRuneWeapon);
+                    return;
+                }
                 if (IsCooldowns && TalentIcecap && API.CanCast(EmpowerRuneWeapon) && API.CanCast(EmpowerRuneWeapon) && API.PlayerCurrentRunes < 3 && IsMelee)
                 {
                     API.CastSpell(EmpowerRuneWeapon);
@@ -257,6 +294,13 @@ namespace HyperElk.Core
       cooldowns -> add_action( this, "Pillar of Frost", "if=talent.obliteration&(talent.gathering_storm.enabled&buff.remorseless_winter.up|!talent.gathering_storm.enabled)" );
 
             */
+                if (IsCooldowns && PlayerLevel >= 29 && API.CanCast(PillarofFrost) && TalentBreathOfSindra &&
+                (((!API.SpellISOnCooldown(BreathofSindragosa) || API.PlayerHasBuff(BreathofSindragosa)) && RPDeficit < 60) || API.SpellCDDuration(BreathofSindragosa) >= 5000)
+                && IsMelee)
+                {
+                    API.CastSpell(PillarofFrost);
+                    return;
+                }
                 if (IsCooldowns && PlayerLevel >= 29 && API.CanCast(PillarofFrost) && TalentIcecap && API.PlayerHasBuff(PillarofFrost)
                 && IsMelee)
                 {
@@ -267,6 +311,13 @@ namespace HyperElk.Core
                 && IsMelee)
                 {
                     API.CastSpell(PillarofFrost);
+                    return;
+                }
+
+
+                if (IsCooldowns && TalentBreathOfSindra && API.CanCast(BreathofSindragosa) && API.PlayerHasBuff(PillarofFrost) && IsMelee)
+                {
+                    API.CastSpell(BreathofSindragosa);
                     return;
                 }
 
@@ -325,6 +376,146 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(ChillStreak);
                     return;
+                }
+
+                if (TalentBreathOfSindra && API.SpellCDDuration(BreathofSindragosa) <= 1000)
+                {
+                    //bos_pooling -> add_action( this, "Howling Blast", "if=buff.rime.up", "Breath of Sindragosa pooling rotation : starts 10s before BoS is available" );
+                    if (API.PlayerHasBuff(Rime) && API.CanCast(HowlingBlast) && API.TargetRange <= 30)
+                    {
+                        API.CastSpell(HowlingBlast);
+                        return;
+                    }
+                    // bos_pooling -> add_action( this, "Remorseless Winter", "if=active_enemies>=2|rune.time_to_5<=gcd&(talent.gathering_storm|conduit.everfrost|runeforge.biting_cold)" );
+
+                    if ((TalentGatheringStorm && CurrentRune < 5 || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber) && CurrentRune >= 1 && API.CanCast(RemorselessWinter) && IsMelee)
+                    {
+                        API.CastSpell(RemorselessWinter);
+                        return;
+                    }
+                    //bos_pooling -> add_action( this, "Obliterate", "target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)*death_knight.runeforge.razorice,if=runic_power.deficit>=25", "'target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)*death_knight.runeforge.razorice' Repeats a lot, this is intended to target the highest priority enemy with an ability that will apply razorice if runeforged. That being an enemy with 0 stacks, or an enemy that the debuff will soon expire on." );
+
+                    if (CurrentRune >= 2 && RPDeficit >= 25 && API.CanCast(Obliterate) && IsMelee)
+                    {
+                        API.CastSpell(Obliterate);
+                        return;
+                    }
+                    //bos_pooling -> add_talent( this, "Glacial Advance", "if=runic_power.deficit<20&spell_targets.glacial_advance>=2&cooldown.pillar_of_frost.remains>5" );
+
+                    if (API.PlayerHealthPercent >= DeathStrikeLifePercent && TalentGlacialAdvance && RPDeficit < 20
+                        && API.SpellCDDuration(PillarofFrost) > 500 && API.CanCast(GlacialAdvance) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsMelee)
+                    {
+                        API.CastSpell(GlacialAdvance);
+                        return;
+                    }
+
+                    // bos_pooling -> add_action( this, "Frost Strike", "target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)
+                    //*death_knight.runeforge.razorice,if=runic_power.deficit<20&cooldown.pillar_of_frost.remains>5" );
+
+                    if (API.PlayerHealthPercent >= DeathStrikeLifePercent && RPDeficit < 20 && API.SpellCDDuration(PillarofFrost) > 500 && API.CanCast(FrostStrike) && IsMelee)
+                    {
+                        API.CastSpell(FrostStrike);
+                        return;
+                    }
+                    // bos_pooling->add_talent(this, "Frostscythe", "if=buff.killing_machine.react&runic_power.deficit>(15+talent.runic_attenuation*3)&spell_targets.frostscythe>=2&(buff.deaths_due.stack=8|!death_and_decay.ticking|!covenant.night_fae)");
+                    //  bos_pooling->add_talent(this, "Frostscythe", "if=runic_power.deficit>=(35+talent.runic_attenuation*3)&spell_targets.frostscythe>=2&(buff.deaths_due.stack=8|!death_and_decay.ticking|!covenant.night_fae)");
+
+                    if (TalentFrostscythe && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && RPDeficit >= 15 + (TalentRunicAtt ? 15 : 0) && CurrentRune >= 1 && API.PlayerHasBuff(KillingMachine) && API.CanCast(Frostscythe) && API.TargetRange <= 8)
+                    {
+                        API.CastSpell(Frostscythe);
+                        return;
+                    }
+                    if (TalentFrostscythe && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && RPDeficit >= 35 + (TalentRunicAtt ? 15 : 0) && CurrentRune >= 1 && API.CanCast(Frostscythe) && API.TargetRange <= 8)
+                    {
+                        API.CastSpell(Frostscythe);
+                        return;
+                    }
+                    //bos_pooling -> add_action( this, "Obliterate", "target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)*death_knight.runeforge.razorice,if=runic_power.deficit>=(35+talent.runic_attenuation*3)" );
+                    if ((!TalentFrostscythe || TalentFrostscythe && !IsAOE) && CurrentRune >= 2 && RPDeficit >= 35 + (TalentRunicAtt ? 15 : 0) && API.CanCast(Obliterate) && IsMelee)
+                    {
+                        API.CastSpell(Obliterate);
+                        return;
+                    }
+                    //bos_pooling->add_talent(this, "Glacial Advance", "if=cooldown.pillar_of_frost.remains>rune.time_to_4&runic_power.deficit<40&spell_targets.glacial_advance>=2");
+
+                    if (API.PlayerHealthPercent >= DeathStrikeLifePercent && TalentGlacialAdvance && RPDeficit < 40
+                        && API.PlayerBuffTimeRemaining(PillarofFrost) > 300 && API.CanCast(GlacialAdvance) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsMelee)
+                    {
+                        API.CastSpell(GlacialAdvance);
+                        return;
+                    }
+                    //bos_pooling->add_action(this, "Frost Strike", "target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)*death_knight.runeforge.razorice,if=cooldown.pillar_of_frost.remains>rune.time_to_4&runic_power.deficit<40");
+
+                    if (API.PlayerHealthPercent >= DeathStrikeLifePercent && RPDeficit < 40 && API.CanCast(FrostStrike) && IsMelee)
+                    {
+                        API.CastSpell(FrostStrike);
+                        return;
+                    }
+
+                    if (CurrentRune >= 5 && API.CanCast(HowlingBlast) && !IsMelee && API.TargetRange <= 30)
+                    {
+                        API.CastSpell(HowlingBlast);
+                        return;
+                    }
+                }
+                if (TalentBreathOfSindra && API.PlayerHasBuff(BreathofSindragosa, false, false))
+                {
+                    //bos_ticking->add_action(this, "Obliterate", "target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)*death_knight.runeforge.razorice,if=runic_power<=40", "Breath of Sindragosa Active Rotation");
+
+                    if (CurrentRune >= 2 && CurrentRP <= 40 && API.CanCast(Obliterate) && IsMelee)
+                    {
+                        API.CastSpell(Obliterate);
+                        return;
+                    }
+                    //bos_ticking->add_action(this, "Remorseless Winter", "if=talent.gathering_storm|conduit.everfrost|runeforge.biting_cold|active_enemies>=2");
+
+                    if ((TalentGatheringStorm || (IsAOE && API.PlayerUnitInMeleeRangeCount > AOEUnitNumber)) && CurrentRune >= 1 && API.CanCast(RemorselessWinter) && IsMelee)
+                    {
+                        API.CastSpell(RemorselessWinter);
+                        return;
+                    }
+                    //bos_ticking->add_action(this, "Howling Blast", "if=buff.rime.up");
+                    if (API.PlayerHasBuff(Rime) && API.CanCast(HowlingBlast) && API.TargetRange <= 30)
+                    {
+                        API.CastSpell(HowlingBlast);
+                        return;
+                    }
+                    //bos_ticking->add_action(this, "Obliterate", "target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)*death_knight.runeforge.razorice,if=rune.time_to_4<gcd|runic_power<=45");
+
+                    if (CurrentRune >= 2 && (CurrentRP <= 45 || CurrentRune >= 4) && API.CanCast(Obliterate) && IsMelee)
+                    {
+                        API.CastSpell(Obliterate);
+                        return;
+                    }
+                    //bos_ticking->add_talent(this, "Frostscythe", "if=buff.killing_machine.up&spell_targets.frostscythe>=2&(!death_and_decay.ticking&covenant.night_fae|!covenant.night_fae)");
+                    if (TalentFrostscythe && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && CurrentRune >= 1 && API.PlayerHasBuff(KillingMachine) && API.CanCast(Frostscythe) && API.TargetRange <= 8)
+                    {
+                        API.CastSpell(Frostscythe);
+                        return;
+                    }
+
+                    //bos_ticking->add_talent(this, "Horn of Winter", "if=runic_power.deficit>=40&rune.time_to_3>gcd");
+
+
+                    if (TalentHornOfWinter && API.CanCast(HornofWinter) && RPDeficit >= 40 && CurrentRune < 3 && IsMelee)
+                    {
+                        API.CastSpell(HornofWinter);
+                        return;
+                    }
+                    //bos_ticking->add_talent(this, "Frostscythe", "if=spell_targets.frostscythe>=2&(buff.deaths_due.stack=8|!death_and_decay.ticking|!covenant.night_fae)");
+                    if (TalentFrostscythe && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && CurrentRune >= 1 && API.CanCast(Frostscythe) && API.TargetRange <= 8)
+                    {
+                        API.CastSpell(Frostscythe);
+                        return;
+                    }
+                    //bos_ticking->add_action(this, "Obliterate", "target_if=max:(debuff.razorice.stack+1)%(debuff.razorice.remains+1)*death_knight.runeforge.razorice,if=runic_power.deficit>25|rune>3");
+                    if ((CurrentRune > 3 || RPDeficit > 25) && API.CanCast(Obliterate) && IsMelee)
+                    {
+                        API.CastSpell(Obliterate);
+                        return;
+                    }
+                    //bos_ticking->add_action("arcane_torrent,if=runic_power.deficit>50");
+
                 }
                 if (TalentObliteration && API.PlayerHasBuff(PillarofFrost, false, false))
                 {
@@ -578,6 +769,12 @@ namespace HyperElk.Core
                 }
                 //standard->add_action("arcane_torrent");
 
+            }    
+        catch (System.IndexOutOfRangeException e)  // CS0168
+        {
+                API.WriteLog("test2");
+                API.WriteLog(e.StackTrace);
+            }
 }
         public override void OutOfCombatPulse()
         {

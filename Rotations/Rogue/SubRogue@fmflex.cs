@@ -186,7 +186,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting )
+            if (!API.PlayerIsMounted && !API.PlayerIsCasting() )
             {
                 if (API.PlayerHealthPercent <= CrimsonVialLifePercent && API.CanCast(CrimsonVial) && API.PlayerEnergy >= 20)
                 {
@@ -198,7 +198,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (!API.PlayerIsCasting)
+            if (!API.PlayerIsCasting())
             {
                 //DEF
                 if (isInterrupt && API.CanCast(Kick) && IsMelee)
@@ -438,7 +438,7 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
-            if (AutoStealth && !isStealth && !API.PlayerHasBuff(ShadowDance) && !API.PlayerHasBuff(Soulshape) && API.CanCast(Stealth) && !API.PlayerIsCasting)
+            if (AutoStealth && !isStealth && !API.PlayerHasBuff(ShadowDance) && !API.PlayerHasBuff(Soulshape) && API.CanCast(Stealth) && !API.PlayerIsCasting())
             {
                 API.CastSpell(Stealth);
                 return;
