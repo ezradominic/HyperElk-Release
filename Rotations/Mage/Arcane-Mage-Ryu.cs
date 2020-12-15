@@ -60,7 +60,7 @@ namespace HyperElk.Core
         private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
         //General
         private int Level => API.PlayerLevel;
-        private bool NotCasting => !API.PlayerIsCasting;
+       // private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
@@ -75,7 +75,7 @@ namespace HyperElk.Core
         bool ChannelingEvo => API.CurrentCastSpellID("player") == 12051;
         bool ChannelingMissile => API.CurrentCastSpellID("player") == 5143;
         private bool BLDebuffs => (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued));
-        private bool BLBuFfs => (!API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW));
+        private bool BLBuFfs => !API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW);
         public override void Initialize()
         {
             CombatRoutine.Name = "Arcane Mage by Ryu";
@@ -170,7 +170,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && NotCasting && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7  && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && API.PlayerIsCasting(false))
             {
                 API.CastSpell("Counterspell");
                 return;
@@ -267,6 +267,11 @@ namespace HyperElk.Core
                 API.CastSpell(RacialSpell1);
                 return;
             }
+            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && Level >= 13 && InRange && (API.PlayerHasBuff("Clearcasting") && Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
+            {
+                API.CastSpell("Arcane Missiles");
+                return;
+            }
             if (API.CanCast("Arcane Power") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && (Burn || Conserve && API.PlayerCurrentArcaneCharges == 4) && (IsCooldowns && UseAP == "With Cooldowns" || UseAP == "On Cooldown") && !API.PlayerHasBuff(RoP) && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
             {
                 API.CastSpell("Arcane Power");
@@ -300,11 +305,6 @@ namespace HyperElk.Core
             if (API.CanCast("Presence of Mind") && Level >= 42 && API.PlayerHasBuff("Arcane Power") && API.PlayerBuffTimeRemaining("Arcane Power") <= 400 && !API.PlayerHasBuff("Presence of Mind") && Burn && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
             {
                 API.CastSpell("Presence of Mind");
-                return;
-            }
-            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && Level >= 13 && InRange && API.PlayerHasBuff("Clearcasting") && (Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho && IsAOE) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
-            {
-                API.CastSpell("Arcane Missiles");
                 return;
             }
             if (API.CanCast("Arcane Barrage") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (IsAOE && API.TargetUnitInRangeCount >= 3 || IsAOE && API.TargetUnitInRangeCount >= 2 && Resonace) && InRange && API.PlayerCurrentArcaneCharges == 4 && (Burn || Conserve) && (API.PlayerIsMoving || !API.PlayerIsMoving))

@@ -79,7 +79,7 @@ namespace HyperElk.Core
         bool CastRune => API.PlayerLastSpell == RoP;
         bool CastTW => API.PlayerLastSpell == TimeWarp;
         private int Level => API.PlayerLevel;
-        private bool NotCasting => !API.PlayerIsCasting;
+        //private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool BLDebuffs => (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued));
         private bool BLBuFfs => (!API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW));
@@ -190,7 +190,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (isInterrupt && API.CanCast(Counterspell) && Level >= 7)
+            if (isInterrupt && API.CanCast(Counterspell) && Level >= 7 && API.PlayerIsCasting(false))
             {
                 API.CastSpell(Counterspell);
                 return;
