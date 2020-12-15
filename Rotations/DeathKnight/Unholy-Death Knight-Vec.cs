@@ -98,6 +98,7 @@ namespace HyperElk.Core
 
             }
         }
+        private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -216,7 +217,7 @@ namespace HyperElk.Core
             if (GargoyleActiveTime.IsRunning && GargoyleActiveTime.ElapsedMilliseconds > 30000) { GargoyleActiveTime.Reset(); API.WriteLog("Gargoyle ran off"); }
             //API.WriteLog("debug" + MultiDot + API.CanCast(Kill_Command) + API.TargetHasDebuff(Kill_Command, false, false)+ " " + API.PlayerUnitInMeleeRangeCount  +" "+ API.PlayerBuffStacks(Predator));
 
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
 
                 #region defensives
@@ -256,7 +257,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
                 if (API.CanCast("Mind Freeze") && isInterrupt && MeleeRange)
                 {
