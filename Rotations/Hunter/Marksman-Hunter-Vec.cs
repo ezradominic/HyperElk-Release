@@ -280,7 +280,7 @@ namespace HyperElk.Core
                 API.CastSpell(Feign_Death);
                 return;
             }
-            if (!API.PlayerHasBuff(Aspect_of_the_Turtle) && !API.PlayerIsChanneling)
+            if (!Playeriscasting && !API.PlayerIsMounted && !API.PlayerHasBuff(Aspect_of_the_Turtle) && !API.PlayerHasBuff(Feign_Death))
             {
                 if (isInterrupt && API.CanCast(Counter_Shot) && InRange && PlayerLevel >= 18)
                 {
@@ -300,8 +300,6 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (!Playeriscasting && !API.PlayerIsMounted && !API.PlayerHasBuff(Aspect_of_the_Turtle) && !API.PlayerHasBuff(Feign_Death))
-            {
                 if (API.LastSpellCastInGame == Trueshot)
                 {
                     API.WriteLog("Trueshot window open");
@@ -458,11 +456,6 @@ namespace HyperElk.Core
                     if (PlayerHasBuff(Trueshot))
                     {
                         if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
-                        {
-                            API.CastSpell(Steady_Shot);
-                            return;
-                        }
-                        if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame == Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                         {
                             API.CastSpell(Steady_Shot);
                             return;
@@ -659,11 +652,6 @@ namespace HyperElk.Core
                         API.CastSpell(Steady_Shot);
                         return;
                     }
-                    if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame == Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
-                    {
-                        API.CastSpell(Steady_Shot);
-                        return;
-                    }
                     //actions.trickshots +=/ double_tap,if= covenant.kyrian & cooldown.resonating_arrow.remains < gcd | !covenant.kyrian & !covenant.night_fae | covenant.night_fae & (cooldown.wild_spirits.remains < gcd | cooldown.trueshot.remains > 55) | target.time_to_die < 10
                     if (API.CanCast(Double_Tap) && (UseDoubleTap == "always" || (UseDoubleTap == "with Cooldowns" && IsCooldowns)) && InRange && Talent_Double_Tap && (API.SpellCDDuration(Aimed_Shot) < API.SpellCDDuration(Rapid_Fire))
     && (PlayerCovenantSettings == "Kyrian" && API.SpellCDDuration(Resonating_Arrow) < gcd || PlayerCovenantSettings != "Kyrian" && PlayerCovenantSettings != "Night Fae" || PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(Wild_Spirits) < gcd || API.SpellCDDuration(Trueshot) > 5500) || API.TargetTimeToDie < 1000))
@@ -783,7 +771,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.trickshots +=/ steady_shot
-                    if (API.CanCast(Steady_Shot) && InRange)
+                    if (API.CanCast(Steady_Shot) && API.PlayerFocus <= 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && InRange)
                     {
                         API.CastSpell(Steady_Shot);
                         return;
