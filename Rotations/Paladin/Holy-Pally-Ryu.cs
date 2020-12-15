@@ -301,6 +301,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(DivineToll + "MO");
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddMacro(LoTM + "MO");
+            CombatRoutine.AddMacro(WoG + "MO");
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
 
