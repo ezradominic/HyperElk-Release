@@ -149,7 +149,7 @@ namespace HyperElk.Core
         private int Level => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 40;
         private bool IsMelee => API.TargetRange < 12;
-        private bool NotCasting => !API.PlayerIsCasting;
+       // private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int Mana => API.PlayerMana;
