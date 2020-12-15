@@ -74,7 +74,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fire Mage by Ryu";
-            API.WriteLog("Welcome to Fire Mage by Ryu");
+            API.WriteLog("Welcome to Fire Mage v1.5 by Ryu");
             API.WriteLog("Create the following cursor macro for Flamestrike and Meteor");
             API.WriteLog("Flamestrike -- /cast [@cursor] Flamestrike");
             API.WriteLog("Meteor -- /cast [@cursor] Meteor");
@@ -154,7 +154,6 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
-            API.PlayerCurrentCastTimeRemaining
 
         }
 
