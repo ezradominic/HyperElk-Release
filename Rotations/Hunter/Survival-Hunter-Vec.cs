@@ -125,6 +125,7 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, true, false);
         }
+        private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         //CBProperties
 
 
@@ -261,7 +262,7 @@ namespace HyperElk.Core
                 CallPetTimer.Stop();
                 CallPetTimer.Reset();
             }
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting() && !API.PlayerIsChanneling && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
+            if (!API.PlayerIsMounted && !Playeriscasting && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
             {
                 if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && CallPetTimer.ElapsedMilliseconds > gcd * 20 && UseCallPet && ((API.PlayerIsInCombat && UseRevivePet == "In Combat") || (!API.PlayerIsInCombat && UseRevivePet == "Out Of Combat") || UseRevivePet == "Everytime")
                       && API.CanCast(Revive_Pet))
@@ -301,7 +302,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !API.PlayerIsCasting() && !API.PlayerIsChanneling && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
+            if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !Playeriscasting && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
             {
                 if (API.CanCast(Misdirection) && !API.PlayerHasBuff(Misdirection) && API.PlayerHasPet && Level >= 21 && (UseMisdirection == "On" || (UseMisdirection == "On AOE" & IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)))
                 {
