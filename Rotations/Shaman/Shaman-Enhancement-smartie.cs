@@ -200,7 +200,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (!API.PlayerIsMounted)
             {
@@ -209,7 +209,7 @@ namespace HyperElk.Core
                     API.CastSpell(WindShear);
                     return;
                 }
-                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && isMelee && API.SpellISOnCooldown(WindShear))
+                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(WindShear))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -250,7 +250,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (AutoWolf && API.CanCast(GhostWolf) && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
             {

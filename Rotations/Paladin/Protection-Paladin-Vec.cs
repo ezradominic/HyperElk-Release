@@ -171,6 +171,7 @@
 
         public override void Pulse()
         {
+            //API.WriteLog("debug " + API.SpellCDDuration(AvengingWrath) + " " + API.CanCast(AvengingWrath));
             if (API.PlayerIsMounted)
             {
                 if (AutoAuraSwitch && API.CanCast(CrusaderAura) && PlayerLevel >= 21 && !API.PlayerHasBuff(CrusaderAura))
@@ -266,7 +267,7 @@
                 //cds->add_talent(this, "Holy Avenger", "if=buff.avenging_wrath.up|cooldown.avenging_wrath.remains>60");
                 if (API.CanCast(HolyAvenger) && Talent_HolyAvenger && (API.PlayerHasBuff(AvengingWrath) || API.SpellCDDuration(AvengingWrath) > 6000) && IsMelee)
                 {
-                    API.CastSpell(AvengingWrath);
+                    API.CastSpell(HolyAvenger);
                     return;
                 }
                 //cds->add_action("potion,if=buff.avenging_wrath.up");

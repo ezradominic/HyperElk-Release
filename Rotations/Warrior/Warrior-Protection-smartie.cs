@@ -9,6 +9,7 @@
 // v1.7 rage update
 // v1.8 Racials and Trinkets
 // v1.9 condemn fix hopefully
+// v2.0 typo fix
 
 namespace HyperElk.Core
 {
@@ -16,6 +17,7 @@ namespace HyperElk.Core
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool IsDPS => API.ToggleIsEnabled("DPS");
+        private bool IsRavager => API.ToggleIsEnabled("Ravager");
         //Spell,Auras
         private string ShieldSlam = "Shield Slam";
         private string Devastate = "Devastate";
@@ -72,7 +74,7 @@ namespace HyperElk.Core
         private string UseHeroicThrow => heroiclist[CombatRoutine.GetPropertyInt(HeroicThrow)];
         string[] heroiclist = new string[] {"Not Used", "when out of melee", "only Mouseover", "both"};
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
-        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with cooldowns", "on AOE", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private int LastStandLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LastStand)];
         private int ShieldWallLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ShieldWall)];
@@ -87,7 +89,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v1.9");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v2.0");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam, "D4");
@@ -141,6 +143,7 @@ namespace HyperElk.Core
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Ravager");
             CombatRoutine.AddToggle("DPS");
 
             //Prop
@@ -172,6 +175,8 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerCurrentCastTimeRemaining > 40)
+                return;
             if (isInterrupt && API.CanCast(Pummel) && IsMelee && PlayerLevel >= 7)
             {
                 API.CastSpell(Pummel);
@@ -182,7 +187,7 @@ namespace HyperElk.Core
                 API.CastSpell(Shockwave);
                 return;
             }
-            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
+            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
             {
                 API.CastSpell(RacialSpell1);
                 return;
@@ -319,7 +324,7 @@ namespace HyperElk.Core
                     API.CastSpell(DemoralizingShout);
                     return;
                 }
-                if (API.CanCast(Ravager) && TalentRavager && API.PlayerRage < 70)
+                if (API.CanCast(Ravager) && TalentRavager && API.PlayerRage < 70 && IsRavager)
                 {
                     API.CastSpell(Ravager);
                     return;

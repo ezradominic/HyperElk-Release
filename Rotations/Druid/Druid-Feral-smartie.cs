@@ -7,6 +7,7 @@
 // v1.5 covenant update :-)
 // v1.6 legendary prep
 // v1.7 Racials and Trinkets
+// v1.8 Mighty Bash added
 
 using System.Diagnostics;
 
@@ -57,11 +58,13 @@ namespace HyperElk.Core
         private string LoneSpirit = "Lone Spirit";
         private string Soulshape = "Soulshape";
         private string ApexPredatorsCraving = "Apex Predator's Craving";
+        private string MightyBash = "Mighty Bash";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
         bool TalentPredator => API.PlayerIsTalentSelected(1, 1);
         bool TalentRenewal => API.PlayerIsTalentSelected(2, 2);
+        bool TalentMightyBash => API.PlayerIsTalentSelected(4, 1);
         bool TalentBalanceAffinity => API.PlayerIsTalentSelected(3, 1);
         bool TalentGuardianAffinity => API.PlayerIsTalentSelected(3, 2);
         bool TalentIncarnation => API.PlayerIsTalentSelected(5, 3);
@@ -116,7 +119,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v1.7");
+            API.WriteLog("Welcome to smartie`s Feral Druid v1.8");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -152,6 +155,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FrenziedRegeneration, "D7");
             CombatRoutine.AddSpell(Ironfur, "D8");
             CombatRoutine.AddSpell(TravelForm, "NumPad6");
+            CombatRoutine.AddSpell(MightyBash, "D1");
             CombatRoutine.AddSpell(RavenousFrenzy, "D1");
             CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
             CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
@@ -239,7 +243,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {
@@ -248,9 +252,14 @@ namespace HyperElk.Core
                     API.CastSpell(SkullBash);
                     return;
                 }
-                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
+                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
                 {
                     API.CastSpell(RacialSpell1);
+                    return;
+                }
+                if (API.CanCast(MightyBash) && isInterrupt && TalentMightyBash && isMelee && API.SpellISOnCooldown(SkullBash))
+                {
+                    API.CastSpell(MightyBash);
                     return;
                 }
                 if (API.PlayerHealthPercent <= RegrowthLifePercent && PlayerLevel >= 3 && API.CanCast(Regrowth) && API.PlayerHasBuff(PredatorySwiftness))
@@ -299,7 +308,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerIsCasting || API.PlayerIsChanneling)
+            if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (ProwlOOC && API.CanCast(Prowl) && PlayerLevel >= 17 && !API.PlayerHasBuff(Prowl) && !API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {
