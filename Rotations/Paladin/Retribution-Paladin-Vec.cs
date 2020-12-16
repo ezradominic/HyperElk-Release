@@ -108,6 +108,7 @@ namespace HyperElk.Core
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
 
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Retribution Paladin by Vec ";
@@ -178,6 +179,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(BlessingofProtection+ "MO", "F11");
             CombatRoutine.AddMacro(BlessingofProtection + "focus", "F11");
             CombatRoutine.AddMacro(FlashofLight + "focus","F12");
+            CombatRoutine.AddMacro(FlashofLight + "MO", "F12");
 
             CombatRoutine.AddConduit(RingingClarity);
 
