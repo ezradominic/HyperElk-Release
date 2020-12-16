@@ -177,6 +177,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(WordOfGlory + "focus", "F10");
             CombatRoutine.AddMacro(BlessingofProtection+ "MO", "F11");
             CombatRoutine.AddMacro(BlessingofProtection + "focus", "F11");
+            CombatRoutine.AddMacro(FlashofLight + "focus","F12");
 
             CombatRoutine.AddConduit(RingingClarity);
 
@@ -256,42 +257,52 @@ namespace HyperElk.Core
                 API.CastSpell(ShieldofVengeance);
                 return;
             }
-            if (HealFocus)
-            {
-                if (API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
-                {
-                    API.CastSpell(LayOnHands + "focus");
-                    return;
-                }
-                if (API.SpellIsCanbeCast(WordOfGlory) && API.FocusRange <= 40 && !API.FocusHasDebuff(Mindgames) && API.FocusHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
-                {
-                    API.CastSpell(WordOfGlory + "focus");
-                    return;
-                }
-                if (API.FocusRange <= 40 && !API.FocusHasDebuff(Mindgames) && API.FocusHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(BlessingofProtection) && PlayerLevel >= 10)
-                {
-                    API.CastSpell(BlessingofProtection + "focus");
-                    return;
-                }
-            }
             if (API.SpellIsCanbeCast(WordOfGlory) && !API.PlayerHasDebuff(Mindgames) && API.PlayerHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
             }
+            if (HealFocus)
+            {
+                if (!API.MacroIsIgnored(FlashofLight + "focus") && API.FocusHealthPercent <= FlashofLightLifePercentProc && !API.FocusHasDebuff(Mindgames) && !API.SpellISOnCooldown(FlashofLight) && API.FocusRange <= 40 && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
+                {
+                    API.CastSpell(FlashofLight + "focus");
+                    return;
+                }
+                if (!API.MacroIsIgnored(LayOnHands + "focus") && API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
+                {
+                    API.CastSpell(LayOnHands + "focus");
+                    return;
+                }
+                if (!API.MacroIsIgnored(WordOfGlory + "focus") && API.SpellIsCanbeCast(WordOfGlory) && API.FocusRange <= 40 && !API.FocusHasDebuff(Mindgames) && API.FocusHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
+                {
+                    API.CastSpell(WordOfGlory + "focus");
+                    return;
+                }
+                if (!API.MacroIsIgnored(BlessingofProtection + "focus") && API.FocusRange <= 40 && !API.FocusHasDebuff(Mindgames) && API.FocusHealthPercent <= BlessingofProtectionPercent && !API.SpellISOnCooldown(BlessingofProtection) && PlayerLevel >= 10)
+                {
+                    API.CastSpell(BlessingofProtection + "focus");
+                    return;
+                }
+            }
             if (IsMouseover)
             {
-                if (API.MouseoverHealthPercent <= LayOnHandsLifePercent && API.MouseoverRange <= 40 && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.MouseoverHasDebuff(Forbearance, false, false))
+                if (!API.MacroIsIgnored(FlashofLight + "MO") && API.MouseoverHealthPercent <= FlashofLightLifePercentProc && !API.MouseoverHasDebuff(Mindgames) && !API.SpellISOnCooldown(FlashofLight) && API.PlayerBuffStacks(SelflessHealer) >= 4 && PlayerLevel >= 4)
+                {
+                    API.CastSpell(FlashofLight + "MO");
+                    return;
+                }
+                if (!API.MacroIsIgnored(LayOnHands + "MO") && API.MouseoverHealthPercent <= LayOnHandsLifePercent && API.MouseoverRange <= 40 && !API.SpellISOnCooldown(LayOnHands) && PlayerLevel >= 9 && !API.MouseoverHasDebuff(Forbearance, false, false))
                 {
                     API.CastSpell(LayOnHands + "MO");
                     return;
                 }
-                if (API.SpellIsCanbeCast(WordOfGlory) && API.MouseoverRange <= 40 && !API.MouseoverHasDebuff(Mindgames) && API.MouseoverHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
+                if (!API.MacroIsIgnored(WordOfGlory + "MO") && API.SpellIsCanbeCast(WordOfGlory) && API.MouseoverRange <= 40 && !API.MouseoverHasDebuff(Mindgames) && API.MouseoverHealthPercent <= WordOfGloryLifePercent && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
                 {
                     API.CastSpell(WordOfGlory + "MO");
                     return;
                 }
-                if (API.SpellIsCanbeCast(BlessingofProtection) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofProtectionPercent && !API.SpellISOnCooldown(BlessingofProtection) && PlayerLevel >= 10)
+                if (!API.MacroIsIgnored(BlessingofProtection + "MO") && API.SpellIsCanbeCast(BlessingofProtection) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofProtectionPercent && !API.SpellISOnCooldown(BlessingofProtection) && PlayerLevel >= 10)
                 {
                     API.CastSpell(BlessingofProtection + "MO");
                     return;
