@@ -8,6 +8,7 @@
 // v1.6 legendary prep
 // v1.7 Racials and Trinkets
 // v1.8 Mighty Bash added
+// v1.9 Bloodtalons fixed
 
 using System.Diagnostics;
 
@@ -54,7 +55,7 @@ namespace HyperElk.Core
         private string RavenousFrenzy = "Ravenous Frenzy";
         private string ConvoketheSpirits = "Convoke the Spirits";
         private string AdaptiveSwarm = "Adaptive Swarm";
-        private string LoneEmpowerment= "Lone Empowerment";
+        private string LoneEmpowerment = "Lone Empowerment";
         private string LoneSpirit = "Lone Spirit";
         private string Soulshape = "Soulshape";
         private string ApexPredatorsCraving = "Apex Predator's Craving";
@@ -119,7 +120,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v1.8");
+            API.WriteLog("Welcome to smartie`s Feral Druid v1.9");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -223,6 +224,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            //API.WriteLog("Bloodtalons?: " + Bloodytalons);
             // Stopwatch stop
             if (rakewatch.IsRunning && rakewatch.ElapsedMilliseconds > 4000)
             {
@@ -405,7 +407,7 @@ namespace HyperElk.Core
                     API.CastSpell(ConvoketheSpirits);
                     return;
                 }
-                if (API.CanCast(LoneEmpowerment) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerHasBuff(TigersFury, false, false) && API.PlayerHasBuff(LoneSpirit))
+                if (API.CanCast(LoneEmpowerment) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerBuffTimeRemaining(TigersFury) >= 1000 && API.PlayerHasBuff(LoneSpirit))
                 {
                     API.CastSpell(LoneEmpowerment);
                     return;
@@ -427,220 +429,241 @@ namespace HyperElk.Core
                     API.CastSpell(FeralFrenzy);
                     return;
                 }
-                // Single Target rota
-                if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
+                if (!API.PlayerHasBuff(Prowl))
                 {
-                    //Finisher
-                    if (API.PlayerComboPoints > 4)
+                    // Single Target rota
+                    if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
                     {
-                        if (TalentSavageRoar && isMelee && API.CanCast(SavageRoar) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24) && !API.PlayerHasBuff(SavageRoar))
+                        //Finisher
+                        if (API.PlayerComboPoints > 4)
                         {
-                            API.CastSpell(SavageRoar);
-                            return;
-                        }
-                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerEnergy >= 50 && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
-                        {
-                            API.CastSpell(FerociousBite);
-                            return;
-                        }
-                        if (isMelee && PlayerLevel >= 21 && API.CanCast(Rip) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!API.TargetHasDebuff(Rip) || API.TargetDebuffRemainingTime(Rip) <= 300))
-                        {
-                            API.CastSpell(Rip);
-                            return;
-                        }
-                    }
-                    //Generator
-                    if (API.PlayerComboPoints < 5)
-                    {
-                        if (Bloodytalons)
-                        {
-                            if (API.CanCast(Rake) && PlayerLevel >= 10 && (API.TargetDebuffRemainingTime(Rake) <= 360 && TalentBrutalSlash || !TalentBrutalSlash && !rakewatch.IsRunning) && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                            if (TalentSavageRoar && isMelee && API.CanCast(SavageRoar) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24) && !API.PlayerHasBuff(SavageRoar))
                             {
-                                API.CastSpell(Rake);
-                                rakewatch.Start();
-                                //API.WriteLog("Starting Rakewatch.");
+                                API.CastSpell(SavageRoar);
                                 return;
                             }
-                            if (isThrashMelee && PlayerLevel >= 11 && !thrashwatch.IsRunning && API.CanCast(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(Thrash);
-                                thrashwatch.Start();
-                                //API.WriteLog("Starting thrashwatch.");
-                                return;
-                            }
-                            if (TalentBrutalSlash && !brutalwatch.IsRunning && API.TargetDebuffRemainingTime(Thrash) > 300 && isThrashMelee && API.CanCast(BrutalSlash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(BrutalSlash);
-                                brutalwatch.Start();
-                                //API.WriteLog("Starting brutalwatch.");
-                                return;
-                            }
-                            if (isMelee && PlayerLevel >= 5 && ((brutalwatch.IsRunning && TalentBrutalSlash || TalentBrutalSlash && API.SpellCharges(BrutalSlash) == 0 || !TalentBrutalSlash) && thrashwatch.IsRunning && rakewatch.IsRunning) && API.CanCast(Shred) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(Shred);
-                                return;
-                            }
-                        }
-                        if (!Bloodytalons)
-                        {
-                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerHasBuff(ApexPredatorsCraving))
+                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerEnergy >= 50 && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
                             {
                                 API.CastSpell(FerociousBite);
                                 return;
                             }
-                            if (TalentBrutalSlash && API.TargetDebuffRemainingTime(Thrash) > 300 && !API.PlayerHasBuff(Prowl) && isThrashMelee && API.CanCast(BrutalSlash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Clearcasting)))
+                            if (isMelee && PlayerLevel >= 21 && API.CanCast(Rip) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!API.TargetHasDebuff(Rip) || API.TargetDebuffRemainingTime(Rip) <= 300))
                             {
-                                API.CastSpell(BrutalSlash);
+                                API.CastSpell(Rip);
                                 return;
                             }
-                            if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28) && API.TargetDebuffRemainingTime(Rake) <= 360)
+                        }
+                        //Generator
+                        if (API.PlayerComboPoints < 5)
+                        {
+                            if (Bloodytalons)
                             {
-                                API.CastSpell(Rake);
-                                return;
+                                if (API.LastSpellCastInGame == Rake)
+                                {
+                                    rakewatch.Start();
+                                    //API.WriteLog("Starting Rakewatch.");
+                                }
+                                if (API.LastSpellCastInGame == Thrash)
+                                {
+                                    thrashwatch.Start(); thrashwatch.Start();
+                                    //API.WriteLog("Starting thrashwatch.");
+                                }
+                                if (API.LastSpellCastInGame == BrutalSlash)
+                                {
+                                    brutalwatch.Start();
+                                    //API.WriteLog("Starting brutalwatch.");
+                                }
+                                if (API.CanCast(Rake) && PlayerLevel >= 10 && (API.TargetDebuffRemainingTime(Rake) <= 360 && TalentBrutalSlash || !TalentBrutalSlash) && !rakewatch.IsRunning && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                                {
+                                    API.CastSpell(Rake);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 11 && !thrashwatch.IsRunning && API.CanCast(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Thrash);
+                                    return;
+                                }
+                                if (TalentBrutalSlash && !brutalwatch.IsRunning && API.TargetDebuffRemainingTime(Thrash) > 300 && isThrashMelee && API.CanCast(BrutalSlash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(BrutalSlash);
+                                    return;
+                                }
+                                if (isMelee && PlayerLevel >= 5 && ((brutalwatch.IsRunning && TalentBrutalSlash || TalentBrutalSlash && API.SpellCharges(BrutalSlash) == 0 || !TalentBrutalSlash) && thrashwatch.IsRunning && rakewatch.IsRunning) && API.CanCast(Shred) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Shred);
+                                    return;
+                                }
                             }
-                            if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24))
+                            if (!Bloodytalons)
                             {
-                                API.CastSpell(Moonfire);
-                                return;
-                            }
-                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(Thrash);
-                                return;
-                            }
-                            if (isMelee && PlayerLevel >= 5 && (API.TargetDebuffRemainingTime(Thrash) > 300 || PlayerLevel < 11) && !API.PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || PlayerLevel < 10) && API.CanCast(Shred) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(Shred);
-                                return;
+                                if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerHasBuff(ApexPredatorsCraving))
+                                {
+                                    API.CastSpell(FerociousBite);
+                                    return;
+                                }
+                                if (TalentBrutalSlash && API.TargetDebuffRemainingTime(Thrash) > 300 && !API.PlayerHasBuff(Prowl) && isThrashMelee && API.CanCast(BrutalSlash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(BrutalSlash);
+                                    return;
+                                }
+                                if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28) && API.TargetDebuffRemainingTime(Rake) <= 360)
+                                {
+                                    API.CastSpell(Rake);
+                                    return;
+                                }
+                                if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24))
+                                {
+                                    API.CastSpell(Moonfire);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Thrash);
+                                    return;
+                                }
+                                if (isMelee && PlayerLevel >= 5 && (API.TargetDebuffRemainingTime(Thrash) > 300 || PlayerLevel < 11) && !API.PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || PlayerLevel < 10) && API.CanCast(Shred) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Shred);
+                                    return;
+                                }
                             }
                         }
                     }
-                }
-                if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
-                {
-                    //Finisher
-                    if (API.PlayerComboPoints > 4)
+                    if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
                     {
-                        if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                        //Finisher
+                        if (API.PlayerComboPoints > 4)
                         {
-                            if (API.MouseoverDebuffRemainingTime(Rip) <= 360 && PlayerLevel >= 21 && API.CanCast(Rip) && !TalentPrimalWrath && isMOMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16))
-                            {
-                                API.CastSpell(Rip + "MO");
-                                return;
-                            }
-                        }
-                        if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !TalentPrimalWrath && API.PlayerEnergy >= 50 && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
-                        {
-                            API.CastSpell(FerociousBite);
-                            return;
-                        }
-                        if (TalentSavageRoar && isMelee && API.CanCast(SavageRoar) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24) && !API.PlayerHasBuff(SavageRoar))
-                        {
-                            API.CastSpell(SavageRoar);
-                            return;
-                        }
-                        if (isMelee && TalentPrimalWrath && API.CanCast(PrimalWrath) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16))
-                        {
-                            API.CastSpell(PrimalWrath);
-                            return;
-                        }
-                        if (isMelee && PlayerLevel >= 21 && !TalentPrimalWrath && API.CanCast(Rip) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!API.TargetHasDebuff(Rip) || API.TargetDebuffRemainingTime(Rip) <= 300))
-                        {
-                            API.CastSpell(Rip);
-                            return;
-                        }
-                    }
-                    //Generator
-                    if (API.PlayerComboPoints < 5)
-                    {
-                        if (Bloodytalons)
-                        {
-                            if (API.CanCast(Rake) && PlayerLevel >= 10 && !rakewatch.IsRunning && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
-                            {
-                                API.CastSpell(Rake);
-                                rakewatch.Start();
-                                //API.WriteLog("Starting Rakewatch.");
-                                return;
-                            }
-                            if (isThrashMelee && PlayerLevel >= 11 && !thrashwatch.IsRunning && API.CanCast(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(Thrash);
-                                thrashwatch.Start();
-                                //API.WriteLog("Starting thrashwatch.");
-                                return;
-                            }
-                            if (TalentBrutalSlash && !brutalwatch.IsRunning && API.TargetDebuffRemainingTime(Thrash) > 300 && isThrashMelee && API.CanCast(BrutalSlash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(BrutalSlash);
-                                brutalwatch.Start();
-                                //API.WriteLog("Starting brutalwatch.");
-                                return;
-                            }
-                            if (isThrashMelee && PlayerLevel >= 42 && thrashwatch.IsRunning && rakewatch.IsRunning && !TalentBrutalSlash && API.CanCast(Swipe) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
-                            {
-                                API.CastSpell(Swipe);
-                                return;
-                            }
-                        }
-                        if (!Bloodytalons)
-                        {
-                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerHasBuff(ApexPredatorsCraving))
-                            {
-                                API.CastSpell(FerociousBite);
-                                return;
-                            }
-                            if (isThrashMelee && !API.PlayerHasBuff(Prowl) && API.TargetDebuffRemainingTime(Rake) > 360 && TalentBrutalSlash && API.CanCast(BrutalSlash) && (API.TargetHasDebuff(Thrash) || PlayerLevel < 11) && (API.PlayerHasBuff(Clearcasting) || !API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 15))
-                            {
-                                API.CastSpell(BrutalSlash);
-                                return;
-                            }
-                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(Thrash);
-                                return;
-                            }
-                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && TalentScentofBlood && !API.PlayerHasBuff(ScentofBlood) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                            {
-                                API.CastSpell(Thrash);
-                                return;
-                            }
-                            if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && TalentScentofBlood && API.CanCast(Swipe) && API.PlayerHasBuff(ScentofBlood) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
-                            {
-                                API.CastSpell(Swipe);
-                                return;
-                            }
-                            if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28) && API.TargetDebuffRemainingTime(Rake) <= 360)
-                            {
-                                API.CastSpell(Rake);
-                                return;
-                            }
                             if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                             {
-                                if (API.MouseoverDebuffRemainingTime(Rake) <= 360 && PlayerLevel >= 10 && API.CanCast(Rake) && isMOMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                                if (API.MouseoverDebuffRemainingTime(Rip) <= 360 && !API.MacroIsIgnored(Rip + "MO") && PlayerLevel >= 21 && API.CanCast(Rip) && !TalentPrimalWrath && isMOMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16))
                                 {
-                                    API.CastSpell(Rake + "MO");
-                                    return;
-                                }
-                                if (API.MouseoverDebuffRemainingTime(Thrash) <= 300 && PlayerLevel >= 11 && API.CanCast(Thrash) && isMOThrashMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
-                                {
-                                    API.CastSpell(Thrash + "MO");
+                                    API.CastSpell(Rip + "MO");
                                     return;
                                 }
                             }
-                            if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24))
+                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !TalentPrimalWrath && API.PlayerEnergy >= 50 && (API.TargetHasDebuff(Rip) && API.TargetDebuffRemainingTime(Rip) > 300 || PlayerLevel < 21))
                             {
-                                API.CastSpell(Moonfire);
+                                API.CastSpell(FerociousBite);
                                 return;
                             }
-                            if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && !TalentBrutalSlash && API.CanCast(Swipe) && API.TargetHasDebuff(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                            if (TalentSavageRoar && isMelee && API.CanCast(SavageRoar) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24) && !API.PlayerHasBuff(SavageRoar))
                             {
-                                API.CastSpell(Swipe);
+                                API.CastSpell(SavageRoar);
                                 return;
                             }
-                            if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                            if (isMelee && TalentPrimalWrath && API.CanCast(PrimalWrath) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16))
                             {
-                                API.CastSpell(Thrash);
+                                API.CastSpell(PrimalWrath);
                                 return;
+                            }
+                            if (isMelee && PlayerLevel >= 21 && !TalentPrimalWrath && API.CanCast(Rip) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!API.TargetHasDebuff(Rip) || API.TargetDebuffRemainingTime(Rip) <= 300))
+                            {
+                                API.CastSpell(Rip);
+                                return;
+                            }
+                        }
+                        //Generator
+                        if (API.PlayerComboPoints < 5)
+                        {
+                            if (Bloodytalons)
+                            {
+                                if (API.LastSpellCastInGame == Rake)
+                                {
+                                    rakewatch.Start();
+                                    //API.WriteLog("Starting Rakewatch.");
+                                }
+                                if (API.LastSpellCastInGame == Thrash)
+                                {
+                                    thrashwatch.Start(); thrashwatch.Start();
+                                    //API.WriteLog("Starting thrashwatch.");
+                                }
+                                if (API.LastSpellCastInGame == BrutalSlash)
+                                {
+                                    brutalwatch.Start();
+                                    //API.WriteLog("Starting brutalwatch.");
+                                }
+                                if (API.CanCast(Rake) && PlayerLevel >= 10 && !rakewatch.IsRunning && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                                {
+                                    API.CastSpell(Rake);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 11 && !thrashwatch.IsRunning && API.CanCast(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Thrash);
+                                    return;
+                                }
+                                if (TalentBrutalSlash && !brutalwatch.IsRunning && API.TargetDebuffRemainingTime(Thrash) > 300 && isThrashMelee && API.CanCast(BrutalSlash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(BrutalSlash);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 42 && thrashwatch.IsRunning && rakewatch.IsRunning && !TalentBrutalSlash && API.CanCast(Swipe) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                                {
+                                    API.CastSpell(Swipe);
+                                    return;
+                                }
+                            }
+                            if (!Bloodytalons)
+                            {
+                                if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && API.PlayerHasBuff(ApexPredatorsCraving))
+                                {
+                                    API.CastSpell(FerociousBite);
+                                    return;
+                                }
+                                if (isThrashMelee && !API.PlayerHasBuff(Prowl) && API.TargetDebuffRemainingTime(Rake) > 360 && TalentBrutalSlash && API.CanCast(BrutalSlash) && (API.TargetHasDebuff(Thrash) || PlayerLevel < 11) && (API.PlayerHasBuff(Clearcasting) || !API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 25 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 15))
+                                {
+                                    API.CastSpell(BrutalSlash);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Thrash);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && TalentScentofBlood && !API.PlayerHasBuff(ScentofBlood) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Thrash);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && TalentScentofBlood && API.CanCast(Swipe) && API.PlayerHasBuff(ScentofBlood) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                                {
+                                    API.CastSpell(Swipe);
+                                    return;
+                                }
+                                if (API.CanCast(Rake) && PlayerLevel >= 10 && isMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28) && API.TargetDebuffRemainingTime(Rake) <= 360)
+                                {
+                                    API.CastSpell(Rake);
+                                    return;
+                                }
+                                if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                                {
+                                    if (API.MouseoverDebuffRemainingTime(Rake) <= 360 && !API.MacroIsIgnored(Rake + "MO") && PlayerLevel >= 10 && API.CanCast(Rake) && isMOMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                                    {
+                                        API.CastSpell(Rake + "MO");
+                                        return;
+                                    }
+                                    if (API.MouseoverDebuffRemainingTime(Thrash) <= 300 && !API.MacroIsIgnored(Thrash + "MO") && PlayerLevel >= 11 && API.CanCast(Thrash) && isMOThrashMelee && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                    {
+                                        API.CastSpell(Thrash + "MO");
+                                        return;
+                                    }
+                                }
+                                if (API.CanCast(Moonfire) && !API.PlayerHasBuff(Prowl) && TalentLunarInspiration && API.LastSpellCastInGame != (Moonfire) && (!API.TargetHasDebuff(Moonfire) || API.TargetDebuffRemainingTime(Moonfire) <= 200) && API.TargetRange < 40 && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24))
+                                {
+                                    API.CastSpell(Moonfire);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 42 && !API.PlayerHasBuff(Prowl) && !TalentBrutalSlash && API.CanCast(Swipe) && API.TargetHasDebuff(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 35 || API.PlayerHasBuff(Clearcasting) || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 28))
+                                {
+                                    API.CastSpell(Swipe);
+                                    return;
+                                }
+                                if (isThrashMelee && PlayerLevel >= 11 && !API.PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || API.PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || API.PlayerHasBuff(Clearcasting)))
+                                {
+                                    API.CastSpell(Thrash);
+                                    return;
+                                }
                             }
                         }
                     }
