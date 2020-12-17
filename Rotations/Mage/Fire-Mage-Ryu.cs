@@ -261,12 +261,12 @@ namespace HyperElk.Core
                     API.CastSpell("Pyroblast");
                     return;
                 }
-                if (API.CanCast("Fire Blast") && (IsForceAOE || IsAOE) && API.SpellCharges("Fire Blast") <= 3 && (API.SpellCDDuration("Combustion") > 1800 && FlameOn || API.SpellCDDuration("Combustion") > 2200 && !FlameOn) && (!API.PlayerHasBuff("Combustion") || API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33)
+                if (API.CanCast("Fire Blast") && (IsForceAOE || IsAOE) && API.SpellCharges("Fire Blast") <= 3 && (!API.SpellISOnCooldown("Combustion") || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > 1800 && FlameOn || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > 2200 && !FlameOn) && (!API.PlayerHasBuff("Combustion") || API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33)
                  {
                      API.CastSpell("Fire Blast");
                      return;
                  }
-                if (API.CanCast("Fire Blast") && (IsSmallCD || API.PlayerHasBuff("Combustion")) && API.SpellCharges("Fire Blast") > 0 && (API.PlayerHasBuff("Combustion") || API.SpellCDDuration("Combustion") > 1800 && FlameOn || API.SpellCDDuration("Combustion") > 2200 && !FlameOn) && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33 && (!IsForceAOE || IsForceAOE))
+                if (API.CanCast("Fire Blast") && (IsSmallCD || API.PlayerHasBuff("Combustion")) && API.SpellCharges("Fire Blast") > 0 && (API.PlayerHasBuff("Combustion") || !API.PlayerHasBuff("Combustion")) && (!API.SpellISOnCooldown("Combustion") || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > 1800 && FlameOn || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > 2200 && !FlameOn) && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33 && (!IsForceAOE || IsForceAOE))
                 {
                     API.CastSpell("Fire Blast");
                     return;
