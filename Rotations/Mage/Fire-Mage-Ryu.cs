@@ -261,11 +261,11 @@ namespace HyperElk.Core
                     API.CastSpell("Pyroblast");
                     return;
                 }
-              //  if (API.CanCast("Fire Blast") && IsSmallCD && API.SpellCharges("Fire Blast") == 3 && (API.SpellCDDuration("Combustion") > 1800 && FlameOn || API.SpellCDDuration("Combustion") > 2200 && !FlameOn) && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33 && (!IsForceAOE || IsForceAOE))
-             //   {
-             //       API.CastSpell("Fire Blast");
-            //        return;
-            //    }
+                //  if (API.CanCast("Fire Blast") && IsSmallCD && API.SpellCharges("Fire Blast") == 3 && (API.SpellCDDuration("Combustion") > 1800 && FlameOn || API.SpellCDDuration("Combustion") > 2200 && !FlameOn) && !API.PlayerHasBuff("Combustion") && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33 && (!IsForceAOE || IsForceAOE))
+                //   {
+                //       API.CastSpell("Fire Blast");
+                //        return;
+                //    }
                 if (API.CanCast("Fire Blast") && (IsSmallCD || API.PlayerHasBuff("Combustion")) && API.SpellCharges("Fire Blast") > 0 && (API.PlayerHasBuff("Combustion") || API.SpellCDDuration("Combustion") > 1800 && FlameOn || API.SpellCDDuration("Combustion") > 2200 && !FlameOn) && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33 && (!IsForceAOE || IsForceAOE))
                 {
                     API.CastSpell("Fire Blast");
@@ -291,7 +291,7 @@ namespace HyperElk.Core
                     API.CastSpell("Rune of Power");
                     return;
                 }
-                if (API.CanCast(ShiftingPower) && PlayerCovenantSettings == "Night Fae" && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && API.TargetRange <= 15 && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") <= 150 || API.SpellCDDuration("Combustion") >= 1600 && Kindling && !API.PlayerHasBuff("Combustion") || API.SpellCDDuration("Combustion") >= 1000 && !API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && API.SpellCharges("Fire Blast") <= 1 && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && API.TargetRange <= 15 && API.PlayerHasBuff("Rune of Power") || !RuneOfPower) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion && !API.PlayerHasBuff(Firestorm) && !API.PlayerIsMoving)
+                if (API.CanCast(ShiftingPower) && PlayerCovenantSettings == "Night Fae" && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && API.TargetRange <= 15 && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") <= 150 || API.SpellCDDuration("Combustion") >= 1600 && Kindling && !API.PlayerHasBuff("Combustion") || API.SpellCDDuration("Combustion") >= 1000 && !API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && API.SpellCharges("Fire Blast") <= 1 && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && API.TargetRange <= 15 && API.PlayerHasBuff("Rune of Power") || API.PlayerHasBuff("Rune of Power") || !API.PlayerHasBuff("Rune of Power") || !RuneOfPower) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion && !API.PlayerHasBuff(Firestorm) && !API.PlayerIsMoving)
                 {
                     API.CastSpell(ShiftingPower);
                     return;
