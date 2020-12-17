@@ -43,6 +43,7 @@ namespace HyperElk.Core
         private string trinket2 = "trinket2";
         private string MortalCoil = "Mortal Coil";
         private string DecimatingBolt = "Decimating Bolt";
+        private string ShadowEmbrace = "Shadow Embrace";
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -56,7 +57,9 @@ namespace HyperElk.Core
 
 
         //Misc
-        private static readonly Stopwatch DumpWatch = new Stopwatch();
+        private static readonly Stopwatch DumpWatchLow = new Stopwatch();
+        private static readonly Stopwatch DumpWatchHigh = new Stopwatch();
+
 
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
@@ -187,6 +190,7 @@ namespace HyperElk.Core
 
             //Buffs
             CombatRoutine.AddBuff("Grimoire Of Sacrifice");
+            CombatRoutine.AddBuff(ShadowEmbrace);
 
             //Debuffs
             CombatRoutine.AddDebuff(ImpendingCatastrophe);
@@ -214,10 +218,17 @@ namespace HyperElk.Core
             if (DumpShards && API.PlayerCurrentSoulShards <= 0)
             {
                 API.WriteLog("No More Shards left.");
-                DumpWatch.Stop();
-                DumpWatch.Reset();
+                DumpWatchLow.Stop();
+                DumpWatchHigh.Stop();
+                DumpWatchLow.Reset();
+                DumpWatchHigh.Reset();
             }
-            if (DumpShards && DumpWatch.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
+            if (DumpShards && DumpWatchHigh.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
+            {
+                API.CastSpell(MaleficRapture);
+                return;
+            }
+            if (DumpShards && DumpWatchLow.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -354,9 +365,15 @@ namespace HyperElk.Core
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58)
                 {
-                    DumpWatch.Start();
+                    DumpWatchHigh.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11 && PlayerLevel <= 58)
+                {
+                    DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
@@ -420,7 +437,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/drain_soul,interrupt=1
-                if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards <= 4 && NotChanneling)
+                if (DumpShards && !DumpWatchHigh.IsRunning && !DumpWatchLow.IsRunning && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards <= 4 && NotChanneling)
                 {
                     API.CastSpell(DrainSoul);
                     return;
@@ -542,9 +559,15 @@ namespace HyperElk.Core
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58)
                 {
-                    DumpWatch.Start();
+                    DumpWatchHigh.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11 && PlayerLevel <=58)
+                {
+                    DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
@@ -556,7 +579,7 @@ namespace HyperElk.Core
                 }
                 //actions+=/drain_soul,interrupt=1
 
-                if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards <= 4 && NotChanneling)
+                if (DumpShards && !DumpWatchHigh.IsRunning && !DumpWatchLow.IsRunning && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards <= 4 && NotChanneling)
                 {
                     API.CastSpell(DrainSoul);
                     return;
