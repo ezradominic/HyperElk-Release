@@ -145,7 +145,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (!API.PlayerIsCasting)
+            if (!API.PlayerIsCasting())
             {
                 //KICK
                 if (isInterrupt && API.CanCast(MindFreeze) && IsMelee && PlayerLevel >= 7)
@@ -180,13 +180,13 @@ namespace HyperElk.Core
                 }
                 if (IsDefensive)
                 {
-                    if (API.CanCast(AntiMagicZone) && API.PlayerHealthPercent <= AntiMagicZonePercentLife && API.TargetIsCasting)
+                    if (API.CanCast(AntiMagicZone) && API.PlayerHealthPercent <= AntiMagicZonePercentLife && API.TargetIsCasting(true))
                     {
                         API.CastSpell(AntiMagicZone);
                         return;
                     }
                     //Anti-Magic-Shell
-                    if (API.CanCast(AntiMagicShell) && API.PlayerHealthPercent <= AntiMagicShellPercentLife && API.TargetIsCasting && PlayerLevel >= 9)
+                    if (API.CanCast(AntiMagicShell) && API.PlayerHealthPercent <= AntiMagicShellPercentLife && API.TargetIsCasting(true) && PlayerLevel >= 9)
                     {
                         API.CastSpell(AntiMagicShell);
                         return;
@@ -238,7 +238,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-
         }
 
         bool boneshieldneedrefresh => (API.PlayerBuffStacks(BoneShield) <= (API.PlayerHasBuff(DancingRuneWeapon) ? 4 : 7)) || API.PlayerBuffTimeRemaining(BoneShield) < 300;

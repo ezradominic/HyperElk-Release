@@ -81,7 +81,7 @@ namespace HyperElk.Core
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
-        private bool NotCasting => !API.PlayerIsCasting;
+//        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         bool LastCastImmolate => API.PlayerLastSpell == Immolate;
         bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate;
@@ -197,7 +197,7 @@ namespace HyperElk.Core
         {
             //AOE
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && NotCasting && NotChanneling)
+            if (IsAOE && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetUnitInRangeCount >= AOEUnitNumber && NotChanneling)
             {
                 //actions.aoe=rain_of_fire,if=pet.infernal.active&(!cooldown.havoc.ready|active_enemies>3)
 
@@ -287,7 +287,7 @@ namespace HyperElk.Core
                 }
             }
             //SINGLE TARGET
-            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && NotCasting && IsRange && NotChanneling)
+            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && API.PlayerCurrentCastTimeRemaining > 40 && IsRange && NotChanneling)
             {
                 //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
                 if (SwitchTarget && API.TargetHasDebuff(Havoc))
@@ -440,25 +440,25 @@ namespace HyperElk.Core
                 return;
             }
             //Summon Imp
-            if (API.CanCast(SummonImp) && !LastCastSummonImp && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (API.CanCast(SummonImp) && !LastCastSummonImp && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
             {
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.CanCast(SummonVoidwalker) && !LastCastSummonVoidwalker && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (API.CanCast(SummonVoidwalker) && !LastCastSummonVoidwalker && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
             {
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.CanCast(SummonSuccubus) && !LastCastSummonSuccubus && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (API.CanCast(SummonSuccubus) && !LastCastSummonSuccubus && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
             {
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.CanCast(SummonFelhunter) && !LastCastSummonFelhunter && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && NotCasting && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (API.CanCast(SummonFelhunter) && !LastCastSummonFelhunter && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
             {
                 API.CastSpell(SummonFelhunter);
                 return;

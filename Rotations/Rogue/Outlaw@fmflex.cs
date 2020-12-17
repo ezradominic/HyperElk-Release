@@ -35,8 +35,6 @@ namespace HyperElk.Core
         private string Opportunity = "Opportunity";
         private string LoadedDice = "Loaded Dice";
         private string AceUpYourSleeve = "Ace Up Your Sleeve";
-        private string Deadshot = "Deadshot";
-        private string SnakeEyes = "Snake Eyes";
         private string RuthlessPrecision = "Ruthless Precision";
         private string GrandMelee = "Grand Melee";
         private string Broadside = "Broadside";
@@ -120,8 +118,6 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Vanish);
             CombatRoutine.AddBuff(Opportunity);
             CombatRoutine.AddBuff(LoadedDice);
-            CombatRoutine.AddBuff(Deadshot);
-            CombatRoutine.AddBuff(SnakeEyes);
             CombatRoutine.AddBuff(RuthlessPrecision);
             CombatRoutine.AddBuff(GrandMelee);
             CombatRoutine.AddBuff(Broadside);
@@ -143,7 +139,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting)
+            if (!API.PlayerIsMounted && !API.PlayerIsCasting())
             {
                 if (API.PlayerHealthPercent <= CrimsonVialLifePercent && !API.SpellISOnCooldown(CrimsonVial) && API.PlayerEnergy >= 20)
                 {
@@ -158,7 +154,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (isStealth || API.PlayerIsCasting)
+            if (isStealth || API.PlayerIsCasting(false))
                 return;
 
 
@@ -268,7 +264,7 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
-            if (AutoStealth && !isStealth && !API.SpellISOnCooldown(Stealth) && !API.PlayerIsCasting)
+            if (AutoStealth && !isStealth && !API.SpellISOnCooldown(Stealth) && !API.PlayerIsCasting())
             {
                 API.CastSpell(Stealth);
                 return;
@@ -284,7 +280,6 @@ namespace HyperElk.Core
                 {
                     RolltheBonesRemain = API.PlayerBuffTimeRemaining(buff);
                     RolltheBonesCount++;
-                    break;
                 }
             }
             if (RolltheBonesRemain <= 300) return true;

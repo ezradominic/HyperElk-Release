@@ -157,7 +157,7 @@ private string furious_gaze = "Furious Gaze";
         {
             return API.TargetHasDebuff(debuff, false, false);
         }
-
+        private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
 
         public override void Initialize()
         {
@@ -220,7 +220,7 @@ private string furious_gaze = "Furious Gaze";
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
 
 
@@ -243,7 +243,7 @@ private string furious_gaze = "Furious Gaze";
         }
         public override void CombatPulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
                 //API.WriteLog("debug:" + "cancast "+ API.CanCast(Metamorphosis)+ "when "+ UseMetamorphosis);
                 if (isInterrupt && MeleeRange && PlayerLevel >= 29)
@@ -391,7 +391,7 @@ private string furious_gaze = "Furious Gaze";
                     //fel_rush,if= talent.demon_blades.enabled & !cooldown.eye_beam.ready & (charges = 2 | (raid_event.movement.in> 10 & raid_event.adds.in> 10))
 
                     //demons_bite
-                    if (API.CanCast(Demons_Bite) && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
+                    if (API.CanCast(Demons_Bite) && API.PlayerFury <= API.PlayeMaxFury - 30 && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
                     {
                         API.CastSpell(Demons_Bite);
 
@@ -480,7 +480,7 @@ private string furious_gaze = "Furious Gaze";
 
                     }
                     // demons_bite
-                    if (API.CanCast(Demons_Bite) && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
+                    if (API.CanCast(Demons_Bite) && API.PlayerFury <=API.PlayeMaxFury-30 && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
                     {
                         API.CastSpell(Demons_Bite);
 

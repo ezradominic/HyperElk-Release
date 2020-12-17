@@ -132,7 +132,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (API.PlayerIsMounted || API.PlayerIsCasting)
+            if (API.PlayerIsMounted || API.PlayerIsCasting(true))
             {
                 return;
             }
@@ -173,7 +173,7 @@ namespace HyperElk.Core
                     API.CastSpell(CounterShot);
                     return;
                 }
-                if (!API.PlayerIsCasting)
+                if (!API.PlayerIsCasting(true))
                     rotation();
                 return;
             }

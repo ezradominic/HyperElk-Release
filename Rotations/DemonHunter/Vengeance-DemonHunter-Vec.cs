@@ -55,6 +55,7 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, false, false);
         }
+        private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         //( "variable,name=brand_build,value=talent.agonizing_flames.enabled&talent.burning_alive.enabled&talent.charred_flesh.enabled" );
         private bool brand_build => Talent_agonizing_flames&&Talent_burning_alive&&Talent_charred_flesh;
 
@@ -166,7 +167,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
                 if (API.CanCast(Metamorphosis) && API.PlayerHealthPercent <= MetamorphosisLifePercent)
                 {
@@ -178,7 +179,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting && !API.PlayerIsChanneling)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
                 // apl_default->add_action(this, "Disrupt");
                 if (isInterrupt && API.CanCast(Disrupt) && MeleeRange && PlayerLevel >= 29)
