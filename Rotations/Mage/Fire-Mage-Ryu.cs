@@ -75,7 +75,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fire Mage by Ryu";
-            API.WriteLog("Welcome to Fire Mage v1.6 by Ryu");
+            API.WriteLog("Welcome to Fire Mage v1.7 by Ryu");
             API.WriteLog("Create the following cursor macro for Flamestrike and Meteor");
             API.WriteLog("Flamestrike -- /cast [@cursor] Flamestrike");
             API.WriteLog("Meteor -- /cast [@cursor] Meteor");
@@ -291,7 +291,7 @@ namespace HyperElk.Core
                     API.CastSpell("Rune of Power");
                     return;
                 }
-                if (API.CanCast(ShiftingPower) && !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Night Fae" && (API.SpellISOnCooldown("Combustion") && !API.PlayerHasBuff("Combustion") && (API.SpellCDDuration("Combustion") >= 1600 && Kindling || API.SpellCDDuration("Combustion") >= 1000) || API.TargetUnitInRangeCount >= 2 && API.PlayerHasBuff("Combustion") && API.TargetRange <= 15) && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && API.SpellCharges("Fire Blast") <= 1 && ((API.TargetUnitInRangeCount >= 2 && API.TargetRange <= 15 && IsAOE || IsForceAOE && API.TargetRange <= 15) && API.PlayerHasBuff("Rune of Power") || !RuneOfPower) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion && !API.PlayerHasBuff(Firestorm) && !API.PlayerIsMoving)
+                if (API.CanCast(ShiftingPower) && PlayerCovenantSettings == "Night Fae" && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && API.TargetRange <= 15 && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") <= 150 || API.SpellCDDuration("Combustion") >= 1600 && Kindling && !API.PlayerHasBuff("Combustion") || API.SpellCDDuration("Combustion") >= 1000 && !API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && API.SpellCharges("Fire Blast") <= 1 && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && API.TargetRange <= 15 && API.PlayerHasBuff("Rune of Power") || !RuneOfPower) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion && !API.PlayerHasBuff(Firestorm) && !API.PlayerIsMoving)
                 {
                     API.CastSpell(ShiftingPower);
                     return;
