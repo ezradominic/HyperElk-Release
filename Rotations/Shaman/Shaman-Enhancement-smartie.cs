@@ -308,12 +308,12 @@ namespace HyperElk.Core
             {
                 API.CastSpell("Trinket2");
             }
-            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && !API.PlayerHasBuff(WindfuryTotem) && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && !API.PlayerHasBuff(WindfuryTotem, false, false) && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
             }
-            if (API.CanCast(WindfuryTotem) && WindfuryToggle && DoomWindLeggy && API.PlayerDebuffRemainingTime(DoomWinds) == 0 && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && WindfuryToggle && DoomWindLeggy && (API.PlayerDebuffRemainingTime(DoomWinds) == 0 || !API.PlayerHasBuff(WindfuryTotem, false, false)) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
