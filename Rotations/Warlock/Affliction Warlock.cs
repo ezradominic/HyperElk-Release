@@ -78,6 +78,8 @@ namespace HyperElk.Core
         bool DotCheck => API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && API.TargetHasDebuff(UnstableAffliction) && (API.TargetHasDebuff(SoulRot) || !API.TargetHasDebuff(SoulRot));
         bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
         bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
+        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction;
+        bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe;
         bool CastingAgony => API.PlayerLastSpell == Agony;
         bool CastingCorruption => API.PlayerLastSpell == Corruption;
         bool CastingSL => API.PlayerLastSpell == SiphonLife;
@@ -332,7 +334,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && LastCastUnstableAffliction && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
@@ -468,7 +470,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //ScouringTithe
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(ScouringTithe) && LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
                 {
                     API.CastSpell(ScouringTithe);
                     return;
@@ -497,7 +499,7 @@ namespace HyperElk.Core
                 }
                 //actions.covenant+=/scouring_tithe
                 //ScouringTithe
-                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && LastCastScouringTithe && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
                 {
                     API.CastSpell(ScouringTithe);
                     return;
@@ -570,7 +572,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
@@ -589,7 +591,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //ScouringTithe
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
+                if (API.CanCast(ScouringTithe) && LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
                 {
                     API.CastSpell(ScouringTithe);
                     return;
