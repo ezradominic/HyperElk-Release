@@ -4,6 +4,7 @@
 // v1.2 vesper totem fix
 // v1.3 legendary preperation
 // v1.4 Racials and Trinkets
+// v1.5 Doomwind Leggy fixed
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -105,7 +106,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.4");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.5");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, "D3");
@@ -269,7 +270,7 @@ namespace HyperElk.Core
             }
         }
         private void rotation()
-        {                //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
+        {   //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
             if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && isRacial && IsCooldowns && isMelee && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
             {
                 API.CastSpell(RacialSpell1);
@@ -312,7 +313,7 @@ namespace HyperElk.Core
                 API.CastSpell(WindfuryTotem);
                 return;
             }
-            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && DoomWindLeggy && !API.PlayerHasDebuff(DoomWinds) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && WindfuryToggle && DoomWindLeggy && API.PlayerDebuffRemainingTime(DoomWinds) == 0 && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
@@ -455,7 +456,7 @@ namespace HyperElk.Core
                     API.CastSpell(EarthElemental);
                     return;
                 }
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
@@ -579,7 +580,7 @@ namespace HyperElk.Core
                     API.CastSpell(EarthElemental);
                     return;
                 }
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
