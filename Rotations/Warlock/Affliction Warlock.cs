@@ -380,19 +380,19 @@ namespace HyperElk.Core
                 }
 
                 //Malefic Rapture Check High Level ShadowEmbrande
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58 && API.PlayerBuffStacks(ShadowEmbrace) >= 3)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //Malefic Rapture PhantomSingularity
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel >= 58 && API.PlayerBuffStacks(ShadowEmbrace) >= 3)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel >= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //Malefic Rapture TalentVileTaint
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel >= 58 && API.PlayerBuffStacks(ShadowEmbrace) >= 3)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel >= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -661,19 +661,19 @@ namespace HyperElk.Core
                 }
 
                 //Malefic Rapture Check High Level ShadowEmbrande
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58 && API.PlayerBuffStacks(ShadowEmbrace) >= 3)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //Malefic Rapture PhantomSingularity
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel >= 58 && API.PlayerBuffStacks(ShadowEmbrace) >= 3)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel >= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //Malefic Rapture TalentVileTaint
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel >= 58 && API.PlayerBuffStacks(ShadowEmbrace) >= 3)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel >= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
