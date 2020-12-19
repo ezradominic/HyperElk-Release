@@ -5,6 +5,7 @@
 // v1.3 complete new apl
 // v1.4 Racials and Trinkets
 // v1.5 mouseover flameshock
+// v1.6 overcap maelstrom fix
 using System.Diagnostics;
 
 
@@ -98,11 +99,14 @@ namespace HyperElk.Core
 
         private static readonly Stopwatch stormwatch = new Stopwatch();
         private static readonly Stopwatch vesperwatch = new Stopwatch();
+        private static readonly Stopwatch Masterwatch = new Stopwatch();
+        private bool LastWasNotLavaBurst => API.LastSpellCastInGame != LavaBurst && API.PlayerCurrentCastSpellID != 51505;
+        private bool MasterUP => (TalentMasterofTheElements && (!Masterwatch.IsRunning || API.PlayerMaelstrom < 60) || !TalentMasterofTheElements);
         private float gcd => API.SpellGCDTotalDuration;
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.5");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.6");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, "D7");
@@ -182,6 +186,21 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            if (TalentMasterofTheElements && API.PlayerCurrentCastSpellID == 51505)
+            {
+                Masterwatch.Restart();
+                //API.WriteLog("Starting Mastermwatch.");
+            }
+            if (Masterwatch.IsRunning && Masterwatch.ElapsedMilliseconds > 2500)
+            {
+                Masterwatch.Reset();
+                //API.WriteLog("Resetting Masterwatch.");
+            }
+            if (API.LastSpellCastInGame == StormElemental)
+            {
+                stormwatch.Restart();
+                API.WriteLog("Starting Stormwatch.");
+            }
             if (stormwatch.IsRunning && stormwatch.ElapsedMilliseconds > 30000)
             {
                 stormwatch.Reset();
@@ -315,8 +334,6 @@ namespace HyperElk.Core
                 if (API.CanCast(StormElemental) && TalentStormElemental && IsStormElemental)
                 {
                     API.CastSpell(StormElemental);
-                    stormwatch.Start();
-                    API.WriteLog("Starting Stormwatch.");
                     return;
                 }
                 //actions+=/primordial_wave,target_if=min:dot.flame_shock.remains,cycle_targets=1,if=!buff.primordial_wave.up
@@ -355,7 +372,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.se_single_target +=/ elemental_blast,if= talent.elemental_blast.enabled
-                        if (API.CanCast(ElementalBlast) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentElementalBlast)
+                        if (API.CanCast(ElementalBlast) && API.PlayerMaelstrom < 70 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentElementalBlast)
                         {
                             API.CastSpell(ElementalBlast);
                             return;
@@ -373,13 +390,13 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.se_single_target +=/ lava_burst,if= buff.wind_gust.stack < 18 | buff.lava_surge.up
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && (API.PlayerBuffStacks(WindGust) < 18 || API.PlayerHasBuff(LavaSurge)))
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && API.PlayerMaelstrom < 90 && (API.PlayerBuffStacks(WindGust) < 18 || API.PlayerHasBuff(LavaSurge)))
                         {
                             API.CastSpell(LavaBurst);
                             return;
                         }
                         //actions.se_single_target +=/ lightning_bolt,if= buff.stormkeeper.up
-                        if (API.CanCast(LightningBolt) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && API.PlayerHasBuff(Stormkeeper))
+                        if (API.CanCast(LightningBolt) && API.PlayerMaelstrom < 90 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && API.PlayerHasBuff(Stormkeeper))
                         {
                             API.CastSpell(LightningBolt);
                             return;
@@ -397,13 +414,13 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.se_single_target +=/ lava_burst,if= buff.ascendance.up
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.PlayerHasBuff(Ascendance))
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && API.PlayerMaelstrom < 90 && API.PlayerHasBuff(Ascendance))
                         {
                             API.CastSpell(LavaBurst);
                             return;
                         }
                         //actions.se_single_target +=/ lava_burst,if= cooldown_react & !talent.master_of_the_elements.enabled
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11)
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && API.PlayerMaelstrom < 90)
                         {
                             API.CastSpell(LavaBurst);
                             return;
@@ -466,7 +483,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.single_target +=/ elemental_blast,if= talent.elemental_blast.enabled & (talent.master_of_the_elements.enabled & (buff.master_of_the_elements.up & maelstrom < 60 | !buff.master_of_the_elements.up) | !talent.master_of_the_elements.enabled)
-                        if (API.CanCast(ElementalBlast) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentElementalBlast && (TalentMasterofTheElements && (API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 60 || !API.PlayerHasBuff(MasteroftheElements)) || !TalentMasterofTheElements))
+                        if (API.CanCast(ElementalBlast) && API.PlayerMaelstrom < 70 && MasterUP && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentElementalBlast && (TalentMasterofTheElements && (API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 60 || !API.PlayerHasBuff(MasteroftheElements)) || !TalentMasterofTheElements))
                         {
                             API.CastSpell(ElementalBlast);
                             return;
@@ -484,7 +501,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.single_target +=/ lava_burst,if= talent.echoing_shock.enabled & buff.echoing_shock.up
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.PlayerHasBuff(EchoingShock))
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && !API.PlayerHasBuff(MasteroftheElements) && API.PlayerHasBuff(EchoingShock) && API.PlayerMaelstrom < 90)
                         {
                             API.CastSpell(LavaBurst);
                             return;
@@ -496,7 +513,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.single_target +=/ lightning_bolt,if= buff.stormkeeper.up & spell_targets.chain_lightning < 2 & (buff.master_of_the_elements.up)
-                        if (API.CanCast(LightningBolt) && API.PlayerHasBuff(Stormkeeper) && API.PlayerHasBuff(MasteroftheElements))
+                        if (API.CanCast(LightningBolt) && API.PlayerHasBuff(Stormkeeper) && API.PlayerMaelstrom < 90 && API.PlayerHasBuff(MasteroftheElements))
                         {
                             API.CastSpell(LightningBolt);
                             return;
@@ -508,31 +525,31 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.single_target +=/ earth_shock,if= talent.master_of_the_elements.enabled & (buff.master_of_the_elements.up | cooldown.lava_burst.remains > 0 & maelstrom >= 92 | spell_targets.chain_lightning < 2 & buff.stormkeeper.up & cooldown.lava_burst.remains <= gcd) | !talent.master_of_the_elements.enabled
-                        if (API.CanCast(EarthShock) && PlayerLevel >= 10 && (TalentMasterofTheElements && (API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom >= 60 || API.SpellCDDuration(LavaBurst) > 0 && API.PlayerMaelstrom >= 92 || API.PlayerHasBuff(Stormkeeper) && API.SpellCDDuration(LavaBurst) >= gcd) && API.PlayerMaelstrom >= 60 || !TalentMasterofTheElements && API.PlayerMaelstrom >= 60))
+                        if (API.CanCast(EarthShock) && PlayerLevel >= 10 && (TalentMasterofTheElements && (API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom >= 60 || API.PlayerMaelstrom >= 92 || API.PlayerHasBuff(Stormkeeper) && API.SpellCDDuration(LavaBurst) >= gcd) && API.PlayerMaelstrom >= 60 || !TalentMasterofTheElements && API.PlayerMaelstrom >= 60))
                         {
                             API.CastSpell(EarthShock);
                             return;
                         }
                         //actions.single_target+=/lightning_bolt,if=(buff.stormkeeper.remains<1.1*gcd*buff.stormkeeper.stack|buff.stormkeeper.up&buff.master_of_the_elements.up)
-                        if (API.CanCast(LightningBolt) && API.PlayerHasBuff(Stormkeeper) && API.PlayerBuffTimeRemaining(Stormkeeper) < 110+gcd)
+                        if (API.CanCast(LightningBolt) && API.PlayerHasBuff(Stormkeeper) && API.PlayerMaelstrom < 90 && API.PlayerBuffTimeRemaining(Stormkeeper) < 110+gcd)
                         {
                             API.CastSpell(LightningBolt);
                             return;
                         }
-                        //actions.single_target +=/ frost_shock,if= talent.icefury.enabled & talent.master_of_the_elements.enabled & buff.icefury.up & buff.master_of_the_elements.up
+                        //actions.single_target+=/frost_shock,if=talent.icefury.enabled&talent.master_of_the_elements.enabled&buff.icefury.up&buff.master_of_the_elements.up
                         if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerHasBuff(Icefury) && API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 60)
                         {
                             API.CastSpell(FrostShock);
                             return;
                         }
                         //actions.single_target +=/ lava_burst,if= buff.ascendance.up
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.PlayerHasBuff(Ascendance) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.PlayerMaelstrom < 90 && API.PlayerHasBuff(Ascendance) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
                         {
                             API.CastSpell(LavaBurst);
                             return;
                         }
                         //actions.single_target +=/ lava_burst,if= cooldown_react & !talent.master_of_the_elements.enabled
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && !TalentMasterofTheElements && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && !TalentMasterofTheElements && API.PlayerMaelstrom < 90 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
                         {
                             API.CastSpell(LavaBurst);
                             return;
@@ -544,19 +561,19 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.single_target +=/ lava_burst,if= cooldown_react & charges > talent.echo_of_the_elements.enabled
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.LastSpellCastInGame != LavaBurst && API.SpellCharges(LavaBurst) > 1 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && !API.PlayerHasBuff(MasteroftheElements) && LastWasNotLavaBurst && API.SpellCharges(LavaBurst) > 1 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
                         {
                             API.CastSpell(LavaBurst);
                             return;
                         }
                         //actions.single_target +=/ frost_shock,if= talent.icefury.enabled & buff.icefury.up & buff.icefury.remains < 1.1 * gcd * buff.icefury.stack
-                        if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerHasBuff(Icefury))
+                        if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerHasBuff(Icefury) && MasterUP)
                         {
                             API.CastSpell(FrostShock);
                             return;
                         }
                         //actions.single_target +=/ lava_burst,if= cooldown_react
-                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.LastSpellCastInGame != LavaBurst && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
+                        if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && !API.PlayerHasBuff(MasteroftheElements) && LastWasNotLavaBurst && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace) || API.PlayerHasBuff(LavaSurge)))
                         {
                             API.CastSpell(LavaBurst);
                             return;
@@ -574,7 +591,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.single_target +=/ lightning_bolt
-                        if (API.CanCast(LightningBolt) && API.PlayerMaelstrom < 90 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)))
+                        if (API.CanCast(LightningBolt) && API.PlayerMaelstrom < 90 && MasterUP && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)))
                         {
                             API.CastSpell(LightningBolt);
                             return;
@@ -586,7 +603,7 @@ namespace HyperElk.Core
                             return;
                         }
                         // actions.single_target +=/ frost_shock,moving = 1
-                        if (API.CanCast(FrostShock) && PlayerLevel >= 17 && PlayerLevel >= 38 && API.PlayerIsMoving)
+                        if (API.CanCast(FrostShock) && PlayerLevel >= 17 && PlayerLevel >= 38 && API.PlayerIsMoving && MasterUP)
                         {
                             API.CastSpell(FrostShock);
                             return;
@@ -659,43 +676,43 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ lava_burst,target_if = dot.flame_shock.remains,if= spell_targets.chain_lightning < 4 | buff.lava_surge.up | (talent.master_of_the_elements.enabled & !buff.master_of_the_elements.up & maelstrom >= 60)
-                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.TargetDebuffRemainingTime(FlameShock) > gcd*2 && (API.TargetUnitInRangeCount < 4 || API.PlayerHasBuff(LavaSurge) || (TalentMasterofTheElements && !API.PlayerHasBuff(MasteroftheElements) && API.PlayeMaxMaelstrom >= 60)))
+                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd*2 && (API.TargetUnitInRangeCount < 4 || API.PlayerHasBuff(LavaSurge) || (TalentMasterofTheElements && !API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom >= 60)))
                     {
                         API.CastSpell(LavaBurst);
                         return;
                     }
                     //actions.aoe +=/ earthquake,if= !talent.master_of_the_elements.enabled | buff.stormkeeper.up | maelstrom >= (100 - 4 * spell_targets.chain_lightning) | buff.master_of_the_elements.up | spell_targets.chain_lightning > 3
-                    if (API.CanCast(Earthquake) && PlayerLevel >= 38 && API.PlayerMaelstrom >= 60 && (!TalentMasterofTheElements || API.PlayerHasBuff(Stormkeeper) || API.PlayerMaelstrom >= 90 || API.PlayerHasBuff(MasteroftheElements) || API.TargetUnitInRangeCount > 3))
+                    if (API.CanCast(Earthquake) && PlayerLevel >= 38 && API.PlayerMaelstrom >= 60 && (!TalentMasterofTheElements || API.PlayerHasBuff(Stormkeeper) || API.PlayerMaelstrom >= 90 || TalentMasterofTheElements && API.PlayerHasBuff(MasteroftheElements) || API.TargetUnitInRangeCount > 3))
                     {
                         API.CastSpell(Earthquake);
                         return;
                     }
                     //actions.aoe +=/ chain_lightning,if= buff.stormkeeper.remains < 3 * gcd * buff.stormkeeper.stack
-                    if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && API.PlayerHasBuff(Stormkeeper))
+                    if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerHasBuff(Stormkeeper) && MasterUP && API.PlayerMaelstrom < 90)
                     {
                         API.CastSpell(ChainLightning);
                         return;
                     }
                     //actions.aoe +=/ lava_burst,if= buff.lava_surge.up & spell_targets.chain_lightning < 4 & (!pet.storm_elemental.active) & dot.flame_shock.ticking
-                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && API.TargetDebuffRemainingTime(FlameShock) > gcd * 2 &&  API.PlayerHasBuff(LavaSurge) && API.TargetUnitInRangeCount < 4 && !stormwatch.IsRunning)
+                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd * 2 &&  API.PlayerHasBuff(LavaSurge) && API.TargetUnitInRangeCount < 4 && !stormwatch.IsRunning)
                     {
                         API.CastSpell(LavaBurst);
                         return;
                     }
                     //actions.aoe +=/ elemental_blast,if= talent.elemental_blast.enabled & spell_targets.chain_lightning < 5 & (!pet.storm_elemental.active)
-                    if (API.CanCast(ElementalBlast) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentElementalBlast && API.TargetUnitInRangeCount < 5 && !stormwatch.IsRunning)
+                    if (API.CanCast(ElementalBlast) && API.PlayerMaelstrom < 70 && MasterUP && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)) && TalentElementalBlast && API.TargetUnitInRangeCount < 5 && !stormwatch.IsRunning)
                     {
                         API.CastSpell(ElementalBlast);
                         return;
                     }
                     //actions.aoe +=/ lava_beam,if= talent.ascendance.enabled
-                    if (API.CanCast(LavaBeam) && TalentAscendance && API.PlayerHasBuff(Ascendance) && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)))
+                    if (API.CanCast(LavaBeam) && TalentAscendance && API.PlayerHasBuff(Ascendance) && API.PlayerMaelstrom < 90 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)))
                     {
                         API.CastSpell(LavaBeam);
                         return;
                     }
                     //actions.aoe +=/ chain_lightning
-                    if (API.CanCast(ChainLightning) && API.PlayerMaelstrom < 90 && PlayerLevel >= 24 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)))
+                    if (API.CanCast(ChainLightning) && API.PlayerMaelstrom < 90 && MasterUP && PlayerLevel >= 24 && (!API.PlayerIsMoving || API.PlayerHasBuff(SpiritwalkersGrace)))
                     {
                         API.CastSpell(ChainLightning);
                         return;
@@ -707,7 +724,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ frost_shock,moving = 1
-                    if (API.CanCast(FrostShock) && PlayerLevel >= 17 && PlayerLevel >= 38 && API.PlayerIsMoving)
+                    if (API.CanCast(FrostShock) && PlayerLevel >= 17 && PlayerLevel >= 38 && API.PlayerIsMoving && MasterUP)
                     {
                         API.CastSpell(FrostShock);
                         return;

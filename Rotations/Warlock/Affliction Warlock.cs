@@ -64,7 +64,7 @@ namespace HyperElk.Core
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
-//        private bool NotCasting => !API.PlayerIsCasting;
+        //        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int ShoulShardNumberMaleficRapture => CombatRoutine.GetPropertyInt("SoulShardNumberMaleficRapture");
@@ -78,6 +78,8 @@ namespace HyperElk.Core
         bool DotCheck => API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && API.TargetHasDebuff(UnstableAffliction) && (API.TargetHasDebuff(SoulRot) || !API.TargetHasDebuff(SoulRot));
         bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
         bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
+        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction;
+        bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe;
         bool CastingAgony => API.PlayerLastSpell == Agony;
         bool CastingCorruption => API.PlayerLastSpell == Corruption;
         bool CastingSL => API.PlayerLastSpell == SiphonLife;
@@ -260,38 +262,38 @@ namespace HyperElk.Core
                     }
                 }
             }
-                // Dark Pact
-                if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
-                {
-                    API.CastSpell(DarkPact);
-                    return;
-                }
-                //MortalCoil
-                if (API.CanCast(MortalCoil) && TalentMortalCoil && API.PlayerHealthPercent <= MortalCoilPercentProc && PlayerLevel >= 40)
-                {
-                    API.CastSpell(MortalCoil);
-                    return;
-                }
-                // Drain Life
-                if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
-                {
-                    API.CastSpell(DrainLife);
-                    return;
-                }
-                // Health Funnel
-                if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
-                {
-                    API.CastSpell(HealthFunnel);
-                    return;
-                }
+            // Dark Pact
+            if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
+            {
+                API.CastSpell(DarkPact);
+                return;
+            }
+            //MortalCoil
+            if (API.CanCast(MortalCoil) && TalentMortalCoil && API.PlayerHealthPercent <= MortalCoilPercentProc && PlayerLevel >= 40)
+            {
+                API.CastSpell(MortalCoil);
+                return;
+            }
+            // Drain Life
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
+            {
+                API.CastSpell(DrainLife);
+                return;
+            }
+            // Health Funnel
+            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+            {
+                API.CastSpell(HealthFunnel);
+                return;
+            }
 
             //Trinkets
             if (UseTrinket1 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
             if (UseTrinket2 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
                 API.CastSpell(trinket2);
-                rotation();
-                return;         
+            rotation();
+            return;
         }
 
 
@@ -301,13 +303,6 @@ namespace HyperElk.Core
             //ROTATION AOE
             if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
-                //actions.aoe=phantom_singularity
-                //PhantomSingularity
-                if (TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity))
-                {
-                    API.CastSpell(PhantomSingularity);
-                    return;
-                }
                 //actions.aoe+=/haunt
                 //Haunt 
                 if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && API.PlayerCurrentCastTimeRemaining > 40 && TalentHaunt && NotMoving && IsRange && NotChanneling && PlayerLevel >= 45)
@@ -339,19 +334,13 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && LastCastUnstableAffliction && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
                     }
                 }
-                //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
-                //VileTaint
-                if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
-                {
-                    API.CastSpell(VileTaint);
-                    return;
-                }
+
                 //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
                 //DarkSoulMisery
                 if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellCDDuration(SummonDarkglare) >= API.TargetTimeToDie)
@@ -359,20 +348,105 @@ namespace HyperElk.Core
                     API.CastSpell(DarkSoulMisery);
                     return;
                 }
-                //Malefic Rapture Check
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11)
+                //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
+                //VileTaint
+                if (!DumpShards &&TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions+=/phantom_singularity,if=time>30
+                //PhantomSingularity
+                if (!DumpShards && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
+                {
+                    API.CastSpell(PhantomSingularity);
+                    return;
+                }
+                //Malefic Rapture Check Low Level
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11 && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel <= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58)
+                //Malefic Rapture PhantomSingularity
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel <= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //Malefic Rapture TalentVileTaint
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel <= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+
+                //Malefic Rapture Check High Level ShadowEmbrande
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //Malefic Rapture PhantomSingularity
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel >= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //Malefic Rapture TalentVileTaint
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel >= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+
+
+
+
+
+
+
+
+
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11 && PlayerLevel <= 58)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
                 {
+                    API.CastSpell(VileTaint);
+                    DumpWatchHigh.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
+                {
+                    API.CastSpell(PhantomSingularity);
+                    DumpWatchHigh.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+
+
+
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
+                {
+                    DumpWatchLow.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
+                {
+                    API.CastSpell(VileTaint);
+                    DumpWatchLow.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
+                {
+                    API.CastSpell(PhantomSingularity);
                     DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
@@ -396,7 +470,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //ScouringTithe
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(ScouringTithe) && LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
                 {
                     API.CastSpell(ScouringTithe);
                     return;
@@ -425,7 +499,7 @@ namespace HyperElk.Core
                 }
                 //actions.covenant+=/scouring_tithe
                 //ScouringTithe
-                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && LastCastScouringTithe && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
                 {
                     API.CastSpell(ScouringTithe);
                     return;
@@ -475,13 +549,13 @@ namespace HyperElk.Core
                 }
                 //actions+=/phantom_singularity,if=time>30
                 //PhantomSingularity
-                if (TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity))
+                if (!DumpShards && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity))
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
                 }
                 //VileTaint
-                if (TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
                 {
                     API.CastSpell(VileTaint);
                     return;
@@ -498,7 +572,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
@@ -517,7 +591,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //ScouringTithe
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
+                if (API.CanCast(ScouringTithe) && LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
                 {
                     API.CastSpell(ScouringTithe);
                     return;
@@ -553,24 +627,107 @@ namespace HyperElk.Core
                     API.CastSpell(DarkSoulMisery);
                     return;
                 }
-                //Malefic Rapture Check
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11)
+
+
+                //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
+                //VileTaint
+                if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions+=/phantom_singularity,if=time>30
+                //PhantomSingularity
+                if (!DumpShards && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
+                {
+                    API.CastSpell(PhantomSingularity);
+                    return;
+                }
+                //Malefic Rapture Check Low Level
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11 && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel <= 58)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58)
+                //Malefic Rapture PhantomSingularity
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel <= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //Malefic Rapture TalentVileTaint
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel <= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+
+                //Malefic Rapture Check High Level ShadowEmbrande
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //Malefic Rapture PhantomSingularity
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(PhantomSingularity) && TalentPhantomSingularity && PlayerLevel >= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //Malefic Rapture TalentVileTaint
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel >= 58)
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+
+
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel >= 11 && PlayerLevel <=58)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
+                {
+                    API.CastSpell(VileTaint);
+                    DumpWatchHigh.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
+                {
+                    API.CastSpell(PhantomSingularity);
+                    DumpWatchHigh.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+
+
+
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
+                {
+                    API.CastSpell(VileTaint);
+                    DumpWatchLow.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
+                {
+                    API.CastSpell(PhantomSingularity);
+                    DumpWatchLow.Start();
+                    API.WriteLog("Starting Dump Shards.");
+                    return;
+                }
+
+
+
                 //DecimatingBolt
                 if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always")
                 {
