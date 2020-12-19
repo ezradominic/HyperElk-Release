@@ -204,13 +204,21 @@ namespace HyperElk.Core
                 return;
             }
             if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && NotChanneling && API.PlayerHasBuff("Combustion"))
+            {
                 API.CastSpell(trinket1);
+            }
             if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && NotChanneling)
+            {
                 API.CastSpell(trinket1);
+            }
             if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift && NotChanneling && API.PlayerHasBuff("Combustion"))
+            {
                 API.CastSpell(trinket2);
+            }
             if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift && NotChanneling)
+            {
                 API.CastSpell(trinket2);
+            }
             if (Level <= 60)
             {
                 rotation();
@@ -252,7 +260,7 @@ namespace HyperElk.Core
                     API.CastSpell("Meteor");
                     return;
                 }
-                if (API.CanCast("Combustion") && Level >= 29 && (!API.PlayerIsMoving || API.PlayerIsMoving) && (API.PlayerIsCasting(false) || API.PlayerIsCasting(true) && API.PlayerElapsedCastTimePercent <= 95) && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29 && !API.PlayerHasBuff("Rune of Power") && (FireStarter && API.TargetHealthPercent < 90 || !FireStarter))
+                if (API.CanCast("Combustion") && Level >= 29 && (!API.PlayerIsMoving || API.PlayerIsMoving) && (API.PlayerIsCasting(false) || API.PlayerElapsedCastTimePercent <= 95) && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29 && !API.PlayerHasBuff("Rune of Power") && (FireStarter && API.TargetHealthPercent < 90 || !FireStarter) && API.SpellCharges("Fire Blast") >= 2)
                 {
                     API.CastSpell("Combustion");
                     return;
