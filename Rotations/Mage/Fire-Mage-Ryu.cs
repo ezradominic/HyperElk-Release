@@ -28,6 +28,7 @@ namespace HyperElk.Core
         private string InfernalCascade = "Infernal Cascade";
 
         //Talents
+        bool FireStarter => API.PlayerIsTalentSelected(1, 1);
         bool SearingTouch => API.PlayerIsTalentSelected(1, 3);
         bool BlastWave => API.PlayerIsTalentSelected(2, 3);
         bool RuneOfPower => API.PlayerIsTalentSelected(3, 3);
@@ -79,7 +80,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fire Mage by Ryu";
-            API.WriteLog("Welcome to Fire Mage v1.7 by Ryu");
+            API.WriteLog("Welcome to Fire Mage v1.8 by Ryu");
             API.WriteLog("Create the following cursor macro for Flamestrike and Meteor");
             API.WriteLog("Flamestrike -- /cast [@cursor] Flamestrike");
             API.WriteLog("Meteor -- /cast [@cursor] Meteor");
@@ -87,6 +88,7 @@ namespace HyperElk.Core
             API.WriteLog("All Talents expect Ring of Frost and Alexstrasza's Fury supported. All Cooldowns are associated with Cooldown toggle.");
             API.WriteLog("Firestrom is auto supported, no need to select in Legendary List.");
             API.WriteLog("Fireblast and Pheonix Flames WILL not be used if you do not have SmallCd's toggle on, or when you have Combustion Buff.");
+            API.WriteLog("If you have Trinkets used With Cooldowns, it will only ever cast them while you have Combustion Buff.");
             //Buff
             CombatRoutine.AddBuff("Heating Up");
             CombatRoutine.AddBuff("Pyroclasm");
@@ -201,11 +203,11 @@ namespace HyperElk.Core
                 API.CastSpell("Blazing Barrier");
                 return;
             }
-            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && NotChanneling)
+            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && NotChanneling && API.PlayerHasBuff("Combustion"))
                 API.CastSpell(trinket1);
-            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift)
+            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && NotChanneling)
                 API.CastSpell(trinket1);
-            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift && NotChanneling)
+            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift && NotChanneling && API.PlayerHasBuff("Combustion"))
                 API.CastSpell(trinket2);
             if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift && NotChanneling)
                 API.CastSpell(trinket2);
@@ -250,7 +252,7 @@ namespace HyperElk.Core
                     API.CastSpell("Meteor");
                     return;
                 }
-                if (API.CanCast("Combustion") && Level >= 29 && (!API.PlayerIsMoving || API.PlayerIsMoving) && (API.PlayerIsCasting(false) || API.PlayerIsCasting(true) && API.PlayerElapsedCastTimePercent <= 95) && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29 && !API.PlayerHasBuff("Rune of Power") && API.SpellCharges("Fire Blast") >= 2)
+                if (API.CanCast("Combustion") && Level >= 29 && (!API.PlayerIsMoving || API.PlayerIsMoving) && (API.PlayerIsCasting(false) || API.PlayerIsCasting(true) && API.PlayerElapsedCastTimePercent <= 95) && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29 && !API.PlayerHasBuff("Rune of Power") && (FireStarter && API.TargetHealthPercent < 90 || !FireStarter))
                 {
                     API.CastSpell("Combustion");
                     return;
@@ -272,7 +274,7 @@ namespace HyperElk.Core
                     return;
                 }
                 // || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > FBRecharge*2 && !FlameOn
-                if (API.CanCast("Fire Blast") && (IsForceAOE || IsAOE) && API.SpellCharges("Fire Blast") <= 3 && (!API.SpellISOnCooldown("Combustion") || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > FBRecharge*2) && (!API.PlayerHasBuff("Combustion") || API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33)
+                if (API.CanCast("Fire Blast") && (IsSmallCD || API.PlayerHasBuff("Combustion")) && API.SpellCharges("Fire Blast") == 3 && (!API.SpellISOnCooldown("Combustion") || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > FBRecharge*2) && (!API.PlayerHasBuff("Combustion") || API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33)
                  {
                      API.CastSpell("Fire Blast");
                      return;
