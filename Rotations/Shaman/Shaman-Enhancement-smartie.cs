@@ -5,6 +5,7 @@
 // v1.3 legendary preperation
 // v1.4 Racials and Trinkets
 // v1.5 Doomwind Leggy fixed
+// v1.6 updated to latest simc apl
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -106,7 +107,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.5");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.6");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, "D3");
@@ -157,6 +158,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(WindfuryTotem);
             CombatRoutine.AddBuff(PrimordialWave);
             CombatRoutine.AddBuff(VesperTotem);
+            CombatRoutine.AddBuff(DoomWinds);
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock);
@@ -318,144 +320,184 @@ namespace HyperElk.Core
                 API.CastSpell(WindfuryTotem);
                 return;
             }
-            if (API.CanCast(Ascendance) && isMelee && TalentAscendance && IsAscendance)
-            {
-                API.CastSpell(Ascendance);
-                return;
-            }
-            if (API.CanCast(Windstrike) && PlayerLevel >= 15 && API.PlayerHasBuff(Ascendance) && isMelee)
-            {
-                API.CastSpell(Windstrike);
-                return;
-            }
+            //actions+=/feral_spirit
             if (API.CanCast(FeralSpirit) && PlayerLevel >= 34 && isMelee && IsFeralSpirit)
             {
                 API.CastSpell(FeralSpirit);
                 return;
             }
+            //actions+=/ascendance,if=raid_event.adds.in>=90|active_enemies>1
+            if (API.CanCast(Ascendance) && isMelee && TalentAscendance && IsAscendance)
+            {
+                API.CastSpell(Ascendance);
+                return;
+            }
             // Single Target rota
             if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
             {
+                //actions.single=windstrike
+                if (API.CanCast(Windstrike) && PlayerLevel >= 15 && API.PlayerHasBuff(Ascendance) && isMelee)
+                {
+                    API.CastSpell(Windstrike);
+                    return;
+                }
+                //actions.single+=/primordial_wave,if=!buff.primordial_wave.up
                 if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && !API.PlayerHasBuff(PrimordialWave) && isinrange)
                 {
                     API.CastSpell(PrimordialWave);
                     return;
                 }
+                //actions.single+=/stormstrike,if=runeforge.doom_winds.equipped&buff.doom_winds.up
+                if (API.CanCast(Stormstrike) && PlayerLevel >= 20 && API.PlayerMana >= 2 && isMelee && API.PlayerHasBuff(DoomWinds, false, false))
+                {
+                    API.CastSpell(Stormstrike);
+                    return;
+                }
+                //actions.single +=/ crash_lightning,if= runeforge.doom_winds.equipped & buff.doom_winds.up
+                if (API.CanCast(CrashLightning) && PlayerLevel >= 38 && API.PlayerMana >= 6 && isMelee && API.PlayerHasBuff(DoomWinds, false, false))
+                {
+                    API.CastSpell(CrashLightning);
+                    return;
+                }
+                //actions.single +=/ ice_strike,if= runeforge.doom_winds.equipped & buff.doom_winds.up
+                if (API.CanCast(IceStrike) && isMelee && API.PlayerMana >= 4 && TalentIceStrike && API.PlayerHasBuff(DoomWinds, false, false))
+                {
+                    API.CastSpell(IceStrike);
+                    return;
+                }
+                //actions.single+=/flame_shock,if=!ticking
                 if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange)
                 {
                     API.CastSpell(FlameShock);
                     return;
                 }
+                //actions.single+=/vesper_totem
                 if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
                     return;
                 }
+                //actions.single+=/frost_shock,if=buff.hailstorm.up
                 if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange && API.PlayerHasBuff(Hailstorm))
                 {
                     API.CastSpell(FrostShock);
                     return;
                 }
+                //actions.single+=/earthen_spike
                 if (API.CanCast(EarthenSpike) && isMelee && API.PlayerMana >= 4 && TalentEarthenSpike)
                 {
                     API.CastSpell(EarthenSpike);
                     return;
                 }
+                //actions.single+=/fae_transfusion
                 if (API.CanCast(FaeTransfusion) && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(FaeTransfusion);
                     return;
                 }
+                //actions.single+=/lightning_bolt,if=buff.stormkeeper.up
                 if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerHasBuff(StormKeeper) && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(LightningBolt);
                     return;
                 }
+                //actions.single+=/elemental_blast,if=buff.maelstrom_weapon.stack>=5
                 if (API.CanCast(ElementalBlast) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 3 && TalentElementalBlast)
                 {
                     API.CastSpell(ElementalBlast);
                     return;
                 }
+                //actions.single+=/chain_harvest,if=buff.maelstrom_weapon.stack>=5
                 if (API.CanCast(ChainHarvest) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
                 {
                     API.CastSpell(ChainHarvest);
                     return;
                 }
+                //actions.single+=/lightning_bolt,if=buff.maelstrom_weapon.stack=10
                 if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) == 10 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(LightningBolt);
                     return;
                 }
+                //actions.single+=/lava_lash,if=buff.hot_hand.up|(runeforge.primal_lava_actuators.equipped&buff.primal_lava_actuators.stack>6)
                 if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee && API.PlayerHasBuff(HotHand))
                 {
                     API.CastSpell(LavaLash);
                     return;
                 }
+                //actions.single+=/stormstrike low level
                 if (API.CanCast(PrimalStrike) && PlayerLevel < 20 && API.PlayerMana >= 10 && isMelee)
                 {
                     API.CastSpell(PrimalStrike);
                     return;
                 }
+                //actions.single+=/stormstrike
                 if (API.CanCast(Stormstrike) && PlayerLevel >= 20 && API.PlayerMana >= 2 && isMelee)
                 {
                     API.CastSpell(Stormstrike);
                     return;
                 }
+                //actions.single+=/stormkeeper,if=buff.maelstrom_weapon.stack>=5
                 if (API.CanCast(StormKeeper) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && !API.PlayerIsMoving && isinrange && TalentStormkeeper && IsStormKeeper)
                 {
                     API.CastSpell(StormKeeper);
                     return;
                 }
-                if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) >= 8 && API.PlayerMana >= 1 && isinrange)
-                {
-                    API.CastSpell(LightningBolt);
-                    return;
-                }
+                //actions.single+=/lava_lash
                 if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee)
                 {
                     API.CastSpell(LavaLash);
                     return;
                 }
+                //actions.single+=/crash_lightning
                 if (API.CanCast(CrashLightning) && PlayerLevel >= 38 && API.PlayerMana >= 6 && isMelee)
                 {
                     API.CastSpell(CrashLightning);
                     return;
                 }
+                //actions.single+=/flame_shock,target_if=refreshable
                 if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 500 && isinrange)
                 {
                     API.CastSpell(FlameShock);
                     return;
                 }
+                //actions.single+=/frost_shock
                 if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(FrostShock);
                     return;
                 }
+                //actions.single+=/ice_strike
                 if (API.CanCast(IceStrike) && isMelee && API.PlayerMana >= 4 && TalentIceStrike)
                 {
                     API.CastSpell(IceStrike);
                     return;
                 }
+                //actions.single+=/sundering,if=raid_event.adds.in>=40
                 if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
                 }
+                //actions.single+=/fire_nova,if=active_dot.flame_shock
                 if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
                 {
                     API.CastSpell(FireNova);
                     return;
                 }
+                //actions.single+=/lightning_bolt,if=buff.maelstrom_weapon.stack>=5
                 if (API.CanCast(LightningBolt) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(LightningBolt);
                     return;
                 }
+                //actions.single+=/earth_elemental
                 if (API.CanCast(EarthElemental) && isMelee && PlayerLevel >= 37 && IsEarthElemental)
                 {
                     API.CastSpell(EarthElemental);
                     return;
                 }
+                //actions.single+=/windfury_totem,if=buff.windfury_totem.remains<30
                 if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
@@ -465,121 +507,181 @@ namespace HyperElk.Core
             //AoE rota
             if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
             {
+                //actions.aoe=windstrike,if=buff.crash_lightning.up
+                if (API.CanCast(Windstrike) && PlayerLevel >= 15 && API.PlayerHasBuff(Ascendance) && isMelee && API.PlayerHasBuff(CrashLightning))
+                {
+                    API.CastSpell(Windstrike);
+                    return;
+                }
+                //actions.aoe+=/frost_shock,if=buff.hailstorm.up
                 if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange && API.PlayerHasBuff(Hailstorm))
                 {
                     API.CastSpell(FrostShock);
                     return;
                 }
-                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange && (TalentFireNova || TalentLashingFlames || PlayerCovenantSettings == "Necrolord"))
-                {
-                    API.CastSpell(FlameShock);
-                    return;
-                }
-                if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && !API.PlayerHasBuff(PrimordialWave) && isinrange)
-                {
-                    API.CastSpell(PrimordialWave);
-                    return;
-                }
-                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
-                {
-                    API.CastSpell(FireNova);
-                    return;
-                }
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
-                {
-                    API.CastSpell(VesperTotem);
-                    return;
-                }
-                if (API.CanCast(LightningBolt) && API.PlayerHasBuff(PrimordialWave) && (API.PlayerBuffStacks(MaelstromWeapon) >= 5 || API.PlayerHasBuff(StormKeeper)) && API.PlayerMana >= 1 && isinrange)
-                {
-                    API.CastSpell(LightningBolt);
-                    return;
-                }
-                if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee && TalentLashingFlames && API.TargetDebuffRemainingTime(LashingFlames) < 150)
-                {
-                    API.CastSpell(LavaLash);
-                    return;
-                }
-                if (API.CanCast(CrashLightning) && PlayerLevel >= 38 && API.PlayerMana >= 6 && isMelee)
-                {
-                    API.CastSpell(CrashLightning);
-                    return;
-                }
-                if (API.CanCast(ChainHarvest) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
-                {
-                    API.CastSpell(ChainHarvest);
-                    return;
-                }
-                if (API.CanCast(ElementalBlast) && API.PlayerUnitInMeleeRangeCount < 3 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 3 && TalentElementalBlast)
-                {
-                    API.CastSpell(ElementalBlast);
-                    return;
-                }
-                if (API.CanCast(StormKeeper) && !API.PlayerIsMoving && IsStormKeeper && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && TalentStormkeeper)
-                {
-                    API.CastSpell(StormKeeper);
-                    return;
-                }
-                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffStacks(MaelstromWeapon) == 10 && API.PlayerMana >= 1 && isinrange)
-                {
-                    API.CastSpell(ChainLightning);
-                    return;
-                }
-                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 100 && TalentFireNova && isinrange)
-                {
-                    API.CastSpell(FlameShock);
-                    return;
-                }
+                //actions.aoe+=/sundering
                 if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
                 }
+                //actions.aoe+=/flame_shock,target_if=refreshable,cycle_targets=1,if=talent.fire_nova.enabled|talent.lashing_flames.enabled|covenant.necrolord
+                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange && (TalentFireNova || TalentLashingFlames || PlayerCovenantSettings == "Necrolord"))
+                {
+                    API.CastSpell(FlameShock);
+                    return;
+                }
+                //actions.aoe+=/primordial_wave,target_if=min:dot.flame_shock.remains,cycle_targets=1,if=!buff.primordial_wave.up
+                if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && API.TargetHasDebuff(FlameShock) && !API.PlayerHasBuff(PrimordialWave) && isinrange)
+                {
+                    API.CastSpell(PrimordialWave);
+                    return;
+                }
+                //actions.aoe+=/fire_nova,if=active_dot.flame_shock>=3
+                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
+                {
+                    API.CastSpell(FireNova);
+                    return;
+                }
+                //actions.aoe+=/vesper_totem
+                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
+                {
+                    API.CastSpell(VesperTotem);
+                    return;
+                }
+                //actions.aoe+=/lightning_bolt,if=buff.primordial_wave.up&(buff.stormkeeper.up|buff.maelstrom_weapon.stack>=5)
+                if (API.CanCast(LightningBolt) && API.PlayerHasBuff(PrimordialWave) && (API.PlayerBuffStacks(MaelstromWeapon) >= 5 || API.PlayerHasBuff(StormKeeper)) && API.PlayerMana >= 1 && isinrange)
+                {
+                    API.CastSpell(LightningBolt);
+                    return;
+                }
+                //actions.aoe+=/lava_lash,target_if=min:debuff.lashing_flames.remains,cycle_targets=1,if=talent.lashing_flames.enabled
+                if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee && TalentLashingFlames && API.TargetDebuffRemainingTime(LashingFlames) < 150)
+                {
+                    API.CastSpell(LavaLash);
+                    return;
+                }
+                //actions.aoe+=/stormstrike,if=buff.crash_lightning.up
+                if (API.CanCast(Stormstrike) && PlayerLevel >= 20 && API.PlayerMana >= 2 && isMelee && API.PlayerHasBuff(CrashLightning))
+                {
+                    API.CastSpell(Stormstrike);
+                    return;
+                }
+                //actions.aoe+=/crash_lightning
+                if (API.CanCast(CrashLightning) && PlayerLevel >= 38 && API.PlayerMana >= 6 && isMelee)
+                {
+                    API.CastSpell(CrashLightning);
+                    return;
+                }
+                //actions.aoe+=/chain_lightning,if=buff.stormkeeper.up
+                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerHasBuff(StormKeeper) && API.PlayerMana >= 1 && isinrange)
+                {
+                    API.CastSpell(ChainLightning);
+                    return;
+                }
+                //actions.aoe+=/chain_harvest,if=buff.maelstrom_weapon.stack>=5
+                if (API.CanCast(ChainHarvest) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                {
+                    API.CastSpell(ChainHarvest);
+                    return;
+                }
+                //actions.aoe+=/elemental_blast,if=buff.maelstrom_weapon.stack>=5
+                if (API.CanCast(ElementalBlast) && API.PlayerUnitInMeleeRangeCount < 3 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 3 && TalentElementalBlast)
+                {
+                    API.CastSpell(ElementalBlast);
+                    return;
+                }
+                //actions.aoe+=/stormkeeper,if=buff.maelstrom_weapon.stack>=5
+                if (API.CanCast(StormKeeper) && !API.PlayerIsMoving && IsStormKeeper && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && TalentStormkeeper)
+                {
+                    API.CastSpell(StormKeeper);
+                    return;
+                }
+                //actions.aoe+=/chain_lightning,if=buff.maelstrom_weapon.stack=10
+                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffStacks(MaelstromWeapon) == 10 && API.PlayerMana >= 1 && isinrange)
+                {
+                    API.CastSpell(ChainLightning);
+                    return;
+                }
+                //actions.aoe+=/flame_shock,target_if=refreshable,cycle_targets=1,if=talent.fire_nova.enabled
+                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 100 && TalentFireNova && isinrange)
+                {
+                    API.CastSpell(FlameShock);
+                    return;
+                }
+                //actions.aoe+=/chain_lightning,if=buff.maelstrom_weapon.stack>=5&active_enemies>=3
+                if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerUnitInMeleeRangeCount >= 3 && API.PlayerMana >= 1 && isinrange)
+                {
+                    API.CastSpell(ChainLightning);
+                    return;
+                }
+                //actions.aoe+=/windstrike
+                if (API.CanCast(Windstrike) && PlayerLevel >= 15 && API.PlayerHasBuff(Ascendance) && isMelee)
+                {
+                    API.CastSpell(Windstrike);
+                    return;
+                }
+                //actions.aoe+=/stormstrike
                 if (API.CanCast(Stormstrike) && PlayerLevel >= 20 && API.PlayerMana >= 2 && isMelee)
                 {
                     API.CastSpell(Stormstrike);
                     return;
                 }
+                //actions.aoe+=/stormstrike low level
                 if (API.CanCast(PrimalStrike) && PlayerLevel < 20 && API.PlayerMana >= 10 && isMelee)
                 {
                     API.CastSpell(PrimalStrike);
                     return;
                 }
+                //actions.aoe+=/lava_lash
                 if (API.CanCast(LavaLash) && PlayerLevel >= 11 && API.PlayerMana >= 4 && isMelee)
                 {
                     API.CastSpell(LavaLash);
                     return;
                 }
+                //actions.aoe+=/flame_shock,target_if=refreshable,cycle_targets=1
+                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 100 && isinrange)
+                {
+                    API.CastSpell(FlameShock);
+                    return;
+                }
+                //actions.aoe+=/fae_transfusion
                 if (API.CanCast(FaeTransfusion) && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(FaeTransfusion);
                     return;
                 }
+                //actions.aoe+=/frost_shock
                 if (API.CanCast(FrostShock) && PlayerLevel >= 17 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(FrostShock);
                     return;
                 }
+                //actions.aoe+=/ice_strike
                 if (API.CanCast(IceStrike) && isMelee && API.PlayerMana >= 4 && TalentIceStrike)
                 {
                     API.CastSpell(IceStrike);
                     return;
                 }
+                //actions.aoe+=/chain_lightning,if=buff.maelstrom_weapon.stack>=5
                 if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerMana >= 1 && isinrange)
                 {
                     API.CastSpell(ChainLightning);
                     return;
                 }
+                //actions.aoe+=/earthen_spike
                 if (API.CanCast(EarthenSpike) && isMelee && API.PlayerMana >= 4 && TalentEarthenSpike)
                 {
                     API.CastSpell(EarthenSpike);
                     return;
                 }
+                //actions.aoe+=/earth_elemental
                 if (API.CanCast(EarthElemental) && isMelee && PlayerLevel >= 37 && IsEarthElemental)
                 {
                     API.CastSpell(EarthElemental);
                     return;
                 }
+                //actions.aoe+=/windfury_totem,if=buff.windfury_totem.remains<30
                 if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
                 {
                     API.CastSpell(WindfuryTotem);
