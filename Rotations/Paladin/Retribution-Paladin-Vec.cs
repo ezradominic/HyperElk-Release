@@ -271,7 +271,7 @@ namespace HyperElk.Core
                     API.CastSpell(FlashofLight + " Focus");
                     return;
                 }
-                if (!API.MacroIsIgnored(LayOnHands + "Focus") && API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
+                if (!API.MacroIsIgnored(LayOnHands + " Focus") && API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
                 {
                     API.CastSpell(LayOnHands + " Focus");
                     return;
