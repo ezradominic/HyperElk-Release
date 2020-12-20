@@ -114,42 +114,42 @@ namespace HyperElk.Core
 
 
             //Spells
-            CombatRoutine.AddSpell(TigerPalm, "D1");
-            CombatRoutine.AddSpell(BlackOutKick, "D2");
-            CombatRoutine.AddSpell(SpinningCraneKick, "D3");
-            CombatRoutine.AddSpell(SpearHandStrike, "D4");
-            CombatRoutine.AddSpell(FistsofFury, "D5");
-            CombatRoutine.AddSpell(FistsoftheWhiteTiger, "D6");
-            CombatRoutine.AddSpell(WhirlingDragonPunch, "D7");
-            CombatRoutine.AddSpell(TouchofDeath, "D7");
-            CombatRoutine.AddSpell(ChiWave, "D7");
-            CombatRoutine.AddSpell(StormEarthandFire, "OemOpenBrackets");
-            CombatRoutine.AddSpell(Serenity, "OemOpenBrackets");
+            CombatRoutine.AddSpell(TigerPalm, 100780, "D1");
+            CombatRoutine.AddSpell(BlackOutKick, 100784, "D2");
+            CombatRoutine.AddSpell(SpinningCraneKick, 101546, "D3");
+            CombatRoutine.AddSpell(SpearHandStrike, 116705, "D4");
+            CombatRoutine.AddSpell(FistsofFury, 113656,"D5");
+            CombatRoutine.AddSpell(FistsoftheWhiteTiger, 261947,"D6");
+            CombatRoutine.AddSpell(WhirlingDragonPunch, 152175,"D7");
+            CombatRoutine.AddSpell(TouchofDeath, 115080,"D7");
+            CombatRoutine.AddSpell(ChiWave, 115098,"D7");
+            CombatRoutine.AddSpell(StormEarthandFire, 137639,"OemOpenBrackets");
+            CombatRoutine.AddSpell(Serenity, 152173,"OemOpenBrackets");
 
-            CombatRoutine.AddSpell(WeaponsofOrder, "Oem6");
-            CombatRoutine.AddSpell(BonedustBrew, "Oem6");
-            CombatRoutine.AddSpell(Fleshcraft, "OemOpenBrackets");
-            CombatRoutine.AddSpell(FaelineStomp, "Oem6");
-            CombatRoutine.AddSpell(FallenOrder, "Oem6");
+            CombatRoutine.AddSpell(WeaponsofOrder, 310454, "Oem6");
+            CombatRoutine.AddSpell(BonedustBrew, 325216, "Oem6");
+            CombatRoutine.AddSpell(Fleshcraft, 324631, "OemOpenBrackets");
+            CombatRoutine.AddSpell(FaelineStomp, 327104, "Oem6");
+            CombatRoutine.AddSpell(FallenOrder, 326860, "Oem6");
 
-            CombatRoutine.AddSpell(ChiBurst, "D9");
-            CombatRoutine.AddSpell(RisingSunKick, "D0");
-            CombatRoutine.AddSpell(RushingJadeWind, "Oem6");
+            CombatRoutine.AddSpell(ChiBurst, 123986,"D9");
+            CombatRoutine.AddSpell(RisingSunKick, 107428,"D0");
+            CombatRoutine.AddSpell(RushingJadeWind, 116847,"Oem6");
 
-            CombatRoutine.AddSpell(Vivify, "NumPad1");
-            CombatRoutine.AddSpell(ExpelHarm, "NumPad2");
-            CombatRoutine.AddSpell(EnergizingElixir, "NumPad3");
-            CombatRoutine.AddSpell(DampenHarm, "F1");
-            CombatRoutine.AddSpell(FortifyingBrew, "F2");
-            CombatRoutine.AddSpell(InvokeXuen, "F3");
+            CombatRoutine.AddSpell(Vivify, 116670,"NumPad1");
+            CombatRoutine.AddSpell(ExpelHarm, 115072,"NumPad2");
+            CombatRoutine.AddSpell(EnergizingElixir, 115288,"NumPad3");
+            CombatRoutine.AddSpell(DampenHarm, 122278,"F1");
+            CombatRoutine.AddSpell(FortifyingBrew, 115203,"F2");
+            CombatRoutine.AddSpell(InvokeXuen, 123904,"F3");
 
 
 
             //Buffs
-            CombatRoutine.AddBuff("Blackout Kick!");
-            CombatRoutine.AddBuff("Dance of Chi-Ji");
-            CombatRoutine.AddBuff("Storm,  Earth,  and Fire");
-            CombatRoutine.AddBuff("Serenity");
+            CombatRoutine.AddBuff("Blackout Kick!", 116768);
+            CombatRoutine.AddBuff("Dance of Chi-Ji", 325201);
+            CombatRoutine.AddBuff("Storm,  Earth,  and Fire", 137639);
+            CombatRoutine.AddBuff("Serenity", 152173);
 
             //Debuffs
             CombatRoutine.AddDebuff("Mark of the Crane");
