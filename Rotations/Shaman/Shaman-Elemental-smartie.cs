@@ -8,6 +8,7 @@
 // v1.6 overcap maelstrom fix
 // v1.7 Master of the Elements workaround
 // v1.8 chain lightning with stormkeeper change
+// v1.9 spell ids and alot of other stuff
 
 using System.Diagnostics;
 
@@ -52,6 +53,8 @@ namespace HyperElk.Core
         private string WindGust = "Wind Gust";
         private string EchoesofGreatSundering = "Echoes of Great Sundering";
         private string LavaBeam = "Lava Beam";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         //Talents
         bool TalentEchoingShock => API.PlayerIsTalentSelected(2, 2);
@@ -85,6 +88,7 @@ namespace HyperElk.Core
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseAscendance => CDUsage[CombatRoutine.GetPropertyInt(Ascendance)];
         private string UseStormElemental => CDUsage[CombatRoutine.GetPropertyInt(StormElemental)];
@@ -96,9 +100,11 @@ namespace HyperElk.Core
         private bool EchoLeggy => CombatRoutine.GetPropertyBool("EchoLeggy");
         private bool SelfLightningShield => CombatRoutine.GetPropertyBool("LightningShield");
         private bool SelfEarthShield => CombatRoutine.GetPropertyBool("EarthShield");
-        private int AstralShiftLifePercent => percentListProp[CombatRoutine.GetPropertyInt(AstralShift)];
-        private int HealingStreamTotemLifePercent => percentListProp[CombatRoutine.GetPropertyInt(HealingStreamTotem)];
-        private int HealingSurgeLifePercent => percentListProp[CombatRoutine.GetPropertyInt(HealingSurge)];
+        private int AstralShiftLifePercent => numbList[CombatRoutine.GetPropertyInt(AstralShift)];
+        private int HealingStreamTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingStreamTotem)];
+        private int HealingSurgeLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingSurge)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         private static readonly Stopwatch stormwatch = new Stopwatch();
         private static readonly Stopwatch vesperwatch = new Stopwatch();
@@ -109,37 +115,37 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.8");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.9");
 
             //Spells
-            CombatRoutine.AddSpell(ChainLightning, "D7");
-            CombatRoutine.AddSpell(LavaBeam, "D7");
-            CombatRoutine.AddSpell(Earthquake, "D5");
-            CombatRoutine.AddSpell(Icefury, "D9");
-            CombatRoutine.AddSpell(LavaBurst, "D3");
-            CombatRoutine.AddSpell(FrostShock, "D6");
-            CombatRoutine.AddSpell(Stormkeeper, "NumPad2");
-            CombatRoutine.AddSpell(LiquidManaTotem, "D1");
-            CombatRoutine.AddSpell(ElementalBlast, "D8");
-            CombatRoutine.AddSpell(EarthShock, "D4");
-            CombatRoutine.AddSpell(EarthElemental, "D1");
-            CombatRoutine.AddSpell(StormElemental, "D0");
-            CombatRoutine.AddSpell(FireElemental, "D0");
-            CombatRoutine.AddSpell(FlameShock, "D2");
-            CombatRoutine.AddSpell(Ascendance, "D1");
-            CombatRoutine.AddSpell(GhostWolf, "NumPad1");
-            CombatRoutine.AddSpell(HealingSurge, "F1");
-            CombatRoutine.AddSpell(LightningBolt, "D1");
-            CombatRoutine.AddSpell(WindShear, "F12");
-            CombatRoutine.AddSpell(AstralShift, "F4");
-            CombatRoutine.AddSpell(EchoingShock, "NumPad3");
-            CombatRoutine.AddSpell(EarthShield, "F7");
-            CombatRoutine.AddSpell(HealingStreamTotem, "NumPad6");
-            CombatRoutine.AddSpell(LightningShield, "F2");
-            CombatRoutine.AddSpell(PrimordialWave, "D1");
-            CombatRoutine.AddSpell(VesperTotem, "D1");
-            CombatRoutine.AddSpell(FaeTransfusion, "D1");
-            CombatRoutine.AddSpell(ChainHarvest, "D1");
+            CombatRoutine.AddSpell(ChainLightning, 188443, "D7");
+            CombatRoutine.AddSpell(LavaBeam, 114074, "D7");
+            CombatRoutine.AddSpell(Earthquake, 61882, "D5");
+            CombatRoutine.AddSpell(Icefury, 210714, "D9");
+            CombatRoutine.AddSpell(LavaBurst, 51505, "D3");
+            CombatRoutine.AddSpell(FrostShock, 196840, "D6");
+            CombatRoutine.AddSpell(Stormkeeper, 191634, "NumPad2");
+            CombatRoutine.AddSpell(LiquidManaTotem, 192222, "D1");
+            CombatRoutine.AddSpell(ElementalBlast, 117014, "D8");
+            CombatRoutine.AddSpell(EarthShock, 8042, "D4");
+            CombatRoutine.AddSpell(EarthElemental, 198103, "D1");
+            CombatRoutine.AddSpell(StormElemental, 192249, "D0");
+            CombatRoutine.AddSpell(FireElemental, 198067, "D0");
+            CombatRoutine.AddSpell(FlameShock, 188389, "D2");
+            CombatRoutine.AddSpell(Ascendance, 114050, "D1");
+            CombatRoutine.AddSpell(GhostWolf, 2645, "NumPad1");
+            CombatRoutine.AddSpell(HealingSurge, 8004, "F1");
+            CombatRoutine.AddSpell(LightningBolt, 188196, "D1");
+            CombatRoutine.AddSpell(WindShear, 57994, "F12");
+            CombatRoutine.AddSpell(AstralShift, 108271, "F4");
+            CombatRoutine.AddSpell(EchoingShock, 320125, "NumPad3");
+            CombatRoutine.AddSpell(EarthShield, 974, "F7");
+            CombatRoutine.AddSpell(HealingStreamTotem, 5394, "NumPad6");
+            CombatRoutine.AddSpell(LightningShield, 192106, "F2");
+            CombatRoutine.AddSpell(PrimordialWave, 326059, "D1");
+            CombatRoutine.AddSpell(VesperTotem, 324386, "D1");
+            CombatRoutine.AddSpell(FaeTransfusion, 328923, "D1");
+            CombatRoutine.AddSpell(ChainHarvest, 320674, "D1");
 
             //Macros
             CombatRoutine.AddMacro(FlameShock + "MO", "NumPad7");
@@ -147,26 +153,31 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro("Trinket2", "F10");
 
             //Buffs
-            CombatRoutine.AddBuff(LavaSurge);
-            CombatRoutine.AddBuff(MasteroftheElements);
-            CombatRoutine.AddBuff(Stormkeeper);
-            CombatRoutine.AddBuff(Icefury);
-            CombatRoutine.AddBuff(SurgeofPower);
-            CombatRoutine.AddBuff(Ascendance);
-            CombatRoutine.AddBuff(GhostWolf);
-            CombatRoutine.AddBuff(EarthShield);
-            CombatRoutine.AddBuff(LightningShield);
-            CombatRoutine.AddBuff(SpiritwalkersGrace);
-            CombatRoutine.AddBuff(PrimordialWave);
-            CombatRoutine.AddBuff(WindGust);
-            CombatRoutine.AddBuff(EchoesofGreatSundering);
-            CombatRoutine.AddBuff(EchoingShock);
+            CombatRoutine.AddBuff(LavaSurge, 77762);
+            CombatRoutine.AddBuff(MasteroftheElements, 260734);
+            CombatRoutine.AddBuff(Stormkeeper, 191634);
+            CombatRoutine.AddBuff(Icefury, 210714);
+            CombatRoutine.AddBuff(SurgeofPower, 285514);
+            CombatRoutine.AddBuff(Ascendance, 114050);
+            CombatRoutine.AddBuff(GhostWolf, 2645);
+            CombatRoutine.AddBuff(EarthShield, 974);
+            CombatRoutine.AddBuff(LightningShield, 192106);
+            CombatRoutine.AddBuff(SpiritwalkersGrace, 79206);
+            CombatRoutine.AddBuff(PrimordialWave, 326059);
+            CombatRoutine.AddBuff(WindGust, 263806);
+            CombatRoutine.AddBuff(EchoesofGreatSundering, 336215);
+            CombatRoutine.AddBuff(EchoingShock, 320125);
+            CombatRoutine.AddBuff(VesperTotem, 324386);
 
             //Debuff
-            CombatRoutine.AddDebuff(FlameShock);
+            CombatRoutine.AddDebuff(FlameShock, 188389);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
 
             //Prop
@@ -183,27 +194,29 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + "on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
             CombatRoutine.AddProp("EchoLeggy", "Echoes of Great Sundering Legendary", false, "Enable if you have the Legendary", "Generic");
-            CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", percentListProp, "Life percent at which" + AstralShift + "is used, set to 0 to disable", "Defense", 4);
-            CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", percentListProp, "Life percent at which" + HealingStreamTotem + "is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp(HealingSurge, HealingSurge + " Life Percent", percentListProp, "Life percent at which" + HealingSurge + "is used, set to 0 to disable", "Defense", 0);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", numbList, "Life percent at which" + AstralShift + "is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", numbList, "Life percent at which" + HealingStreamTotem + "is used, set to 0 to disable", "Defense", 20);
+            CombatRoutine.AddProp(HealingSurge, HealingSurge + " Life Percent", numbList, "Life percent at which" + HealingSurge + "is used, set to 0 to disable", "Defense", 0);
         }
         public override void Pulse()
         {
-            API.WriteLog("Maelstrom: " + API.PlayerMaelstrom);
+            //API.WriteLog("Maelstrom: " + API.PlayerMaelstrom);
             if (!Masterwatch.IsRunning && TalentMasterofTheElements && (API.PlayerCurrentCastSpellID == 51505 || API.LastSpellCastInGame == LavaBurst))
             {
                 Masterwatch.Restart();
-                API.WriteLog("Starting Mastermwatch.");
+                //API.WriteLog("Starting Mastermwatch.");
             }
             if (Masterwatch.IsRunning && API.PlayerIsMoving)
             {
                 Masterwatch.Reset();
-                API.WriteLog("Resetting Masterwatch.");
+                //API.WriteLog("Resetting Masterwatch.");
             }
             if (Masterwatch.IsRunning && Masterwatch.ElapsedMilliseconds > 2500)
             {
                 Masterwatch.Reset();
-                API.WriteLog("Resetting Masterwatch.");
+                //API.WriteLog("Resetting Masterwatch.");
             }
             if (API.LastSpellCastInGame == StormElemental)
             {
@@ -245,6 +258,21 @@ namespace HyperElk.Core
                 if (API.CanCast(AstralShift) && PlayerLevel >= 42 && API.PlayerHealthPercent <= AstralShiftLifePercent)
                 {
                     API.CastSpell(AstralShift);
+                    return;
+                }
+                if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+                {
+                    API.CastSpell("Healthstone");
+                    return;
+                }
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
                     return;
                 }
                 if (API.CanCast(HealingSurge) && PlayerLevel >= 4 && API.PlayerMana >= 24 && !API.PlayerIsMoving && API.PlayerHealthPercent <= HealingSurgeLifePercent)

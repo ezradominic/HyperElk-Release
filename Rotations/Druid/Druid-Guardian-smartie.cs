@@ -5,6 +5,7 @@
 // v1.3 covenant update :-)
 // v1.4 Racials and Trinkets
 // v1.5 Mighty Bash added
+// v1.6 spell ids and alot of other stuff
 
 namespace HyperElk.Core
 {
@@ -40,6 +41,8 @@ namespace HyperElk.Core
         private string LoneSpirit = "Lone Spirit";
         private string Soulshape = "Soulshape";
         private string MightyBash = "Mighty Bash";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
 
         //Talents
@@ -73,75 +76,82 @@ namespace HyperElk.Core
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
         private string UseBerserk => CDUsage[CombatRoutine.GetPropertyInt(Berserk)];
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
-        private int BarkskinLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Barkskin)];
-        private int RenewalLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Renewal)];
-        private int SurvivalInstinctsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(SurvivalInstincts)];
-        private int FrenziedRegenerationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(FrenziedRegeneration)];
-        private int IronfurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Ironfur)];
-        private int BristlingFurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(BristlingFur)];
-        private int PulverizeLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Pulverize)];
-        private int LoneProtectionLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LoneProtection)];
+        private int BarkskinLifePercent => numbList[CombatRoutine.GetPropertyInt(Barkskin)];
+        private int RenewalLifePercent => numbList[CombatRoutine.GetPropertyInt(Renewal)];
+        private int SurvivalInstinctsLifePercent => numbList[CombatRoutine.GetPropertyInt(SurvivalInstincts)];
+        private int FrenziedRegenerationLifePercent => numbList[CombatRoutine.GetPropertyInt(FrenziedRegeneration)];
+        private int IronfurLifePercent => numbList[CombatRoutine.GetPropertyInt(Ironfur)];
+        private int BristlingFurLifePercent => numbList[CombatRoutine.GetPropertyInt(BristlingFur)];
+        private int PulverizeLifePercent => numbList[CombatRoutine.GetPropertyInt(Pulverize)];
+        private int LoneProtectionLifePercent => numbList[CombatRoutine.GetPropertyInt(LoneProtection)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.5");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.6");
 
             //Spells
-            CombatRoutine.AddSpell(Moonfire, "D3");
-            CombatRoutine.AddSpell(Swipe, "D5");
-            CombatRoutine.AddSpell(Thrash, "D4");
-            CombatRoutine.AddSpell(Renewal, "NumPad4");
-            CombatRoutine.AddSpell(Mangle, "D6");
-            CombatRoutine.AddSpell(Maul, "D7");
-            CombatRoutine.AddSpell(Ironfur, "F6");
-            CombatRoutine.AddSpell(BearForm, "NumPad1");
-            CombatRoutine.AddSpell(TravelForm, "NumPad2");
-            CombatRoutine.AddSpell(Barkskin, "F4");
-            CombatRoutine.AddSpell(SurvivalInstincts, "F1");
-            CombatRoutine.AddSpell(FrenziedRegeneration, "F5");
-            CombatRoutine.AddSpell(BristlingFur, "D0");
-            CombatRoutine.AddSpell(Pulverize, "D9");
-            CombatRoutine.AddSpell(Incarnation, "D8");
-            CombatRoutine.AddSpell(Berserk, "D8");
-            CombatRoutine.AddSpell(SkullBash, "F12");
-            CombatRoutine.AddSpell(StampedingRoar, "NumPad5");
-            CombatRoutine.AddSpell(Typhoon, "F8");
-            CombatRoutine.AddSpell(MightyBash, "D1");
-            CombatRoutine.AddSpell(RavenousFrenzy, "D1");
-            CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
-            CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
-            CombatRoutine.AddSpell(LoneProtection, "D1");
+            CombatRoutine.AddSpell(Moonfire, 8921, "D3");
+            CombatRoutine.AddSpell(Swipe, 213771, "D5");
+            CombatRoutine.AddSpell(Thrash, 77758, "D4");
+            CombatRoutine.AddSpell(Renewal, 108238, "NumPad4");
+            CombatRoutine.AddSpell(Mangle, 33917, "D6");
+            CombatRoutine.AddSpell(Maul, 6807, "D7");
+            CombatRoutine.AddSpell(Ironfur, 192081, "F6");
+            CombatRoutine.AddSpell(BearForm, 5487, "NumPad1");
+            CombatRoutine.AddSpell(TravelForm,783, "NumPad2");
+            CombatRoutine.AddSpell(Barkskin, 22812, "F4");
+            CombatRoutine.AddSpell(SurvivalInstincts, 61336, "F1");
+            CombatRoutine.AddSpell(FrenziedRegeneration, 22842, "F5");
+            CombatRoutine.AddSpell(BristlingFur, 155835, "D0");
+            CombatRoutine.AddSpell(Pulverize, 80313, "D9");
+            CombatRoutine.AddSpell(Incarnation, 102558, "D8");
+            CombatRoutine.AddSpell(Berserk,50334, "D8");
+            CombatRoutine.AddSpell(SkullBash, 106839, "F12");
+            CombatRoutine.AddSpell(StampedingRoar, 106898, "NumPad5");
+            CombatRoutine.AddSpell(Typhoon, 132469, "F8");
+            CombatRoutine.AddSpell(MightyBash,5211, "D1");
+            CombatRoutine.AddSpell(RavenousFrenzy,323546, "D1");
+            CombatRoutine.AddSpell(ConvoketheSpirits,323764, "D1");
+            CombatRoutine.AddSpell(AdaptiveSwarm,325727, "D1");
+            CombatRoutine.AddSpell(LoneProtection,338018, "D1");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
 
             //Buffs
-            CombatRoutine.AddBuff(GalacticGuardian);
-            CombatRoutine.AddBuff(CatForm);
-            CombatRoutine.AddBuff(BearForm);
-            CombatRoutine.AddBuff(TravelForm);
-            CombatRoutine.AddBuff(SurvivalInstincts);
-            CombatRoutine.AddBuff(Barkskin);
-            CombatRoutine.AddBuff(Ironfur);
-            CombatRoutine.AddBuff(FrenziedRegeneration);
-            CombatRoutine.AddBuff(Incarnation);
-            CombatRoutine.AddBuff(Berserk);
-            CombatRoutine.AddBuff(BristlingFur);
-            CombatRoutine.AddBuff(Pulverize);
-            CombatRoutine.AddBuff(ToothandClaw);
-            CombatRoutine.AddBuff(RavenousFrenzy);
-            CombatRoutine.AddBuff(LoneSpirit);
-            CombatRoutine.AddBuff(Soulshape);
+            CombatRoutine.AddBuff(GalacticGuardian, 213708);
+            CombatRoutine.AddBuff(CatForm, 768);
+            CombatRoutine.AddBuff(BearForm, 5487);
+            CombatRoutine.AddBuff(TravelForm,783);
+            CombatRoutine.AddBuff(SurvivalInstincts, 61336);
+            CombatRoutine.AddBuff(Barkskin, 22812);
+            CombatRoutine.AddBuff(Ironfur, 192081);
+            CombatRoutine.AddBuff(FrenziedRegeneration, 22842);
+            CombatRoutine.AddBuff(Incarnation,102558);
+            CombatRoutine.AddBuff(Berserk,50334);
+            CombatRoutine.AddBuff(BristlingFur, 155835);
+            CombatRoutine.AddBuff(Pulverize, 158792);
+            CombatRoutine.AddBuff(ToothandClaw, 135286);
+            CombatRoutine.AddBuff(RavenousFrenzy, 323546);
+            CombatRoutine.AddBuff(LoneSpirit,338041);
+            CombatRoutine.AddBuff(Soulshape, 310143);
 
             //Debuff
-            CombatRoutine.AddDebuff(Thrash);
-            CombatRoutine.AddDebuff(Moonfire);
-            CombatRoutine.AddDebuff(AdaptiveSwarm);
+            CombatRoutine.AddDebuff(Thrash, 192090);
+            CombatRoutine.AddDebuff(Moonfire, 164812);
+            CombatRoutine.AddDebuff(AdaptiveSwarm, 325727);
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Prop
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
@@ -151,14 +161,16 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Berserk, "Use " + Berserk, CDUsage, "Use " + Berserk + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
-            CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", percentListProp, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(Renewal, Renewal + " Life Percent", percentListProp, "Life percent at which" + Renewal + "is used, set to 0 to disable", "Defense", 4);
-            CombatRoutine.AddProp(SurvivalInstincts, SurvivalInstincts + " Life Percent", percentListProp, "Life percent at which" + SurvivalInstincts + "is used, set to 0 to disable", "Defense", 3);
-            CombatRoutine.AddProp(FrenziedRegeneration, FrenziedRegeneration + " Life Percent", percentListProp, "Life percent at which" + FrenziedRegeneration + "is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", percentListProp, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 9);
-            CombatRoutine.AddProp(BristlingFur, BristlingFur + " Life Percent", percentListProp, "Life percent at which" + BristlingFur + "is used, set to 0 to disable", "Defense", 5);
-            CombatRoutine.AddProp(Pulverize, Pulverize + " Life Percent", percentListProp, "Life percent at which" + Pulverize + "is used, set to 0 to disable", "Defense", 5);
-            CombatRoutine.AddProp(LoneProtection, LoneProtection + " Life Percent", percentListProp, "Life percent at which" + LoneProtection + "is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", numbList, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 60);
+            CombatRoutine.AddProp(Renewal, Renewal + " Life Percent", numbList, "Life percent at which" + Renewal + "is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SurvivalInstincts, SurvivalInstincts + " Life Percent", numbList, "Life percent at which" + SurvivalInstincts + "is used, set to 0 to disable", "Defense", 30);
+            CombatRoutine.AddProp(FrenziedRegeneration, FrenziedRegeneration + " Life Percent", numbList, "Life percent at which" + FrenziedRegeneration + "is used, set to 0 to disable", "Defense", 60);
+            CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", numbList, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 90);
+            CombatRoutine.AddProp(BristlingFur, BristlingFur + " Life Percent", numbList, "Life percent at which" + BristlingFur + "is used, set to 0 to disable", "Defense", 50);
+            CombatRoutine.AddProp(Pulverize, Pulverize + " Life Percent", numbList, "Life percent at which" + Pulverize + "is used, set to 0 to disable", "Defense", 50);
+            CombatRoutine.AddProp(LoneProtection, LoneProtection + " Life Percent", numbList, "Life percent at which" + LoneProtection + "is used, set to 0 to disable", "Defense", 50);
         }
         public override void Pulse()
         {
@@ -222,6 +234,21 @@ namespace HyperElk.Core
                 if (API.PlayerHealthPercent <= LoneProtectionLifePercent && API.CanCast(LoneProtection) && isMelee && API.PlayerHasBuff(LoneSpirit) && PlayerCovenantSettings == "Kyrian")
                 {
                     API.CastSpell(LoneProtection);
+                    return;
+                }
+                if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+                {
+                    API.CastSpell("Healthstone");
+                    return;
+                }
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
                     return;
                 }
                 rotation();
