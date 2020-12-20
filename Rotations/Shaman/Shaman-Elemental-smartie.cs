@@ -7,6 +7,7 @@
 // v1.5 mouseover flameshock
 // v1.6 overcap maelstrom fix
 // v1.7 Master of the Elements workaround
+// v1.8 chain lightning with stormkeeper change
 
 using System.Diagnostics;
 
@@ -108,7 +109,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.7");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.8");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, "D7");
@@ -188,21 +189,21 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Maelstrom: " + API.PlayerMaelstrom);
+            API.WriteLog("Maelstrom: " + API.PlayerMaelstrom);
             if (!Masterwatch.IsRunning && TalentMasterofTheElements && (API.PlayerCurrentCastSpellID == 51505 || API.LastSpellCastInGame == LavaBurst))
             {
                 Masterwatch.Restart();
-                //API.WriteLog("Starting Mastermwatch.");
+                API.WriteLog("Starting Mastermwatch.");
             }
             if (Masterwatch.IsRunning && API.PlayerIsMoving)
             {
                 Masterwatch.Reset();
-                //API.WriteLog("Resetting Masterwatch.");
+                API.WriteLog("Resetting Masterwatch.");
             }
             if (Masterwatch.IsRunning && Masterwatch.ElapsedMilliseconds > 2500)
             {
                 Masterwatch.Reset();
-                //API.WriteLog("Resetting Masterwatch.");
+                API.WriteLog("Resetting Masterwatch.");
             }
             if (API.LastSpellCastInGame == StormElemental)
             {
@@ -684,7 +685,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ lava_burst,target_if = dot.flame_shock.remains,if= spell_targets.chain_lightning < 4 | buff.lava_surge.up | (talent.master_of_the_elements.enabled & !buff.master_of_the_elements.up & maelstrom >= 60)
-                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && !API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd*2 && (API.TargetUnitInRangeCount < 4 || API.PlayerHasBuff(LavaSurge) || (TalentMasterofTheElements && !API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom >= 60)))
+                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && LastWasNotLavaBurst && (API.PlayerBuffTimeRemaining(Stormkeeper) > 300 * gcd * API.PlayerBuffStacks(Stormkeeper) || !API.PlayerHasBuff(Stormkeeper)) && !API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd*2 && (API.TargetUnitInRangeCount < 4 || API.PlayerHasBuff(LavaSurge) || (TalentMasterofTheElements && !API.PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom >= 60)))
                     {
                         API.CastSpell(LavaBurst);
                         return;
@@ -696,7 +697,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ chain_lightning,if= buff.stormkeeper.remains < 3 * gcd * buff.stormkeeper.stack
-                    if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerHasBuff(Stormkeeper) && API.PlayerMaelstrom < 90)
+                    if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffTimeRemaining(Stormkeeper) < 300 * gcd * API.PlayerBuffStacks(Stormkeeper) && API.PlayerMaelstrom < 90)
                     {
                         API.CastSpell(ChainLightning);
                         return;
