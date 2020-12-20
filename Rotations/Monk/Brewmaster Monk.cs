@@ -121,34 +121,34 @@ namespace HyperElk.Core
 
 
             //Spells
-            CombatRoutine.AddSpell(TigerPalm, "D1");
-            CombatRoutine.AddSpell(BlackOutKick, "D2");
-            CombatRoutine.AddSpell(SpinningCraneKick, "D3");
-            CombatRoutine.AddSpell(SpearHandStrike, "D4");
-            CombatRoutine.AddSpell(BreathOfFire, "D5");
-            CombatRoutine.AddSpell(KegSmash, "D6");
-            CombatRoutine.AddSpell(TouchofDeath, "D7");
-            CombatRoutine.AddSpell(InvokeNiuzao, "D8");
-            CombatRoutine.AddSpell(ChiBurst, "D9");
-            CombatRoutine.AddSpell(RushingJadeWind, "D0");
-            CombatRoutine.AddSpell(ExplodingKeg, "Oem6");
+            CombatRoutine.AddSpell(TigerPalm, 100780,"D1");
+            CombatRoutine.AddSpell(BlackOutKick, 116768,"D2");
+            CombatRoutine.AddSpell(SpinningCraneKick, 101546,"D3");
+            CombatRoutine.AddSpell(SpearHandStrike, 116705,"D4");
+            CombatRoutine.AddSpell(BreathOfFire, 115181,"D5");
+            CombatRoutine.AddSpell(KegSmash, 121253,"D6");
+            CombatRoutine.AddSpell(TouchofDeath, 115080,"D7");
+            CombatRoutine.AddSpell(InvokeNiuzao, 132578,"D8");
+            CombatRoutine.AddSpell(ChiBurst, 123986,"D9");
+            CombatRoutine.AddSpell(RushingJadeWind, 116847,"D0");
+            CombatRoutine.AddSpell(ExplodingKeg, 325153,"Oem6");
 
 
-            CombatRoutine.AddSpell(Vivify, "NumPad1");
-            CombatRoutine.AddSpell(ChiWave, "NumPad1");
+            CombatRoutine.AddSpell(Vivify, 116670,"NumPad1");
+            CombatRoutine.AddSpell(ChiWave, 115098,"NumPad1");
 
-            CombatRoutine.AddSpell(ExpelHarm, "NumPad2");
-            CombatRoutine.AddSpell(PurifyingBrew, "NumPad3");
-            CombatRoutine.AddSpell(CelestialBrew, "NumPad4");
-            CombatRoutine.AddSpell(FortifyingBrew, "NumPad5");
-            CombatRoutine.AddSpell(BlackOxBrew, "NumPad6");
-            CombatRoutine.AddSpell(HealingElixir, "NumPad7");
-            CombatRoutine.AddSpell(Detox, "NumPad8");
-            CombatRoutine.AddSpell(WeaponsofOrder, "Oem6");
-            CombatRoutine.AddSpell(BonedustBrew, "Oem6");
-            CombatRoutine.AddSpell(Fleshcraft, "OemOpenBrackets");
-            CombatRoutine.AddSpell(FaelineStomp, "Oem6");
-            CombatRoutine.AddSpell(FallenOrder, "Oem6");
+            CombatRoutine.AddSpell(ExpelHarm, 115072,"NumPad2");
+            CombatRoutine.AddSpell(PurifyingBrew, 119582,"NumPad3");
+            CombatRoutine.AddSpell(CelestialBrew, 322507,"NumPad4");
+            CombatRoutine.AddSpell(FortifyingBrew, 115203,"NumPad5");
+            CombatRoutine.AddSpell(BlackOxBrew, 115399,"NumPad6");
+            CombatRoutine.AddSpell(HealingElixir, 122281,"NumPad7");
+            CombatRoutine.AddSpell(Detox, 115450,"NumPad8");
+            CombatRoutine.AddSpell(WeaponsofOrder, 310454,"Oem6");
+            CombatRoutine.AddSpell(BonedustBrew, 325216,"Oem6");
+            CombatRoutine.AddSpell(Fleshcraft, 324631,"OemOpenBrackets");
+            CombatRoutine.AddSpell(FaelineStomp, 327104,"Oem6");
+            CombatRoutine.AddSpell(FallenOrder, 326860,"Oem6");
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -160,9 +160,9 @@ namespace HyperElk.Core
 
 
             //Debuffs
-            CombatRoutine.AddDebuff(LightStagger);
-            CombatRoutine.AddDebuff(ModerateStagger);
-            CombatRoutine.AddDebuff(HeavyStagger);
+            CombatRoutine.AddDebuff(LightStagger, 124275);
+            CombatRoutine.AddDebuff(ModerateStagger, 124274);
+            CombatRoutine.AddDebuff(HeavyStagger, 124273);
 
 
         }
