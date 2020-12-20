@@ -79,11 +79,13 @@ namespace HyperElk.Core
         bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
         bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
         bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction;
+        bool CurrenCastUnstableAffliction => API.CurrentCastSpellID("player") == 316099;
         bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe;
         bool CastingAgony => API.PlayerLastSpell == Agony;
         bool CastingCorruption => API.PlayerLastSpell == Corruption;
         bool CastingSL => API.PlayerLastSpell == SiphonLife;
         bool LastSeed => API.CurrentCastSpellID("player") == 27243;
+        bool CurrentCastHealthFunnel => API.CurrentCastSpellID("player") == 755;
 
         bool LastUnstableAffliction => API.PlayerLastSpell == UnstableAffliction;
         //Trinket1
@@ -151,23 +153,23 @@ namespace HyperElk.Core
 
 
             //Spells
-            CombatRoutine.AddSpell(ShadowBolt, "D1");
-            CombatRoutine.AddSpell(DrainSoul, "D1");
-            CombatRoutine.AddSpell(Corruption, "D2");
-            CombatRoutine.AddSpell(Agony, "D3");
-            CombatRoutine.AddSpell(MaleficRapture, "D4");
-            CombatRoutine.AddSpell(UnstableAffliction, "D5");
-            CombatRoutine.AddSpell(SeedofCorruption, "D6");
-            CombatRoutine.AddSpell(SiphonLife, "D7");
-            CombatRoutine.AddSpell(PhantomSingularity, "D8");
-            CombatRoutine.AddSpell(Haunt, "D8");
-            CombatRoutine.AddSpell(DarkSoulMisery, "D8");
-            CombatRoutine.AddSpell(MortalCoil, "D9");
-            CombatRoutine.AddSpell(VileTaint, "D8");
-            CombatRoutine.AddSpell(ScouringTithe, "F1");
-            CombatRoutine.AddSpell(SoulRot, "F1");
-            CombatRoutine.AddSpell(ImpendingCatastrophe, "F1");
-            CombatRoutine.AddSpell(DecimatingBolt, "F1");
+            CombatRoutine.AddSpell(ShadowBolt, 686,"D1");
+            CombatRoutine.AddSpell(DrainSoul, 198590,"D1");
+            CombatRoutine.AddSpell(Corruption, 172,"D2");
+            CombatRoutine.AddSpell(Agony, 980,"D3");
+            CombatRoutine.AddSpell(MaleficRapture, 324536,"D4");
+            CombatRoutine.AddSpell(UnstableAffliction, 316099,"D5");
+            CombatRoutine.AddSpell(SeedofCorruption, 27243,"D6");
+            CombatRoutine.AddSpell(SiphonLife, 63106,"D7");
+            CombatRoutine.AddSpell(PhantomSingularity, 205179,"D8");
+            CombatRoutine.AddSpell(Haunt, 48181,"D8");
+            CombatRoutine.AddSpell(DarkSoulMisery, 113860,"D8");
+            CombatRoutine.AddSpell(MortalCoil, 6789,"D9");
+            CombatRoutine.AddSpell(VileTaint, 278350,"D8");
+            CombatRoutine.AddSpell(ScouringTithe, 312321,"F1");
+            CombatRoutine.AddSpell(SoulRot, 325640,"F1");
+            CombatRoutine.AddSpell(ImpendingCatastrophe, 321792,"F1");
+            CombatRoutine.AddSpell(DecimatingBolt, 325289,"F1");
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -178,32 +180,32 @@ namespace HyperElk.Core
 
 
 
-            CombatRoutine.AddSpell("Drain Life", "NumPad1");
-            CombatRoutine.AddSpell("Health Funnel", "NumPad2");
-            CombatRoutine.AddSpell("Dark Pact", "NumPad3");
-            CombatRoutine.AddSpell("Grimoire Of Sacrifice", "NumPad4");
-            CombatRoutine.AddSpell("Summon Darkglare", "NumPad5");
-            CombatRoutine.AddSpell("Summon Felhunter", "NumPad6");
-            CombatRoutine.AddSpell("Summon Succubus", "NumPad7");
-            CombatRoutine.AddSpell("Summon Voidwalker", "NumPad8");
-            CombatRoutine.AddSpell("Summon Imp", "NumPad9");
+            CombatRoutine.AddSpell("Drain Life", 234153,"NumPad1");
+            CombatRoutine.AddSpell("Health Funnel", 755,"NumPad2");
+            CombatRoutine.AddSpell("Dark Pact", 108416,"NumPad3");
+            CombatRoutine.AddSpell("Grimoire Of Sacrifice", 108503,"NumPad4");
+            CombatRoutine.AddSpell("Summon Darkglare", 205180,"NumPad5");
+            CombatRoutine.AddSpell("Summon Felhunter", 691,"NumPad6");
+            CombatRoutine.AddSpell("Summon Succubus", 712,"NumPad7");
+            CombatRoutine.AddSpell("Summon Voidwalker", 697,"NumPad8");
+            CombatRoutine.AddSpell("Summon Imp", 688,"NumPad9");
 
 
             //Buffs
-            CombatRoutine.AddBuff("Grimoire Of Sacrifice");
+            CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
             CombatRoutine.AddBuff(ShadowEmbrace);
 
             //Debuffs
             CombatRoutine.AddDebuff(ImpendingCatastrophe);
-            CombatRoutine.AddDebuff(Corruption);
-            CombatRoutine.AddDebuff(Agony);
-            CombatRoutine.AddDebuff(UnstableAffliction);
-            CombatRoutine.AddDebuff(SiphonLife);
-            CombatRoutine.AddDebuff(SeedofCorruption);
-            CombatRoutine.AddDebuff(VileTaint);
-            CombatRoutine.AddDebuff(PhantomSingularity);
-            CombatRoutine.AddDebuff(Haunt);
-            CombatRoutine.AddDebuff(SoulRot);
+            CombatRoutine.AddDebuff(Corruption, 146739);
+            CombatRoutine.AddDebuff(Agony, 980);
+            CombatRoutine.AddDebuff(UnstableAffliction, 316099);
+            CombatRoutine.AddDebuff(SiphonLife, 63106);
+            CombatRoutine.AddDebuff(SeedofCorruption, 27243);
+            CombatRoutine.AddDebuff(VileTaint, 278350);
+            CombatRoutine.AddDebuff(PhantomSingularity, 205179);
+            CombatRoutine.AddDebuff(Haunt, 48181);
+            CombatRoutine.AddDebuff(SoulRot, 325640);
 
 
 
@@ -268,11 +270,11 @@ namespace HyperElk.Core
                 return;
             }
             //MortalCoil
-            if (API.CanCast(MortalCoil) && TalentMortalCoil && API.PlayerHealthPercent <= MortalCoilPercentProc && PlayerLevel >= 40)
-            {
-                API.CastSpell(MortalCoil);
-                return;
-            }
+            //if (API.CanCast(MortalCoil) && TalentMortalCoil && API.PlayerHealthPercent <= MortalCoilPercentProc && PlayerLevel >= 40)
+            //{
+            //    API.CastSpell(MortalCoil);
+            //    return;
+            //}
             // Drain Life
             if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
             {
@@ -300,7 +302,7 @@ namespace HyperElk.Core
         {
 
             //ROTATION AOE
-            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
+            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange && !CurrentCastHealthFunnel)
             {
                 //actions.aoe+=/haunt
                 //Haunt 
@@ -333,7 +335,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && !CurrenCastUnstableAffliction && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
@@ -530,7 +532,7 @@ namespace HyperElk.Core
                 }
             }
             //ROTATION SINGLE TARGET
-            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
+            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber && !CurrentCastHealthFunnel)
             {
                 //actions+=/agony,if=dot.agony.remains<4
                 //Agony
@@ -571,7 +573,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && !CurrenCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
