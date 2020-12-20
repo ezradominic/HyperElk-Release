@@ -86,6 +86,7 @@ namespace HyperElk.Core
         bool CastingSL => API.PlayerLastSpell == SiphonLife;
         bool LastSeed => API.CurrentCastSpellID("player") == 27243;
         bool CurrentCastHealthFunnel => API.CurrentCastSpellID("player") == 755;
+        bool LastCastHealthFunnel => API.PlayerLastSpell == HealthFunnel;
 
         bool LastUnstableAffliction => API.PlayerLastSpell == UnstableAffliction;
         //Trinket1
@@ -196,7 +197,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(ShadowEmbrace);
 
             //Debuffs
-            CombatRoutine.AddDebuff(ImpendingCatastrophe);
+            CombatRoutine.AddDebuff(ImpendingCatastrophe, 321792);
             CombatRoutine.AddDebuff(Corruption, 146739);
             CombatRoutine.AddDebuff(Agony, 980);
             CombatRoutine.AddDebuff(UnstableAffliction, 316099);
@@ -302,7 +303,7 @@ namespace HyperElk.Core
         {
 
             //ROTATION AOE
-            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange && !CurrentCastHealthFunnel)
+            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange && !LastCastHealthFunnel)
             {
                 //actions.aoe+=/haunt
                 //Haunt 
@@ -532,7 +533,7 @@ namespace HyperElk.Core
                 }
             }
             //ROTATION SINGLE TARGET
-            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber && !CurrentCastHealthFunnel)
+            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber && !LastCastHealthFunnel)
             {
                 //actions+=/agony,if=dot.agony.remains<4
                 //Agony
