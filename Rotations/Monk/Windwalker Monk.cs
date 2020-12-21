@@ -42,10 +42,10 @@ namespace HyperElk.Core
         bool LastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
-        string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
+        string[] TouchofDeathList = new string[] { "always", "with Cooldowns", "Manual" };
 
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
-        string[] InvokeXuenList = new string[] { "always", "with Cooldowns" };
+        string[] InvokeXuenList = new string[] { "always", "with Cooldowns", "Manual" };
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
