@@ -12,6 +12,7 @@
 // v1.8 Racials and Trinkets
 // v1.9 Mighty bash added
 // v2.0 core update
+// v2.1 spell ids and alot of other stuff
 
 using System.Diagnostics;
 
@@ -47,8 +48,8 @@ namespace HyperElk.Core
         private string Mangle = "Mangle";
         private string FrenziedRegeneration = "Frenzied Regeneration";
         private string Ironfur = "Ironfur";
-        private string EclipseSolar = "48517";
-        private string EclipseLunar = "48518";
+        private string EclipseSolar = "EclipseSolar";
+        private string EclipseLunar = "EclipseLunar";
         private string TravelForm = "Travel Form";
         private string CatForm = "Cat Form";
         private string Starlord = "Starlord";
@@ -61,6 +62,8 @@ namespace HyperElk.Core
         private string OnethsClearVision = "Oneth's Clear Vision";
         private string OnethsPerception = "Oneth's Perception";
         private string MightyBash = "Mighty Bash";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         //Talents
         bool TalentNatureBalance => API.PlayerIsTalentSelected(1, 1);
@@ -97,6 +100,7 @@ namespace HyperElk.Core
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
         private string UseCelestialAlignment => CDUsage[CombatRoutine.GetPropertyInt(CelestialAlignment)];
@@ -107,56 +111,58 @@ namespace HyperElk.Core
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool SpamDots => CombatRoutine.GetPropertyBool("SpamDots");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
-        private int RegrowthLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Regrowth)];
-        private int BarkskinLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Barkskin)];
-        private int BearFormLifePercent => percentListProp[CombatRoutine.GetPropertyInt(BearForm)];
-        private int RenewalLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Renewal)];
-        private int FrenziedRegenerationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(FrenziedRegeneration)];
-        private int IronfurLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Ironfur)];
+        private int RegrowthLifePercent => numbList[CombatRoutine.GetPropertyInt(Regrowth)];
+        private int BarkskinLifePercent => numbList[CombatRoutine.GetPropertyInt(Barkskin)];
+        private int BearFormLifePercent => numbList[CombatRoutine.GetPropertyInt(BearForm)];
+        private int RenewalLifePercent => numbList[CombatRoutine.GetPropertyInt(Renewal)];
+        private int FrenziedRegenerationLifePercent => numbList[CombatRoutine.GetPropertyInt(FrenziedRegeneration)];
+        private int IronfurLifePercent => numbList[CombatRoutine.GetPropertyInt(Ironfur)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private bool IncaCelestial => (API.PlayerHasBuff(Incarnation) || API.PlayerHasBuff(CelestialAlignment));
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v2.0");
+            API.WriteLog("Welcome to smartie`s Balance Druid v2.1");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
             API.WriteLog("StellarFlareMO - /cast [@mouseover] Stellar Flare");
 
             //Spells
-            CombatRoutine.AddSpell(Moonfire, "D1");
-            CombatRoutine.AddSpell(Sunfire, "D2");
-            CombatRoutine.AddSpell(StellarFlare, "D7");
-            CombatRoutine.AddSpell(Starsurge, "D5");
-            CombatRoutine.AddSpell(Starfall, "D6");
-            CombatRoutine.AddSpell(Starfire, "D4");
-            CombatRoutine.AddSpell(Wrath, "D3");
-            CombatRoutine.AddSpell(NewMoon, "Oem6");
-            CombatRoutine.AddSpell(HalfMoon, "Oem6");
-            CombatRoutine.AddSpell(FullMoon, "Oem6");
-            CombatRoutine.AddSpell(Incarnation, "D8");
-            CombatRoutine.AddSpell(CelestialAlignment, "D8");
-            CombatRoutine.AddSpell(MoonkinForm, "NumPad1");
-            CombatRoutine.AddSpell(FuryofElune, "NumPad4");
-            CombatRoutine.AddSpell(WarriorofElune, "NumPad2");
-            CombatRoutine.AddSpell(ForceofNature, "NumPad3");
-            CombatRoutine.AddSpell(Renewal, "F1");
-            CombatRoutine.AddSpell(Regrowth, "F6");
-            CombatRoutine.AddSpell(Barkskin, "F1");
-            CombatRoutine.AddSpell(SolarBeam, "F12");
-            CombatRoutine.AddSpell(MightyBash, "D1");
-            CombatRoutine.AddSpell(Typhoon, "D0");
-            CombatRoutine.AddSpell(BearForm, "NumPad5");
-            CombatRoutine.AddSpell(Thrash, "D4");
-            CombatRoutine.AddSpell(Mangle, "D3");
-            CombatRoutine.AddSpell(FrenziedRegeneration, "D6");
-            CombatRoutine.AddSpell(Ironfur, "D5");
-            CombatRoutine.AddSpell(TravelForm, "NumPad6");
-            CombatRoutine.AddSpell(RavenousFrenzy, "D1");
-            CombatRoutine.AddSpell(ConvoketheSpirits, "D1");
-            CombatRoutine.AddSpell(AdaptiveSwarm, "D1");
-            CombatRoutine.AddSpell(LoneEmpowerment, "D1");
+            CombatRoutine.AddSpell(Moonfire, 8921, "D1");
+            CombatRoutine.AddSpell(Sunfire, 93402, "D2");
+            CombatRoutine.AddSpell(StellarFlare, 202347, "D7");
+            CombatRoutine.AddSpell(Starsurge, 78674, "D5");
+            CombatRoutine.AddSpell(Starfall, 191034, "D6");
+            CombatRoutine.AddSpell(Starfire, 194153, "D4");
+            CombatRoutine.AddSpell(Wrath, 190984, "D3");
+            CombatRoutine.AddSpell(NewMoon, 274281, "Oem6");
+            CombatRoutine.AddSpell(HalfMoon,274282, "Oem6");
+            CombatRoutine.AddSpell(FullMoon, 274283, "Oem6");
+            CombatRoutine.AddSpell(Incarnation, 102560, "D8");
+            CombatRoutine.AddSpell(CelestialAlignment, 194223, "D8");
+            CombatRoutine.AddSpell(MoonkinForm, 24858, "NumPad1");
+            CombatRoutine.AddSpell(FuryofElune, 202770, "NumPad4");
+            CombatRoutine.AddSpell(WarriorofElune, 202425, "NumPad2");
+            CombatRoutine.AddSpell(ForceofNature, 205636, "NumPad3");
+            CombatRoutine.AddSpell(Renewal, 108238, "F1");
+            CombatRoutine.AddSpell(Regrowth, 8936, "F6");
+            CombatRoutine.AddSpell(Barkskin, 22812, "F1");
+            CombatRoutine.AddSpell(SolarBeam, 78675, "F12");
+            CombatRoutine.AddSpell(MightyBash, 5211, "D1");
+            CombatRoutine.AddSpell(Typhoon, 132469, "D0");
+            CombatRoutine.AddSpell(BearForm, 5487, "NumPad5");
+            CombatRoutine.AddSpell(Thrash, 77758, "D4");
+            CombatRoutine.AddSpell(Mangle, 33917, "D3");
+            CombatRoutine.AddSpell(FrenziedRegeneration, 22842, "D6");
+            CombatRoutine.AddSpell(Ironfur, 192081, "D5");
+            CombatRoutine.AddSpell(TravelForm, 783, "NumPad6");
+            CombatRoutine.AddSpell(RavenousFrenzy,323546, "D1");
+            CombatRoutine.AddSpell(ConvoketheSpirits,323764, "D1");
+            CombatRoutine.AddSpell(AdaptiveSwarm,325727, "D1");
+            CombatRoutine.AddSpell(LoneEmpowerment, 338142, "D1");
 
             //Macros
             CombatRoutine.AddMacro(Moonfire+"MO", "NumPad7");
@@ -166,34 +172,38 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro("Trinket2", "F10");
 
             //Buffs
-            CombatRoutine.AddBuff(EclipseLunar);
-            CombatRoutine.AddBuff(EclipseSolar);
-            CombatRoutine.AddBuff(MoonkinForm);
-            CombatRoutine.AddBuff(CelestialAlignment);
-            CombatRoutine.AddBuff(Incarnation);
-            CombatRoutine.AddBuff(Starfall);
-            CombatRoutine.AddBuff(TravelForm);
-            CombatRoutine.AddBuff(WarriorofElune);
-            CombatRoutine.AddBuff(BearForm);
-            CombatRoutine.AddBuff(CatForm);
-            CombatRoutine.AddBuff(FrenziedRegeneration);
-            CombatRoutine.AddBuff(Starlord);
-            CombatRoutine.AddBuff(RavenousFrenzy);
-            CombatRoutine.AddBuff(LoneSpirit);
-            CombatRoutine.AddBuff(Soulshape);
-            CombatRoutine.AddBuff(OnethsClearVision);
-            CombatRoutine.AddBuff(OnethsPerception);
+            CombatRoutine.AddBuff(EclipseLunar, 48518);
+            CombatRoutine.AddBuff(EclipseSolar, 48517);
+            CombatRoutine.AddBuff(MoonkinForm, 24858);
+            CombatRoutine.AddBuff(CelestialAlignment, 194223);
+            CombatRoutine.AddBuff(Incarnation, 102560);
+            CombatRoutine.AddBuff(Starfall, 191034);
+            CombatRoutine.AddBuff(TravelForm, 783);
+            CombatRoutine.AddBuff(WarriorofElune, 202425);
+            CombatRoutine.AddBuff(BearForm, 5487);
+            CombatRoutine.AddBuff(CatForm, 768);
+            CombatRoutine.AddBuff(FrenziedRegeneration, 22842);
+            CombatRoutine.AddBuff(Starlord, 279709);
+            CombatRoutine.AddBuff(RavenousFrenzy, 323546);
+            CombatRoutine.AddBuff(LoneSpirit, 338041);
+            CombatRoutine.AddBuff(Soulshape, 310143);
+            CombatRoutine.AddBuff(OnethsClearVision, 339797);
+            CombatRoutine.AddBuff(OnethsPerception, 339800);
 
 
             //Debuff
-            CombatRoutine.AddDebuff(Moonfire);
-            CombatRoutine.AddDebuff(Sunfire);
-            CombatRoutine.AddDebuff(StellarFlare);
-            CombatRoutine.AddDebuff(Thrash);
-            CombatRoutine.AddDebuff(AdaptiveSwarm);
+            CombatRoutine.AddDebuff(Moonfire, 164812);
+            CombatRoutine.AddDebuff(Sunfire, 164815);
+            CombatRoutine.AddDebuff(StellarFlare, 202347);
+            CombatRoutine.AddDebuff(Thrash, 192090);
+            CombatRoutine.AddDebuff(AdaptiveSwarm, 325727);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Prop
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
@@ -208,12 +218,14 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("SpamDots", "SpamDots", true, "Will spam Dots while moving", "Generic");
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
-            CombatRoutine.AddProp(Renewal, Renewal + " Life Percent", percentListProp, "Life percent at which" + Renewal + "is used, set to 0 to disable", "Defense", 4);
-            CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", percentListProp, "Life percent at which" + Regrowth + "is used, set to 0 to disable", "Defense", 3);
-            CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", percentListProp, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 4);
-            CombatRoutine.AddProp(BearForm, BearForm + " Life Percent", percentListProp, "Life percent at which rota will go into" + BearForm + "set to 0 to disable", "Defense", 1);
-            CombatRoutine.AddProp(FrenziedRegeneration, FrenziedRegeneration + " Life Percent", percentListProp, "Life percent at which" + FrenziedRegeneration + "is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", percentListProp, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 9);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(Renewal, Renewal + " Life Percent", numbList, "Life percent at which" + Renewal + "is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", numbList, "Life percent at which" + Regrowth + "is used, set to 0 to disable", "Defense", 30);
+            CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", numbList, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(BearForm, BearForm + " Life Percent", numbList, "Life percent at which rota will go into" + BearForm + "set to 0 to disable", "Defense", 10);
+            CombatRoutine.AddProp(FrenziedRegeneration, FrenziedRegeneration + " Life Percent", numbList, "Life percent at which" + FrenziedRegeneration + "is used, set to 0 to disable", "Defense", 60);
+            CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", numbList, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 90);
         }
         public override void Pulse()
         {
@@ -282,12 +294,27 @@ namespace HyperElk.Core
                     API.CastSpell(Renewal);
                     return;
                 }
+                if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+                {
+                    API.CastSpell("Healthstone");
+                    return;
+                }
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
+                    return;
+                }
                 if (API.PlayerHealthPercent <= FrenziedRegenerationLifePercent && API.PlayerRage >= 10 && API.CanCast(FrenziedRegeneration) && API.PlayerHasBuff(BearForm) && TalentGuardianAffinity)
                 {
                     API.CastSpell(FrenziedRegeneration);
                     return;
                 }
-                if (API.PlayerHealthPercent <= IronfurLifePercent && API.PlayerRage >= 40 && API.CanCast(Ironfur) && API.PlayerHasBuff(BearForm))
+                if (API.PlayerHealthPercent <= IronfurLifePercent && API.PlayerRage >= 40 && API.CanCast(Ironfur) && TalentGuardianAffinity && API.PlayerHasBuff(BearForm))
                 {
                     API.CastSpell(Ironfur);
                     return;
@@ -325,12 +352,12 @@ namespace HyperElk.Core
             }
             if (API.PlayerHasBuff(BearForm))
             {
-                if (API.CanCast(Thrash) && API.TargetRange < 9 && PlayerLevel >= 11 && !API.TargetHasDebuff(Thrash))
+                if (API.CanCast(Thrash) && API.TargetRange < 9 && TalentGuardianAffinity && PlayerLevel >= 11 && !API.TargetHasDebuff(Thrash))
                 {
                     API.CastSpell(Thrash);
                     return;
                 }
-                if (API.CanCast(Mangle) && API.TargetRange < 6 && PlayerLevel >= 8 && API.TargetHasDebuff(Thrash))
+                if (API.CanCast(Mangle) && API.TargetRange < 6 && PlayerLevel >= 8 && (API.TargetHasDebuff(Thrash) || !TalentGuardianAffinity))
                 {
                     API.CastSpell(Mangle);
                     return;
@@ -475,14 +502,14 @@ namespace HyperElk.Core
                 //AoE Rota
                 if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)
                 {
-                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300)
-                    {
-                        API.CastSpell(Moonfire);
-                        return;
-                    }
                     if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.TargetDebuffRemainingTime(Sunfire) < 300)
                     {
                         API.CastSpell(Sunfire);
+                        return;
+                    }
+                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300)
+                    {
+                        API.CastSpell(Moonfire);
                         return;
                     }
                     if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.PlayerIsMoving && API.TargetDebuffRemainingTime(Moonfire) >= 300 && (!API.PlayerHasBuff(Starfall) && TalentStellarDrift || !TalentStellarDrift) && !API.PlayerHasBuff(WarriorofElune) && SpamDots)
@@ -497,17 +524,17 @@ namespace HyperElk.Core
                     }
                     if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                     {
-                        if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && API.CanCast(Moonfire) && isMOinRange)
-                        {
-                            API.CastSpell(Moonfire + "MO");
-                            return;
-                        }
-                        if (API.MouseoverDebuffRemainingTime(Sunfire) <= 300 && API.CanCast(Sunfire) && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(Sunfire) <= 300 && !API.MacroIsIgnored(Sunfire + "MO") && API.CanCast(Sunfire) && isMOinRange)
                         {
                             API.CastSpell(Sunfire + "MO");
                             return;
                         }
-                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && API.CanCast(StellarFlare) && TalentStellarFlare && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
+                        {
+                            API.CastSpell(Moonfire + "MO");
+                            return;
+                        }
+                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && !API.MacroIsIgnored(StellarFlare + "MO") && API.CanCast(StellarFlare) && TalentStellarFlare && isMOinRange)
                         {
                             API.CastSpell(StellarFlare + "MO");
                             return;

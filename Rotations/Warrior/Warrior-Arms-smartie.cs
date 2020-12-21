@@ -1,4 +1,4 @@
-//Changelog test@test.de
+//Changelog
 // v1.0 First release
 // v1.1 Victory Rush fix
 // v1.2 covenant support
@@ -14,6 +14,7 @@
 // v2.2 ravager fix
 // v2.25 small apl change
 // v2.3 another ravager fix
+// v2.4 spell ids and alot of other stuff
 
 namespace HyperElk.Core
 {
@@ -28,6 +29,7 @@ namespace HyperElk.Core
         private string Warbreaker = "Warbreaker";
         private string Slam = "Slam";
         private string Execute = "Execute";
+        private string MassacreExecute = "Massacre Execute";
         private string Cleave = "Cleave";
         private string Whirlwind = "Whirlwind";
         private string Bladestorm = "Bladestorm";
@@ -43,17 +45,21 @@ namespace HyperElk.Core
         private string DeadlyCalm = "Deadly Calm";
         private string DefensiveStance = "Defensive Stance";
         private string BattleShout = "Battle Shout";
+        private string BerserkerRage = "Berserker Rage";
         private string Avatar = "Avatar";
         private string StormBolt = "Storm Bolt";
         private string SuddenDeath = "Sudden Death";
         private string DeepWounds = "Deep Wounds";
         private string Victorious = "Victorious";
         private string Condemn = "Condemn";
+        private string MassacreCondemn = "Massacre Condemn";
         private string SpearofBastion = "Spear of Bastion";
         private string AncientAftershock = "Ancient Aftershock";
         private string ConquerorsBanner = "Conqueror's Banner";
         private string HeroicThrow = "Heroic Throw";
         private string Exploiter = "Exploiter";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         //Talents
         bool TalentSkullsplitter => API.PlayerIsTalentSelected(1, 3);
@@ -96,6 +102,7 @@ namespace HyperElk.Core
         string[] heroiclist = new string[] { "Not Used", "when out of melee", "only Mouseover", "both" };
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseAvatar => CDUsage[CombatRoutine.GetPropertyInt(Avatar)];
         private string UseRavager => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Ravager)];
@@ -103,46 +110,51 @@ namespace HyperElk.Core
         private string UseColossusSmash => CDUsage[CombatRoutine.GetPropertyInt(ColossusSmash)];
         private string UseWarbreaker => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Warbreaker)];
         private string UseDeadlyCalm => CDUsage[CombatRoutine.GetPropertyInt(DeadlyCalm)];
-        private int VictoryRushLifePercent => percentListProp[CombatRoutine.GetPropertyInt(VictoryRush)];
-        private int ImpendingVictoryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ImpendingVictory)];
-        private int DiebytheSwordLifePercent => percentListProp[CombatRoutine.GetPropertyInt(DiebytheSword)];
-        private int DefensiveStanceLifePercent => percentListProp[CombatRoutine.GetPropertyInt(DefensiveStance)];
+        private int VictoryRushLifePercent => numbList[CombatRoutine.GetPropertyInt(VictoryRush)];
+        private int ImpendingVictoryLifePercent => numbList[CombatRoutine.GetPropertyInt(ImpendingVictory)];
+        private int DiebytheSwordLifePercent => numbList[CombatRoutine.GetPropertyInt(DiebytheSword)];
+        private int DefensiveStanceLifePercent => numbList[CombatRoutine.GetPropertyInt(DefensiveStance)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.3");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.4");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
             //Spells
-            CombatRoutine.AddSpell(MortalStrike, "D4");
-            CombatRoutine.AddSpell(ColossusSmash, "D3");
-            CombatRoutine.AddSpell(Warbreaker, "D3");
-            CombatRoutine.AddSpell(Slam, "F12");
-            CombatRoutine.AddSpell(Execute, "D6");
-            CombatRoutine.AddSpell(Cleave, "NumPad4");
-            CombatRoutine.AddSpell(Whirlwind, "D7");
-            CombatRoutine.AddSpell(Bladestorm, "D5");
-            CombatRoutine.AddSpell(Ravager, "D5");
-            CombatRoutine.AddSpell(Rend, "D8");
-            CombatRoutine.AddSpell(VictoryRush, "F3");
-            CombatRoutine.AddSpell(ImpendingVictory, "F3");
-            CombatRoutine.AddSpell(DiebytheSword, "F2");
-            CombatRoutine.AddSpell(Pummel, "F11");
-            CombatRoutine.AddSpell(HeroicThrow, "F6");
-            CombatRoutine.AddSpell(SweepingStrikes, "None");
-            CombatRoutine.AddSpell(Skullsplitter, "D8");
-            CombatRoutine.AddSpell(Overpower, "NumPad3");
-            CombatRoutine.AddSpell(DeadlyCalm, "NumPad5");
-            CombatRoutine.AddSpell(DefensiveStance, "F6");
-            CombatRoutine.AddSpell(BattleShout, "None");
-            CombatRoutine.AddSpell(Avatar, "None");
-            CombatRoutine.AddSpell(StormBolt, "F7");
-            CombatRoutine.AddSpell(Condemn, "D6");
-            CombatRoutine.AddSpell(ConquerorsBanner, "D1");
-            CombatRoutine.AddSpell(AncientAftershock, "D1");
-            CombatRoutine.AddSpell(SpearofBastion, "D1");
+            CombatRoutine.AddSpell(MortalStrike, 12294, "D4");
+            CombatRoutine.AddSpell(ColossusSmash, 167105, "D3");
+            CombatRoutine.AddSpell(Warbreaker, 262161, "D3");
+            CombatRoutine.AddSpell(Slam, 1464, "F12");
+            CombatRoutine.AddSpell(Execute,163201, "D6");
+            CombatRoutine.AddSpell(MassacreExecute, 281000, "D7");
+            CombatRoutine.AddSpell(Cleave, 845, "NumPad4");
+            CombatRoutine.AddSpell(Whirlwind, 1680, "D7");
+            CombatRoutine.AddSpell(Bladestorm, 227847, "D5");
+            CombatRoutine.AddSpell(Ravager, 152277, "D5");
+            CombatRoutine.AddSpell(Rend, 772, "D8");
+            CombatRoutine.AddSpell(VictoryRush, 34428, "F3");
+            CombatRoutine.AddSpell(ImpendingVictory, 202168, "F3");
+            CombatRoutine.AddSpell(DiebytheSword, 118038, "F2");
+            CombatRoutine.AddSpell(Pummel, 6552, "F11");
+            CombatRoutine.AddSpell(BerserkerRage, 18499, "F1");
+            CombatRoutine.AddSpell(HeroicThrow, 57755, "F6");
+            CombatRoutine.AddSpell(SweepingStrikes, 260708, "None");
+            CombatRoutine.AddSpell(Skullsplitter, 260643, "D8");
+            CombatRoutine.AddSpell(Overpower, 7384, "NumPad3");
+            CombatRoutine.AddSpell(DeadlyCalm, 262228, "NumPad5");
+            CombatRoutine.AddSpell(DefensiveStance, 197690, "F6");
+            CombatRoutine.AddSpell(BattleShout, 6673, "None");
+            CombatRoutine.AddSpell(Avatar, 107574, "None");
+            CombatRoutine.AddSpell(StormBolt, 107570, "F7");
+            CombatRoutine.AddSpell(Condemn, 317349, "D6");
+            CombatRoutine.AddSpell(MassacreCondemn, 330334, "D6");
+            CombatRoutine.AddSpell(ConquerorsBanner, 324143, "D1");
+            CombatRoutine.AddSpell(AncientAftershock, 325886, "D1");
+            CombatRoutine.AddSpell(SpearofBastion, 307865, "D1");
 
             //Macros
             CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
@@ -150,25 +162,28 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro("Trinket2", "F10");
 
             //Buffs
-            CombatRoutine.AddBuff(BattleShout);
-            CombatRoutine.AddBuff(DeadlyCalm);
-            CombatRoutine.AddBuff(Overpower);
-            CombatRoutine.AddBuff(SuddenDeath);
-            CombatRoutine.AddBuff(SweepingStrikes);
-            CombatRoutine.AddBuff(VictoryRush);
-            CombatRoutine.AddBuff(Victorious);
-            CombatRoutine.AddBuff(Avatar);
-            CombatRoutine.AddBuff(Exploiter);
+            CombatRoutine.AddBuff(BattleShout, 6673);
+            CombatRoutine.AddBuff(DeadlyCalm, 262228);
+            CombatRoutine.AddBuff(Overpower, 7384);
+            CombatRoutine.AddBuff(SuddenDeath, 52437);
+            CombatRoutine.AddBuff(SweepingStrikes, 260708);
+            CombatRoutine.AddBuff(Victorious, 32216);
+            CombatRoutine.AddBuff(Avatar, 107574);
+            CombatRoutine.AddBuff(Exploiter, 335451);
 
             //Debuff
-            CombatRoutine.AddDebuff(ColossusSmash);
-            CombatRoutine.AddDebuff(DeepWounds);
-            CombatRoutine.AddDebuff(Rend);
+            CombatRoutine.AddDebuff(ColossusSmash, 208086);
+            CombatRoutine.AddDebuff(DeepWounds, 262115);
+            CombatRoutine.AddDebuff(Rend, 772);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("Bladestorm");
             CombatRoutine.AddToggle("Colossus Smash");
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Prop
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
@@ -182,10 +197,12 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(ColossusSmash, "Use " + ColossusSmash, CDUsage, "Use " + ColossusSmash + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Warbreaker, "Use " + Warbreaker, CDUsageWithAOE, "Use " + Warbreaker + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(DeadlyCalm, "Use " + DeadlyCalm, CDUsage, "Use " + DeadlyCalm + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", percentListProp, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", percentListProp, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(DiebytheSword, DiebytheSword + " Life Percent", percentListProp, "Life percent at which" + DiebytheSword + " is used, set to 0 to disable", "Defense", 8);
-            CombatRoutine.AddProp(DefensiveStance, DefensiveStance + " Life Percent", percentListProp, "Life percent at which" + DefensiveStance + " is used, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", numbList, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 80);
+            CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", numbList, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 80);
+            CombatRoutine.AddProp(DiebytheSword, DiebytheSword + " Life Percent", numbList, "Life percent at which" + DiebytheSword + " is used, set to 0 to disable", "Defense", 35);
+            CombatRoutine.AddProp(DefensiveStance, DefensiveStance + " Life Percent", numbList, "Life percent at which" + DefensiveStance + " is used, set to 0 to disable", "Defense", 20);
         }
         public override void Pulse()
         {
@@ -207,9 +224,29 @@ namespace HyperElk.Core
                 API.CastSpell(Pummel);
                 return;
             }
+            if (isInterrupt && API.CanCast(StormBolt) && API.TargetRange <= 20 && TalentStormBolt && (API.SpellISOnCooldown(Pummel) || !IsMelee))
+            {
+                API.CastSpell(StormBolt);
+                return;
+            }
             if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
             {
                 API.CastSpell(RacialSpell1);
+                return;
+            }
+            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
                 return;
             }
             if (API.PlayerHealthPercent <= VictoryRushLifePercent && PlayerLevel >= 5 && API.CanCast(VictoryRush) && API.PlayerHasBuff(Victorious) && IsMelee)
@@ -217,7 +254,7 @@ namespace HyperElk.Core
                 API.CastSpell(VictoryRush);
                 return;
             }
-            if (API.PlayerHealthPercent <= ImpendingVictoryLifePercent && TalentImpendingVictory && API.CanCast(ImpendingVictory))
+            if (API.PlayerHealthPercent <= ImpendingVictoryLifePercent && TalentImpendingVictory && API.CanCast(ImpendingVictory) && IsMelee)
             {
                 API.CastSpell(ImpendingVictory);
                 return;
@@ -225,6 +262,11 @@ namespace HyperElk.Core
             if (API.CanCast(DiebytheSword) && PlayerLevel >= 23 && API.PlayerHealthPercent <= DiebytheSwordLifePercent)
             {
                 API.CastSpell(DiebytheSword);
+                return;
+            }
+            if (API.CanCast(BerserkerRage) && API.PlayerIsCC(CCList.FEAR_MECHANIC))
+            {
+                API.CastSpell(BerserkerRage);
                 return;
             }
             rotation();
@@ -372,9 +414,15 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.execute+=/condemn,if=debuff.colossus_smash.up|buff.sudden_death.react|rage>65
-                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && (API.TargetHasDebuff(ColossusSmash) && API.PlayerRage > 20 || API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 65 || API.PlayerHasBuff(SuddenDeath)))
+                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && (API.TargetHasDebuff(ColossusSmash) && API.PlayerRage > 20 || API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 65 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(Condemn);
+                        return;
+                    }
+                    //actions.execute+=/condemn,if=debuff.colossus_smash.up|buff.sudden_death.react|rage>65
+                    if (API.CanCast(MassacreCondemn, true, false) && PlayerCovenantSettings == "Venthyr" && TalentMassacre && (API.TargetHasDebuff(ColossusSmash) && API.PlayerRage > 20 || API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 65 || API.PlayerHasBuff(SuddenDeath)))
+                    {
+                        API.CastSpell(MassacreCondemn);
                         return;
                     }
                     //actions.execute+=/overpower,if=charges=2
@@ -408,15 +456,26 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.execute+=/execute
-                    if (API.CanCast(Execute) && PlayerLevel >= 10 && PlayerCovenantSettings != "Venthyr" && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath)))
+                    if (API.CanCast(Execute) && PlayerLevel >= 10 && PlayerCovenantSettings != "Venthyr" && !TalentMassacre && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(Execute);
                         return;
                     }
+                    //actions.execute+=/execute
+                    if (API.CanCast(MassacreExecute) && PlayerLevel >= 10 && PlayerCovenantSettings != "Venthyr" && TalentMassacre && (API.PlayerHasBuff(DeadlyCalm) || API.PlayerRage >= 20 || API.PlayerHasBuff(SuddenDeath)))
+                    {
+                        API.CastSpell(MassacreExecute);
+                        return;
+                    }
                     //actions.execute+=/condemn
-                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage >= 20)
+                    if (API.CanCast(Condemn, true, false) && !TalentMassacre && PlayerCovenantSettings == "Venthyr" && API.PlayerRage >= 20)
                     {
                         API.CastSpell(Condemn);
+                        return;
+                    }
+                    if (API.CanCast(MassacreCondemn, true, false) && TalentMassacre && PlayerCovenantSettings == "Venthyr" && API.PlayerRage >= 20)
+                    {
+                        API.CastSpell(MassacreCondemn);
                         return;
                     }
                 }
@@ -489,15 +548,27 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/condemn,if=buff.sudden_death.react
-                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
+                    if (API.CanCast(Condemn, true, false) && !TalentMassacre && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
                     {
                         API.CastSpell(Condemn);
                         return;
                     }
+                    //actions.single_target+=/condemn,if=buff.sudden_death.react
+                    if (API.CanCast(MassacreCondemn, true, false) && TalentMassacre && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
+                    {
+                        API.CastSpell(MassacreCondemn);
+                        return;
+                    }
                     //actions.single_target+=/execute,if=buff.sudden_death.react
-                    if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 10 && API.PlayerHasBuff(SuddenDeath))
+                    if (API.CanCast(Execute) && !TalentMassacre && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 10 && API.PlayerHasBuff(SuddenDeath))
                     {
                         API.CastSpell(Execute);
+                        return;
+                    }
+                    //actions.single_target+=/execute,if=buff.sudden_death.react
+                    if (API.CanCast(MassacreExecute) && TalentMassacre && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 10 && API.PlayerHasBuff(SuddenDeath))
+                    {
+                        API.CastSpell(MassacreExecute);
                         return;
                     }
                     //actions.single_target+=/mortal_strike
@@ -588,15 +659,27 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.hac+=/condemn
-                    if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
+                    if (API.CanCast(Condemn, true, false) && !TalentMassacre && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
                     {
                         API.CastSpell(Condemn);
                         return;
                     }
+                    //actions.hac+=/condemn
+                    if (API.CanCast(MassacreCondemn, true, false) && TalentMassacre && PlayerCovenantSettings == "Venthyr" && API.PlayerHasBuff(SuddenDeath))
+                    {
+                        API.CastSpell(MassacreCondemn);
+                        return;
+                    }
                     //actions.hac+=/execute,if=buff.sweeping_strikes.up
-                    if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && API.PlayerHasBuff(SweepingStrikes) && PlayerLevel >= 10 && API.PlayerHasBuff(SuddenDeath))
+                    if (API.CanCast(Execute) && !TalentMassacre && PlayerCovenantSettings != "Venthyr" && API.PlayerHasBuff(SweepingStrikes) && PlayerLevel >= 10 && API.PlayerHasBuff(SuddenDeath))
                     {
                         API.CastSpell(Execute);
+                        return;
+                    }
+                    //actions.hac+=/execute,if=buff.sweeping_strikes.up
+                    if (API.CanCast(MassacreExecute) && TalentMassacre && PlayerCovenantSettings != "Venthyr" && API.PlayerHasBuff(SweepingStrikes) && PlayerLevel >= 10 && API.PlayerHasBuff(SuddenDeath))
+                    {
+                        API.CastSpell(MassacreExecute);
                         return;
                     }
                     //actions.hac+=/overpower

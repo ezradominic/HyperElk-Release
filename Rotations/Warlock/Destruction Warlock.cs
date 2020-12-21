@@ -117,42 +117,42 @@ namespace HyperElk.Core
             //Spells
             CombatRoutine.AddSpell("Switch Target", "Tab");
 
-            CombatRoutine.AddSpell(Immolate, "D1");
-            CombatRoutine.AddSpell(Incinerate, "D2");
-            CombatRoutine.AddSpell(Conflagrate, "D3");
-            CombatRoutine.AddSpell(ChaosBolt, "D4");
-            CombatRoutine.AddSpell(ShadowBurn, "D5");
-            CombatRoutine.AddSpell(Cataclysm, "D6");
-            CombatRoutine.AddSpell(Havoc, "D7");
-            CombatRoutine.AddSpell(RainOfFire, "D8");
-            CombatRoutine.AddSpell(SoulFire, "D9");
-            CombatRoutine.AddSpell(ChannelDemonFire, "D0");
-            CombatRoutine.AddSpell(darkSoulInstability, "OemOpenBrackets");
+            CombatRoutine.AddSpell(Immolate, 348,"D1");
+            CombatRoutine.AddSpell(Incinerate, 29722,"D2");
+            CombatRoutine.AddSpell(Conflagrate, 17962,"D3");
+            CombatRoutine.AddSpell(ChaosBolt, 116858,"D4");
+            CombatRoutine.AddSpell(ShadowBurn, 17877,"D5");
+            CombatRoutine.AddSpell(Cataclysm, 152108,"D6");
+            CombatRoutine.AddSpell(Havoc, 80240,"D7");
+            CombatRoutine.AddSpell(RainOfFire, 5740,"D8");
+            CombatRoutine.AddSpell(SoulFire, 6353,"D9");
+            CombatRoutine.AddSpell(ChannelDemonFire, 196447,"D0");
+            CombatRoutine.AddSpell(darkSoulInstability, 113858,"OemOpenBrackets");
 
-            CombatRoutine.AddSpell(DrainLife, "NumPad1");
-            CombatRoutine.AddSpell(HealthFunnel, "NumPad2");
+            CombatRoutine.AddSpell(DrainLife, 234153,"NumPad1");
+            CombatRoutine.AddSpell(HealthFunnel, 755,"NumPad2");
             CombatRoutine.AddSpell(SummonInfernal, "NumPad5");
-            CombatRoutine.AddSpell(SummonFelhunter, "NumPad6");
-            CombatRoutine.AddSpell(SummonSuccubus, "NumPad7");
-            CombatRoutine.AddSpell(SummonVoidwalker, "NumPad8");
-            CombatRoutine.AddSpell(SummonImp, "NumPad9");
+            CombatRoutine.AddSpell(SummonFelhunter, 691,"NumPad6");
+            CombatRoutine.AddSpell(SummonSuccubus, 712,"NumPad7");
+            CombatRoutine.AddSpell(SummonVoidwalker, 697,"NumPad8");
+            CombatRoutine.AddSpell(SummonImp, 688,"NumPad9");
 
-            CombatRoutine.AddSpell(ScouringTithe, "F1");
-            CombatRoutine.AddSpell(DecimatingBolt, "F1");
-            CombatRoutine.AddSpell(ImpendingCatastrophe, "F1");
-            CombatRoutine.AddSpell(SoulRot, "F1");
+            CombatRoutine.AddSpell(ScouringTithe, 312321, "F1");
+            CombatRoutine.AddSpell(SoulRot, 325640, "F1");
+            CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
+            CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
 
             //Buffs
-            CombatRoutine.AddBuff("Grimoire Of Sacrifice");
-            CombatRoutine.AddBuff(ChrashingChaos);
-            CombatRoutine.AddBuff(Backdraft);
-            CombatRoutine.AddBuff(darkSoulInstability);
+            CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
+            CombatRoutine.AddBuff(ChrashingChaos, 277705);
+            CombatRoutine.AddBuff(Backdraft, 196406);
+            CombatRoutine.AddBuff(darkSoulInstability, 113858);
 
             //Debuffs
-            CombatRoutine.AddDebuff(Immolate);
-            CombatRoutine.AddDebuff(Havoc);
-            CombatRoutine.AddDebuff(Eradication);
-            CombatRoutine.AddDebuff(RoaringBlaze);
+            CombatRoutine.AddDebuff(Immolate, 348);
+            CombatRoutine.AddDebuff(Havoc, 80240);
+            CombatRoutine.AddDebuff(Eradication, 196412);
+            CombatRoutine.AddDebuff(RoaringBlaze, 205184);
         }
 
         public override void Pulse()

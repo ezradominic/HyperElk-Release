@@ -271,7 +271,7 @@ namespace HyperElk.Core
                     API.CastSpell(FlashofLight + " Focus");
                     return;
                 }
-                if (!API.MacroIsIgnored(LayOnHands + "Focus") && API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
+                if (!API.MacroIsIgnored(LayOnHands + " Focus") && API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
                 {
                     API.CastSpell(LayOnHands + " Focus");
                     return;
@@ -401,8 +401,8 @@ namespace HyperElk.Core
                 API.CastSpell("Trinket2");
                 return;
             }
-            //Seraphim if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 25 seconds.
-            if (Talent_Seraphim && API.CanCast(Seraphim) && UseSeraphim != "Not Used" && (UseSeraphim == "On Cooldown" || UseSeraphim == "With Cooldowns" && (IsCooldowns|| UseSmallCD)) && IsMelee && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 2500) || Buff_or_CDmorethan(Crusade, 2500)))
+            //Seraphim if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 25 seconds. &&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains<10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains<10)
+            if (Talent_Seraphim && !gcd_to_hpg && API.CanCast(Seraphim) && UseSeraphim != "Not Used" && (UseSeraphim == "On Cooldown" || UseSeraphim == "With Cooldowns" && (IsCooldowns|| UseSmallCD)) && IsMelee && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 2500) || Buff_or_CDmorethan(Crusade, 2500)) && (!Talent_FinalReckoning||API.SpellCDDuration(FinalReckoning) <1000)&& (!Talent_ExecutionSentence ||API.SpellCDDuration(ExecutionSentence) <100))
             {
                 API.CastSpell(Seraphim);
                 return;

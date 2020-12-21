@@ -88,39 +88,39 @@ namespace HyperElk.Core
 
 
             //Spells
-            CombatRoutine.AddSpell("Shadow Bolt", "D1");
-            CombatRoutine.AddSpell("Hand of Gul'dan", "D2");
-            CombatRoutine.AddSpell("Call Dreadstalkers", "D3");
-            CombatRoutine.AddSpell("Implosion", "D4");
-            CombatRoutine.AddSpell(SummonDemonicTyrant, "D9");
-            CombatRoutine.AddSpell(BilescourgeBombers, "D7");
-            CombatRoutine.AddSpell(SummonVilefiend, "D7");
-            CombatRoutine.AddSpell(SoulStrike, "D8");
-            CombatRoutine.AddSpell(Demonbolt, "D6");
-            CombatRoutine.AddSpell(GrimoireFelguard, "D0");
-            CombatRoutine.AddSpell(Doom);
-            CombatRoutine.AddSpell(DemonicStrength);
-            CombatRoutine.AddSpell(PowerSiphon);
+            CombatRoutine.AddSpell("Shadow Bolt", 686,"D1");
+            CombatRoutine.AddSpell("Hand of Gul'dan", 105174,"D2");
+            CombatRoutine.AddSpell("Call Dreadstalkers", 104316,"D3");
+            CombatRoutine.AddSpell("Implosion", 196277,"D4");
+            CombatRoutine.AddSpell(SummonDemonicTyrant, 265187,"D9");
+            CombatRoutine.AddSpell(BilescourgeBombers, 267211,"D7");
+            CombatRoutine.AddSpell(SummonVilefiend, 264119,"D7");
+            CombatRoutine.AddSpell(SoulStrike, 264057,"D8");
+            CombatRoutine.AddSpell(Demonbolt, 264178,"D6");
+            CombatRoutine.AddSpell(GrimoireFelguard, 111898,"D0");
+            CombatRoutine.AddSpell(Doom, 603);
+            CombatRoutine.AddSpell(DemonicStrength, 267171);
+            CombatRoutine.AddSpell(PowerSiphon, 264130);
 
-            CombatRoutine.AddSpell("Drain Life", "NumPad1");
-            CombatRoutine.AddSpell("Health Funnel", "NumPad2");
-            CombatRoutine.AddSpell(ScouringTithe, "F1");
-            CombatRoutine.AddSpell(SoulRot, "F1");
-            CombatRoutine.AddSpell(ImpendingCatastrophe, "F1");
-            CombatRoutine.AddSpell(DecimatingBolt, "F1");
+            CombatRoutine.AddSpell("Drain Life", 234153,"NumPad1");
+            CombatRoutine.AddSpell("Health Funnel", 755,"NumPad2");
+            CombatRoutine.AddSpell(ScouringTithe, 312321, "F1");
+            CombatRoutine.AddSpell(SoulRot, 325640, "F1");
+            CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
+            CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
 
 
-            CombatRoutine.AddSpell(SummonFelguard, "NumPad5");
-            CombatRoutine.AddSpell("Summon Felhunter", "NumPad6");
-            CombatRoutine.AddSpell("Summon Succubus", "NumPad7");
-            CombatRoutine.AddSpell("Summon Voidwalker", "NumPad8");
-            CombatRoutine.AddSpell("Summon Imp", "NumPad9");
+            CombatRoutine.AddSpell(SummonFelguard, 30146,"NumPad5");
+            CombatRoutine.AddSpell("Summon Felhunter", 691, "NumPad6");
+            CombatRoutine.AddSpell("Summon Succubus", 712, "NumPad7");
+            CombatRoutine.AddSpell("Summon Voidwalker", 697, "NumPad8");
+            CombatRoutine.AddSpell("Summon Imp", 688, "NumPad9");
 
 
             //Buffs
             CombatRoutine.AddBuff(NetherPortal);
-            CombatRoutine.AddBuff(DemonicCore);
-            CombatRoutine.AddBuff(DemonicPower);
+            CombatRoutine.AddBuff(DemonicCore, 267102);
+            CombatRoutine.AddBuff(DemonicPower, 265273);
             //Debuffs
         }
 
