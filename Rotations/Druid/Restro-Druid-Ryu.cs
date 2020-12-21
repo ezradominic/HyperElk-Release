@@ -260,7 +260,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Tranquility, 740);
             CombatRoutine.AddSpell(Moonfire, 8921);
             CombatRoutine.AddSpell(Sunfire, 93402);
-            CombatRoutine.AddSpell(Wrath, 190984);
+            CombatRoutine.AddSpell(Wrath, 5176);
             CombatRoutine.AddSpell(Innervate, 29166);
             CombatRoutine.AddSpell(Ironbark, 102342);
             CombatRoutine.AddSpell(Natureswiftness, 132158);
