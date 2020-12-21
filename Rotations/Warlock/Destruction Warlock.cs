@@ -66,6 +66,7 @@ namespace HyperElk.Core
 
         //Misc
         private static readonly Stopwatch HavocWatch = new Stopwatch();
+        private static readonly Stopwatch HealthFunnelWatch = new Stopwatch();
 
 
         //CBProperties
@@ -81,7 +82,6 @@ namespace HyperElk.Core
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
-//        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         bool LastCastImmolate => API.PlayerLastSpell == Immolate;
         bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate;
@@ -101,7 +101,6 @@ namespace HyperElk.Core
             API.WriteLog("Use /cast [@cursor] Rain of Fire");
             API.WriteLog("Use /cast [@cursor] Cataclysm");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-            API.WriteLog("This is a TEMP FIXED Rotation , you need to toggle AOE/SINGLE Target manualy");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
             //Options
@@ -149,7 +148,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(darkSoulInstability, 113858);
 
             //Debuffs
-            CombatRoutine.AddDebuff(Immolate, 348);
+            CombatRoutine.AddDebuff(Immolate, 157736);
             CombatRoutine.AddDebuff(Havoc, 80240);
             CombatRoutine.AddDebuff(Eradication, 196412);
             CombatRoutine.AddDebuff(RoaringBlaze, 205184);
@@ -184,9 +183,20 @@ namespace HyperElk.Core
                 return;
             }
             // Health Funnel
-            if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+            if (HealthFunnelWatch.IsRunning && API.PetHealthPercent >= 70)
+            {
+                HealthFunnelWatch.Stop();
+                HealthFunnelWatch.Reset();
+            }
+            if (HealthFunnelWatch.IsRunning && API.CanCast(HealthFunnel))
             {
                 API.CastSpell(HealthFunnel);
+                return;
+            }
+            // Health Funnel
+            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+            {
+                HealthFunnelWatch.Start();
                 return;
             }
             rotation();
@@ -197,7 +207,7 @@ namespace HyperElk.Core
         {
             //AOE
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
-            if (IsAOE && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetUnitInRangeCount >= AOEUnitNumber && NotChanneling)
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && NotChanneling)
             {
                 //actions.aoe=rain_of_fire,if=pet.infernal.active&(!cooldown.havoc.ready|active_enemies>3)
 
@@ -287,7 +297,7 @@ namespace HyperElk.Core
                 }
             }
             //SINGLE TARGET
-            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && API.PlayerCurrentCastTimeRemaining > 40 && IsRange && NotChanneling)
+            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && IsRange && NotChanneling)
             {
                 //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
                 if (SwitchTarget && API.TargetHasDebuff(Havoc))

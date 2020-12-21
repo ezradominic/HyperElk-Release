@@ -33,19 +33,21 @@ namespace HyperElk.Core
 
 
         //CBProperties
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int VivifyLifePercentProc => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int DampenHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
 
-        int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         bool LastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
-        string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
+        string[] TouchofDeathList = new string[] { "always", "with Cooldowns", "Manual" };
 
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
-        string[] InvokeXuenList = new string[] { "always", "with Cooldowns" };
+        string[] InvokeXuenList = new string[] { "always", "with Cooldowns", "Manual" };
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
@@ -90,16 +92,18 @@ namespace HyperElk.Core
         private string Fleshcraft = "Fleshcraft";
         private string FaelineStomp = "FaelineStomp";
         private string FallenOrder = "Fallen Order";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Windwalker Monk @Mufflon12";
             API.WriteLog("Welcome to Windwalker Monk rotation @ Mufflon12");
 
-            CombatRoutine.AddProp(Vivify, "Vivify", numbList, "Life percent at which " + Vivify + " is used, set to 0 to disable", "Healing", 5);
-            CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 9);
-            CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
-            CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 4);
+            CombatRoutine.AddProp(Vivify, "Vivify", numbList, "Life percent at which " + Vivify + " is used, set to 0 to disable", "Healing", 50);
+            CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 90);
+            CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
+            CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
             CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
             CombatRoutine.AddProp(InvokeXuen, "Use " + InvokeXuen, InvokeXuenList, "Use " + InvokeXuenList + "always, with Cooldowns", "Cooldowns", 1);
             //Kyrian
@@ -111,6 +115,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
             //Venthyr 
             CombatRoutine.AddProp(FallenOrder, "Use " + FallenOrder, FallenOrderList, "How to use Fallen Order", "Covenant Venthyr", 0);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
 
 
             //Spells
@@ -163,6 +169,16 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
             //COOLDOWNS
             //Covenant Kyrian
             //WeaponsofOrder
