@@ -26,9 +26,9 @@ namespace HyperElk.Core
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int ChiWaveLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
 
-        string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE" };
+        string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE", "Manual" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
-        string[] TouchofDeathList = new string[] { "always", "with Cooldowns" };
+        string[] TouchofDeathList = new string[] { "always", "with Cooldowns", "Manual" };
         private string UseInvokeNiuzao => InvokeNiuzaoList[CombatRoutine.GetPropertyInt(InvokeNiuzao)];
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
