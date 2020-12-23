@@ -118,6 +118,7 @@ namespace HyperElk.Core
         private float SteadyShot_CastTime => 175f / (1f + (API.PlayerGetHaste));
         private float gcd => API.SpellGCDTotalDuration;
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
+        private bool VolleyTrickShots => (Talent_Volley && API.SpellCDDuration(Volley) > 3900 && API.SpellCDDuration(Volley) < 4500);
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -144,62 +145,62 @@ namespace HyperElk.Core
 
 
             //Spells
-            CombatRoutine.AddSpell(Steady_Shot, "D1");
-            CombatRoutine.AddSpell(Arcane_Shot, "D2");
-            CombatRoutine.AddSpell(Aimed_Shot, "D3");
-            CombatRoutine.AddSpell(Trueshot, "Q");
-            CombatRoutine.AddSpell(Rapid_Fire, "Q");
-            CombatRoutine.AddSpell(Bursting_Shot, "D7");
+            CombatRoutine.AddSpell(Steady_Shot, 56641, "D1");
+            CombatRoutine.AddSpell(Arcane_Shot, 185358, "D2");
+            CombatRoutine.AddSpell(Aimed_Shot, 19434, "D3");
+            CombatRoutine.AddSpell(Trueshot, 288613,"Q");
+            CombatRoutine.AddSpell(Rapid_Fire, 257044, "Q");
+            CombatRoutine.AddSpell(Bursting_Shot, 186387, "D7");
 
-            CombatRoutine.AddSpell(Kill_Shot, "D5");
-            CombatRoutine.AddSpell(Multi_Shot, "D6");
+            CombatRoutine.AddSpell(Kill_Shot, 53351, "D5");
+            CombatRoutine.AddSpell(Multi_Shot, 257620, "D6");
 
-            CombatRoutine.AddSpell(Counter_Shot, "F");
-            CombatRoutine.AddSpell(Exhilaration, "F9");
-            CombatRoutine.AddSpell(Survival_of_the_Fittest, "F8");
-            CombatRoutine.AddSpell(Misdirection, "D4");
+            CombatRoutine.AddSpell(Counter_Shot, 147362, "F");
+            CombatRoutine.AddSpell(Exhilaration, 109304, "F9");
+            CombatRoutine.AddSpell(Survival_of_the_Fittest, 281195, "F8");
+            CombatRoutine.AddSpell(Misdirection, 34477, "D4");
 
-            CombatRoutine.AddSpell(Double_Tap, "D1");
-            CombatRoutine.AddSpell(Chimaera_Shot, "D1");
-            CombatRoutine.AddSpell(A_Murder_of_Crows, "D1");
-            CombatRoutine.AddSpell(Barrage, "D1");
-            CombatRoutine.AddSpell(Volley, "D1");
-            CombatRoutine.AddSpell(Explosive_Shot, "D1");
-            CombatRoutine.AddSpell(Serpent_Sting, "D1");
-            CombatRoutine.AddSpell(Feign_Death, "F2");
-            CombatRoutine.AddSpell(Aspect_of_the_Turtle, "G");
+            CombatRoutine.AddSpell(Double_Tap, 260402, "D1");
+            CombatRoutine.AddSpell(Chimaera_Shot, 342049, "D1");
+            CombatRoutine.AddSpell(A_Murder_of_Crows, 131894, "D1");
+            CombatRoutine.AddSpell(Barrage, 120360, "D1");
+            CombatRoutine.AddSpell(Volley, 260243, "D1");
+            CombatRoutine.AddSpell(Explosive_Shot, 212431, "D1");
+            CombatRoutine.AddSpell(Serpent_Sting, 271788, "D1");
+            CombatRoutine.AddSpell(Feign_Death, 5384, "F2");
+            CombatRoutine.AddSpell(Aspect_of_the_Turtle, 186265, "G");
 
-            CombatRoutine.AddSpell(Mend_Pet, "F5");
+            CombatRoutine.AddSpell(Mend_Pet, 982, "F5");
 
-            CombatRoutine.AddSpell(Wild_Spirits, "F10");
-            CombatRoutine.AddSpell(Resonating_Arrow, "F10");
-            CombatRoutine.AddSpell(Flayed_Shot, "F10");
-            CombatRoutine.AddSpell(Death_Chakram, "F10");
-            CombatRoutine.AddSpell(HuntersMark, "F11");
+            CombatRoutine.AddSpell(Wild_Spirits, 328231, "F10");
+            CombatRoutine.AddSpell(Resonating_Arrow, 308491, "F10");
+            CombatRoutine.AddSpell(Flayed_Shot, 324149, "F10");
+            CombatRoutine.AddSpell(Death_Chakram, 325028, "F10");
+            CombatRoutine.AddSpell(HuntersMark, 257284, "F11");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
 
-            CombatRoutine.AddBuff(Aspect_of_the_Turtle);
-            CombatRoutine.AddBuff(Feign_Death);
-            CombatRoutine.AddBuff(Misdirection);
-            CombatRoutine.AddBuff(Precise_Shots);
-            CombatRoutine.AddBuff(Trick_Shots);
-            CombatRoutine.AddBuff(Steady_Focus);
-            CombatRoutine.AddBuff(Trueshot);
-            CombatRoutine.AddBuff(Double_Tap);
-            CombatRoutine.AddBuff(Lock_and_Load);
-            CombatRoutine.AddBuff(Dead_Eye);
-            CombatRoutine.AddBuff(FlayersMark);
-            CombatRoutine.AddBuff(Volley);
+            CombatRoutine.AddBuff(Aspect_of_the_Turtle, 186265);
+            CombatRoutine.AddBuff(Feign_Death, 5384);
+            CombatRoutine.AddBuff(Misdirection,34477);
+            CombatRoutine.AddBuff(Precise_Shots, 260242);
+            CombatRoutine.AddBuff(Trick_Shots,257622 );
+            CombatRoutine.AddBuff(Steady_Focus,193534);
+            CombatRoutine.AddBuff(Trueshot,288613);
+            CombatRoutine.AddBuff(Double_Tap,260402);
+            CombatRoutine.AddBuff(Lock_and_Load,194595);
+            CombatRoutine.AddBuff(Dead_Eye,321460);
+            CombatRoutine.AddBuff(FlayersMark, 324156);
+            CombatRoutine.AddBuff(Volley, 260243);
             //Debuffs
 
-            CombatRoutine.AddDebuff(Serpent_Sting);
+            CombatRoutine.AddDebuff(Serpent_Sting,271788);
 
-            CombatRoutine.AddDebuff(Wild_Mark);
-            CombatRoutine.AddDebuff(Resonating_Arrow);
-            CombatRoutine.AddDebuff(HuntersMark);
+            CombatRoutine.AddDebuff(Wild_Mark, 328275);
+            CombatRoutine.AddDebuff(Resonating_Arrow, 308491);
+            CombatRoutine.AddDebuff(HuntersMark,257284);
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
 
@@ -234,7 +235,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            // API.WriteLog("debug: " + ca_active);
+         //    API.WriteLog("debug: " + API.PlayerBuffTimeRemaining(Steady_Focus) + " "+API.PlayerCurrentCastSpellID+" "+ (API.LastSpellCastInGame) );
 
             if (UseCallPet && (!API.PlayerHasPet || API.PetHealthPercent < 1))
             {
@@ -280,7 +281,7 @@ namespace HyperElk.Core
                 API.CastSpell(Feign_Death);
                 return;
             }
-            if (!Playeriscasting && !API.PlayerIsMounted && !API.PlayerHasBuff(Aspect_of_the_Turtle) && !API.PlayerHasBuff(Feign_Death))
+            if (!Playeriscasting && !API.PlayerIsChanneling && !API.PlayerIsMounted && !API.PlayerHasBuff(Aspect_of_the_Turtle) && !API.PlayerHasBuff(Feign_Death))
             {
                 if (isInterrupt && API.CanCast(Counter_Shot) && InRange && PlayerLevel >= 18)
                 {
@@ -357,107 +358,59 @@ namespace HyperElk.Core
 
             // actions.cds +=/ potion,if= buff.trueshot.up & buff.bloodlust.up | buff.trueshot.up & target.health.pct < 20 | target.time_to_die < 26
 
-            #region opener
-
-            if (API.PlayerTimeInCombat <= 1700 && IsCooldowns && (!IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE)))
-            {
-                if (API.CanCast(Double_Tap))
-                {
-                    API.CastSpell(Double_Tap);
-                    return;
-                }
-                if (API.CanCast(Aimed_Shot) && API.SpellCharges(Aimed_Shot) >= 2 && !PlayerHasBuff(Trueshot))
-                {
-                    API.CastSpell(Aimed_Shot);
-                    return;
-                }
-                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
-                {
-                    API.CastSpell(Steady_Shot);
-                    return;
-                }
-                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
-                {
-                    API.CastSpell(Steady_Shot);
-                    return;
-                }
-                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame == Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
-                {
-                    API.CastSpell(Steady_Shot);
-                    return;
-                }
-                if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
-                {
-                    API.CastSpell(Explosive_Shot);
-                    return;
-                }
-                if (API.CanCast(Wild_Spirits) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                {
-                    API.CastSpell(Wild_Spirits);
-                    return;
-                }
-                if (API.CanCast(Resonating_Arrow) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                {
-                    API.CastSpell(Resonating_Arrow);
-                    return;
-                }
-                if (API.CanCast(Volley) && InRange)
-                {
-                    API.CastSpell(Volley);
-                    return;
-                }
-                if (API.CanCast(Trueshot) && InRange && (API.TargetHasDebuff(Resonating_Arrow) || API.TargetHasDebuff(Wild_Mark) || (API.SpellCDDuration(Resonating_Arrow) > gcd && API.SpellCDDuration(Wild_Mark) > gcd)))
-                {
-                    API.CastSpell(Trueshot);
-                    return;
-                }
-                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus > 35)
-                {
-                    API.CastSpell(Aimed_Shot);
-                    return;
-                }
-                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime)
-                {
-                    API.CastSpell(Aimed_Shot);
-                    return;
-                }
-                if (API.CanCast(Rapid_Fire) && !eagletalons_true_focus_enabled && InRange && API.PlayerFocus + FocusRegen * (gcd / 100) + 7 < API.PlayerMaxFocus && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > RapidFireChannelTime)
-                {
-                    API.CastSpell(Rapid_Fire);
-                    return;
-                }
-                if (API.CanCast(Arcane_Shot) && InRange && API.PlayerFocus > 50 && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > gcd && !API.CanCast(Rapid_Fire))
-                {
-                    API.CastSpell(Arcane_Shot);
-                    return;
-                }
-                if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
-                {
-                    API.CastSpell(Steady_Shot);
-                    return;
-                }
-            }
-            #endregion
+           
             //API.WriteLog("cov not ready: " + NoCovReady);
             if (!IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE))
             {
-                #region cooldowns
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                {
-                    API.CastSpell("Trinket1");
-                }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                {
-                    API.CastSpell("Trinket2");
-                }
-                #endregion
-                #region ST
+                #region opener
 
-                if (PlayerHasBuff(Trueshot))
+                if (API.PlayerTimeInCombat <= 1700 && IsCooldowns && (!IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE)))
                 {
+                    if (API.CanCast(Double_Tap))
+                    {
+                        API.CastSpell(Double_Tap);
+                        return;
+                    }
+                    if (API.CanCast(Aimed_Shot) && API.SpellCharges(Aimed_Shot) >= 2 && !PlayerHasBuff(Trueshot))
+                    {
+                        API.CastSpell(Aimed_Shot);
+                        return;
+                    }
+                    if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
+                    {
+                        API.CastSpell(Steady_Shot);
+                        API.WriteLog("opener: SS:1 ");
+                        return;
+                    }
                     if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                     {
                         API.CastSpell(Steady_Shot);
+                        API.WriteLog("opener: SS:2 ");
+                        return;
+                    }
+                    if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                    {
+                        API.CastSpell(Explosive_Shot);
+                        return;
+                    }
+                    if (API.CanCast(Wild_Spirits) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Wild_Spirits);
+                        return;
+                    }
+                    if (API.CanCast(Resonating_Arrow) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                    {
+                        API.CastSpell(Resonating_Arrow);
+                        return;
+                    }
+                    if (API.CanCast(Volley) && InRange)
+                    {
+                        API.CastSpell(Volley);
+                        return;
+                    }
+                    if (API.CanCast(Trueshot) && InRange && (API.TargetHasDebuff(Resonating_Arrow) || API.TargetHasDebuff(Wild_Mark) || (API.SpellCDDuration(Resonating_Arrow) > gcd && API.SpellCDDuration(Wild_Mark) > gcd)))
+                    {
+                        API.CastSpell(Trueshot);
                         return;
                     }
                     if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus > 35)
@@ -483,6 +436,55 @@ namespace HyperElk.Core
                     if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
                     {
                         API.CastSpell(Steady_Shot);
+                        API.WriteLog("opener: SS:3 ");
+                        return;
+                    }
+                }
+                #endregion
+                #region cooldowns
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell("Trinket1");
+                }
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                {
+                    API.CastSpell("Trinket2");
+                }
+                #endregion
+                #region ST
+
+                if (PlayerHasBuff(Trueshot))
+                {
+                    if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                    {
+                        API.CastSpell(Steady_Shot);
+                        API.WriteLog("ST: SS:1 ");
+                        return;
+                    }
+                    if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus > 35)
+                    {
+                        API.CastSpell(Aimed_Shot);
+                        return;
+                    }
+                    if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime)
+                    {
+                        API.CastSpell(Aimed_Shot);
+                        return;
+                    }
+                    if (API.CanCast(Rapid_Fire) && !eagletalons_true_focus_enabled && InRange && API.PlayerFocus + FocusRegen * (gcd / 100) + 7 < API.PlayerMaxFocus && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > RapidFireChannelTime)
+                    {
+                        API.CastSpell(Rapid_Fire);
+                        return;
+                    }
+                    if (API.CanCast(Arcane_Shot) && InRange && API.PlayerFocus > 50 && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > gcd && !API.CanCast(Rapid_Fire))
+                    {
+                        API.CastSpell(Arcane_Shot);
+                        return;
+                    }
+                    if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
+                    {
+                        API.CastSpell(Steady_Shot);
+                        API.WriteLog("st: SS:2 ");
                         return;
                     }
                 }
@@ -491,11 +493,7 @@ namespace HyperElk.Core
                     if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                     {
                         API.CastSpell(Steady_Shot);
-                        return;
-                    }
-                    if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame == Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
-                    {
-                        API.CastSpell(Steady_Shot);
+                        API.WriteLog("st: SS:3 ");
                         return;
                     }
                     //actions.st +=/ kill_shot
@@ -520,6 +518,7 @@ namespace HyperElk.Core
                     if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
                     {
                         API.CastSpell(Steady_Shot);
+                        API.WriteLog("st: SS:4 ");
                         return;
                     }
                     //actions.st +=/ flare,if= tar_trap.up & runeforge.soulforge_embers
@@ -580,7 +579,7 @@ namespace HyperElk.Core
                     }
                     //actions.st +=/ aimed_shot,target_if = min:dot.serpent_sting.remains + action.serpent_sting.in_flight_to_target * 99,if= 
                     //buff.precise_shots.down | (buff.trueshot.up | full_recharge_time < gcd + cast_time) & (!talent.chimaera_shot | active_enemies < 2) | buff.trick_shots.remains > execute_time & active_enemies > 1
-                    if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && !LastSpell(Aimed_Shot, 19434) &&
+                    if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && API.PlayerCurrentCastSpellID !=19434 &&
     (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) &&
     (!PlayerHasBuff(Precise_Shots) || (PlayerHasBuff(Trueshot) || FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime) && (!Talent_Chimaera_Shot || API.TargetUnitInRangeCount < 2) || API.PlayerBuffTimeRemaining(Trick_Shots) > AimedShotCastTime && API.TargetUnitInRangeCount > 1))
                     {
@@ -632,6 +631,7 @@ namespace HyperElk.Core
                     if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
                     {
                         API.CastSpell(Steady_Shot);
+                        API.WriteLog("st: SS:5 ");
                         return;
                     }
                 }
@@ -647,14 +647,20 @@ namespace HyperElk.Core
                      API.CastSpell(Steady_Shot);
                      return;
                  }*/
-                if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                if (Talent_Steady_Focus && !PlayerHasBuff(Trueshot) && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                 {
                     API.CastSpell(Steady_Shot);
+                    API.WriteLog("AOE: SS:1 ");
                     return;
                 }
                 //actions.trickshots +=/ double_tap,if= covenant.kyrian & cooldown.resonating_arrow.remains < gcd | !covenant.kyrian & !covenant.night_fae | covenant.night_fae & (cooldown.wild_spirits.remains < gcd | cooldown.trueshot.remains > 55) | target.time_to_die < 10
-                if (API.CanCast(Double_Tap) && (UseDoubleTap == "always" || (UseDoubleTap == "with Cooldowns" && IsCooldowns)) && InRange && Talent_Double_Tap && (API.SpellCDDuration(Aimed_Shot) < API.SpellCDDuration(Rapid_Fire))
+                if (API.CanCast(Double_Tap) && (UseDoubleTap == "always" || (UseDoubleTap == "with Cooldowns" && IsCooldowns)) && InRange && Talent_Double_Tap && (API.SpellCDDuration(Aimed_Shot)-300 < API.SpellCDDuration(Rapid_Fire))
 && (PlayerCovenantSettings == "Kyrian" && API.SpellCDDuration(Resonating_Arrow) < gcd || PlayerCovenantSettings != "Kyrian" && PlayerCovenantSettings != "Night Fae" || PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(Wild_Spirits) < gcd || API.SpellCDDuration(Trueshot) > 5500) || API.TargetTimeToDie < 1000))
+                {
+                    API.CastSpell(Double_Tap);
+                    return;
+                }
+                if (API.CanCast(Double_Tap) && (UseDoubleTap == "always" || (UseDoubleTap == "with Cooldowns" && IsCooldowns)) && InRange && Talent_Double_Tap && API.SpellCDDuration(Aimed_Shot) - 300 < API.SpellCDDuration(Rapid_Fire) && (!(UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) || API.TargetTimeToDie < 1000))
                 {
                     API.CastSpell(Double_Tap);
                     return;
@@ -698,13 +704,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.trickshots +=/ rapid_fire,if= buff.trick_shots.remains >= execute_time & runeforge.surging_shots & buff.double_tap.down
-                if (API.CanCast(Rapid_Fire) && !LastSpell(Aimed_Shot, 19434) && !LastSpell(Rapid_Fire, 257044) && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime && !PlayerHasBuff(Double_Tap) && SurgingShots_enabled)
+                if (API.CanCast(Rapid_Fire) && (API.PlayerCurrentCastSpellID!= 19434 || VolleyTrickShots) && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime && !PlayerHasBuff(Double_Tap) && SurgingShots_enabled)
                 {
                     API.CastSpell(Rapid_Fire);
                     return;
                 }
                 //actions.trickshots +=/ aimed_shot,target_if = min:dot.serpent_sting.remains + action.serpent_sting.in_flight_to_target * 99,if= buff.trick_shots.remains >= execute_time & (buff.precise_shots.down | full_recharge_time < cast_time + gcd | buff.trueshot.up)
-                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && !LastSpell(Aimed_Shot, 19434) && !LastSpell(Rapid_Fire, 257044) &&
+                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && API.PlayerCurrentCastSpellID!=19434 && (API.PlayerCurrentCastSpellID != 257044 || VolleyTrickShots) &&
     (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) &&
     API.PlayerBuffTimeRemaining(Trick_Shots) >= AimedShotCastTime && (!PlayerHasBuff(Precise_Shots) || FullRechargeTime(Aimed_Shot, AimedShotCooldown) < AimedShotCastTime + gcd || PlayerHasBuff(Trueshot)))
                 {
@@ -718,7 +724,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.trickshots +=/ rapid_fire,if= buff.trick_shots.remains >= execute_time
-                if (API.CanCast(Rapid_Fire) && !LastSpell(Aimed_Shot, 19434) && !LastSpell(Rapid_Fire, 257044) && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime)
+                if (API.CanCast(Rapid_Fire) && API.PlayerCurrentCastSpellID!=19434 && !LastSpell(Rapid_Fire, 257044) && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime)
                 {
                     API.CastSpell(Rapid_Fire);
                     return;
@@ -765,17 +771,24 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.trickshots +=/ multishot,if= focus > cost + action.aimed_shot.cost
-                if (API.CanCast(Multi_Shot) && InRange && API.PlayerFocus >= 20 && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35))
+                if (API.CanCast(Multi_Shot) && !API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) && InRange && API.PlayerFocus >= 20 && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35))
                 {
                     API.CastSpell(Multi_Shot);
                     return;
                 }
-                //actions.trickshots +=/ steady_shot
-                if (API.CanCast(Steady_Shot) && API.PlayerFocus <= 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && InRange)
+                if (API.CanCast(Steady_Shot) && !API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) && InRange)
                 {
                     API.CastSpell(Steady_Shot);
+                    API.WriteLog("AOE: SS:2 ");
                     return;
                 }
+                //actions.trickshots +=/ steady_shot
+                /*     if (API.CanCast(Steady_Shot) && (API.CanCast(Aimed_Shot) && API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || !API.CanCast(Aimed_Shot)) && !API.CanCast(Rapid_Fire) && InRange)
+                     {
+                         API.CastSpell(Steady_Shot);
+                         API.WriteLog("AOE: SS:2 ");
+                         return;
+                     }*/
             }
         }
     }
