@@ -43,6 +43,8 @@ namespace HyperElk.Core
         private string CovenantAbility = "Covenant Ability";
         private string darkSoulInstability = "Dark Soul:  Instability";
         private string RoaringBlaze = "Roaring Blaze";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         //Talents
         private bool TalentFlashover => API.PlayerIsTalentSelected(1, 1);
@@ -72,12 +74,13 @@ namespace HyperElk.Core
         float SCTime => 2 / (1f + API.PlayerGetHaste / 1);
         float IncinerateTime => 2 / (1f + API.PlayerGetHaste / 1);
 
-        float HavocTime => 10000 - (HavocWatch.ElapsedMilliseconds / 1);
+        float HavocTime => 10 - (HavocWatch.ElapsedMilliseconds / 1000);
 
         //CBProperties
-        int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
-
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         string[] MisdirectionList = new string[] { "Imp", "Voidwalker", "Succubus", "Felhunter", "Infernal" };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
@@ -110,12 +113,15 @@ namespace HyperElk.Core
 
             //Options
             CombatRoutine.AddProp(Misdirection, "Wich Pet", MisdirectionList, "Chose your Pet", "PETS", 0);
-            CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 5);
+            CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(HealthFunnel, "Health Funnel", numbList, "Life percent at which " + HealthFunnel + " is used, set to 0 to disable", "PETS", 0);
-            CombatRoutine.AddProp(DarkPact, "Dark Pact", numbList, "Life percent at which " + DarkPact + " is used, set to 0 to disable", "Healing", 2);
+            CombatRoutine.AddProp(DarkPact, "Dark Pact", numbList, "Life percent at which " + DarkPact + " is used, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp("Covenant Ability", "Use " + "Covenant Ability", CovenantAbilityList, "How to use Weapons of Order", "Covenant", 0);
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("SwitchTarget", "Switch Target on Havoc", true, "Switch Target if Havoc is Activ", "Generic");
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+
 
 
             //Spells
@@ -157,15 +163,34 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Havoc, 80240);
             CombatRoutine.AddDebuff(Eradication, 196412);
             CombatRoutine.AddDebuff(RoaringBlaze, 205184);
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
         }
 
         public override void Pulse()
         {
-       //     API.WriteLog("Time" + (HavocTime - CBTime));
+        //    API.WriteLog("Havoc Time left  " + HavocTime);
         }
 
         public override void CombatPulse()
         {
+            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
             if (!API.PlayerIsInCombat && InfernalWatch.IsRunning)
             {
                 InfernalWatch.Stop();
