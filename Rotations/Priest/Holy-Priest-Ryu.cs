@@ -50,6 +50,10 @@ namespace HyperElk.Core
         private string SurgeofLight = "Surge of Light";
         private string PrayerCircle = "Prayer Circle";
         private string AoE = "AOE";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
 
 
 
@@ -106,7 +110,7 @@ namespace HyperElk.Core
         private bool PoHCheck => API.CanCast(PoH) && PoHAoE && Mana >= 5 && !API.PlayerIsMoving && !ChannelingDivine;
         private bool GSCheck => API.CanCast(GuardianSpirit) && API.TargetHealthPercent <= GuardianSpirtLifePercent && Mana >= 1 && !API.PlayerCanAttackTarget && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingDivine;
         private bool HealCheck => API.CanCast(Heal) && API.TargetHealthPercent <= HealLifePercent && Mana >= 3 && !API.PlayerCanAttackTarget && NotChanneling && !API.PlayerIsMoving && !ChannelingDivine;
-        private bool FlashHealCheck => API.CanCast(FlashHeal) && API.TargetHealthPercent <= FlashHealLifePercent && Mana >=4 && !API.PlayerCanAttackTarget && NotChanneling && !API.PlayerIsMoving && !ChannelingDivine;
+        private bool FlashHealCheck => API.CanCast(FlashHeal) && API.TargetHealthPercent <= FlashHealLifePercent && Mana >=4 && !API.PlayerCanAttackTarget && NotChanneling && (SurgeofLightTalent && API.PlayerHasBuff(SurgeofLight)  || !API.PlayerIsMoving) && !ChannelingDivine;
         private bool RenewCheck => API.CanCast(Renew) && API.TargetHealthPercent <= RenewLifePercent && Mana >= 2 && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Renew) && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingDivine;
         private bool HolyWordSerenityCheck => API.CanCast(HolyWordSerenity) && API.TargetHealthPercent <= HolyWordSerenityLifePercent && Mana >= 4 && !API.PlayerCanAttackTarget && API.SpellCharges(HolyWordSerenity) > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingDivine;
         private bool HaloCheck => API.CanCast(Halo) && HaloAoE && !ChannelingDivine && Mana >= 3 && HaloTalent && !API.PlayerIsMoving;
@@ -142,6 +146,10 @@ namespace HyperElk.Core
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private int AoENumber => numbPartyList[CombatRoutine.GetPropertyInt(AoE)];
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
 
         //General
@@ -152,6 +160,8 @@ namespace HyperElk.Core
        // private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private int Mana => API.PlayerMana;
 
 
@@ -166,62 +176,75 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Holy Priest by Ryu");
             API.WriteLog("BETA ROTATION : Things may be missing or not work correctly yet. Please post feedback in Priest channel. Cov expect Unholy Nova is supported via Cooldown toggle or break marcos");
            // API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
-            API.WriteLog("If you want to use Holy Word: Sanctify, you need to use an @Cursor macro with /xxx break or break2 whereas xxx is your addon name(First five only) for it to work");
+            API.WriteLog("If you want to use Holy Word: Sanctify or the Nercolord Cov Abiltity, you need to use an @Cursor macro with /xxx break or break2 whereas xxx is your addon name(First five only) for it to work");
             API.WriteLog("Target Spec" + API.TargetRoleSpec);
 
             //Buff
-            CombatRoutine.AddBuff(PowerWordFortitude);
-            CombatRoutine.AddBuff(PowerWordShield);
-            CombatRoutine.AddBuff(SurgeofLight);
-            CombatRoutine.AddBuff(PrayerCircle);
-            CombatRoutine.AddBuff(Apotheosis);
-            CombatRoutine.AddBuff(SpiritOfRedemption);
-            CombatRoutine.AddBuff(Renew);
+            CombatRoutine.AddBuff(PowerWordFortitude, 21562);
+            CombatRoutine.AddBuff(PowerWordShield, 17);
+            CombatRoutine.AddBuff(SurgeofLight, 109186);
+            CombatRoutine.AddBuff(PrayerCircle, 321377);
+            CombatRoutine.AddBuff(Apotheosis, 200183);
+            CombatRoutine.AddBuff(SpiritOfRedemption, 20711);
+            CombatRoutine.AddBuff(Renew, 139);
 
 
             //Debuff
-            CombatRoutine.AddDebuff(WeakenedSoul);
-            CombatRoutine.AddDebuff(ShadowWordPain);
+            CombatRoutine.AddDebuff(WeakenedSoul, 6788);
+            CombatRoutine.AddDebuff(ShadowWordPain, 589);
 
             //Spell
-            CombatRoutine.AddSpell(Heal);
-            CombatRoutine.AddSpell(FlashHeal);
-            CombatRoutine.AddSpell(Renew);
-            CombatRoutine.AddSpell(HolyWordSerenity);
-            CombatRoutine.AddSpell(HolyWordSanctify);
-            CombatRoutine.AddSpell(PoH);
-            CombatRoutine.AddSpell(DivineHymn);
-            CombatRoutine.AddSpell(CoH);
-            CombatRoutine.AddSpell(HolyWordChastise);
-            CombatRoutine.AddSpell(Smite);
-            CombatRoutine.AddSpell(HolyNova);
-            CombatRoutine.AddSpell(HolyFire);
-            CombatRoutine.AddSpell(SymbolOfHope);
-            CombatRoutine.AddSpell(Fade);
-            CombatRoutine.AddSpell(DispelMagic);
-            CombatRoutine.AddSpell(GuardianSpirit);
-            CombatRoutine.AddSpell(LeapOfFaith);
-            CombatRoutine.AddSpell(MindControl);
-            CombatRoutine.AddSpell(MassDispel);
-            CombatRoutine.AddSpell(ShackleUndead);
-            CombatRoutine.AddSpell(Fleshcraft);
-            CombatRoutine.AddSpell(MindSoothe);
-            CombatRoutine.AddSpell(PowerInfusion);
-            CombatRoutine.AddSpell(PsychicScream);
-            CombatRoutine.AddSpell(BoonoftheAscended);
-            CombatRoutine.AddSpell(BindingHeal);
-            CombatRoutine.AddSpell(AscendedBlast);
-            CombatRoutine.AddSpell(AscendedNova);
-            CombatRoutine.AddSpell(Mindgames);
-            CombatRoutine.AddSpell(UnholyNova);
-            CombatRoutine.AddSpell(FaeGuardians);
+            CombatRoutine.AddSpell(Heal, 2060);
+            CombatRoutine.AddSpell(FlashHeal, 2061);
+            CombatRoutine.AddSpell(Renew, 139);
+            CombatRoutine.AddSpell(HolyWordSerenity, 2050);
+            CombatRoutine.AddSpell(HolyWordSanctify, 34861);
+            CombatRoutine.AddSpell(PoH, 596);
+            CombatRoutine.AddSpell(CoH, 204883);
+            CombatRoutine.AddSpell(HolyWordChastise, 88625);
+            CombatRoutine.AddSpell(Smite, 585);
+            CombatRoutine.AddSpell(HolyNova, 132157);
+            CombatRoutine.AddSpell(HolyFire, 14914);
+            CombatRoutine.AddSpell(SymbolOfHope, 64901);
+            CombatRoutine.AddSpell(Fade, 586);
+            CombatRoutine.AddSpell(DispelMagic, 528);
+            CombatRoutine.AddSpell(GuardianSpirit, 47788);
+            CombatRoutine.AddSpell(LeapOfFaith, 73325);
+            CombatRoutine.AddSpell(MindControl, 136287);
+            CombatRoutine.AddSpell(MassDispel, 32375);
+            CombatRoutine.AddSpell(ShackleUndead, 9484);
+            CombatRoutine.AddSpell(Fleshcraft, 324631);
+            CombatRoutine.AddSpell(MindSoothe, 453);
+            CombatRoutine.AddSpell(PowerInfusion, 10060);
+            CombatRoutine.AddSpell(PsychicScream, 8122);
+            CombatRoutine.AddSpell(BoonoftheAscended, 325013);
+            CombatRoutine.AddSpell(BindingHeal, 32546);
+            CombatRoutine.AddSpell(AscendedBlast, 325315);
+            CombatRoutine.AddSpell(AscendedNova, 325020);
+            CombatRoutine.AddSpell(Mindgames, 323673);
+            CombatRoutine.AddSpell(UnholyNova, 347788);
+            CombatRoutine.AddSpell(FaeGuardians, 327661);
+            CombatRoutine.AddSpell(HolyWordSalvation, 265202);
+            CombatRoutine.AddSpell(Halo, 120517);
+            CombatRoutine.AddSpell(Apotheosis, 200183);
+            CombatRoutine.AddSpell(PrayerofMending, 33076);
+            CombatRoutine.AddSpell(DivineHymn, 64843);
+            CombatRoutine.AddSpell(ShadowWordPain, 589);
+            CombatRoutine.AddSpell(PowerWordFortitude, 21562);
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Macro
-
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
 
             //Prop
             // CombatRoutine.AddProp("Auto Swap", "Auto Swap", false, "Use Auto Swap Logic", "Generic");
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used and meets the below healing perecents", "Cooldowns", 1);
 
             CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
@@ -237,6 +260,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(CoH, CoH + " Life Percent", numbList, "Life percent at which " + CoH + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(PoH, PoH + " Life Percent", numbList, "Life percent at which " + PoH + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp(DivineHymn , DivineHymn + " Life Percent", numbList, "Life percent at which " + DivineHymn + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 10);
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
 
 
@@ -321,6 +346,34 @@ namespace HyperElk.Core
                 API.CastSpell(Fleshcraft);
                 return;
             }
+            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+            {
+                API.CastSpell("Trinket1");
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+            {
+                API.CastSpell("Trinket2");
+            }
+            if (VenthyrCheck && InRange)
+            {
+                API.CastSpell(Mindgames);
+                return;
+            }
             if (API.CanCast(HolyWordChastise) && InRange && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine)
             {
                 API.CastSpell(HolyWordChastise);
@@ -336,7 +389,7 @@ namespace HyperElk.Core
                 API.CanCast(ShadowWordPain);
                 return;
             }
-            if (API.CanCast(HolyNova) && IsMelee && API.TargetUnitInRangeCount >= 3 && !ChannelingDivine && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast(HolyNova) && IsMelee && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 12 && !ChannelingDivine && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CanCast(HolyNova);
                 return;
@@ -354,11 +407,6 @@ namespace HyperElk.Core
             if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell(Smite);
-                return;
-            }
-            if (VenthyrCheck && InRange)
-            {
-                API.CastSpell(Mindgames);
                 return;
             }
         }

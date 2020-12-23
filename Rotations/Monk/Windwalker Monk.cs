@@ -159,7 +159,9 @@ namespace HyperElk.Core
 
             //Debuffs
             CombatRoutine.AddDebuff("Mark of the Crane");
-
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
         }
 
