@@ -14,6 +14,7 @@
 // v2.0 core update
 // v2.1 spell ids and alot of other stuff
 // v2.2 Save AP Toggle
+// v2.3 Stellar Flare double cast fix
 
 using System.Diagnostics;
 
@@ -126,7 +127,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v2.2");
+            API.WriteLog("Welcome to smartie`s Balance Druid v2.3");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -232,6 +233,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            //API.WriteLog("Last Spell ? : " + API.LastSpellCastInGame);
             if (!Lunarwatch.IsRunning && API.PlayerHasBuff(EclipseLunar) && !API.PlayerHasBuff(EclipseSolar))
             {
                 Solarwatch.Stop();
@@ -446,7 +448,7 @@ namespace HyperElk.Core
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.LastSpellCastInGame != (StellarFlare))
+                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
                     {
                         API.CastSpell(StellarFlare);
                         return;
@@ -520,7 +522,7 @@ namespace HyperElk.Core
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.LastSpellCastInGame != (StellarFlare))
+                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
                     {
                         API.CastSpell(StellarFlare);
                         return;
@@ -537,7 +539,7 @@ namespace HyperElk.Core
                             API.CastSpell(Moonfire + "MO");
                             return;
                         }
-                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && !API.MacroIsIgnored(StellarFlare + "MO") && API.CanCast(StellarFlare) && TalentStellarFlare && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && !API.MacroIsIgnored(StellarFlare + "MO") && API.CanCast(StellarFlare) && TalentStellarFlare && isMOinRange && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
                         {
                             API.CastSpell(StellarFlare + "MO");
                             return;
