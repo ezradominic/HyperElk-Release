@@ -219,7 +219,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("blessing: " + API.CanCast(BlessingofSpring) + " " + API.CanCast(BlessingofSummer) + " " + API.CanCast(BlessingofAutumn) + " " + API.CanCast(BlessingofWinter));
+            //API.WriteLog("blessing: " + API.CanCast(BlessingofSpring) + " " + API.CanCast(BlessingofSummer) + " " + API.CanCast(BlessingofAutumn) + " " + API.CanCast(BlessingofWinter));
             if (API.PlayerIsMounted)
             {
                 if (AutoAuraSwitch && API.CanCast(CrusaderAura) && PlayerLevel >= 21 && !PlayerHasBuff(CrusaderAura))
