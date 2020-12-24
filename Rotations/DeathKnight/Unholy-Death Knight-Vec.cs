@@ -395,12 +395,7 @@ namespace HyperElk.Core
                 #endregion
                 if (!IsAOE || API.TargetUnitInRangeCount < AOEUnitNumber)
                 {
-                    #region ST
-                    if (API.CanCast("Dark Transformation")  && WhenDarkTransformation == "On Cooldown" && MeleeRange)
-                    {
-                        API.CastSpell("Dark Transformation");
-                        return;
-                    }
+                    #region ST - outside cd
                     //actions +=/ outbreak,if= dot.virulent_plague.refreshable & !talent.unholy_blight & !raid_event.adds.exists
                     if (API.CanCast("Outbreak") && (!Talent_UnholyBlight || !SmallCDs && !IsCooldowns) && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
                     {
