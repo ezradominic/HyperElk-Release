@@ -7,7 +7,7 @@ namespace HyperElk.Core
     public class UHDK : CombatRoutine
     {
         private bool SmallCDs => API.ToggleIsEnabled("Small CDs");
-        private bool UseDnD => API.ToggleIsEnabled("Small CDs");
+        private bool UseDnD => API.ToggleIsEnabled("Use DnD");
         private string ShackletheUnworthy = "Shackle the Unworthy";
         private string SwarmingMist = "Swarming Mist";
         private string DeathsDue = "Death's Due";
