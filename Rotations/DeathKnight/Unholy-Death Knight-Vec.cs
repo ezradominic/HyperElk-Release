@@ -414,11 +414,6 @@ namespace HyperElk.Core
                         API.CastSpell("Unholy Blight");
                         return;
                     }
-                    if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
-                    {
-                        API.CastSpell("Outbreak");
-                        return;
-                    }
                     if (API.CanCast("Soul Reaper") && API.PlayerCurrentRunes >= 1 && Talent_SoulReaper && API.TargetHealthPercent < 35 && MeleeRange)
                     {
                         API.CastSpell("Soul Reaper");
