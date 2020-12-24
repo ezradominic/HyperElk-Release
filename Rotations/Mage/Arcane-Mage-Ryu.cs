@@ -28,6 +28,11 @@ namespace HyperElk.Core
         private string AH = "Ancient Hysteria";
         private string TW = "Temporal Warp";
         private string AHL = "Arcane Harmony";
+        private string Sated = "Sated";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string Spellsteal = "Spellsteal";
+        private string RemoveCurse = "Remove Curse";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -39,17 +44,23 @@ namespace HyperElk.Core
         bool ArcaneOrb => API.PlayerIsTalentSelected(6, 2);
         bool SuperNova => API.PlayerIsTalentSelected(6, 3);
         bool Resonace => API.PlayerIsTalentSelected(4, 1);
+        //Spell Steal & Curse Removal
+        string[] SpellSpealBuffList = { "Bless Weapon", "Death's Embrace", "Turn to Stone", "Wonder Grow", "Stoneskin" };
+        string[] CurseList = { "Sintouched Anima", "Curse of Stone" };
         //CBProperties
-        private int PBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(PB)];
-        private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
-        private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
-        private int FleshcraftPercentProc => percentListProp[CombatRoutine.GetPropertyInt(Fleshcraft)];
+        private int PBPercentProc => numbList[CombatRoutine.GetPropertyInt(PB)];
+        private int IBPercentProc => numbList[CombatRoutine.GetPropertyInt(IB)];
+        private int MIPercentProc => numbList[CombatRoutine.GetPropertyInt(MI)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         // public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
 
         // public new string[] CDUsageWithAOE = new string[] { "Not Used", "with cooldowns", "on AOE", "always" };
 
         // public string[] CDUsage = new string[] { "Not Used", "With Cooldowns", "On Cooldown" };
         // public string[] CDUsageWithAOE = new string[] { "Not Used", "With Cooldowns", "on AOE", "On Cooldown" };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         public string[] LegendaryList = new string[] { "None", "Temporal Warp", "Arcane Harmony", "Arcane Bombardment" };
         private string UseAP => CDUsage[CombatRoutine.GetPropertyInt("Arcane Power")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt("Rune of Power")];
@@ -74,7 +85,7 @@ namespace HyperElk.Core
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         bool ChannelingEvo => API.CurrentCastSpellID("player") == 12051;
         bool ChannelingMissile => API.CurrentCastSpellID("player") == 5143;
-        private bool BLDebuffs => (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued));
+        private bool BLDebuffs => !API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued);
         private bool BLBuFfs => !API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW);
         public override void Initialize()
         {
@@ -83,75 +94,95 @@ namespace HyperElk.Core
             API.WriteLog("Presence of Mind(PoM) will by default cast when Arcane Power as less than 3 seconds left, otherwise, you can check box in settings to cast on CD");
             API.WriteLog("All Talents expect Ice Ward, Ring of Frost, Supernova and Mirror Image are supported");
             API.WriteLog("Legendary Support for Temporal Warp, Arcane Harmory and Arcane Bombardment added. If you have it please select it in the settings.");
-
+            API.WriteLog("Rotation supports Auto Spellsteal for certain buffs and auto Remove Curse for certian curses along with Mouseover Support for them, please create the correct Mouseover Marco if you wish to use it. If you DONT want it do that, please check Ignore in the keybinds for SpellSteal/Remove Curse");
             // API.WriteLog("Supported Essences are Memory of Lucids, Concerated Flame and Worldvein");
             //Buff
 
-            CombatRoutine.AddBuff("Arcane Power");
-            CombatRoutine.AddBuff("Clearcasting");
-            CombatRoutine.AddBuff("Rule of Threes");
-            CombatRoutine.AddBuff("Presence of Mind");
-            CombatRoutine.AddBuff("Rune of Power");
-            CombatRoutine.AddBuff("Prismatic Barrier");
-            CombatRoutine.AddBuff("Arcane Intellect");
-            CombatRoutine.AddBuff("Arcane Familiar");
-            CombatRoutine.AddBuff("Evocation");
-            CombatRoutine.AddBuff(TimeWarp);
-            CombatRoutine.AddBuff(BL);
-            CombatRoutine.AddBuff(AH);
-            CombatRoutine.AddBuff(TW);
-            CombatRoutine.AddBuff(AHL);
+            CombatRoutine.AddBuff("Arcane Power", 12042);
+            CombatRoutine.AddBuff("Clearcasting", 263725);
+            CombatRoutine.AddBuff("Rule of Threes", 2647741);
+            CombatRoutine.AddBuff("Presence of Mind", 205025);
+            CombatRoutine.AddBuff("Rune of Power", 116014);
+            CombatRoutine.AddBuff("Prismatic Barrier", 235450);
+            CombatRoutine.AddBuff("Arcane Intellect", 1459);
+            CombatRoutine.AddBuff("Arcane Familiar", 210126);
+            CombatRoutine.AddBuff("Evocation", 12051);
+            CombatRoutine.AddBuff(TimeWarp, 80353);
+            CombatRoutine.AddBuff(BL, 2825);
+            CombatRoutine.AddBuff(AH, 90355);
+            CombatRoutine.AddBuff(TW, 327351);
+            CombatRoutine.AddBuff(AHL, 332769);
+            CombatRoutine.AddBuff("Bless Weapon", 328288);
+            CombatRoutine.AddBuff("Death's Embrace", 333875);
+            CombatRoutine.AddBuff("Turn to Stone", 326607);
+            CombatRoutine.AddBuff("Wonder Grow", 328016);
+            CombatRoutine.AddBuff("Stoneskin", 322433);
+
             //Debuff
-            CombatRoutine.AddDebuff("Nether Tempest");
-            CombatRoutine.AddDebuff("Touch of the Magi");
-            CombatRoutine.AddDebuff(Temp);
-            CombatRoutine.AddDebuff(Fatigued);
-            CombatRoutine.AddDebuff(Exhaustion);
+            CombatRoutine.AddDebuff("Nether Tempest", 114923);
+            CombatRoutine.AddDebuff("Touch of the Magi", 210824);
+            CombatRoutine.AddDebuff(Temp, 80354);
+            CombatRoutine.AddDebuff(Fatigued, 264689);
+            CombatRoutine.AddDebuff(Exhaustion, 57723);
+            CombatRoutine.AddDebuff(Sated, 57724);
+            CombatRoutine.AddDebuff("Sintouched Anima", 328494);
+            CombatRoutine.AddDebuff("Curse of Stone", 319603);
 
             //Spell
-            CombatRoutine.AddSpell("Rune of Power", "None");
-            CombatRoutine.AddSpell("Ice Block");
-            CombatRoutine.AddSpell("Arcane Power");
-            CombatRoutine.AddSpell("Arcane Orb");
-            CombatRoutine.AddSpell("Nether Tempest");
-            CombatRoutine.AddSpell("Arcane Barrage");
-            CombatRoutine.AddSpell("Arcane Explosion");
-            CombatRoutine.AddSpell("Arcane Missiles");
-            CombatRoutine.AddSpell("Arcane Blast", "C");
-            CombatRoutine.AddSpell("Evocation", "C");
-            CombatRoutine.AddSpell("Prismatic Barrier", "C");
-            CombatRoutine.AddSpell("Mirror Image", "C");
+            CombatRoutine.AddSpell("Rune of Power", 116011, "None");
+            CombatRoutine.AddSpell("Ice Block", 45438);
+            CombatRoutine.AddSpell("Arcane Power", 12042);
+            CombatRoutine.AddSpell("Arcane Orb", 153626);
+            CombatRoutine.AddSpell("Nether Tempest", 114923);
+            CombatRoutine.AddSpell("Arcane Barrage", 44425);
+            CombatRoutine.AddSpell("Arcane Explosion", 1449);
+            CombatRoutine.AddSpell("Arcane Missiles", 5143);
+            CombatRoutine.AddSpell("Arcane Blast", 30451, "C");
+            CombatRoutine.AddSpell("Evocation", 12051, "C");
+            CombatRoutine.AddSpell("Prismatic Barrier", 235450, "C");
+            CombatRoutine.AddSpell("Mirror Image", 55342, "C");
             CombatRoutine.AddSpell("Presence of Mind", "None");
-            CombatRoutine.AddSpell("Counterspell", "None");
-            CombatRoutine.AddSpell("Arcane Familiar", "None");
-            CombatRoutine.AddSpell("Touch of the Magi", "None");
-            CombatRoutine.AddSpell("Arcane Intellect", "None");
-            CombatRoutine.AddSpell(ShiftingPower);
-            CombatRoutine.AddSpell(RadiantSpark);
-            CombatRoutine.AddSpell(Deathborne);
-            CombatRoutine.AddSpell(MirrorsofTorment);
-            CombatRoutine.AddSpell(Fleshcraft);
-            CombatRoutine.AddSpell(ManaGem);
-            CombatRoutine.AddSpell(TimeWarp);
+            CombatRoutine.AddSpell("Counterspell", 2139, "None");
+            CombatRoutine.AddSpell("Arcane Familiar", 205022, "None");
+            CombatRoutine.AddSpell("Touch of the Magi", 321507, "None");
+            CombatRoutine.AddSpell("Arcane Intellect", 1459, "None");
+            CombatRoutine.AddSpell(ShiftingPower, 314791);
+            CombatRoutine.AddSpell(RadiantSpark, 307443);
+            CombatRoutine.AddSpell(Deathborne, 324220);
+            CombatRoutine.AddSpell(MirrorsofTorment, 314793);
+            CombatRoutine.AddSpell(Fleshcraft, 324631);
+            CombatRoutine.AddSpell(TimeWarp, 80353);
+            CombatRoutine.AddSpell(Spellsteal, 30449);
+            CombatRoutine.AddSpell(RemoveCurse, 475);
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+            CombatRoutine.AddItem(ManaGem, 36799);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(RemoveCurse + "MO");
+            CombatRoutine.AddMacro(Spellsteal + "MO");
 
             //Toggle
             CombatRoutine.AddToggle("TimeWarp");
+            CombatRoutine.AddToggle("Mouseover");
 
             //Prop
-            CombatRoutine.AddProp(PB, PB, percentListProp, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
-            CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
-            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
+            CombatRoutine.AddProp(PB, PB, numbList, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(IB, IB, numbList, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp(MI, MI, numbList, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
             CombatRoutine.AddProp("Arcane Power", "Use " + "Arcane Power", CDUsage, "Use " + "Arcane Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Rune of Power", "Use " + "Rune of Power", CDUsage, "Use " + "Rune of Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
-            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
 
 
 
@@ -175,14 +206,68 @@ namespace HyperElk.Core
                 API.CastSpell("Counterspell");
                 return;
             }
-            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            if (API.CanCast(Spellsteal) && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
             {
-                API.CastSpell("Ice Block");
+                for (int i = 0; i < SpellSpealBuffList.Length; i++)
+                {
+                    if (API.TargetHasBuff(SpellSpealBuffList[i]))
+                    {
+                        API.CastSpell(Spellsteal);
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(Spellsteal) && IsMouseover && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            {
+                for (int i = 0; i < SpellSpealBuffList.Length; i++)
+                {
+                    if (API.MouseoverHasBuff(SpellSpealBuffList[i]))
+                    {
+                        API.CastSpell(Spellsteal + "MO");
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(RemoveCurse) && !API.PlayerCanAttackTarget && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            {
+                for (int i = 0; i < CurseList.Length; i++)
+                {
+                    if (API.TargetHasDebuff(CurseList[i]))
+                    {
+                        API.CastSpell(RemoveCurse);
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(RemoveCurse) && !API.PlayerCanAttackMouseover && IsMouseover && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            {
+                for (int i = 0; i < CurseList.Length; i++)
+                {
+                    if (API.MouseoverHasDebuff(CurseList[i]))
+                    {
+                        API.CastSpell(RemoveCurse + "MO");
+                        return;
+                    }
+                }
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
                 return;
             }
             if (API.CanCast("Mirror Image") && API.PlayerHealthPercent <= MIPercentProc && API.PlayerHealthPercent != 0 && Level >= 44 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
             {
                 API.CastSpell("Mirror Image");
+                return;
+            }
+            if (API.CanCast("Ice Block") && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            {
+                API.CastSpell("Ice Block");
                 return;
             }
             if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
@@ -195,16 +280,16 @@ namespace HyperElk.Core
                 API.CastSpell("Prismatic Barrier");
                 return;
             }
-            if (IsTimeWarp && API.CanCast(TimeWarp) && (BLDebuffs || UseLeg == "Temporal Warp") && BLBuFfs)
+            if (IsTimeWarp && API.CanCast(TimeWarp) && ((BLDebuffs) || UseLeg == "Temporal Warp") && (BLBuFfs))
             {
                 API.CastSpell(TimeWarp);
                 return;
             }
-          //  if (API.CanCast(ManaGem) && API.SpellCharges(ManaGem) > 0 && API.PlayerMana < 90 && NotCasting && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
-          //  {
-          //      API.CastSpell(ManaGem);
-         //       return;
-         //   }
+            if (API.PlayerItemCanUse(ManaGem) && API.PlayerItemRemainingCD(ManaGem) == 0 && API.PlayerMana < 90 && !API.PlayerIsCasting(true) && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
+            {
+                API.CastSpell(ManaGem);
+                return;
+            }
             if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
                 API.CastSpell(trinket1);
             if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
@@ -267,7 +352,7 @@ namespace HyperElk.Core
                 API.CastSpell(RacialSpell1);
                 return;
             }
-            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && Level >= 13 && InRange && (API.PlayerHasBuff("Clearcasting") && Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 13 && InRange && (API.PlayerHasBuff("Clearcasting") && Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Missiles");
                 return;
@@ -327,12 +412,7 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Barrage");
                 return;
             }
-            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (Burn || Conserve) && !API.PlayerIsMoving)
-            {
-                API.CastSpell("Arcane Blast");
-                return;
-            }
-            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && RuleofThrees && API.PlayerHasBuff("Rule of Threes") && (Burn || Conserve) && !API.PlayerIsMoving)
+            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (Burn || Conserve) && (RuleofThrees && API.PlayerHasBuff("Rule of Threes") || !RuleofThrees) && !API.PlayerIsMoving)
             {
                 API.CastSpell("Arcane Blast");
                 return;

@@ -14,6 +14,7 @@
 // v2.2 Racials and Trinkets
 // v2.3 new apl
 // v2.4 spell ids added + Berserker rage in fear + storm bolt as kick
+// v2.5 quick hotfix on phone lul
 
 namespace HyperElk.Core
 {
@@ -106,7 +107,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.4");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.5");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, 23881, "D1");
@@ -181,6 +182,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, " Lineup Recklessness and Siegebreaker", "Cooldowns");
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", numbList, " Life percent at which" + EnragedRegeneration + " is used, set to 0 to disable", "Defense", 60);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", numbList, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 80);
             CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", numbList, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 80);
 

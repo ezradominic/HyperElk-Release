@@ -36,8 +36,8 @@ namespace HyperElk.Core
         private string AE = "Arcane Explosion";
         private string Fleshcraft = "Fleshcraft";
         private string FR = "Freezing Rain";
-        private string trinket1 = "trinket1";
-        private string trinket2 = "trinket2";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
         private string SlickIce = "Slick Ice";
         private string TimeWarp = "Time Warp";
         private string Temp = "Temporal Displacement";
@@ -46,6 +46,9 @@ namespace HyperElk.Core
         private string BL = "Bloodlust";
         private string AH = "Ancient Hysteria";
         private string TW = "Temporal Warp";
+        private string Sated = "Sated";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
         bool IceNova => API.PlayerIsTalentSelected(1, 3);
@@ -59,17 +62,22 @@ namespace HyperElk.Core
 
         //CBProperties
         public string[] LegendaryList = new string[] { "None", "Temporal Warp" };
-        private int IceBarrierPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IceBarrier)];
-        private int IBPercentProc => percentListProp[CombatRoutine.GetPropertyInt(IB)];
-        private int MIPercentProc => percentListProp[CombatRoutine.GetPropertyInt(MI)];
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+        private int IceBarrierPercentProc => numbList[CombatRoutine.GetPropertyInt(IceBarrier)];
+        private int IBPercentProc => numbList[CombatRoutine.GetPropertyInt(IB)];
+        private int MIPercentProc => numbList[CombatRoutine.GetPropertyInt(MI)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
         private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt(RoP)];
         private string UseIV => CDUsage[CombatRoutine.GetPropertyInt(IV)];
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
-        private int FleshcraftPercentProc => percentListProp[CombatRoutine.GetPropertyInt(Fleshcraft)];
+        private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         //General
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         bool CastShifting => API.PlayerLastSpell == ShiftingPower;
@@ -78,6 +86,8 @@ namespace HyperElk.Core
         bool CastIL => API.PlayerLastSpell == IL;
         bool CastRune => API.PlayerLastSpell == RoP;
         bool CastTW => API.PlayerLastSpell == TimeWarp;
+        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private int Level => API.PlayerLevel;
         //private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
@@ -100,74 +110,81 @@ namespace HyperElk.Core
             API.WriteLog("Legendary Support for Temporal Warp added. If you have it please select it in the settings.");
             //Buff
 
-            CombatRoutine.AddBuff(Icicles);
-            CombatRoutine.AddBuff(BrainFreeze);
-            CombatRoutine.AddBuff(FoF);
-            CombatRoutine.AddBuff(IF);
-            CombatRoutine.AddBuff(RoP);
-            CombatRoutine.AddBuff(IceBarrier);
-            CombatRoutine.AddBuff(AI);
-            CombatRoutine.AddBuff(IV);
-            CombatRoutine.AddBuff(FR);
-            CombatRoutine.AddBuff(SlickIce);
-            CombatRoutine.AddBuff(TimeWarp);
-            CombatRoutine.AddBuff(BL);
-            CombatRoutine.AddBuff(AH);
-            CombatRoutine.AddBuff(TW);
+            CombatRoutine.AddBuff(Icicles, 205473);
+            CombatRoutine.AddBuff(BrainFreeze, 190446);
+            CombatRoutine.AddBuff(FoF, 44544);
+            CombatRoutine.AddBuff(IF, 108839);
+            CombatRoutine.AddBuff(RoP, 116014);
+            CombatRoutine.AddBuff(IceBarrier, 11426);
+            CombatRoutine.AddBuff(AI, 1459);
+            CombatRoutine.AddBuff(IV, 12472);
+            CombatRoutine.AddBuff(FR, 240555);
+            CombatRoutine.AddBuff(SlickIce, 327511);
+            CombatRoutine.AddBuff(TimeWarp, 80353);
+            CombatRoutine.AddBuff(BL, 2825);
+            CombatRoutine.AddBuff(AH, 90355);
+            CombatRoutine.AddBuff(TW, 327351);
 
             //Debuff
-            CombatRoutine.AddDebuff(WC);
-            CombatRoutine.AddDebuff(Temp);
-            CombatRoutine.AddDebuff(Fatigued);
-            CombatRoutine.AddDebuff(Exhaustion);
+            CombatRoutine.AddDebuff(WC, 228358);
+            CombatRoutine.AddDebuff(Temp, 80354);
+            CombatRoutine.AddDebuff(Fatigued, 264689);
+            CombatRoutine.AddDebuff(Exhaustion, 57723);
+            CombatRoutine.AddDebuff(Sated, 57724);
 
             //Spell
-            CombatRoutine.AddSpell(RoP, "None");
-            CombatRoutine.AddSpell(IB);
-            CombatRoutine.AddSpell(Frostbolt);
-            CombatRoutine.AddSpell(IL);
-            CombatRoutine.AddSpell(Flurry);
-            CombatRoutine.AddSpell(CoC);
-            CombatRoutine.AddSpell(EB);
-            CombatRoutine.AddSpell(Blizzard);
-            CombatRoutine.AddSpell(GS, "C");
-            CombatRoutine.AddSpell(IV, "C");
-            CombatRoutine.AddSpell(IceBarrier, "C");
-            CombatRoutine.AddSpell(MI, "C");
-            CombatRoutine.AddSpell(IN, "None");
-            CombatRoutine.AddSpell(FO, "None");
-            CombatRoutine.AddSpell(CS, "None");
-            CombatRoutine.AddSpell(RoF, "None");
-            CombatRoutine.AddSpell(Freeze, "None");
-            CombatRoutine.AddSpell(WE, "None");
-            CombatRoutine.AddSpell(IF, "None");
-            CombatRoutine.AddSpell(AI, "None");
+            CombatRoutine.AddSpell(RoP, 116011, "None");
+            CombatRoutine.AddSpell(IB, 45438);
+            CombatRoutine.AddSpell(Frostbolt, 116);
+            CombatRoutine.AddSpell(IL, 30455);
+            CombatRoutine.AddSpell(Flurry, 44614);
+            CombatRoutine.AddSpell(CoC, 120);
+            CombatRoutine.AddSpell(EB, 257537);
+            CombatRoutine.AddSpell(Blizzard, 190356);
+            CombatRoutine.AddSpell(GS, 199786, "C");
+            CombatRoutine.AddSpell(IV, 12472, "C");
+            CombatRoutine.AddSpell(IceBarrier, 11426, "C");
+            CombatRoutine.AddSpell(MI, 55342, "C");
+            CombatRoutine.AddSpell(IN, 157997, "None");
+            CombatRoutine.AddSpell(FO, 84714, "None");
+            CombatRoutine.AddSpell(CS, 153595, "None");
+            CombatRoutine.AddSpell(RoF, 205021, "None");
+            CombatRoutine.AddSpell(Freeze, 33395, "None");
+            CombatRoutine.AddSpell(WE, 31687, "None");
+            CombatRoutine.AddSpell(IF, 108839, "None");
+            CombatRoutine.AddSpell(AI, 1459, "None");
             CombatRoutine.AddSpell(Counterspell, "None");
-            CombatRoutine.AddSpell(ShiftingPower);
-            CombatRoutine.AddSpell(RadiantSpark);
-            CombatRoutine.AddSpell(Deathborne);
-            CombatRoutine.AddSpell(MirrorsofTorment);
-            CombatRoutine.AddSpell(AE);
-            CombatRoutine.AddSpell(Fleshcraft);
-            CombatRoutine.AddSpell(TimeWarp);
+            CombatRoutine.AddSpell(ShiftingPower, 314791);
+            CombatRoutine.AddSpell(RadiantSpark, 307443);
+            CombatRoutine.AddSpell(Deathborne, 324220);
+            CombatRoutine.AddSpell(MirrorsofTorment, 314793);
+            CombatRoutine.AddSpell(Fleshcraft, 324631);
+            CombatRoutine.AddSpell(TimeWarp, 80353);
+            CombatRoutine.AddSpell(AE, 1449);
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Macro
-            CombatRoutine.AddMacro(trinket1);
-            CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
 
             //Toggle
             CombatRoutine.AddToggle("TimeWarp");
 
             //Prop
-            CombatRoutine.AddProp(IceBarrier, IceBarrier, percentListProp, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
-            CombatRoutine.AddProp(IB, IB, percentListProp, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(MI, MI, percentListProp, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
-            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", percentListProp, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
+            CombatRoutine.AddProp(IceBarrier, IceBarrier, numbList, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(IB, IB, numbList, "Life percent at which " + IB + " is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp(MI, MI, numbList, "Life percent at which " + MI + " is used, set to 0 to disable", "Defense", 7);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
             CombatRoutine.AddProp(RoP, "Use " + RoP, CDUsage, "Use " + RoP + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp(IV, "Use " + IV, CDUsage, "Use " + IV + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
-            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
         }
@@ -215,19 +232,34 @@ namespace HyperElk.Core
                 API.CastSpell(IceBarrier);
                 return;
             }
+            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
             if (IsTimeWarp && API.CanCast(TimeWarp) && (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Fatigued) || !API.PlayerHasDebuff(Exhaustion) || UseLeg == "Temporal Warp") && (!API.PlayerHasBuff(TW) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(BL)))
             {
                 API.CastSpell(TimeWarp);
                 return;
             }
-            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift) 
-                API.CastSpell(trinket1);
-            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift)
-                API.CastSpell(trinket1);
-            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift)
-                API.CastSpell(trinket2);
-            if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift)
-                API.CastSpell(trinket2);
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+            {
+                API.CastSpell("Trinket1");
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+            {
+                API.CastSpell("Trinket2");
+            }
             if (Level <= 60)
             {
                 rotation();
@@ -305,13 +337,13 @@ namespace HyperElk.Core
                 return;
             }
             // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
-            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 2 && !ChannelingShift)
+            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 2 && API.TargetDebuffPlayerSrc(WC) && !ChannelingShift)
             {
                 API.CastSpell(IL);
                 API.WriteLog("Winters Debuff" + API.TargetHasDebuff(WC) + "Stacks " + API.TargetDebuffStacks(WC) + "Fingers of Frost " + API.PlayerHasBuff(FoF));
                 return;
             }
-            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 1 && !ChannelingShift)
+            if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 1 && API.TargetDebuffPlayerSrc(WC) && !ChannelingShift)
             {
                 API.CastSpell(IL);
                 API.WriteLog("Winters Debuff" + API.TargetHasDebuff(WC) + "Stacks " + API.TargetDebuffStacks(WC) + "Fingers of Frost " + API.PlayerHasBuff(FoF));

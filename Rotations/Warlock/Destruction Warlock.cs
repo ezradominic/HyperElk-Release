@@ -29,16 +29,13 @@ namespace HyperElk.Core
         private string MortalCoil = "Mortal Coil";
         private string HowlofTerror = "Howl Of Terror";
         private string GrimoireOfSacrifice = "Grimoire Of Sacrifice";
-        private string DemonFire = "Demon Fire";
         private string SummonInfernal = "Summon Infernal";
-        private string ChangeTarget = "Change Target";
         private string SoulFire = "Soul Fire";
         private string ChannelDemonFire = "Channel DemonFire";
         private string ScouringTithe = "Scouring Tithe";
         private string Eradication = "Eradication";
         private string ChrashingChaos = "Chrashing Chaos";
         private string DecimatingBolt = "Decimating Bolt";
-        private string InternalCombustion = "Internal Combustion";
         private string Misdirection = "Misdirection";
         private string ImpendingCatastrophe = "Impending Catastrophe";
         private string SoulRot = "Soul Rot";
@@ -46,6 +43,8 @@ namespace HyperElk.Core
         private string CovenantAbility = "Covenant Ability";
         private string darkSoulInstability = "Dark Soul:  Instability";
         private string RoaringBlaze = "Roaring Blaze";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         //Talents
         private bool TalentFlashover => API.PlayerIsTalentSelected(1, 1);
@@ -64,14 +63,24 @@ namespace HyperElk.Core
         private bool TalentInferno => API.PlayerIsTalentSelected(4, 1);
         private bool SwitchTarget => (bool)CombatRoutine.GetProperty("SwitchTarget");
 
-        //Misc
-        private static readonly Stopwatch HavocWatch = new Stopwatch();
 
+        //Misc
+        private static readonly Stopwatch InfernalWatch = new Stopwatch();
+        private static readonly Stopwatch HavocWatch = new Stopwatch();
+        private static readonly Stopwatch HealthFunnelWatch = new Stopwatch();
+        float CBTime => 3 / (1f + API.PlayerGetHaste / 1);
+        float SFTime => 4 / (1f + API.PlayerGetHaste / 1);
+        float DBTime => 2500 / 1000 / (1f + API.PlayerGetHaste / 1);
+        float SCTime => 2 / (1f + API.PlayerGetHaste / 1);
+        float IncinerateTime => 2 / (1f + API.PlayerGetHaste / 1);
+
+        float HavocTime => 10 - (HavocWatch.ElapsedMilliseconds / 1000);
 
         //CBProperties
-        int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
-
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         string[] MisdirectionList = new string[] { "Imp", "Voidwalker", "Succubus", "Felhunter", "Infernal" };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
@@ -81,7 +90,6 @@ namespace HyperElk.Core
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
-//        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         bool LastCastImmolate => API.PlayerLastSpell == Immolate;
         bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate;
@@ -101,17 +109,19 @@ namespace HyperElk.Core
             API.WriteLog("Use /cast [@cursor] Rain of Fire");
             API.WriteLog("Use /cast [@cursor] Cataclysm");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-            API.WriteLog("This is a TEMP FIXED Rotation , you need to toggle AOE/SINGLE Target manualy");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
             //Options
             CombatRoutine.AddProp(Misdirection, "Wich Pet", MisdirectionList, "Chose your Pet", "PETS", 0);
-            CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 5);
+            CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(HealthFunnel, "Health Funnel", numbList, "Life percent at which " + HealthFunnel + " is used, set to 0 to disable", "PETS", 0);
-            CombatRoutine.AddProp(DarkPact, "Dark Pact", numbList, "Life percent at which " + DarkPact + " is used, set to 0 to disable", "Healing", 2);
+            CombatRoutine.AddProp(DarkPact, "Dark Pact", numbList, "Life percent at which " + DarkPact + " is used, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp("Covenant Ability", "Use " + "Covenant Ability", CovenantAbilityList, "How to use Weapons of Order", "Covenant", 0);
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("SwitchTarget", "Switch Target on Havoc", true, "Switch Target if Havoc is Activ", "Generic");
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+
 
 
             //Spells
@@ -131,7 +141,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddSpell(DrainLife, 234153,"NumPad1");
             CombatRoutine.AddSpell(HealthFunnel, 755,"NumPad2");
-            CombatRoutine.AddSpell(SummonInfernal, "NumPad5");
+            CombatRoutine.AddSpell(SummonInfernal, 1122,"NumPad5");
             CombatRoutine.AddSpell(SummonFelhunter, 691,"NumPad6");
             CombatRoutine.AddSpell(SummonSuccubus, 712,"NumPad7");
             CombatRoutine.AddSpell(SummonVoidwalker, 697,"NumPad8");
@@ -149,18 +159,62 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(darkSoulInstability, 113858);
 
             //Debuffs
-            CombatRoutine.AddDebuff(Immolate, 348);
+            CombatRoutine.AddDebuff(Immolate, 157736);
             CombatRoutine.AddDebuff(Havoc, 80240);
             CombatRoutine.AddDebuff(Eradication, 196412);
             CombatRoutine.AddDebuff(RoaringBlaze, 205184);
+
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
         }
 
         public override void Pulse()
         {
+        //    API.WriteLog("Havoc Time left  " + HavocTime);
         }
 
         public override void CombatPulse()
         {
+            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
+            if (!API.PlayerIsInCombat && InfernalWatch.IsRunning)
+            {
+                InfernalWatch.Stop();
+                InfernalWatch.Reset();
+                return;
+            }
+            if (!API.PlayerIsInCombat && HavocWatch.IsRunning)
+            {
+                HavocWatch.Stop();
+                HavocWatch.Reset();
+                return;
+            }
+            if (InfernalWatch.IsRunning && InfernalWatch.ElapsedMilliseconds >= 30000)
+            {
+                InfernalWatch.Stop();
+                InfernalWatch.Reset();
+                return;
+            }
+            if (HavocWatch.IsRunning && HavocWatch.ElapsedMilliseconds >= 10000)
+            {
+                HavocWatch.Stop();
+                HavocWatch.Reset();
+                return;
+            }
             //Cooldowns
             if (IsCooldowns)
             {
@@ -168,6 +222,7 @@ namespace HyperElk.Core
                 if (API.CanCast(SummonInfernal))
                 {
                     API.CastSpell(SummonInfernal);
+                    InfernalWatch.Start();
                     return;
                 }
                 //actions.cds+=/dark_soul_instability
@@ -178,15 +233,27 @@ namespace HyperElk.Core
                 }
             }
             // Drain Life
-            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
             {
                 API.CastSpell(DrainLife);
                 return;
             }
             // Health Funnel
-            if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+            if (HealthFunnelWatch.IsRunning && API.PetHealthPercent >= 70)
+            {
+                HealthFunnelWatch.Stop();
+                HealthFunnelWatch.Reset();
+                return;
+            }
+            if (HealthFunnelWatch.IsRunning && API.CanCast(HealthFunnel))
             {
                 API.CastSpell(HealthFunnel);
+                return;
+            }
+            // Health Funnel
+            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 8)
+            {
+                HealthFunnelWatch.Start();
                 return;
             }
             rotation();
@@ -197,12 +264,17 @@ namespace HyperElk.Core
         {
             //AOE
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
-            if (IsAOE && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetUnitInRangeCount >= AOEUnitNumber && NotChanneling)
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
             {
                 //actions.aoe=rain_of_fire,if=pet.infernal.active&(!cooldown.havoc.ready|active_enemies>3)
+               // if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && InfernalWatch.IsRunning && API.SpellISOnCooldown(Havoc) || API.TargetUnitInRangeCount > 3)
+               // {
+               //     API.CastSpell(RainOfFire);
+               //     return;
+               // }
 
                 //actions.aoe+=/soul_rot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns"))
+                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
                 {
                     API.CastSpell(SoulRot);
                     return;
@@ -215,18 +287,21 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/immolate,cycle_targets=1,if=remains<5&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
-
-                //actions.aoe+=/call_action_list,name=cds
-
-                //actions.aoe+=/havoc,cycle_targets=1,if=!(target=self.target)&active_enemies<4
-                if (API.TargetHasDebuff(Havoc) && SwitchTarget)
+                if (API.CanCast(Cataclysm) && TalentCataclysm)
                 {
-                    API.CastSpell("Switch Target");
+                    API.CastSpell(Cataclysm);
                     return;
                 }
+
                 if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc))
                 {
                     API.CastSpell(Havoc);
+                    HavocWatch.Start();
+                    if (SwitchTarget)
+                    {
+                        Thread.Sleep(150);
+                        API.CastSpell("Switch Target");
+                    }
                     return;
                 }
                 //actions.aoe+=/rain_of_fire
@@ -287,19 +362,22 @@ namespace HyperElk.Core
                 }
             }
             //SINGLE TARGET
-            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && API.PlayerCurrentCastTimeRemaining > 40 && IsRange && NotChanneling)
+            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && IsRange && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
             {
+                //# Executed every time the actor is available.
                 //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
-                if (SwitchTarget && API.TargetHasDebuff(Havoc))
-                {
-                    API.CastSpell("Switch Target");
-                    return;
-                }
-                if (API.TargetUnitInRangeCount >= 2 && API.CanCast(Havoc))
+                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount > 1)
                 {
                     API.CastSpell(Havoc);
+                    HavocWatch.Start();
+                    if (SwitchTarget)
+                    {
+                        Thread.Sleep(150);
+                        API.CastSpell("Switch Target");
+                    }
                     return;
                 }
+                
                 //actions+=/conflagrate,if=talent.roaring_blaze.enabled&debuff.roaring_blaze.remains<1.5
                 if (API.CanCast(Conflagrate) && !LastCastConflagrate && TalentRoaringBlaze && API.TargetDebuffRemainingTime(RoaringBlaze) <= 150)
                 {
@@ -417,18 +495,47 @@ namespace HyperElk.Core
                 }
 
                 //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
+                if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
+                {
+                    API.CastSpell(SoulFire);
+                    return;
+                }
 
                 //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && HavocWatch.IsRunning && DBTime <= HavocTime)
+                {
+                    API.CanCast(DecimatingBolt);
+                    return;
+                }
 
                 //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
+                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && HavocWatch.IsRunning && SCTime <= HavocTime)
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
 
                 //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
 
                 //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
-
+                if (API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
+                {
+                    API.CastSpell(ChaosBolt);
+                    return;
+                }
                 //actions.havoc+=/shadowburn
+                if (API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
+                {
+                    API.CastSpell(ShadowBurn);
+                    return;
+                }
 
                 //actions.havoc+=/incinerate,if=cast_time<havoc_remains
+                if (API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
+                {
+                    API.CastSpell(Incinerate);
+                    return;
+                }
 
             }
         }

@@ -11,6 +11,7 @@
 // v1.9 Bloodtalons fixed
 // v2.0 some small changes
 // v2.1 spell ids and alot of other stuff
+// v2.2 Bloodtalons fix 
 
 using System.Diagnostics;
 
@@ -128,7 +129,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v2.1");
+            API.WriteLog("Welcome to smartie`s Feral Druid v2.2");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -240,7 +241,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Bloodtalons?: " + Bloodytalons);
+            //API.WriteLog("Last Spell?: " + API.LastSpellCastInGame);
             // Stopwatch stop
             if (rakewatch.IsRunning && rakewatch.ElapsedMilliseconds > 4000)
             {
@@ -489,17 +490,17 @@ namespace HyperElk.Core
                         {
                             if (Bloodytalons)
                             {
-                                if (API.LastSpellCastInGame == Rake)
+                                if (API.LastSpellCastInGame == Rake && !rakewatch.IsRunning)
                                 {
                                     rakewatch.Start();
                                     //API.WriteLog("Starting Rakewatch.");
                                 }
-                                if (API.LastSpellCastInGame == Thrash)
+                                if ((API.LastSpellCastInGame == Thrash || API.LastSpellCastInGame == Thrashbear) && !thrashwatch.IsRunning)
                                 {
                                     thrashwatch.Start(); thrashwatch.Start();
                                     //API.WriteLog("Starting thrashwatch.");
                                 }
-                                if (API.LastSpellCastInGame == BrutalSlash)
+                                if (API.LastSpellCastInGame == BrutalSlash && !brutalwatch.IsRunning)
                                 {
                                     brutalwatch.Start();
                                     //API.WriteLog("Starting brutalwatch.");
@@ -599,17 +600,17 @@ namespace HyperElk.Core
                         {
                             if (Bloodytalons)
                             {
-                                if (API.LastSpellCastInGame == Rake)
+                                if (API.LastSpellCastInGame == Rake && !rakewatch.IsRunning)
                                 {
                                     rakewatch.Start();
                                     //API.WriteLog("Starting Rakewatch.");
                                 }
-                                if (API.LastSpellCastInGame == Thrash)
+                                if ((API.LastSpellCastInGame == Thrash || API.LastSpellCastInGame == Thrashbear) && !thrashwatch.IsRunning)
                                 {
                                     thrashwatch.Start(); thrashwatch.Start();
                                     //API.WriteLog("Starting thrashwatch.");
                                 }
-                                if (API.LastSpellCastInGame == BrutalSlash)
+                                if (API.LastSpellCastInGame == BrutalSlash && !brutalwatch.IsRunning)
                                 {
                                     brutalwatch.Start();
                                     //API.WriteLog("Starting brutalwatch.");
