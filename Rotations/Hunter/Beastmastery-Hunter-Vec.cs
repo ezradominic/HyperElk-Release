@@ -49,11 +49,11 @@ namespace HyperElk.Core
         private bool InRange => API.TargetRange <= 40;
         private float gcd => API.SpellGCDTotalDuration;
         private float BarbedShotCount => (API.PlayerHasBuff("246152", false, false) ? 1 : 0) + (API.PlayerHasBuff("246851", false, false) ? 1 : 0) + (API.PlayerHasBuff("217200", false, false) ? 1 : 0);
-        private float FocusRegen => 10f * (1f + API.PlayerGetHaste / 100f);
+        private float FocusRegen => 10f * (1f + API.PlayerGetHaste);
         private float RealFocusRegen => FocusRegen + BarbedShotCount * 2.5f;
         private float RealFocusTimeToMax => ((120f - API.PlayerFocus) / ((FocusRegen + BarbedShotCount * 2.5f) + (5 * API.PlayerBuffStacks(Aspect_of_the_Wild)))) * 100f;
-        private float Barrage_ExecuteTime => 300f / (1f + (API.PlayerGetHaste / 100f));
-        private float BarbedShotCooldown => 1200f / (1f + (API.PlayerGetHaste / 100f));
+        private float Barrage_ExecuteTime => 300f / (1f + (API.PlayerGetHaste));
+        private float BarbedShotCooldown => 1200f / (1f + (API.PlayerGetHaste));
         private float Barbed_Shot_Fractional => (API.SpellCharges(Barbed_Shot) * 100 + ((BarbedShotCooldown - API.SpellChargeCD(Barbed_Shot)) / (BarbedShotCooldown / 100)));
         private float Barbed_Shot_FullRechargeTime => (2 - API.SpellCharges(Barbed_Shot)) * BarbedShotCooldown + API.SpellCDDuration(Barbed_Shot);
         //Talents
@@ -113,6 +113,7 @@ namespace HyperElk.Core
         private string UseAMurderofCrows => AMurderofCrowsList[CombatRoutine.GetPropertyInt(A_Murder_of_Crows)];
         private string UseStampede => StampedeList[CombatRoutine.GetPropertyInt(Stampede)];
         private string UseBloodshed => BloodshedList[CombatRoutine.GetPropertyInt(Bloodshed)];
+        private bool BarbedShotPetInRange => CombatRoutine.GetPropertyBool("BarbedShot");
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
         private string UseRevivePet => combatList[CombatRoutine.GetPropertyInt(Revive_Pet)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
@@ -199,6 +200,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
 
+            CombatRoutine.AddProp("BarbedShot", "Barbed Shot", false, "Use Barbed Shot with pet in range", "Pet");
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", true, "Should the rotation try to ressurect/call your Pet", "Pet");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
@@ -327,7 +329,7 @@ namespace HyperElk.Core
                         API.CastSpell("Trinket2");
                     }
                     //st->add_action("barbed_shot,if=pet.main.buff.frenzy.up&pet.main.buff.frenzy.remains<=gcd");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && PetHasBuff(Frenzy) && API.PetBuffTimeRemaining(Frenzy) < 200)
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange&& InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount >0) && API.PlayerLevel >= 12 && PetHasBuff(Frenzy) && API.PetBuffTimeRemaining(Frenzy) < 200)
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
@@ -364,7 +366,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("barbed_shot,if=(cooldown.wild_spirits.remains>full_recharge_time|!covenant.night_fae)&(cooldown.bestial_wrath.remains<12*charges_fractional+gcd&talent.scent_of_blood|full_recharge_time<gcd&cooldown.bestial_wrath.remains)|target.time_to_die<9");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && (API.SpellCDDuration(Wild_Spirits) > Barbed_Shot_FullRechargeTime || PlayerCovenantSettings != "Night Fae") && ((API.SpellCDDuration(Bestial_Wrath) < (12 * Barbed_Shot_Fractional / 100 + gcd / 100) * 100 && Talent_ScentOfBlood || (API.SpellCharges(Barbed_Shot) >= 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath))) || API.TargetTimeToDie < 900))
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && (API.SpellCDDuration(Wild_Spirits) > Barbed_Shot_FullRechargeTime || PlayerCovenantSettings != "Night Fae") && ((API.SpellCDDuration(Bestial_Wrath) < (12 * Barbed_Shot_Fractional / 100 + gcd / 100) * 100 && Talent_ScentOfBlood || (API.SpellCharges(Barbed_Shot) >= 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath))) || API.TargetTimeToDie < 900))
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
@@ -425,7 +427,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("barbed_shot,if=buff.wild_spirits.up");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && API.TargetHasDebuff("Wild Mark"))
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && API.TargetHasDebuff("Wild Mark"))
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
@@ -444,7 +446,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("barbed_shot,target_if=min:dot.barbed_shot.remains,if=pet.main.buff.frenzy.up&pet.main.buff.frenzy.remains<=gcd");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && PetHasBuff(Frenzy) && API.PetBuffTimeRemaining(Frenzy) < 200)
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && PetHasBuff(Frenzy) && API.PetBuffTimeRemaining(Frenzy) < 200)
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
@@ -471,7 +473,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("barbed_shot,target_if=min:dot.barbed_shot.remains,if=full_recharge_time<gcd&cooldown.bestial_wrath.remains|cooldown.bestial_wrath.remains<12+gcd&talent.scent_of_blood");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && (API.SpellCharges(Barbed_Shot) == 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath) || API.SpellCDDuration(Bestial_Wrath) < 1200 + gcd && Talent_ScentOfBlood))
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && (API.SpellCharges(Barbed_Shot) == 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath) || API.SpellCDDuration(Bestial_Wrath) < 1200 + gcd && Talent_ScentOfBlood))
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
@@ -536,7 +538,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("kill_command,if=focus>cost+action.multishot.cost");
-                    if (API.CanCast(Kill_Command) && API.PlayerLevel >= 10 && InRange && API.PlayerFocus >= 30 + 40)
+                    if (API.CanCast(Kill_Command) && API.PlayerLevel >= 10 && InRange && API.PlayerFocus >= 30 + 40 - (RealFocusRegen*(gcd/100)))
                     {
                         API.CastSpell(Kill_Command);
                         return;
@@ -549,7 +551,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("barbed_shot,target_if=min:dot.barbed_shot.remains,if=target.time_to_die<9");
-                    if (API.CanCast(Barbed_Shot) && InRange && API.PlayerLevel >= 12 && API.TargetTimeToDie < 900)
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && API.TargetTimeToDie < 900)
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
