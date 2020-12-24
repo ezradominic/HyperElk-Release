@@ -36,11 +36,13 @@
         private string VanquishersHammer = "Vanquisher's Hammer";
         private string DivineToll = "Divine Toll";
         private string AshenHallow = "Ashen Hallow";
-        private string ShiningLightFree = "327510";
-        private string BlessingoftheSeasons = "328282";
+        private string BlessingofSpring = "Blessing of Spring";
+        private string BlessingofSummer = "Blessing of Summer";
+        private string BlessingofAutumn = "Blessing of Autumn";
+        private string BlessingofWinter = "Blessing of Winter";
         private string RingingClarity = "Ringing Clarity";
         private string RoyalDecree = "Royal Decree";
-
+        private string BlessingofProtection = "Blessing of Protection";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
@@ -89,59 +91,61 @@
             API.WriteLog("Welcome to Protection Paladin by Vec");
 
             //Spells
-            CombatRoutine.AddSpell(CrusaderStrike, "D1");
-            CombatRoutine.AddSpell(Judgment, "D2");
-            CombatRoutine.AddSpell(AvengersShield, "D2");
-            CombatRoutine.AddSpell(HammeroftheRighteous, "D1");
-            CombatRoutine.AddSpell(BlessedHammer, "D1");
-            CombatRoutine.AddSpell(Consecration, "D4");
-            CombatRoutine.AddSpell(ShieldoftheRighteous, "D3");
-            CombatRoutine.AddSpell(WordOfGlory, "F7");
-            CombatRoutine.AddSpell(FlashofLight, "Q");
-            CombatRoutine.AddSpell(Rebuke, "F");
+            CombatRoutine.AddSpell(Judgment,275779, "D2");
+            CombatRoutine.AddSpell(AvengersShield,31935, "D2");
+            CombatRoutine.AddSpell(HammeroftheRighteous,53595, "D1");
+            CombatRoutine.AddSpell(BlessedHammer,204019, "D1");
+            CombatRoutine.AddSpell(Consecration,26573, "D4");
+            CombatRoutine.AddSpell(ShieldoftheRighteous,53600, "D3");
+            CombatRoutine.AddSpell(WordOfGlory,85673, "F7");
+            CombatRoutine.AddSpell(FlashofLight,19750, "Q");
+            CombatRoutine.AddSpell(Rebuke,96231, "F");
 
-            CombatRoutine.AddSpell(CrusaderAura, "F5");
-            CombatRoutine.AddSpell(DevotionAura, "F6");
+            CombatRoutine.AddSpell(CrusaderAura,32223, "F5");
+            CombatRoutine.AddSpell(DevotionAura,465, "F6");
 
-            CombatRoutine.AddSpell(AvengingWrath, "F");
-            CombatRoutine.AddSpell(HammerofWrath, "D7");
+            CombatRoutine.AddSpell(AvengingWrath,31884, "F");
+            CombatRoutine.AddSpell(HammerofWrath,24275, "D7");
 
-            CombatRoutine.AddSpell(LayOnHands, "F8");
-            CombatRoutine.AddSpell(ArdentDefender, "S");
-            CombatRoutine.AddSpell(GuardianofAncientKings, "F9");
-            CombatRoutine.AddSpell(DivineShield, "F10");
-            CombatRoutine.AddSpell(HolyAvenger, "F11");
-            CombatRoutine.AddSpell(Seraphim, "F11");
-            CombatRoutine.AddSpell(MomentOfGlory, "D6");
-            CombatRoutine.AddSpell(SanctifiedWrath, "F1");
-            CombatRoutine.AddSpell(DivineToll, "F8");
-            CombatRoutine.AddSpell(AshenHallow, "F8");
-            CombatRoutine.AddSpell(BlessingoftheSeasons, "F8");
-            CombatRoutine.AddSpell(VanquishersHammer, "F8");
+            CombatRoutine.AddSpell(LayOnHands,633, "F8");
+            CombatRoutine.AddSpell(ArdentDefender,31850, "S");
+            CombatRoutine.AddSpell(GuardianofAncientKings,86659, "F9");
+            CombatRoutine.AddSpell(DivineShield,642, "F10");
+            CombatRoutine.AddSpell(HolyAvenger,105809, "F11");
+            CombatRoutine.AddSpell(Seraphim,152262, "F11");
+            CombatRoutine.AddSpell(MomentOfGlory,327193, "D6");
+            CombatRoutine.AddSpell(SanctifiedWrath,171648, "F1");
+            CombatRoutine.AddSpell(DivineToll, 304971, "F8");
+            CombatRoutine.AddSpell(AshenHallow, 316958, "F8");
+            CombatRoutine.AddSpell(BlessingofSpring, 328282, "F8");
+            CombatRoutine.AddSpell(BlessingofSummer, 328620, "F8");
+            CombatRoutine.AddSpell(BlessingofAutumn, 328622, "F8");
+            CombatRoutine.AddSpell(BlessingofWinter, 328281, "F8");
+            CombatRoutine.AddSpell(VanquishersHammer, 328204, "F8");
+            CombatRoutine.AddSpell(BlessingofProtection, 1022, "F11");
 
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
-            CombatRoutine.AddBuff(Consecration);
-            CombatRoutine.AddBuff(CrusaderAura);
-            CombatRoutine.AddBuff(DevotionAura);
-            CombatRoutine.AddBuff(AvengingWrath);
-            CombatRoutine.AddBuff(ShieldoftheRighteous);
-            CombatRoutine.AddBuff(DivinePurpose);
-            CombatRoutine.AddBuff(ArdentDefender);
-            CombatRoutine.AddBuff(GuardianofAncientKings);
-            CombatRoutine.AddBuff(DivineShield);
-            CombatRoutine.AddBuff(ShiningLight);
-            CombatRoutine.AddBuff(ShiningLightFree);
-            CombatRoutine.AddBuff(HolyAvenger);
-            CombatRoutine.AddBuff(VanquishersHammer);
-            CombatRoutine.AddBuff(Seraphim);
-            CombatRoutine.AddBuff(RoyalDecree);
+            CombatRoutine.AddBuff(Consecration,188370);
+            CombatRoutine.AddBuff(CrusaderAura,32223);
+            CombatRoutine.AddBuff(DevotionAura,465);
+            CombatRoutine.AddBuff(AvengingWrath,31884);
+            CombatRoutine.AddBuff(ShieldoftheRighteous,132403);
+            CombatRoutine.AddBuff(DivinePurpose, 223817);
+            CombatRoutine.AddBuff(ArdentDefender,31850);
+            CombatRoutine.AddBuff(GuardianofAncientKings,86659);
+            CombatRoutine.AddBuff(DivineShield,642);
+            CombatRoutine.AddBuff(ShiningLight,327510);
+            CombatRoutine.AddBuff(HolyAvenger,105809);
+            CombatRoutine.AddBuff(VanquishersHammer, 328204);
+            CombatRoutine.AddBuff(Seraphim, 152262);
+            CombatRoutine.AddBuff(RoyalDecree, 340147);
             //Debuffs
-            CombatRoutine.AddDebuff(Forbearance);
-            CombatRoutine.AddDebuff(Judgment);
-            CombatRoutine.AddDebuff(vengeful_shock);
+            CombatRoutine.AddDebuff(Forbearance,25771);
+            CombatRoutine.AddDebuff(Judgment,197277);
+            CombatRoutine.AddDebuff(vengeful_shock, 340007);
 
 
 
@@ -239,7 +243,7 @@
         }
         private void rotation()
         {
-            if (API.PlayerHealthPercent <= WordOfGloryLifePercent && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLightFree)) && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
+            if (API.PlayerHealthPercent <= WordOfGloryLifePercent && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLight)) && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
@@ -335,10 +339,28 @@
                 API.CastSpell(Judgment);
                 return;
             }
-            if (!API.SpellISOnCooldown(BlessingoftheSeasons) && PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
-                API.CastSpell(BlessingoftheSeasons);
-                return;
+                if (API.CanCast(BlessingofSpring))
+                {
+                    API.CastSpell(BlessingofSpring);
+                    return;
+                }
+                if (API.CanCast(BlessingofSummer))
+                {
+                    API.CastSpell(BlessingofSummer);
+                    return;
+                }
+                if (API.CanCast(BlessingofAutumn))
+                {
+                    API.CastSpell(BlessingofAutumn);
+                    return;
+                }
+                if (API.CanCast(BlessingofWinter))
+                {
+                    API.CastSpell(BlessingofWinter);
+                    return;
+                }
             }
             //std->add_action("vanquishers_hammer");
             if (!API.SpellISOnCooldown(VanquishersHammer) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
@@ -377,7 +399,7 @@
                 return;
             }
             //std->add_action(this, "Word of Glory", "if=buff.vanquishers_hammer.up");
-            if ((API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLightFree)) && API.PlayerHasBuff(VanquishersHammer) && API.CanCast(WordOfGlory, true, true) && PlayerLevel >= 7)
+            if ((API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLight)) && API.PlayerHasBuff(VanquishersHammer) && API.CanCast(WordOfGlory, true, true) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
@@ -403,7 +425,7 @@
                 return;
             }
             //std->add_action(this, "Word of Glory", "if=buff.shining_light_free.up&!covenant.necrolord");
-            if ((API.PlayerHasBuff(ShiningLightFree) || API.PlayerHasBuff(RoyalDecree)) && PlayerCovenantSettings != "Necrolord" && API.CanCast(WordOfGlory, true, true) && PlayerLevel >= 7)
+            if ((API.PlayerHasBuff(ShiningLight) || API.PlayerHasBuff(RoyalDecree)) && PlayerCovenantSettings != "Necrolord" && API.CanCast(WordOfGlory, true, true) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
