@@ -236,6 +236,11 @@ namespace HyperElk.Core
                     API.CastSpell("Icebound Fortitude");
                     return;
                 }
+                if (API.CanCast(Lichborne) && API.PlayerIsCC(CCList.FEAR_MECHANIC))
+                {
+                    API.CastSpell(Lichborne);
+                    return;
+                }
                 if (API.CanCast("Death Pact") && Talent_DeathPact  && API.PlayerHealthPercent <= DeathPactLifePercent)
                 {
                     API.CastSpell("Death Pact");
