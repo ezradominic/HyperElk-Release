@@ -31,6 +31,8 @@ namespace HyperElk.Core
         private string Sated = "Sated";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string Spellsteal = "Spellsteal";
+        private string RemoveCurse = "Remove Curse";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -42,6 +44,9 @@ namespace HyperElk.Core
         bool ArcaneOrb => API.PlayerIsTalentSelected(6, 2);
         bool SuperNova => API.PlayerIsTalentSelected(6, 3);
         bool Resonace => API.PlayerIsTalentSelected(4, 1);
+        //Spell Steal & Curse Removal
+        string[] SpellSpealBuffList = { "Bless Weapon", "Death's Embrace", "Turn to Stone", "Wonder Grow", "Stoneskin" };
+        string[] CurseList = { "Sintouched Anima", "Curse of Stone" };
         //CBProperties
         private int PBPercentProc => numbList[CombatRoutine.GetPropertyInt(PB)];
         private int IBPercentProc => numbList[CombatRoutine.GetPropertyInt(IB)];
@@ -89,7 +94,7 @@ namespace HyperElk.Core
             API.WriteLog("Presence of Mind(PoM) will by default cast when Arcane Power as less than 3 seconds left, otherwise, you can check box in settings to cast on CD");
             API.WriteLog("All Talents expect Ice Ward, Ring of Frost, Supernova and Mirror Image are supported");
             API.WriteLog("Legendary Support for Temporal Warp, Arcane Harmory and Arcane Bombardment added. If you have it please select it in the settings.");
-
+            API.WriteLog("Rotation supports Auto Spellsteal for certain buffs and auto Remove Curse for certian curses along with Mouseover Support for them, please create the correct Mouseover Marco if you wish to use it. If you DONT want it do that, please check Ignore in the keybinds for SpellSteal/Remove Curse");
             // API.WriteLog("Supported Essences are Memory of Lucids, Concerated Flame and Worldvein");
             //Buff
 
@@ -107,7 +112,12 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(AH, 90355);
             CombatRoutine.AddBuff(TW, 327351);
             CombatRoutine.AddBuff(AHL, 332769);
-          
+            CombatRoutine.AddBuff("Bless Weapon", 328288);
+            CombatRoutine.AddBuff("Death's Embrace", 333875);
+            CombatRoutine.AddBuff("Turn to Stone", 326607);
+            CombatRoutine.AddBuff("Wonder Grow", 328016);
+            CombatRoutine.AddBuff("Stoneskin", 322433);
+
             //Debuff
             CombatRoutine.AddDebuff("Nether Tempest", 114923);
             CombatRoutine.AddDebuff("Touch of the Magi", 210824);
@@ -115,6 +125,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Fatigued, 264689);
             CombatRoutine.AddDebuff(Exhaustion, 57723);
             CombatRoutine.AddDebuff(Sated, 57724);
+            CombatRoutine.AddDebuff("Sintouched Anima", 328494);
+            CombatRoutine.AddDebuff("Curse of Stone", 319603);
 
             //Spell
             CombatRoutine.AddSpell("Rune of Power", 116011, "None");
@@ -140,6 +152,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(MirrorsofTorment, 314793);
             CombatRoutine.AddSpell(Fleshcraft, 324631);
             CombatRoutine.AddSpell(TimeWarp, 80353);
+            CombatRoutine.AddSpell(Spellsteal, 30449);
+            CombatRoutine.AddSpell(RemoveCurse, 475);
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -149,9 +163,12 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(RemoveCurse + "MO");
+            CombatRoutine.AddMacro(Spellsteal + "MO");
 
             //Toggle
             CombatRoutine.AddToggle("TimeWarp");
+            CombatRoutine.AddToggle("Mouseover");
 
             //Prop
             CombatRoutine.AddProp(PB, PB, numbList, "Life percent at which " + PB + " is used, set to 0 to disable", "Defense", 5);
@@ -164,8 +181,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Arcane Power", "Use " + "Arcane Power", CDUsage, "Use " + "Arcane Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Rune of Power", "Use " + "Rune of Power", CDUsage, "Use " + "Rune of Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
-            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
 
 
 
@@ -189,10 +206,49 @@ namespace HyperElk.Core
                 API.CastSpell("Counterspell");
                 return;
             }
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            if (API.CanCast(Spellsteal) && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
             {
-                API.CastSpell("Healthstone");
-                return;
+                for (int i = 0; i < SpellSpealBuffList.Length; i++)
+                {
+                    if (API.TargetHasBuff(SpellSpealBuffList[i]))
+                    {
+                        API.CastSpell(Spellsteal);
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(Spellsteal) && IsMouseover && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            {
+                for (int i = 0; i < SpellSpealBuffList.Length; i++)
+                {
+                    if (API.MouseoverHasBuff(SpellSpealBuffList[i]))
+                    {
+                        API.CastSpell(Spellsteal + "MO");
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(RemoveCurse) && !API.PlayerCanAttackTarget && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            {
+                for (int i = 0; i < CurseList.Length; i++)
+                {
+                    if (API.TargetHasDebuff(CurseList[i]))
+                    {
+                        API.CastSpell(RemoveCurse);
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(RemoveCurse) && !API.PlayerCanAttackMouseover && IsMouseover && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
+            {
+                for (int i = 0; i < CurseList.Length; i++)
+                {
+                    if (API.MouseoverHasDebuff(CurseList[i]))
+                    {
+                        API.CastSpell(RemoveCurse + "MO");
+                        return;
+                    }
+                }
             }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
             {
@@ -229,7 +285,7 @@ namespace HyperElk.Core
                 API.CastSpell(TimeWarp);
                 return;
             }
-            if (API.PlayerItemCanUse(ManaGem) && API.PlayerItemRemainingCD(ManaGem) == 0 && API.PlayerMana < 90 && API.PlayerIsCasting(false) && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
+            if (API.PlayerItemCanUse(ManaGem) && API.PlayerItemRemainingCD(ManaGem) == 0 && API.PlayerMana < 90 && !API.PlayerIsCasting(true) && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
             {
                 API.CastSpell(ManaGem);
                 return;
@@ -356,12 +412,7 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Barrage");
                 return;
             }
-            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (Burn || Conserve) && !API.PlayerIsMoving)
-            {
-                API.CastSpell("Arcane Blast");
-                return;
-            }
-            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && RuleofThrees && API.PlayerHasBuff("Rule of Threes") && (Burn || Conserve) && !API.PlayerIsMoving)
+            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (Burn || Conserve) && (RuleofThrees && API.PlayerHasBuff("Rule of Threes") || !RuleofThrees) && !API.PlayerIsMoving)
             {
                 API.CastSpell("Arcane Blast");
                 return;
