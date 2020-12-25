@@ -47,9 +47,23 @@ namespace HyperElk.Core
         private string BearForm = "Bear Form";
         private string MoonkinForm = "Moonkin Form";
         private string PhialofSerenity = "Phial of Serenity";
-        private string SpiritualHealingPotion = "Spiritual Healing Potion"; 
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string Trinket1 = "Trinket1";
         private string Trinket2 = "Trinket2";
+        private string Mana = "Mana";
+        private string FrenziedRegeneration = "Frenzied Regeneration";
+        private string Ironfur = "Ironfur";
+        private string Trinket = "Trinket";
+        private string SouloftheForest = "Soul of the Forest";
+        private string CenarionWardPlayer = "Cenarian Ward Player";
+        private string Party1 = "party1";
+        private string Party2 = "party2";
+        private string Party3 = "party3";
+        private string Party4 = "party4";
+        private string Player = "player";
+        private string PartySwap = "Target Swap";
+        private string LifebloomL = "LifebloomL";
+        private string TargetChange = "Target Change";
 
 
         //Talents
@@ -78,7 +92,11 @@ namespace HyperElk.Core
         //CBProperties
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
-        int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40};
+        int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40 };
+        public string[] LegendaryList = new string[] { "None", "Verdant Infustion", "The Dark Titan's Lesson" };
+        int PlayerHealth => API.TargetHealthPercent;
+        string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
+        string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
 
         private static readonly Stopwatch player = new Stopwatch();
         private static readonly Stopwatch party1 = new Stopwatch();
@@ -87,6 +105,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch party4 = new Stopwatch();
         private static readonly Stopwatch LifeBloomwatch = new Stopwatch();
 
+        private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
@@ -94,101 +113,60 @@ namespace HyperElk.Core
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
 
         private int FlourishRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(p,buff));
-        private int FlourishPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(p,buff));
-        private int FlourishTrackingRej(string buff) => API.PlayerIsInRaid ? FlourishRaidTracking(Rejuvenation) : FlourishPartyTracking(Rejuvenation);
+        private int FlourishPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p));
+       // private int FlourishTracking(string buff) => API.PlayerIsInRaid ? FlourishRaidTracking(Rejuvenation) : FlourishPartyTracking(Rejuvenation);
 
         bool ChannelingCov => API.CurrentCastSpellID("player") == 323764;
         bool ChannelingTranq => API.CurrentCastSpellID("player") == 740;
 
+        private bool TrinketAoE => UnitBelowHealthPercent(TrinketLifePercent) >= AoENumber;
+        private bool ConvokeAoE => UnitBelowHealthPercent(ConvLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !API.PlayerIsMoving && !ChannelingTranq;
         private bool WGAoE => UnitBelowHealthPercent(WGLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !API.PlayerIsMoving;
         private bool ToLAoE => UnitBelowHealthPercent(ToLLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
-        private bool TranqAoE => UnitBelowHealthPercent(TranqLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && !API.PlayerIsMoving;
-        private bool FloruishTracking => FlourishTrackingRej(Rejuvenation) >= AoENumber;
+        private bool TranqAoE => UnitBelowHealthPercent(TranqLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingCov;
+        private bool FloruishRejTracking => FlourishPartyTracking(Rejuvenation) >= AoENumber;
+        private bool FlourishRegTracking => FlourishPartyTracking(Regrowth) >= 1;
+        private bool FlourishLifeTracking => FlourishPartyTracking(Lifebloom) >= 1;
+        private bool FlourishWGTracking => FlourishPartyTracking(WildGrowth) >= AoENumber;
+        private bool FlourishTranqTracking => FlourishPartyTracking(Tranquility) >= AoENumber;
         private bool FloruishAoE => UnitBelowHealthPercent(FloruishLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
-        private bool CWCheck => CenarionWardTalent && API.TargetHealthPercent <= CWLifePercent && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool CWCheck => CenarionWardTalent && (API.TargetRoleSpec == API.TankRole && API.TargetHealthPercent <= CWTankLifePercent || API.TargetHealthPercent <= CWPlayerLifePercent) && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool NatureSwiftCheck => API.TargetHealthPercent <= NSLifePercent && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool OvergrowthCheck => API.TargetHealthPercent <= OvergrowthLifePercent && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving) && (!API.PlayerHasBuff(Lifebloom) || !API.PlayerHasBuff(WildGrowth) ||!API.PlayerHasBuff(Rejuvenation) || !API.PlayerHasBuff(Regrowth));
+        private bool InnervateCheck => API.PlayerMana <= ManaPercent && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool IBCheck => API.TargetHealthPercent <= IronBarkLifePercent && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool NourishCheck => NourishTalent && API.TargetHealthPercent <= NourishLifePercent && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving;
         private bool RegrowthCheck => (API.PlayerHasBuff(Clear) && API.TargetHealthPercent <= 90 ||API.TargetHealthPercent <= RegrowthLifePercent) && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving;
-        private bool RejCheck => API.TargetHealthPercent <= RejLifePercent && !API.PlayerCanAttackTarget && (!API.TargetHasBuff(Rejuvenation) && !GerminationTalent || API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT) || !API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT)) && !ChannelingCov && !ChannelingTranq && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving);
-        private bool SwiftCheck => API.TargetHealthPercent <= SwiftmendLifePercent && !API.PlayerCanAttackTarget && API.SpellCharges(Swiftmend) > 0 && (API.TargetHasBuff(Rejuvenation) || API.TargetHasBuff(Regrowth) || API.TargetHasBuff(WildGrowth)) && (!API.PlayerIsMoving || API.PlayerIsMoving);
-        // (PhotosynthesisTalent && API.TargetRoleSpec == 998 || API.TargetRoleSpec == 999) &&
-        private bool LifeBloomCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Lifebloom) && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
-        private bool FloruishCheck => FloruishTracking && !API.PlayerCanAttackTarget && FloruishAoE && FlourishTalent;
+        private bool RejCheck => API.TargetHealthPercent <= RejLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Rejuvenation) && (!GerminationTalent || API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT) && API.TargetHealthPercent <= RejGermLifePercent) && !ChannelingCov && !ChannelingTranq && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool SwiftCheck => API.TargetHealthPercent <= SwiftmendLifePercent && !API.PlayerCanAttackTarget && API.SpellCharges(Swiftmend) > 0 && (API.TargetHasBuff(Rejuvenation) || API.TargetHasBuff(Regrowth) || API.TargetHasBuff(WildGrowth)) && (!API.PlayerIsMoving || API.PlayerIsMoving) && NotChanneling && !ChannelingCov && !ChannelingTranq;
+        private bool LifeBloomCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Lifebloom) && (PhotosynthesisTalent && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000)) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool LifeBloomLegCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole);
+        private bool FloruishCheck => (FloruishRejTracking && FlourishLifeTracking && FlourishRegTracking || FlourishWGTracking && FlourishTranqTracking) && !API.PlayerCanAttackTarget && FloruishAoE && FlourishTalent;
         private bool KyrianCheck => PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingTranq;
-        private bool NightFaeCheck => PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !ChannelingCov && !ChannelingTranq;
+        private bool NightFaeCheck => PlayerCovenantSettings == "Night Fae" && ConvokeAoE;
         private bool NecrolordCheck => PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingCov && !ChannelingTranq;
         private bool VenthyrCheck => PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingCov && !ChannelingTranq;
         private bool Forms => !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(MoonkinForm) || !API.PlayerHasBuff(Soulshape);
-        private bool WGParty(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= WGLifePercent && units.Count(p => API.UnitHealthPercent(p) <= WGLifePercent) >= 3;
-        }
-
-        private bool WGParty1 => WGParty(1);
-        private bool WGRaid(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= WGLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= WGLifePercent) >= 3;
-        }
-
-        private bool WGRaid1 => WGRaid(1);
-
-        private bool FloruishParty(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= FloruishLifePercent && units.Count(p => API.UnitHealthPercent(p) <= FloruishLifePercent) >= 3;
-        }
-
-        private bool FloruishParty1 => FloruishParty(1);
-        private bool FloruishRaid(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= FloruishLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= FloruishLifePercent) >= 3;
-        }
-
-        private bool FloruishRaid1 => FloruishRaid(1);
-
-        private bool ToLParty(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= ToLLifePercent && units.Count(p => API.UnitHealthPercent(p) <= ToLLifePercent) >= 3;
-        }
-
-        private bool ToLParty1 => ToLParty(1);
-        private bool ToLRaid(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= ToLLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= ToLLifePercent) >= 3;
-        }
-
-        private bool ToLRaid1 => ToLRaid(1);
-
-        private bool TranqParty(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= TranqLifePercent && units.Count(p => API.UnitHealthPercent(p) <= TranqLifePercent) >= 3;
-        }
-
-        private bool TranqParty1 => TranqParty(1);
-        private bool TranqRaid(int i)
-        {
-
-            return API.UnitHealthPercent(units[i]) <= TranqLifePercent && raidunits.Count(p => API.UnitHealthPercent(p) <= TranqLifePercent) >= 3;
-        }
-
-        private bool TranqRaid1 => TranqRaid(1);
-
-
+        private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool IsAutoSwap => CombatRoutine.GetPropertyBool("Auto Swap");
         private bool IsOOC => CombatRoutine.GetPropertyBool("OOC");
+        private bool PlayerSwap => API.UnitHealthPercent(Player) <= PartySwapPercent && API.TargetHealthPercent >= PartySwapPercent;
+        private bool Party1Swap => API.UnitHealthPercent(Party1) <= PartySwapPercent && API.TargetHealthPercent >= PartySwapPercent;
+        private bool Party2Swap => API.UnitHealthPercent(Party2) <= PartySwapPercent && API.TargetHealthPercent >= PartySwapPercent;
+        private bool Party3Swap => API.UnitHealthPercent(Party3) <= PartySwapPercent && API.TargetHealthPercent >= PartySwapPercent;
+        private bool Party4Swap => API.UnitHealthPercent(Party4) <= PartySwapPercent && API.TargetHealthPercent >= PartySwapPercent;
+        private int FrenziedRegenerationLifePercent => numbList[CombatRoutine.GetPropertyInt(FrenziedRegeneration)];
+        private int IronfurLifePercent => numbList[CombatRoutine.GetPropertyInt(Ironfur)];
         private int BarkskinLifePercent => numbList[CombatRoutine.GetPropertyInt(Barkskin)];
+        private int BearFormLifePercent => numbList[CombatRoutine.GetPropertyInt(BearForm)];
         private int RenewalLifePercent => numbList[CombatRoutine.GetPropertyInt(Renewal)];
         private int RejLifePercent => numbList[CombatRoutine.GetPropertyInt(Rejuvenation)];
+        private int RejGermLifePercent => numbList[CombatRoutine.GetPropertyInt(GerminationHoT)];
         private int RegrowthLifePercent => numbList[CombatRoutine.GetPropertyInt(Regrowth)];
         private int LifebloomLifePercent => numbList[CombatRoutine.GetPropertyInt(Lifebloom)];
-        private int CWLifePercent => numbList[CombatRoutine.GetPropertyInt(CenarionWard)];
+        private int CWTankLifePercent => numbList[CombatRoutine.GetPropertyInt(CenarionWard)];
+        private int CWPlayerLifePercent => numbList[CombatRoutine.GetPropertyInt(CenarionWardPlayer)];
         private int IronBarkLifePercent => numbList[CombatRoutine.GetPropertyInt(Ironbark)];
         private int NourishLifePercent => numbList[CombatRoutine.GetPropertyInt(Nourish)];
         private int SwiftmendLifePercent => numbList[CombatRoutine.GetPropertyInt(Swiftmend)];
@@ -198,18 +176,25 @@ namespace HyperElk.Core
         private int TranqLifePercent => numbList[CombatRoutine.GetPropertyInt(Tranquility)];
         private int ToLLifePercent => numbList[CombatRoutine.GetPropertyInt(TreeofLife)];
         private int NSLifePercent => numbList[CombatRoutine.GetPropertyInt(Natureswiftness)];
+        private int ConvLifePercent => numbList[CombatRoutine.GetPropertyInt(Convoke)];
+        private int TrinketLifePercent => numbList[CombatRoutine.GetPropertyInt(Trinket)];
+        private int ManaPercent => numbList[CombatRoutine.GetPropertyInt(Innervate)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
+        private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
         private int AoENumber => numbPartyList[CombatRoutine.GetPropertyInt(AoE)];
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
+        private int PartySwapPercent => numbList[CombatRoutine.GetPropertyInt(PartySwap)];
+        private int TargetChangePercent => numbList[CombatRoutine.GetPropertyInt(TargetChange)];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private string UseHeart => CDUsage[CombatRoutine.GetPropertyInt(HeartoftheWild)];
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
 
         //General
-        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
-        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && TrinketAoE);
+        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && TrinketAoE);
         private int Level => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 40;
         private bool IsMelee => API.TargetRange < 6;
@@ -226,12 +211,13 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Resto Druid by Ryu";
-            API.WriteLog("Welcome to Resto Druid by Ryu");
-            API.WriteLog("BETA ROTATION : Some things are still missing. Please post feedback in Druid Channel. Have not fully added defenseive  Innervate will need /break or /break2 macro to use. Cov is supported via Cooldown toggle or break marcos");
+            API.WriteLog("Welcome to Resto Druid v1.2 by Ryu");
+            API.WriteLog("BETA ROTATION : Some things are still missing. Please post feedback in Druid Channel. Have not fully added defenseive  Innervate will need /break or /break2 macro to use. Cov is supported via Cooldown toggle or break marcos -- Flourish will only work for Party, not for raid currently");
            // API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
             API.WriteLog("If you want to use Effloresence, you need to use an @Cursor macro with /xxx break or break2 whereas xxx is your addon name(First five only) for it to work");
-            API.WriteLog("Lifebloom will cast every 15 seconds on whichever target you are currently targeting.");
-            API.WriteLog("Target Spec" + API.TargetRoleSpec);
+            API.WriteLog("Please us a /cast [target=player] macro for Innervate to work properly or it will cast on your current target");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's's in the spell book. Enable it the settings and set your party swap health perecent and target check percent. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This works ONLY for party at this time.");
+            API.WriteLog("Special Thanks to Ajax and Goose/Zero for testing");
 
             //Buff
             CombatRoutine.AddBuff(Rejuvenation, 774);
@@ -245,7 +231,11 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(MoonkinForm, 24858);
             CombatRoutine.AddBuff(TravelForm, 783);
             CombatRoutine.AddBuff(Soulshape, 310143);
-
+            CombatRoutine.AddBuff(FrenziedRegeneration, 22842);
+            CombatRoutine.AddBuff(HeartoftheWild, 108291);
+            CombatRoutine.AddBuff(Tranquility, 157982);
+            CombatRoutine.AddBuff(SouloftheForest, 114108);
+            CombatRoutine.AddBuff(LifebloomL, 188550);
 
             //Debuff
             CombatRoutine.AddDebuff(Sunfire, 164815);
@@ -280,6 +270,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Overgrowth, 203651);
             CombatRoutine.AddSpell(Flourish, 197721);
             CombatRoutine.AddSpell(Renewal, 108238);
+            CombatRoutine.AddSpell(TravelForm, 783);
+            CombatRoutine.AddSpell(FrenziedRegeneration, 22842);
+            CombatRoutine.AddSpell(Ironfur, 192081);
+            CombatRoutine.AddSpell(HeartoftheWild, 319454);
+            CombatRoutine.AddSpell(LifebloomL, 188550);
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -288,31 +283,49 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
+            CombatRoutine.AddMacro(Player);
+            CombatRoutine.AddMacro(Party1);
+            CombatRoutine.AddMacro(Party2);
+            CombatRoutine.AddMacro(Party3);
+            CombatRoutine.AddMacro(Party4);
 
             //Prop
-            // CombatRoutine.AddProp("Auto Swap", "Auto Swap", false, "Use Auto Swap Logic", "Generic");
-            CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", numbList, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(Renewal, Renewal + " Life Percent", numbList, "Life percent at which" + Renewal + "is used, if talented, set to 0 to disable", "Defense", 8);
+            CombatRoutine.AddProp("Auto Swap", "Auto Swap", false, "Use Auto Swap Logic", "Generic");
+            CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
+            CombatRoutine.AddProp("AutoForm", "AutoForm", false, "Will auto switch forms", "Generic");
+            CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", numbList, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 25);
+            CombatRoutine.AddProp(Renewal, Renewal + " Life Percent", numbList, "Life percent at which" + Renewal + "is used, if talented, set to 0 to disable", "Defense", 45);
+            CombatRoutine.AddProp(FrenziedRegeneration, FrenziedRegeneration + " Life Percent", numbList, "Life percent at which" + FrenziedRegeneration + "is used, set to 0 to disable", "Defense", 60);
+            CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", numbList, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 90);
+            CombatRoutine.AddProp(BearForm, BearForm + " Life Percent", numbList, "Life percent at which rota will go into" + BearForm + "set to 0 to disable", "Defense", 10);
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
+            CombatRoutine.AddProp(HeartoftheWild, "Use " + HeartoftheWild, CDUsage, "Use " + HeartoftheWild + "On Cooldown, with Cooldowns, Not Used", "Cooldowns", 1);
 
+            CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
+            CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
-            CombatRoutine.AddProp(Rejuvenation, Rejuvenation + " Life Percent", numbList, "Life percent at which " + Rejuvenation + " is used, set to 0 to disable", "Healing", 10);
-            CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", numbList, "Life percent at which " + Regrowth + " is used, set to 0 to disable", "Healing", 11);
-            CombatRoutine.AddProp(Lifebloom, Lifebloom + " Life Percent", numbList, "Life percent at which " + Lifebloom + " is used, set to 0 to disable", "Healing", 12);
-            CombatRoutine.AddProp(CenarionWard, CenarionWard + " Life Percent", numbList, "Life percent at which " + CenarionWard + " is used, if talented, set to 0 to disable", "Healing", 13);
-            CombatRoutine.AddProp(Ironbark, Ironbark + " Life Percent", numbList, "Life percent at which " + Ironbark + " is used, set to 0 to disable", "Healing", 14);
-            CombatRoutine.AddProp(Nourish, Nourish + " Life Percent", numbList, "Life percent at which " + Nourish + " is used, set to 0 to disable", "Healing", 15);
-            CombatRoutine.AddProp(Swiftmend, Swiftmend + " Life Percent", numbList, "Life percent at which " + Swiftmend + " is used, set to 0 to disable", "Healing", 16);
-            CombatRoutine.AddProp(Natureswiftness, Natureswiftness + " Life Percent", numbList, "Life percent at which " + Natureswiftness + " is used, set to 0 to disable", "Healing", 16);
-            CombatRoutine.AddProp(Overgrowth, Overgrowth + " Life Percent", numbList, "Life percent at which " + Overgrowth + " is used, set to 0 to disable", "Healing", 17);
-            CombatRoutine.AddProp(Flourish, Flourish + " Life Percent", numbList, "Life percent at which " + Flourish + " is used when AoE Number of members are at and have the HoTs needed, set to 0 to disable", "Healing", 18);
-            CombatRoutine.AddProp(WildGrowth, WildGrowth + " Life Percent", numbList, "Life percent at which " + WildGrowth + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 19);
+            CombatRoutine.AddProp(Rejuvenation, Rejuvenation + " Life Percent", numbList, "Life percent at which " + Rejuvenation + " is used, set to 0 to disable", "Healing", 95);
+            CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", numbList, "Life percent at which " + Regrowth + " is used, set to 0 to disable", "Healing", 85);
+            CombatRoutine.AddProp(Lifebloom, Lifebloom + " Life Percent", numbList, "Life percent at which " + Lifebloom + " is used, set to 0 to disable", "Healing", 100);
+            CombatRoutine.AddProp(CenarionWard, CenarionWard + " Life Percent", numbList, "Life percent at which " + CenarionWard + " is used for the tank, if talented, set to 0 to disable", "Healing", 95);
+            CombatRoutine.AddProp(CenarionWardPlayer, CenarionWard + " Life Percent", numbList, "Life percent at which " + CenarionWard + " is used for other players, if talented, set to 0 to disable", "Healing", 95);
+            CombatRoutine.AddProp(Ironbark, Ironbark + " Life Percent", numbList, "Life percent at which " + Ironbark + " is used, set to 0 to disable", "Healing", 25);
+            CombatRoutine.AddProp(Nourish, Nourish + " Life Percent", numbList, "Life percent at which " + Nourish + " is used, set to 0 to disable", "Healing", 55);
+            CombatRoutine.AddProp(Swiftmend, Swiftmend + " Life Percent", numbList, "Life percent at which " + Swiftmend + " is used, set to 0 to disable", "Healing", 65);
+            CombatRoutine.AddProp(Natureswiftness, Natureswiftness + " Life Percent", numbList, "Life percent at which " + Natureswiftness + " is used, set to 0 to disable", "Healing", 45);
+            CombatRoutine.AddProp(Overgrowth, Overgrowth + " Life Percent", numbList, "Life percent at which " + Overgrowth + " is used, set to 0 to disable", "Healing", 75);
+            CombatRoutine.AddProp(Innervate, Innervate + " Mana Percent", numbList, "Mana percent at which " + Innervate + " is used, set to 0 to disable", "Healing", 85);
+            CombatRoutine.AddProp(Flourish, Flourish + " Life Percent", numbList, "Life percent at which " + Flourish + " is used when AoE Number of members are at and have the HoTs needed, set to 0 to disable", "Healing", 45);
+            CombatRoutine.AddProp(Convoke, Convoke + " Life Percent", numbList, "Life percent at which " + Convoke + " is used when AoE Number of members are at and have the HoTs needed, set to 0 to disable", "Healing", 55);
+            CombatRoutine.AddProp(WildGrowth, WildGrowth + " Life Percent", numbList, "Life percent at which " + WildGrowth + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 65);
             CombatRoutine.AddProp(Tranquility, Tranquility + " Life Percent", numbList, "Life percent at which " + Tranquility + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 20);
-            CombatRoutine.AddProp(TreeofLife, TreeofLife + " Life Percent", numbList, "Life percent at which " + TreeofLife + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 19);
+            CombatRoutine.AddProp(TreeofLife, TreeofLife + " Life Percent", numbList, "Life percent at which " + TreeofLife + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 45);
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
+            CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
+            CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " should be used, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
 
@@ -320,26 +333,72 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm) && Forms && (IsOOC || API.PlayerIsInCombat))
+            if (!API.PlayerIsMounted && (!API.PlayerHasBuff(TravelForm) || !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(MoonkinForm) || !API.PlayerHasBuff(Soulshape)) && (IsOOC || API.PlayerIsInCombat))
             {
-                if (API.CanCast(Convoke) && NightFaeCheck)
+                if (API.CanCast(Convoke) && NightFaeCheck && InRange)
                 {
                     API.CastSpell(Convoke);
+              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
-                if (API.CanCast(AdaptiveSwarm) && NecrolordCheck)
+                if (API.CanCast(AdaptiveSwarm) && NecrolordCheck && InRange)
                 {
                     API.CastSpell(AdaptiveSwarm);
                     return;
                 }
-                if (API.CanCast(RavenousFrenzy) && VenthyrCheck)
+                if (API.CanCast(RavenousFrenzy) && VenthyrCheck && InRange)
                 {
                     API.CastSpell(RavenousFrenzy);
                     return;
                 }
+                if (API.CanCast(Innervate) && InnervateCheck && InRange)
+                {
+                    API.CastSpell(Innervate);
+                    return;
+                }
+                if (API.CanCast(Overgrowth) && OvergrowthCheck && InRange)
+                {
+                    API.CastSpell(Overgrowth);
+                    return;
+                }
+                if (API.CanCast(Natureswiftness) && NatureSwiftCheck && InRange)
+                {
+                    API.CastSpell(Natureswiftness);
+                    return;
+                }    
                 if (API.CanCast(TreeofLife) && TreeofLifeTalent && InRange && ToLAoE)
                 {
                     API.CastSpell(TreeofLife);;
+                    return;
+                }
+                if (API.CanCast(Lifebloom) && InRange && LifeBloomCheck)
+                {
+                    API.CastSpell(Lifebloom);
+             //       API.WriteLog("Target Spec : " + API.TargetRoleSpec);
+              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    LifeBloomwatch.Reset();
+                    LifeBloomwatch.Start();
+                    return;
+                }
+                if (API.CanCast(LifebloomL) && InRange && LifeBloomLegCheck)
+                {
+                    API.CastSpell(LifebloomL);
+                    //       API.WriteLog("Target Spec : " + API.TargetRoleSpec);
+                    //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    LifeBloomwatch.Reset();
+                    LifeBloomwatch.Start();
+                    return;
+                }
+                if (API.CanCast(WildGrowth) && InRange && WGAoE || API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InRange)
+                {
+                    API.CastSpell(WildGrowth);
+             //       API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    return;
+                }
+                if (API.CanCast(Tranquility) && InRange && TranqAoE)
+                {
+                    API.CastSpell(Tranquility);
+              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Flourish) && InRange && FloruishCheck)
@@ -347,61 +406,93 @@ namespace HyperElk.Core
                     API.CastSpell(Flourish);
                     return;
                 }
-                if (API.CanCast(Lifebloom) && InRange && LifeBloomCheck)
-                {
-                    API.CastSpell(Lifebloom);
-                    API.WriteLog("Target Spec : " + API.TargetRoleSpec);
-                    LifeBloomwatch.Reset();
-                    LifeBloomwatch.Start();
-                    return;
-                }
-                if (API.CanCast(WildGrowth) && InRange && WGAoE)
-                {
-                    API.CastSpell(WildGrowth);
-                    return;
-                }
-                if (API.CanCast(Tranquility) && InRange && TranqAoE)
-                {
-                    API.CastSpell(Tranquility);
-                    return;
-                }
                 if (API.CanCast(Ironbark) && InRange && IBCheck)
                 {
                     API.CastSpell(Ironbark);
-                    API.WriteLog("Target Health % " + API.TargetHealthPercent);
+              //      API.WriteLog("Target Health % " + API.TargetHealthPercent);
+              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(CenarionWard) && InRange && CWCheck)
                 {
                     API.CastSpell(CenarionWard);
-                    API.WriteLog("Target Health % " + API.TargetHealthPercent);
+               //     API.WriteLog("Target Health % " + API.TargetHealthPercent);
+               //     API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Swiftmend) && InRange && SwiftCheck)
                 {
                     API.CastSpell(Swiftmend);
-                    API.WriteLog("Target Health % " + API.TargetHealthPercent);
+               //     API.WriteLog("Target Health % " + API.TargetHealthPercent);
+               //     API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Rejuvenation) && InRange && RejCheck)
                 {
                     API.CastSpell(Rejuvenation);
-                    API.WriteLog("Target Health % " + API.TargetHealthPercent);
-                    API.WriteLog("Target Spec : " + API.TargetRoleSpec);
                     return;
                 }
                 if (API.CanCast(Regrowth) && InRange && RegrowthCheck)
                 {
                     API.CastSpell(Regrowth);
-                    API.WriteLog("Target Health % " + API.TargetHealthPercent);
-                    API.WriteLog("Target Spec :  " + API.TargetRoleSpec);
+             //       API.WriteLog("Target Health % " + API.TargetHealthPercent);
+             //       API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Nourish) && InRange && NourishCheck)
                 {
                     API.CastSpell(Nourish);
-                    API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                  //  API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
+                }
+                //DPS
+                if (API.CanCast(HeartoftheWild) && HeartoftheWildTalent && !ChannelingCov && !ChannelingTranq && (UseHeart == "With Cooldowns" && IsCooldowns || UseHeart == "On Cooldown"))
+                {
+                    API.CastSpell(HeartoftheWild);
+                    return;
+                }
+                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(Wrath);
+                    return;
+                }
+                if (API.CanCast(Moonfire) && InRange && !API.TargetHasDebuff(Moonfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(Moonfire);
+                    return;
+                }
+                if (API.CanCast(Sunfire) && InRange && !API.TargetHasDebuff(Sunfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(Sunfire);
+                    return;
+                }
+                //Auto Target
+                if (IsAutoSwap)
+                {
+                    if (API.PlayerIsInGroup)
+                    {
+                        for (int i = 0; i < units.Length; i++)
+                        {
+                            if (API.UnitHealthPercent(units[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                                API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                                return;
+                            }
+                        }
+                    }
+                    if (API.PlayerIsInRaid)
+                    {
+                        for (int i = 0; i < raidunits.Length; i++)
+                        {
+                            if (API.UnitHealthPercent(raidunits[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -412,9 +503,34 @@ namespace HyperElk.Core
                 API.CastSpell(Fleshcraft);
                 return;
             }
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            if (API.PlayerHealthPercent <= BarkskinLifePercent && Level >= 24 && API.CanCast(Barkskin))
             {
-                API.CastSpell("Healthstone");
+                API.CastSpell(Barkskin);
+                return;
+            }
+            if (API.CanCast(Renewal) && API.PlayerHealthPercent <= RenewalLifePercent && RenewalTalent)
+            {
+                API.CastSpell(Renewal);
+                return;
+            }
+            if (API.PlayerHealthPercent <= FrenziedRegenerationLifePercent && API.PlayerRage >= 10 && API.CanCast(FrenziedRegeneration) && API.PlayerHasBuff(BearForm) && GuardianAffintiy)
+            {
+                API.CastSpell(FrenziedRegeneration);
+                return;
+            }
+            if (API.PlayerHealthPercent <= IronfurLifePercent && API.PlayerRage >= 40 && API.CanCast(Ironfur) && GuardianAffintiy && API.PlayerHasBuff(BearForm))
+            {
+                API.CastSpell(Ironfur);
+                return;
+            }
+            if (API.PlayerHealthPercent <= BearFormLifePercent && Level >= 8 && AutoForm && API.CanCast(BearForm) && !API.PlayerHasBuff(BearForm))
+            {
+                API.CastSpell(BearForm);
+                return;
+            }
+            if (API.PlayerHealthPercent > BearFormLifePercent && BearFormLifePercent != 0 && API.CanCast(BearForm) && API.PlayerHasBuff(BearForm) && AutoForm)
+            {
+                API.CastSpell(BearForm);
                 return;
             }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
@@ -427,33 +543,27 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1 && !ChannelingCov && !ChannelingTranq && NotChanneling && InRange)
             {
                 API.CastSpell("Trinket1");
             }
-            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2 && !ChannelingCov && !ChannelingTranq && NotChanneling && InRange) 
             {
                 API.CastSpell("Trinket2");
-            }
-            if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire))
-            {
-                API.CastSpell(Wrath);
-                return;
-            }
-            if (API.CanCast(Moonfire) && InRange && !API.TargetHasDebuff(Moonfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov) 
-            {
-                API.CastSpell(Moonfire);
-                return;
-            }
-            if (API.CanCast(Sunfire) && InRange && !API.TargetHasDebuff(Sunfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov)
-            {
-                API.CastSpell(Sunfire);
-                return;
             }
         }
 
         public override void OutOfCombatPulse()
         {
+            {
+                if (API.PlayerCurrentCastTimeRemaining > 40)
+                    return;
+                if (API.CanCast(TravelForm) && AutoTravelForm && API.PlayerIsOutdoor && !API.PlayerHasBuff(TravelForm))
+                {
+                    API.CastSpell(TravelForm);
+                    return;
+                }
+            }
 
         }
 
