@@ -44,6 +44,8 @@ namespace HyperElk.Core
         private string MortalCoil = "Mortal Coil";
         private string DecimatingBolt = "Decimating Bolt";
         private string ShadowEmbrace = "Shadow Embrace";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -57,6 +59,7 @@ namespace HyperElk.Core
 
 
         //Misc
+        private static readonly Stopwatch HealthFunnelWatch = new Stopwatch();
         private static readonly Stopwatch DumpWatchLow = new Stopwatch();
         private static readonly Stopwatch DumpWatchHigh = new Stopwatch();
 
@@ -78,15 +81,13 @@ namespace HyperElk.Core
         bool DotCheck => API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && API.TargetHasDebuff(UnstableAffliction) && (API.TargetHasDebuff(SoulRot) || !API.TargetHasDebuff(SoulRot));
         bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
         bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
-        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction;
+        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction || API.LastSpellCastInGame == UnstableAffliction;
         bool CurrenCastUnstableAffliction => API.CurrentCastSpellID("player") == 316099;
-        bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe;
-        bool CastingAgony => API.PlayerLastSpell == Agony;
-        bool CastingCorruption => API.PlayerLastSpell == Corruption;
-        bool CastingSL => API.PlayerLastSpell == SiphonLife;
+        bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe || API.LastSpellCastInGame == ScouringTithe;
+        bool CastingAgony => API.PlayerLastSpell == Agony || API.LastSpellCastInGame == Agony;
+        bool CastingCorruption => API.PlayerLastSpell == Corruption || API.LastSpellCastInGame == Corruption;
+        bool CastingSL => API.PlayerLastSpell == SiphonLife || API.LastSpellCastInGame == SiphonLife;
         bool LastSeed => API.CurrentCastSpellID("player") == 27243;
-        bool CurrentCastHealthFunnel => API.CurrentCastSpellID("player") == 755;
-        bool LastCastHealthFunnel => API.PlayerLastSpell == HealthFunnel;
 
         bool LastUnstableAffliction => API.PlayerLastSpell == UnstableAffliction;
         //Trinket1
@@ -96,11 +97,14 @@ namespace HyperElk.Core
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int DrainLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
         private int MortalCoilPercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
 
 
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
+
         string[] MisdirectionList = new string[] { "None", "Imp", "Voidwalker", "Succubus", "Felhunter", };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private bool UseUA => (bool)CombatRoutine.GetProperty("UseUA");
@@ -151,8 +155,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket", 3);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket", 3);
             CombatRoutine.AddProp("DumpShards", "Dump Shards", true, "Collect 5 Soul Shards and befor using Malefic Rapture", "Class specific");
-
-
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "ITEMS", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "ITEMS", 40);
             //Spells
             CombatRoutine.AddSpell(ShadowBolt, 686,"D1");
             CombatRoutine.AddSpell(DrainSoul, 198590,"D1");
@@ -208,7 +212,9 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Haunt, 48181);
             CombatRoutine.AddDebuff(SoulRot, 325640);
 
-
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
         }
 
@@ -219,6 +225,16 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
             if (DumpShards && API.PlayerCurrentSoulShards <= 0)
             {
                 API.WriteLog("No More Shards left.");
@@ -282,10 +298,20 @@ namespace HyperElk.Core
                 API.CastSpell(DrainLife);
                 return;
             }
-            // Health Funnel
-            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.PlayerHasPet && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+            if (HealthFunnelWatch.IsRunning && API.PetHealthPercent >= 70)
+            {
+                HealthFunnelWatch.Stop();
+                HealthFunnelWatch.Reset();
+            }
+            if (HealthFunnelWatch.IsRunning && API.CanCast(HealthFunnel))
             {
                 API.CastSpell(HealthFunnel);
+                return;
+            }
+            // Health Funnel
+            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
+            {
+                HealthFunnelWatch.Start();
                 return;
             }
 
@@ -303,7 +329,7 @@ namespace HyperElk.Core
         {
 
             //ROTATION AOE
-            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange && !LastCastHealthFunnel)
+            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange && !HealthFunnelWatch.IsRunning)
             {
                 //actions.aoe+=/haunt
                 //Haunt 
@@ -533,7 +559,7 @@ namespace HyperElk.Core
                 }
             }
             //ROTATION SINGLE TARGET
-            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber && !LastCastHealthFunnel)
+            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber && !HealthFunnelWatch.IsRunning)
             {
                 //actions+=/agony,if=dot.agony.remains<4
                 //Agony

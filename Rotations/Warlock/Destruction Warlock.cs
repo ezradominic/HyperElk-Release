@@ -87,17 +87,17 @@ namespace HyperElk.Core
         private int DarkPactPercentProc => numbList[CombatRoutine.GetPropertyInt(DarkPact)];
         private int DrainLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
-        private bool IsRange => API.TargetRange < 40;
+        private bool IsRange => API.TargetRange < 39;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
         private bool NotChanneling => !API.PlayerIsChanneling;
-        bool LastCastImmolate => API.PlayerLastSpell == Immolate;
-        bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate;
-        bool LastCastSummonVoidwalker => API.PlayerLastSpell == SummonVoidwalker;
-        bool LastCastSummonImp => API.PlayerLastSpell == SummonImp;
-        bool LastCastSummonSuccubus => API.PlayerLastSpell == SummonSuccubus;
-        bool LastCastSummonFelhunter => API.PlayerLastSpell == SummonFelhunter;
-        bool LastCastShadowBurn => API.PlayerLastSpell == ShadowBurn;
+        bool LastCastImmolate => API.LastSpellCastInGame == Immolate || API.LastSpellCastInGame == Immolate;
+        bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate || API.LastSpellCastInGame == Conflagrate;
+        bool LastCastSummonVoidwalker => API.PlayerLastSpell == SummonVoidwalker || API.LastSpellCastInGame == SummonVoidwalker;
+        bool LastCastSummonImp => API.PlayerLastSpell == SummonImp || API.LastSpellCastInGame == SummonImp;
+        bool LastCastSummonSuccubus => API.PlayerLastSpell == SummonSuccubus || API.LastSpellCastInGame == SummonSuccubus;
+        bool LastCastSummonFelhunter => API.PlayerLastSpell == SummonFelhunter || API.LastSpellCastInGame == SummonFelhunter;
+        bool LastCastShadowBurn => API.PlayerLastSpell == ShadowBurn || API.LastSpellCastInGame == ShadowBurn;
         private string UseCovenantAbility => CovenantAbilityList[CombatRoutine.GetPropertyInt(CovenantAbility)];
         string[] CovenantAbilityList = new string[] { "always", "Cooldowns", "AOE" };
 
@@ -266,12 +266,54 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
             if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
             {
+                //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
+                if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
+                {
+                    API.CastSpell(SoulFire);
+                    return;
+                }
+
+                //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && HavocWatch.IsRunning && DBTime <= HavocTime)
+                {
+                    API.CanCast(DecimatingBolt);
+                    return;
+                }
+
+                //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
+                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && HavocWatch.IsRunning && SCTime <= HavocTime)
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
+
+                //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
+
+                //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
+                if (API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
+                {
+                    API.CastSpell(ChaosBolt);
+                    return;
+                }
+                //actions.havoc+=/shadowburn
+                if (API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
+                {
+                    API.CastSpell(ShadowBurn);
+                    return;
+                }
+
+                //actions.havoc+=/incinerate,if=cast_time<havoc_remains
+                if (API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
+                {
+                    API.CastSpell(Incinerate);
+                    return;
+                }
                 //actions.aoe=rain_of_fire,if=pet.infernal.active&(!cooldown.havoc.ready|active_enemies>3)
-               // if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && InfernalWatch.IsRunning && API.SpellISOnCooldown(Havoc) || API.TargetUnitInRangeCount > 3)
-               // {
-               //     API.CastSpell(RainOfFire);
-               //     return;
-               // }
+                // if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && InfernalWatch.IsRunning && API.SpellISOnCooldown(Havoc) || API.TargetUnitInRangeCount > 3)
+                // {
+                //     API.CastSpell(RainOfFire);
+                //     return;
+                // }
 
                 //actions.aoe+=/soul_rot
                 if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
@@ -364,6 +406,48 @@ namespace HyperElk.Core
             //SINGLE TARGET
             if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && IsRange && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
             {
+                //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
+                if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
+                {
+                    API.CastSpell(SoulFire);
+                    return;
+                }
+
+                //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && HavocWatch.IsRunning && DBTime <= HavocTime)
+                {
+                    API.CanCast(DecimatingBolt);
+                    return;
+                }
+
+                //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
+                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && HavocWatch.IsRunning && SCTime <= HavocTime)
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
+
+                //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
+
+                //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
+                if (API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
+                {
+                    API.CastSpell(ChaosBolt);
+                    return;
+                }
+                //actions.havoc+=/shadowburn
+                if (API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
+                {
+                    API.CastSpell(ShadowBurn);
+                    return;
+                }
+
+                //actions.havoc+=/incinerate,if=cast_time<havoc_remains
+                if (API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
+                {
+                    API.CastSpell(Incinerate);
+                    return;
+                }
                 //# Executed every time the actor is available.
                 //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
                 if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount > 1)
@@ -492,51 +576,7 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(Conflagrate);
                     return;
-                }
-
-                //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
-                if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
-                {
-                    API.CastSpell(SoulFire);
-                    return;
-                }
-
-                //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && HavocWatch.IsRunning && DBTime <= HavocTime)
-                {
-                    API.CanCast(DecimatingBolt);
-                    return;
-                }
-
-                //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && HavocWatch.IsRunning && SCTime <= HavocTime)
-                {
-                    API.CastSpell(ScouringTithe);
-                    return;
-                }
-
-                //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
-
-                //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
-                if (API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions.havoc+=/shadowburn
-                if (API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
-                {
-                    API.CastSpell(ShadowBurn);
-                    return;
-                }
-
-                //actions.havoc+=/incinerate,if=cast_time<havoc_remains
-                if (API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
-                {
-                    API.CastSpell(Incinerate);
-                    return;
-                }
-
+                }         
             }
         }
         public override void OutOfCombatPulse()

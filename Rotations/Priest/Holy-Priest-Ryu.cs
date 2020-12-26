@@ -54,6 +54,13 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string Trinket1 = "Trinket1";
         private string Trinket2 = "Trinket2";
+        private string TargetChange = "Target Change";
+        private string Party1 = "party1";
+        private string Party2 = "party2";
+        private string Party3 = "party3";
+        private string Party4 = "party4";
+        private string Player = "player";
+        private string PartySwap = "Target Swap";
 
 
 
@@ -85,6 +92,9 @@ namespace HyperElk.Core
         int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
         int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40};
 
+        int PlayerHealth => API.TargetHealthPercent;
+        string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
+        string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
 
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
@@ -100,7 +110,7 @@ namespace HyperElk.Core
         private bool PoHAoE => UnitBelowHealthPercent(PoHLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
         private bool HaloAoE => UnitBelowHealthPercent(HaloLifePercent) >= AoENumber && !API.PlayerCanAttackTarget;
         private bool BoonAoE => UnitBelowHealthPercent(BoonLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
-        private bool UnholyAoE => UnitBelowHealthPercent(UnholyNovaLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
+       // private bool UnholyAoE => UnitBelowHealthPercent(UnholyNovaLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
         private bool HWSancitfyAoE => UnitBelowHealthPercent(HolyWordSanctifyLifePercent) >= AoENumber;
         private bool DivineHymnAoE => UnitBelowHealthPercent(DivineHymnLifePercent) >= AoENumber;
         private bool HWSalAoE => UnitBelowHealthPercent(HolyWordSalvationLifePercent) >= AoENumber;
@@ -119,7 +129,7 @@ namespace HyperElk.Core
         private bool PoMCheck => API.TargetHealthPercent <= PoMLifePercent && !API.PlayerCanAttackTarget && Mana >= 2 && !API.PlayerIsMoving && !ChannelingDivine;
         private bool KyrianCheck => API.CanCast(BoonoftheAscended) && PlayerCovenantSettings == "Kyrian" && BoonAoE && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingDivine;
         private bool NightFaeCheck => API.CanCast(FaeGuardians) && PlayerCovenantSettings == "Night Fae" && Mana >= 2 && API.TargetHealthPercent >= FaeLifePercent && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !ChannelingDivine;
-        private bool NecrolordCheck => API.CanCast(UnholyNova) && PlayerCovenantSettings == "Necrolord" && UnholyAoE && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingDivine;
+       // private bool NecrolordCheck => API.CanCast(UnholyNova) && PlayerCovenantSettings == "Necrolord" && UnholyAoE && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingDivine;
         private bool VenthyrCheck => API.CanCast(Mindgames) && PlayerCovenantSettings == "Venthyr" && Mana >= 2 && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingDivine;
         
 
@@ -139,8 +149,8 @@ namespace HyperElk.Core
         private int HaloLifePercent => numbList[CombatRoutine.GetPropertyInt(Halo)];
         private int HolyWordSalvationLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyWordSalvation)];
         private int BoonLifePercent => numbList[CombatRoutine.GetPropertyInt(BoonoftheAscended)];
-        private int MindgamesLifePercent => numbList[CombatRoutine.GetPropertyInt(Mindgames)];
-        private int UnholyNovaLifePercent => numbList[CombatRoutine.GetPropertyInt(UnholyNova)];
+      //  private int MindgamesLifePercent => numbList[CombatRoutine.GetPropertyInt(Mindgames)];
+       // private int UnholyNovaLifePercent => numbList[CombatRoutine.GetPropertyInt(UnholyNova)];
         private int FaeLifePercent => numbList[CombatRoutine.GetPropertyInt(FaeGuardians)];
         private int GuardianSpirtLifePercent => numbList[CombatRoutine.GetPropertyInt(GuardianSpirit)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
@@ -148,6 +158,8 @@ namespace HyperElk.Core
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private int PartySwapPercent => numbList[CombatRoutine.GetPropertyInt(PartySwap)];
+        private int TargetChangePercent => numbList[CombatRoutine.GetPropertyInt(TargetChange)];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
@@ -160,8 +172,8 @@ namespace HyperElk.Core
        // private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
-        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
-        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private int Mana => API.PlayerMana;
 
 
@@ -177,7 +189,7 @@ namespace HyperElk.Core
             API.WriteLog("BETA ROTATION : Things may be missing or not work correctly yet. Please post feedback in Priest channel. Cov expect Unholy Nova is supported via Cooldown toggle or break marcos");
            // API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
             API.WriteLog("If you want to use Holy Word: Sanctify or the Nercolord Cov Abiltity, you need to use an @Cursor macro with /xxx break or break2 whereas xxx is your addon name(First five only) for it to work");
-            API.WriteLog("Target Spec" + API.TargetRoleSpec);
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's in the spell book. Enable it the settings and set your party swap health perecent and target check percent. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This works ONLY for party at this time.");
 
             //Buff
             CombatRoutine.AddBuff(PowerWordFortitude, 21562);
@@ -239,15 +251,22 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
+            CombatRoutine.AddMacro(Player);
+            CombatRoutine.AddMacro(Party1);
+            CombatRoutine.AddMacro(Party2);
+            CombatRoutine.AddMacro(Party3);
+            CombatRoutine.AddMacro(Party4);
 
             //Prop
-            // CombatRoutine.AddProp("Auto Swap", "Auto Swap", false, "Use Auto Swap Logic", "Generic");
-            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
+            CombatRoutine.AddProp("Auto Swap", "Auto Swap", false, "Use Auto Swap Logic", "Generic");
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 0);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used and meets the below healing perecents", "Cooldowns", 1);
 
             CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
+            CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
+            CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp(Heal, Heal + " Life Percent", numbList, "Life percent at which " + Heal + " is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(FlashHeal, FlashHeal + " Life Percent", numbList, "Life percent at which " + FlashHeal + " is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(PrayerofMending, PrayerofMending + " Life Percent", numbList, "Life percent at which " + PrayerofMending + " is used, set to 0 to disable", "Healing", 10);
@@ -257,11 +276,12 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(GuardianSpirit, GuardianSpirit + " Life Percent", numbList, "Life percent at which " + GuardianSpirit + " is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(Halo, Halo + " Life Percent", numbList, "Life percent at which " + Halo + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(HolyWordSalvation, HolyWordSalvation + " Life Percent", numbList, "Life percent at which " + HolyWordSalvation + " is used when AoE Number of members are at life percent, if talented, set to 0 to disable", "Healing", 10);
+            CombatRoutine.AddProp(BoonoftheAscended, BoonoftheAscended + " Life Percent", numbList, "Life percent at which " + BoonoftheAscended + " is used when AoE Number of members are at life percent, if is your Cov, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(CoH, CoH + " Life Percent", numbList, "Life percent at which " + CoH + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(PoH, PoH + " Life Percent", numbList, "Life percent at which " + PoH + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp(DivineHymn , DivineHymn + " Life Percent", numbList, "Life percent at which " + DivineHymn + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 10);
-            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 1);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 1);
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
 
 
@@ -336,6 +356,75 @@ namespace HyperElk.Core
                     API.CastSpell(Halo);
                     return;
                 }
+                //DPS
+                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(Mindgames);
+                    return;
+                }
+                if (API.CanCast(HolyWordChastise) && InRange && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(HolyWordChastise);
+                    return;
+                }
+                if (API.CanCast(HolyFire) && InRange && Mana >= 1 && !ChannelingDivine && !API.PlayerIsMoving && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(HolyFire);
+                    return;
+                }
+                if (API.CanCast(ShadowWordPain) && InRange && Mana >= 1 && !API.TargetHasDebuff(ShadowWordPain) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine && API.TargetHealthPercent > 0)
+                {
+                    API.CanCast(ShadowWordPain);
+                    return;
+                }
+                if (API.CanCast(HolyNova) && IsMelee && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 12 && !ChannelingDivine && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
+                {
+                    API.CanCast(HolyNova);
+                    return;
+                }
+                if (API.CanCast(AscendedNova) && PlayerCovenantSettings == "Kyrian" && API.TargetRange <= 8 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
+                {
+                    API.CanCast(AscendedNova);
+                    return;
+                }
+                if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(AscendedBlast);
+                    return;
+                }
+                if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(Smite);
+                    return;
+                }
+                // Auto Target
+                if (IsAutoSwap)
+                {
+                    if (API.PlayerIsInGroup)
+                    {
+                        for (int i = 0; i < units.Length; i++)
+                        {
+                            if (API.UnitHealthPercent(units[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                                API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                                return;
+                            }
+                        }
+                    }
+                    if (API.PlayerIsInRaid)
+                    {
+                        for (int i = 0; i < raidunits.Length; i++)
+                        {
+                            if (API.UnitHealthPercent(raidunits[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
+                        }
+                    }
+                }
 
             }
         }
@@ -344,11 +433,6 @@ namespace HyperElk.Core
             if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotChanneling && !ChannelingDivine && !API.PlayerIsMoving)
             {
                 API.CastSpell(Fleshcraft);
-                return;
-            }
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-            {
-                API.CastSpell("Healthstone");
                 return;
             }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
@@ -368,46 +452,6 @@ namespace HyperElk.Core
             if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
             {
                 API.CastSpell("Trinket2");
-            }
-            if (VenthyrCheck && InRange)
-            {
-                API.CastSpell(Mindgames);
-                return;
-            }
-            if (API.CanCast(HolyWordChastise) && InRange && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine)
-            {
-                API.CastSpell(HolyWordChastise);
-                return;
-            }
-            if (API.CanCast(HolyFire) && InRange && Mana >= 1 && !ChannelingDivine && !API.PlayerIsMoving)
-            {
-                API.CastSpell(HolyFire);
-                return;
-            }
-            if (API.CanCast(ShadowWordPain) && InRange && Mana >= 1 && !API.TargetHasDebuff(ShadowWordPain) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine)
-            {
-                API.CanCast(ShadowWordPain);
-                return;
-            }
-            if (API.CanCast(HolyNova) && IsMelee && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 12 && !ChannelingDivine && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving))
-            {
-                API.CanCast(HolyNova);
-                return;
-            }
-            if (API.CanCast(AscendedNova) && PlayerCovenantSettings == "Kyrian" && API.TargetRange <= 8 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving))
-            {
-                API.CanCast(AscendedNova);
-                return;
-            }
-            if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving))
-            {
-                API.CastSpell(AscendedBlast);
-                return;
-            }
-            if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving))
-            {
-                API.CastSpell(Smite);
-                return;
             }
         }
 
