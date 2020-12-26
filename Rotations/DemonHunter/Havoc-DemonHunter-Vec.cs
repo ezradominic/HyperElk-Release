@@ -1,7 +1,7 @@
 ﻿
 namespace HyperElk.Core
 {
-    public class MMHunter : CombatRoutine
+    public class HavocDH : CombatRoutine
     {
 
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
@@ -156,8 +156,9 @@ private string furious_gaze = "Furious Gaze";
         }
         private static bool TargetHasDebuff(string debuff)
         {
-            return API.TargetHasDebuff(debuff, false, false);
+            return API.TargetHasDebuff(debuff, true, false);
         }
+        private static bool MetamorphosisUp => PlayerHasBuff("Metamorphosis") || PlayerHasBuff("Demonic Metamorphosis");
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
 
         public override void Initialize()
@@ -311,25 +312,25 @@ private string furious_gaze = "Furious Gaze";
 
                     }
                     //death_sweep,if= variable.blade_dance & debuff.essence_break.up
-                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 &&!Talent_CycleofHatred&& API.TargetHasDebuff(Essence_Break) && API.PlayerHasBuff(Metamorphosis) && BladeDance && BladeDanceCost && MeleeRange)
+                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 &&!Talent_CycleofHatred&& API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
                     {
                         API.CastSpell(Death_Sweep);
 
                     }
                     //blade_dance,if= variable.blade_dance & debuff.essence_break.up
-                    if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.TargetHasDebuff(Essence_Break) && API.PlayerHasBuff(Metamorphosis) && BladeDance && BladeDanceCost && MeleeRange)
+                    if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
                     {
                         API.CastSpell(Blade_Dance);
 
                     }
                     //annihilation,if= debuff.essence_break.up
-                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && API.PlayerHasBuff(Metamorphosis) && MeleeRange)
+                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
                     {
                         API.CastSpell(Annihilation);
 
                     }
                     //chaos_strike,if= debuff.essence_break.up
-                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && !API.PlayerHasBuff(Metamorphosis) && MeleeRange)
+                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
                     {
                         API.CastSpell(Chaos_Strike);
 
@@ -341,7 +342,7 @@ private string furious_gaze = "Furious Gaze";
                 {
                     //fel_rush,if= (talent.unbound_chaos.enabled & buff.unbound_chaos.up) & (charges = 2 | (raid_event.movement.in> 10 & raid_event.adds.in> 10))
                     //death_sweep,if= variable.blade_dance
-                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.PlayerHasBuff(Metamorphosis) && BladeDance && BladeDanceCost && MeleeRange)
+                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
                     {
                         API.CastSpell(Death_Sweep);
 
@@ -361,7 +362,7 @@ private string furious_gaze = "Furious Gaze";
 
                     }
                     //blade_dance,if= variable.blade_dance & !cooldown.metamorphosis.ready & (cooldown.eye_beam.remains > (5 - azerite.revolving_blades.rank * 3))
-                    if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && !API.PlayerHasBuff(Metamorphosis) && BladeDanceCost && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
+                    if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && !MetamorphosisUp && BladeDanceCost && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
                     {
                         API.CastSpell(Blade_Dance);
 
@@ -373,7 +374,7 @@ private string furious_gaze = "Furious Gaze";
 
                     }
                     //annihilation,if= !variable.pooling_for_blade_dance
-                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && !PoolingForBladeDance && API.PlayerFury >= 40 && API.PlayerHasBuff(Metamorphosis) && MeleeRange)
+                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && !PoolingForBladeDance && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
                     {
                         API.CastSpell(Annihilation);
 
@@ -420,7 +421,7 @@ private string furious_gaze = "Furious Gaze";
 
                     }
                     // death_sweep,if= variable.blade_dance
-                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.PlayerHasBuff(Metamorphosis) && BladeDance && BladeDanceCost && MeleeRange)
+                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
                     {
                         API.CastSpell(Death_Sweep);
 
@@ -446,7 +447,7 @@ private string furious_gaze = "Furious Gaze";
 
                     }
                     // blade_dance,if= variable.blade_dance
-                    if (API.CanCast(Blade_Dance) && !API.PlayerHasBuff(Metamorphosis) && API.PlayerLevel >= 12 && BladeDance && !Talent_CycleofHatred && BladeDanceCost && MeleeRange)
+                    if (API.CanCast(Blade_Dance) && !MetamorphosisUp && API.PlayerLevel >= 12 && BladeDance && !Talent_CycleofHatred && BladeDanceCost && MeleeRange)
                     {
                         API.CastSpell(Blade_Dance);
 
@@ -464,13 +465,13 @@ private string furious_gaze = "Furious Gaze";
 
                     }
                     // annihilation,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30 | buff.metamorphosis.remains < 5) & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
-                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30 || API.PlayerBuffTimeRemaining(Metamorphosis) < 500) && !BladeDance && !waiting_for_essence_break && API.PlayerFury >= 40 && API.PlayerHasBuff(Metamorphosis) && MeleeRange)
+                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30 || (API.PlayerBuffTimeRemaining(Metamorphosis) < 500 || API.PlayerBuffTimeRemaining(DemonicMetamorphosis) < 500)) && !BladeDance && !waiting_for_essence_break && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
                     {
                         API.CastSpell(Annihilation);
 
                     }
                     // chaos_strike,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30) & !variable.pooling_for_meta & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
-                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30) && !PoolingForBladeDance && !waiting_for_essence_break && !waiting_for_essence_break && API.PlayerFury >= 40 && !API.PlayerHasBuff(Metamorphosis) && MeleeRange)
+                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30) && !PoolingForBladeDance && !waiting_for_essence_break && !waiting_for_essence_break && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
                     {
                         API.CastSpell(Chaos_Strike);
 
