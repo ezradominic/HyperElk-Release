@@ -15,6 +15,7 @@
 // v2.1 spell ids and alot of other stuff
 // v2.2 Save AP Toggle
 // v2.3 Stellar Flare double cast fix
+// v2.4 Dont dot Toggle added
 
 using System.Diagnostics;
 
@@ -23,6 +24,7 @@ namespace HyperElk.Core
     public class BalanceDruid : CombatRoutine
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool DontDOT => API.ToggleIsEnabled("Don`t Dot");
         private bool SaveAP => API.ToggleIsEnabled("Save AP");
         //Spell,Auras
         private string Moonfire = "Moonfire";
@@ -127,7 +129,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v2.3");
+            API.WriteLog("Welcome to smartie`s Balance Druid v2.4");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -204,6 +206,7 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("Save AP");
+            CombatRoutine.AddToggle("Don`t Dot");
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -433,22 +436,22 @@ namespace HyperElk.Core
                 // Single Target rota
                 if (API.TargetUnitInRangeCount < AOEUnitNumber || !IsAOE)
                 {
-                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300)
+                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && !DontDOT && API.TargetDebuffRemainingTime(Moonfire) < 300)
                     {
                         API.CastSpell(Moonfire);
                         return;
                     }
-                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.PlayerIsMoving && API.TargetDebuffRemainingTime(Sunfire) >= 300 && (!API.PlayerHasBuff(Starfall) && TalentStellarDrift || !TalentStellarDrift) && !API.PlayerHasBuff(WarriorofElune) && API.PlayerAstral <= 40 && SpamDots)
+                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && !DontDOT && API.PlayerIsMoving && API.TargetDebuffRemainingTime(Sunfire) >= 300 && (!API.PlayerHasBuff(Starfall) && TalentStellarDrift || !TalentStellarDrift) && !API.PlayerHasBuff(WarriorofElune) && API.PlayerAstral <= 40 && SpamDots)
                     {
                         API.CastSpell(Moonfire);
                         return;
                     }
-                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.TargetDebuffRemainingTime(Sunfire) < 300)
+                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && !DontDOT && API.TargetDebuffRemainingTime(Sunfire) < 300)
                     {
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
+                    if (API.CanCast(StellarFlare) && TalentStellarFlare && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
                     {
                         API.CastSpell(StellarFlare);
                         return;
@@ -507,27 +510,27 @@ namespace HyperElk.Core
                 //AoE Rota
                 if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)
                 {
-                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.TargetDebuffRemainingTime(Sunfire) < 300)
+                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && !DontDOT && API.TargetDebuffRemainingTime(Sunfire) < 300)
                     {
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && API.TargetDebuffRemainingTime(Moonfire) < 300)
+                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && !DontDOT && API.TargetDebuffRemainingTime(Moonfire) < 300)
                     {
                         API.CastSpell(Moonfire);
                         return;
                     }
-                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && API.PlayerIsMoving && API.TargetDebuffRemainingTime(Moonfire) >= 300 && (!API.PlayerHasBuff(Starfall) && TalentStellarDrift || !TalentStellarDrift) && !API.PlayerHasBuff(WarriorofElune) && SpamDots)
+                    if (API.CanCast(Sunfire) && PlayerLevel >= 23 && !DontDOT && API.PlayerIsMoving && API.TargetDebuffRemainingTime(Moonfire) >= 300 && (!API.PlayerHasBuff(Starfall) && TalentStellarDrift || !TalentStellarDrift) && !API.PlayerHasBuff(WarriorofElune) && SpamDots)
                     {
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(StellarFlare) && TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
+                    if (API.CanCast(StellarFlare) && TalentStellarFlare && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
                     {
                         API.CastSpell(StellarFlare);
                         return;
                     }
-                    if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                    if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && !DontDOT)
                     {
                         if (API.MouseoverDebuffRemainingTime(Sunfire) <= 300 && !API.MacroIsIgnored(Sunfire + "MO") && API.CanCast(Sunfire) && isMOinRange)
                         {
