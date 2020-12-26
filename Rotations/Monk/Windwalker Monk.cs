@@ -143,7 +143,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(RushingJadeWind, 116847,"Oem6");
 
             CombatRoutine.AddSpell(Vivify, 116670,"NumPad1");
-            CombatRoutine.AddSpell(ExpelHarm, 115072,"NumPad2");
+            CombatRoutine.AddSpell(ExpelHarm, 322101,"NumPad2");
             CombatRoutine.AddSpell(EnergizingElixir, 115288,"NumPad3");
             CombatRoutine.AddSpell(DampenHarm, 122278,"F1");
             CombatRoutine.AddSpell(FortifyingBrew, 115203,"F2");
@@ -158,7 +158,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Serenity", 152173);
 
             //Debuffs
-            CombatRoutine.AddDebuff("Mark of the Crane");
+            CombatRoutine.AddDebuff("Mark of the Crane", 228287);
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
