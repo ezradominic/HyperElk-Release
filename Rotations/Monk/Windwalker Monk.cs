@@ -127,7 +127,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FistsofFury, 113656,"D5");
             CombatRoutine.AddSpell(FistsoftheWhiteTiger, 261947,"D6");
             CombatRoutine.AddSpell(WhirlingDragonPunch, 152175,"D7");
-            CombatRoutine.AddSpell(TouchofDeath, 115080,"D7");
+            CombatRoutine.AddSpell(TouchofDeath, 322109,"D7");
             CombatRoutine.AddSpell(ChiWave, 115098,"D7");
             CombatRoutine.AddSpell(StormEarthandFire, 137639,"OemOpenBrackets");
             CombatRoutine.AddSpell(Serenity, 152173,"OemOpenBrackets");
