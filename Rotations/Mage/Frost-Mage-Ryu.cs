@@ -49,6 +49,9 @@ namespace HyperElk.Core
         private string Sated = "Sated";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string Spellsteal = "Spellsteal";
+        private string RemoveCurse = "Remove Curse";
+
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
         bool IceNova => API.PlayerIsTalentSelected(1, 3);
@@ -59,6 +62,10 @@ namespace HyperElk.Core
         bool RayofFrost => API.PlayerIsTalentSelected(7, 2);
         bool GlacialSpike => API.PlayerIsTalentSelected(7, 3);
         bool FreezingRain => API.PlayerIsTalentSelected(6, 1);
+
+        //Spell Steal & Curse Removal
+        string[] SpellSpealBuffList = { "Bless Weapon", "Death's Embrace", "Turn to Stone", "Wonder Grow", "Stoneskin" };
+        string[] CurseList = { "Sintouched Anima", "Curse of Stone" };
 
         //CBProperties
         public string[] LegendaryList = new string[] { "None", "Temporal Warp" };
@@ -79,6 +86,7 @@ namespace HyperElk.Core
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         bool CastShifting => API.PlayerLastSpell == ShiftingPower;
         bool CastIV => API.PlayerLastSpell == IV;
@@ -86,8 +94,8 @@ namespace HyperElk.Core
         bool CastIL => API.PlayerLastSpell == IL;
         bool CastRune => API.PlayerLastSpell == RoP;
         bool CastTW => API.PlayerLastSpell == TimeWarp;
-        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
-        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private int Level => API.PlayerLevel;
         //private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
@@ -124,6 +132,11 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(BL, 2825);
             CombatRoutine.AddBuff(AH, 90355);
             CombatRoutine.AddBuff(TW, 327351);
+            CombatRoutine.AddBuff("Bless Weapon", 328288);
+            CombatRoutine.AddBuff("Death's Embrace", 333875);
+            CombatRoutine.AddBuff("Turn to Stone", 326607);
+            CombatRoutine.AddBuff("Wonder Grow", 328016);
+            CombatRoutine.AddBuff("Stoneskin", 322433);
 
             //Debuff
             CombatRoutine.AddDebuff(WC, 228358);
@@ -131,6 +144,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Fatigued, 264689);
             CombatRoutine.AddDebuff(Exhaustion, 57723);
             CombatRoutine.AddDebuff(Sated, 57724);
+            CombatRoutine.AddDebuff("Sintouched Anima", 328494);
+            CombatRoutine.AddDebuff("Curse of Stone", 319603);
 
             //Spell
             CombatRoutine.AddSpell(RoP, 116011, "None");
@@ -161,6 +176,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Fleshcraft, 324631);
             CombatRoutine.AddSpell(TimeWarp, 80353);
             CombatRoutine.AddSpell(AE, 1449);
+            CombatRoutine.AddSpell(Spellsteal, 30449);
+            CombatRoutine.AddSpell(RemoveCurse, 475);
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -169,9 +186,12 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
+            CombatRoutine.AddMacro(RemoveCurse + "MO");
+            CombatRoutine.AddMacro(Spellsteal + "MO");
 
             //Toggle
             CombatRoutine.AddToggle("TimeWarp");
+            CombatRoutine.AddToggle("Mouseover");
 
             //Prop
             CombatRoutine.AddProp(IceBarrier, IceBarrier, numbList, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
@@ -211,6 +231,50 @@ namespace HyperElk.Core
             {
                 API.CastSpell(Counterspell);
                 return;
+            }
+            if (API.CanCast(Spellsteal))
+            {
+                for (int i = 0; i < SpellSpealBuffList.Length; i++)
+                {
+                    if (API.TargetHasBuff(SpellSpealBuffList[i]))
+                    {
+                        API.CastSpell(Spellsteal);
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(Spellsteal) && IsMouseover)
+            {
+                for (int i = 0; i < SpellSpealBuffList.Length; i++)
+                {
+                    if (API.MouseoverHasBuff(SpellSpealBuffList[i]))
+                    {
+                        API.CastSpell(Spellsteal + "MO");
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(RemoveCurse) && !API.PlayerCanAttackTarget)
+            {
+                for (int i = 0; i < CurseList.Length; i++)
+                {
+                    if (API.TargetHasDebuff(CurseList[i]))
+                    {
+                        API.CastSpell(RemoveCurse);
+                        return;
+                    }
+                }
+            }
+            if (API.CanCast(RemoveCurse) && !API.PlayerCanAttackMouseover && IsMouseover)
+            {
+                for (int i = 0; i < CurseList.Length; i++)
+                {
+                    if (API.MouseoverHasDebuff(CurseList[i]))
+                    {
+                        API.CastSpell(RemoveCurse + "MO");
+                        return;
+                    }
+                }
             }
             if (API.CanCast(IB) && API.PlayerHealthPercent <= IBPercentProc && API.PlayerHealthPercent != 0 && Level >= 22  && !ChannelingShift)
             {
