@@ -41,7 +41,8 @@ namespace HyperElk.Core
         private string Flayed_Shot = "Flayed Shot";
         private string Death_Chakram = "Death Chakram";
         private string FlayersMark = "Flayer's Mark";
-
+        private string WildMark = "Wild Mark";
+        private string HuntersMark = "Hunter's Mark";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool isMOinRange => API.MouseoverRange <= 40;
@@ -128,36 +129,36 @@ namespace HyperElk.Core
             API.WriteLog("Kill Shot Mouseover - /cast [@mouseover] Kill Shot");
 
             //Spells
-            CombatRoutine.AddSpell(Steady_Shot, "D1");
-            CombatRoutine.AddSpell(Arcane_Shot, "D2");
-            CombatRoutine.AddSpell(Kill_Command, "D2");
-            CombatRoutine.AddSpell(Barbed_Shot, "R");
-            CombatRoutine.AddSpell(Mend_Pet, "X");
-            CombatRoutine.AddSpell(Revive_Pet, "X");
+            CombatRoutine.AddSpell(Steady_Shot,56641, "D1");
+            CombatRoutine.AddSpell(Arcane_Shot,185358, "D2");
+            CombatRoutine.AddSpell(Kill_Command,34026, "D2");
+            CombatRoutine.AddSpell(Barbed_Shot,217200, "R");
+            CombatRoutine.AddSpell(Mend_Pet,136, "X");
+            CombatRoutine.AddSpell(Revive_Pet,982, "X");
             CombatRoutine.AddSpell("Call Pet", "F1");
-            CombatRoutine.AddSpell(Cobra_Shot, "D5");
-            CombatRoutine.AddSpell(Bestial_Wrath, "C");
-            CombatRoutine.AddSpell(Aspect_of_the_Wild, "V");
-            CombatRoutine.AddSpell(Kill_Shot, "D6");
-            CombatRoutine.AddSpell(Multi_Shot, "D4");
+            CombatRoutine.AddSpell(Cobra_Shot,193455, "D5");
+            CombatRoutine.AddSpell(Bestial_Wrath,19574, "C");
+            CombatRoutine.AddSpell(Aspect_of_the_Wild,193530, "V");
+            CombatRoutine.AddSpell(Kill_Shot,53351, "D6");
+            CombatRoutine.AddSpell(Multi_Shot,2643, "D4");
 
-            CombatRoutine.AddSpell(Counter_Shot, "D0");
-            CombatRoutine.AddSpell(Exhilaration, "NumPad9");
-            CombatRoutine.AddSpell(Misdirection, "Q");
+            CombatRoutine.AddSpell(Counter_Shot,147362, "D0");
+            CombatRoutine.AddSpell(Exhilaration,109304, "NumPad9");
+            CombatRoutine.AddSpell(Misdirection,34477, "Q");
 
-            CombatRoutine.AddSpell(Dire_Beast, "F8");
-            CombatRoutine.AddSpell(Chimaera_Shot, "D3");
-            CombatRoutine.AddSpell(A_Murder_of_Crows, "F");
-            CombatRoutine.AddSpell(Barrage, "F7");
-            CombatRoutine.AddSpell(Stampede, "F7");
-            CombatRoutine.AddSpell(Bloodshed, "F11");
-            CombatRoutine.AddSpell(Feign_Death, "F2");
-            CombatRoutine.AddSpell(Aspect_of_the_Turtle, "G");
+            CombatRoutine.AddSpell(Dire_Beast,120679, "F8");
+            CombatRoutine.AddSpell(Chimaera_Shot,53209, "D3");
+            CombatRoutine.AddSpell(A_Murder_of_Crows,131894, "F");
+            CombatRoutine.AddSpell(Barrage,120360, "F7");
+            CombatRoutine.AddSpell(Stampede,201430, "F7");
+            CombatRoutine.AddSpell(Bloodshed,321530, "F11");
+            CombatRoutine.AddSpell(Feign_Death,5384, "F2");
+            CombatRoutine.AddSpell(Aspect_of_the_Turtle,186265, "G");
 
-            CombatRoutine.AddSpell(Wild_Spirits, "F10");
-            CombatRoutine.AddSpell(Resonating_Arrow, "F10");
-            CombatRoutine.AddSpell(Flayed_Shot, "F10");
-            CombatRoutine.AddSpell(Death_Chakram, "F10");
+            CombatRoutine.AddSpell(Wild_Spirits,328231, "F10");
+            CombatRoutine.AddSpell(Resonating_Arrow, 308491, "F10");
+            CombatRoutine.AddSpell(Flayed_Shot, 324149, "F10");
+            CombatRoutine.AddSpell(Death_Chakram, 325028, "F10");
 
 
 
@@ -172,19 +173,20 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("246152");
             CombatRoutine.AddBuff("246851");
             CombatRoutine.AddBuff("217200");
-            CombatRoutine.AddBuff(Frenzy);
-            CombatRoutine.AddBuff(Beast_Cleave);
-            CombatRoutine.AddBuff(Aspect_of_the_Turtle);
-            CombatRoutine.AddBuff(Aspect_of_the_Wild);
-            CombatRoutine.AddBuff(Misdirection);
-            CombatRoutine.AddBuff(Bestial_Wrath);
-            CombatRoutine.AddBuff(Barbed_Shot);
-            CombatRoutine.AddBuff(Feign_Death);
-            CombatRoutine.AddBuff(FlayersMark);
-            CombatRoutine.AddBuff(Wild_Spirits);
+            CombatRoutine.AddBuff(Frenzy,272790);
+            CombatRoutine.AddBuff(Beast_Cleave,118455);
+            CombatRoutine.AddBuff(Aspect_of_the_Turtle,186265);
+            CombatRoutine.AddBuff(Aspect_of_the_Wild,193530);
+            CombatRoutine.AddBuff(Misdirection,34477);
+            CombatRoutine.AddBuff(Bestial_Wrath,19574);
+            CombatRoutine.AddBuff(Feign_Death,5384);
+            CombatRoutine.AddBuff(FlayersMark, 324156);
 
             //Debuffs
-            CombatRoutine.AddDebuff("Wild Mark");
+
+            CombatRoutine.AddDebuff(WildMark, 328275);
+            CombatRoutine.AddDebuff(Resonating_Arrow, 308491);
+            CombatRoutine.AddDebuff(HuntersMark, 257284);
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Mouseover");
@@ -289,7 +291,7 @@ namespace HyperElk.Core
                         return;
                     }
                     // cds->add_action("berserking,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.berserking.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<13");
-                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && InRange && (API.TargetHasDebuff(WildMark) || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
                     {
                         API.CastSpell(RacialSpell1);
                         return;
@@ -303,7 +305,7 @@ namespace HyperElk.Core
 
                     // cds->add_action("blood_fury,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.blood_fury.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<16");
 
-                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && InRange && (API.TargetHasDebuff("Wild Mark") || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && InRange && (API.TargetHasDebuff(WildMark) || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
                     {
                         API.CastSpell(RacialSpell1);
                         return;
@@ -427,7 +429,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("barbed_shot,if=buff.wild_spirits.up");
-                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && API.TargetHasDebuff("Wild Mark"))
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && API.TargetHasDebuff(WildMark))
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
