@@ -31,6 +31,7 @@ namespace HyperElk.Core
         private string fodder_to_the_flame = "Fodder to the Flame"; 
         private string elysian_decree = "Elysian Decree"; 
 private string furious_gaze = "Furious Gaze";
+        private string DemonicMetamorphosis = "Demonic Metamorphosis";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -166,38 +167,39 @@ private string furious_gaze = "Furious Gaze";
             API.WriteLog("Metamorphosis Macro : /cast [@player] Metamorphosis");
 
 
-            CombatRoutine.AddSpell(Fel_Barrage, "F1");
-            CombatRoutine.AddSpell(Eye_Beam, "D1");
-            CombatRoutine.AddSpell(Metamorphosis, "F4");
-            CombatRoutine.AddSpell(Blade_Dance, "D2");
-            CombatRoutine.AddSpell(Death_Sweep, "D2");
-            CombatRoutine.AddSpell(Felblade, "D3");
-            CombatRoutine.AddSpell(Chaos_Strike, "D4");
-            CombatRoutine.AddSpell(Annihilation, "D4");
-            CombatRoutine.AddSpell(Demons_Bite, "D5");
-            CombatRoutine.AddSpell(Immolation_Aura, "D6");
-            CombatRoutine.AddSpell(Throw_Glaive, "D7");
-            CombatRoutine.AddSpell(Netherwalk, "F7");
-            CombatRoutine.AddSpell(Disrupt, "F8");
-            CombatRoutine.AddSpell(Chaos_Nova, "F12");
-            CombatRoutine.AddSpell(Darkness, "F5");
-            CombatRoutine.AddSpell(Blur, "NumPad1");
-            CombatRoutine.AddSpell(Consume_Magic, "NumPad2");
-            CombatRoutine.AddSpell(Glaive_Tempest, "NumPad5");
-        CombatRoutine.AddSpell(SinfulBrand, "NumPad6");
-            CombatRoutine.AddSpell(TheHunt, "NumPad6");
-            CombatRoutine.AddSpell(fodder_to_the_flame, "NumPad6");
-            CombatRoutine.AddSpell(elysian_decree, "NumPad6");
+            CombatRoutine.AddSpell(Fel_Barrage,258925, "F1");
+            CombatRoutine.AddSpell(Eye_Beam,198013, "D1");
+            CombatRoutine.AddSpell(Metamorphosis,191427, "F4");
+            CombatRoutine.AddSpell(Blade_Dance,188499, "D2");
+            CombatRoutine.AddSpell(Death_Sweep,210152, "D2");
+            CombatRoutine.AddSpell(Felblade,232893, "D3");
+            CombatRoutine.AddSpell(Chaos_Strike,162794, "D4");
+            CombatRoutine.AddSpell(Annihilation,201427, "D4");
+            CombatRoutine.AddSpell(Demons_Bite,162243, "D5");
+            CombatRoutine.AddSpell(Immolation_Aura,258920, "D6");
+            CombatRoutine.AddSpell(Throw_Glaive,185123, "D7");
+            CombatRoutine.AddSpell(Netherwalk,196555, "F7");
+            CombatRoutine.AddSpell(Disrupt,183752, "F8");
+            CombatRoutine.AddSpell(Chaos_Nova,179057, "F12");
+            CombatRoutine.AddSpell(Darkness,196718, "F5");
+            CombatRoutine.AddSpell(Blur,198589, "NumPad1");
+            CombatRoutine.AddSpell(Consume_Magic,278326, "NumPad2");
+            CombatRoutine.AddSpell(Glaive_Tempest,342817, "NumPad5");
+        CombatRoutine.AddSpell(SinfulBrand, 317009, "NumPad6");
+            CombatRoutine.AddSpell(TheHunt, 323639, "NumPad6");
+            CombatRoutine.AddSpell(fodder_to_the_flame, 329554, "NumPad6");
+            CombatRoutine.AddSpell(elysian_decree, 306830, "NumPad6");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
 
-            CombatRoutine.AddBuff(Metamorphosis);
-            CombatRoutine.AddBuff(Fel_Bombardment);
-            CombatRoutine.AddBuff(furious_gaze);
+            CombatRoutine.AddBuff(Metamorphosis, 191427);
+            CombatRoutine.AddBuff(DemonicMetamorphosis, 162264);
+            CombatRoutine.AddBuff(Fel_Bombardment, 337775);
+            CombatRoutine.AddBuff(furious_gaze,273232);
             
-            CombatRoutine.AddDebuff(Essence_Break);
-            CombatRoutine.AddDebuff(SinfulBrand);
+            CombatRoutine.AddDebuff(Essence_Break,320338);
+            CombatRoutine.AddDebuff(SinfulBrand, 317009);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
