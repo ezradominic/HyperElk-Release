@@ -174,7 +174,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("246851");
             CombatRoutine.AddBuff("217200");
             CombatRoutine.AddBuff(Frenzy,272790);
-            CombatRoutine.AddBuff(Beast_Cleave,118455);
+            CombatRoutine.AddBuff(Beast_Cleave,268877);
             CombatRoutine.AddBuff(Aspect_of_the_Turtle,186265);
             CombatRoutine.AddBuff(Aspect_of_the_Wild,193530);
             CombatRoutine.AddBuff(Misdirection,34477);
@@ -218,7 +218,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            //API.WriteLog("race  " +PlayerRaceSettings + " cd " + API.CanCast(RacialSpell1) );
+            API.WriteLog("MS  " +(150 - API.PlayerBuffTimeRemaining(Beast_Cleave)));
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
                 CallPetTimer.Stop();
