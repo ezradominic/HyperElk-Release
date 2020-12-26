@@ -218,7 +218,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("MS  " +(150 - API.PlayerBuffTimeRemaining(Beast_Cleave)));
+            //API.WriteLog("MS  " +(150 - API.PlayerBuffTimeRemaining(Beast_Cleave)));
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
                 CallPetTimer.Stop();
