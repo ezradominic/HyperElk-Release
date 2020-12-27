@@ -76,7 +76,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Demonology Warlock @Mufflon12";
-            API.WriteLog("Welcome to Affliction Warlock rotation @ Mufflon12");
+            API.WriteLog("Welcome to Demonology Warlock rotation @ Mufflon12");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
@@ -127,7 +127,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("Buff " + API.PlayerHasBuff(DemonicCore));
 
         }
 
