@@ -153,7 +153,7 @@ namespace HyperElk.Core
 
             //Buffs
             CombatRoutine.AddBuff("Blackout Kick!", 116768);
-            CombatRoutine.AddBuff("Dance of Chi-Ji", 325201);
+            CombatRoutine.AddBuff("Dance of Chi-Ji", 325202);
             CombatRoutine.AddBuff("Storm,  Earth,  and Fire", 137639);
             CombatRoutine.AddBuff("Serenity", 152173);
 
@@ -171,6 +171,12 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            //Spinnging Crane Kick
+            if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >= 7 && API.PlayerCurrentChi >= 2 && API.PlayerIsTalentSelected(6, 3) && API.PlayerHasBuff(DanceofChiJi))
+            {
+                API.CastSpell(SpinningCraneKick);
+                return;
+            }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
             {
                 API.CastSpell(PhialofSerenity);
@@ -211,7 +217,7 @@ namespace HyperElk.Core
                 return;
             }
             //InvokeXuen
-            if (!API.SpellISOnCooldown(InvokeXuen) && PlayerLevel >= 42 && (UseInvokeXuen == "with Cooldowns"))
+            if (IsCooldowns && !API.SpellISOnCooldown(InvokeXuen) && PlayerLevel >= 42 && (UseInvokeXuen == "with Cooldowns"))
             {
                 API.CastSpell(InvokeXuen);
                 return;
@@ -309,7 +315,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Spinnging Crane Kick
-                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >=7 && API.PlayerCurrentChi >=2 && API.PlayerIsTalentSelected(6, 3) && API.TargetHasDebuff(MarkoftheCrane) && API.PlayerHasBuff(DanceofChiJi))
+                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >= 7 && API.PlayerCurrentChi >= 2 && API.PlayerIsTalentSelected(6, 3) && API.PlayerHasBuff(DanceofChiJi))
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
