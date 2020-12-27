@@ -1,11 +1,12 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics;
 namespace HyperElk.Core
 {
-    public class AfflictionWarlock : CombatRoutine
+    public class DemonologyWarlock : CombatRoutine
     {
         //Spells,Buffs,Debuffs
         private string ShadowBolt = "Shadow Bolt";
@@ -17,7 +18,7 @@ namespace HyperElk.Core
         private string SummonSuccubus = "Summon Succubus";
         private string SummonFelhunter = "Summon Felhunter";
         private string HandofGuldan = "Hand of Gul'dan";
-        private string CallDreadstalkers  = "Call Dreadstalkers";
+        private string CallDreadstalkers = "Call Dreadstalkers";
         private string Implosion = "Implosion";
         private string NetherPortal = "Nether Portal";
         private string SummonDemonicTyrant = "Summon Demonic Tyrant";
@@ -50,10 +51,12 @@ namespace HyperElk.Core
         private bool TalentBilescourgeBombers => API.PlayerIsTalentSelected(1, 2);
         private bool TalentNetherPortal => API.PlayerIsTalentSelected(7, 3);
         //Misc
+        private static readonly Stopwatch ImpWatch = new Stopwatch();
+
         private bool IsRange => API.TargetRange < 40;
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
-//        private bool NotCasting => !API.PlayerIsCasting;
+        //        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
 
@@ -72,12 +75,9 @@ namespace HyperElk.Core
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Affliction Warlock @Mufflon12";
+            CombatRoutine.Name = "Demonology Warlock @Mufflon12";
             API.WriteLog("Welcome to Affliction Warlock rotation @ Mufflon12");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-
-            API.WriteLog("Use /stopcasting /cast agony macro");
-            API.WriteLog("Use /stopcasting /cast corruption macro");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
@@ -88,29 +88,29 @@ namespace HyperElk.Core
 
 
             //Spells
-            CombatRoutine.AddSpell("Shadow Bolt", 686,"D1");
-            CombatRoutine.AddSpell("Hand of Gul'dan", 105174,"D2");
-            CombatRoutine.AddSpell("Call Dreadstalkers", 104316,"D3");
-            CombatRoutine.AddSpell("Implosion", 196277,"D4");
-            CombatRoutine.AddSpell(SummonDemonicTyrant, 265187,"D9");
-            CombatRoutine.AddSpell(BilescourgeBombers, 267211,"D7");
-            CombatRoutine.AddSpell(SummonVilefiend, 264119,"D7");
-            CombatRoutine.AddSpell(SoulStrike, 264057,"D8");
-            CombatRoutine.AddSpell(Demonbolt, 264178,"D6");
-            CombatRoutine.AddSpell(GrimoireFelguard, 111898,"D0");
+            CombatRoutine.AddSpell("Shadow Bolt", 686, "D1");
+            CombatRoutine.AddSpell("Hand of Gul'dan", 105174, "D2");
+            CombatRoutine.AddSpell("Call Dreadstalkers", 104316, "D3");
+            CombatRoutine.AddSpell("Implosion", 196277, "D4");
+            CombatRoutine.AddSpell(SummonDemonicTyrant, 265187, "D9");
+            CombatRoutine.AddSpell(BilescourgeBombers, 267211, "D7");
+            CombatRoutine.AddSpell(SummonVilefiend, 264119, "D7");
+            CombatRoutine.AddSpell(SoulStrike, 264057, "D8");
+            CombatRoutine.AddSpell(Demonbolt, 264178, "D6");
+            CombatRoutine.AddSpell(GrimoireFelguard, 111898, "D0");
             CombatRoutine.AddSpell(Doom, 603);
             CombatRoutine.AddSpell(DemonicStrength, 267171);
             CombatRoutine.AddSpell(PowerSiphon, 264130);
 
-            CombatRoutine.AddSpell("Drain Life", 234153,"NumPad1");
-            CombatRoutine.AddSpell("Health Funnel", 755,"NumPad2");
+            CombatRoutine.AddSpell("Drain Life", 234153, "NumPad1");
+            CombatRoutine.AddSpell("Health Funnel", 755, "NumPad2");
             CombatRoutine.AddSpell(ScouringTithe, 312321, "F1");
             CombatRoutine.AddSpell(SoulRot, 325640, "F1");
             CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
             CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
 
 
-            CombatRoutine.AddSpell(SummonFelguard, 30146,"NumPad5");
+            CombatRoutine.AddSpell(SummonFelguard, 30146, "NumPad5");
             CombatRoutine.AddSpell("Summon Felhunter", 691, "NumPad6");
             CombatRoutine.AddSpell("Summon Succubus", 712, "NumPad7");
             CombatRoutine.AddSpell("Summon Voidwalker", 697, "NumPad8");
@@ -119,7 +119,7 @@ namespace HyperElk.Core
 
             //Buffs
             CombatRoutine.AddBuff(NetherPortal);
-            CombatRoutine.AddBuff(DemonicCore, 267102);
+            CombatRoutine.AddBuff(DemonicCore, 264173);
             CombatRoutine.AddBuff(DemonicPower, 265273);
             //Debuffs
         }
@@ -127,19 +127,28 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            API.WriteLog("Buff " + API.PlayerHasBuff(DemonicCore));
 
         }
 
         public override void CombatPulse()
         {
+            if (ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 10000)
+            {
+                API.CastSpell(Implosion);
+                ImpWatch.Stop();
+                ImpWatch.Reset();
+                return;
+            }
             rotation();
             return;
 
         }
         private void rotation()
         {
-            if (NotMoving && IsRange && API.PlayerCurrentCastTimeRemaining > 40 && NotChanneling)
+            if (NotMoving && IsRange && NotChanneling && !API.PlayerIsCasting(true))
             {
+
                 //actions+=/run_action_list,name=summon_tyrant,if=variable.tyrant_ready
                 if (API.CanCast(SummonDemonicTyrant))
                 {
@@ -177,7 +186,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/implosion,if=active_enemies>1&!talent.sacrificed_souls.enabled&buff.wild_imps.stack>=8&buff.tyrant.down&cooldown.summon_demonic_tyrant.remains>5
-                if (API.CanCast(Implosion) && API.TargetUnitInRangeCount >= 1 && !TalentSacrificedSouls && API.PlayerImpCount >= 8 && !API.PlayerHasBuff(DemonicPower) && API.SpellCDDuration(SummonDemonicTyrant) >=500)
+                if (API.CanCast(Implosion) && API.TargetUnitInRangeCount >= 1 && !TalentSacrificedSouls && API.PlayerImpCount >= 8 && !API.PlayerHasBuff(DemonicPower) && API.SpellCDDuration(SummonDemonicTyrant) >= 500)
                 {
                     API.CastSpell(Implosion);
                     return;
@@ -192,12 +201,16 @@ namespace HyperElk.Core
                 if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 5 && API.PlayerHasBuff(NetherPortal))
                 {
                     API.CastSpell(HandofGuldan);
+                    ImpWatch.Reset();
+                    ImpWatch.Start();
                     return;
                 }
                 //actions+=/hand_of_guldan,if=soul_shard>=3&cooldown.summon_demonic_tyrant.remains>20&(cooldown.summon_vilefiend.remains>5|!talent.summon_vilefiend.enabled)&cooldown.call_dreadstalkers.remains>2
                 if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 3 && API.SpellCDDuration(SummonDemonicTyrant) >= 200 && API.SpellCDDuration(SummonVilefiend) >= 500 && API.SpellCDDuration(CallDreadstalkers) >= 200)
                 {
                     API.CastSpell(HandofGuldan);
+                    ImpWatch.Reset();
+                    ImpWatch.Start();
                     return;
                 }
                 //actions+=/call_action_list,name=covenant,if=(covenant.necrolord|covenant.night_fae)&!talent.nether_portal.enabled
@@ -209,14 +222,15 @@ namespace HyperElk.Core
                 if (!TalentNetherPortal && API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
                 {
                     API.CastSpell(DecimatingBolt);
-                    return;                    
+                    return;
                 }
                 //actions+=/demonbolt,if=buff.demonic_core.react&soul_shard<4
-                if (API.CanCast(Demonbolt) && API.PlayerHasBuff(DemonicCore) && API.PlayerCurrentSoulShards <= 4)
+                if (!API.SpellISOnCooldown(Demonbolt) && API.PlayerHasBuff(DemonicCore) && API.PlayerCurrentSoulShards <= 4)
                 {
                     API.CastSpell(Demonbolt);
                     return;
                 }
+
                 //actions+=/grimoire_felguard,if=cooldown.summon_demonic_tyrant.remains+cooldown.summon_demonic_tyrant.duration>time_to_die|time_to_die<cooldown.summon_demonic_tyrant.remains+15
                 if (API.CanCast(GrimoireFelguard) && API.SpellCDDuration(SummonDemonicTyrant) + API.PlayerBuffTimeRemaining(DemonicPower) >= API.TargetTimeToDie)
                 {
@@ -233,12 +247,6 @@ namespace HyperElk.Core
                 if (TalentSoulStrike && !API.SpellISOnCooldown(SoulStrike) && API.PlayerHasPet && (isMisdirection == "Felguard"))
                 {
                     API.CastSpell(SoulStrike);
-                    return;
-                }
-                //actions+=/shadow_bolt
-                if (API.CanCast(ShadowBolt))
-                {
-                    API.CastSpell(ShadowBolt);
                     return;
                 }
                 //actions.covenant=impending_catastrophe,if=!talent.sacrificed_souls.enabled|active_enemies>1
@@ -276,6 +284,8 @@ namespace HyperElk.Core
                 if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 5)
                 {
                     API.CastSpell(HandofGuldan);
+                    ImpWatch.Reset();
+                    ImpWatch.Start();
                     return;
                 }
 
@@ -310,6 +320,7 @@ namespace HyperElk.Core
                     API.CastSpell(ShadowBolt);
                     return;
                 }
+
 
 
             }
