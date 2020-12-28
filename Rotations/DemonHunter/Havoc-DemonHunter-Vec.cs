@@ -249,7 +249,7 @@ private string furious_gaze = "Furious Gaze";
         {
             if (!API.PlayerIsMounted && !Playeriscasting)
             {
-                //API.WriteLog("debug:" + "cancast "+ API.CanCast(Metamorphosis)+ "when "+ UseMetamorphosis);
+               // API.WriteLog("debug:" + "cancast " + API.CanCast(Metamorphosis) + " when " + UseMetamorphosis + " cooldowns? " + IsCooldowns);
                 if (isInterrupt && MeleeRange && PlayerLevel >= 29)
                 {
                     API.CastSpell(Disrupt);
@@ -258,13 +258,13 @@ private string furious_gaze = "Furious Gaze";
                 //API.WriteLog("lastspell " + API.LastSpellCastInGame);
                 #region Cooldowns
                 //apl_cooldown->add_action(this, "Metamorphosis", "if=!(talent.demonic.enabled|variable.pooling_for_meta)&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)|target.time_to_die<25");
-                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && ((UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && !(Talent_Demonic || PoolingForMeta) || API.TargetTimeToDie < 2500))
+                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) &&(!(Talent_Demonic || PoolingForMeta) || API.TargetTimeToDie < 2500))
                 {
                     API.CastSpell(Metamorphosis);
 
                 }
                 //apl_cooldown->add_action(this, "Metamorphosis", "                                                                                                 if=talent.demonic.enabled&(&level<54|(cooldown.eye_beam.remains>20&(!variable.blade_dance|cooldown.blade_dance.remains>gcd.max)))&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)");
-                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && ((UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && Talent_Demonic && (API.PlayerLevel < 54 || (API.SpellCDDuration(Eye_Beam) > 2000 && (!BladeDance || API.SpellCDDuration(Blade_Dance) > 150)))))
+                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && (Talent_Demonic && (API.PlayerLevel < 54 || (API.SpellCDDuration(Eye_Beam) > 2000 && (!BladeDance || API.SpellCDDuration(Blade_Dance) > 150)))))
                 {
                     API.CastSpell(Metamorphosis);
 
