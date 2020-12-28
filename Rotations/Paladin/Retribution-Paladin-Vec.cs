@@ -201,7 +201,6 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             CombatRoutine.AddToggle("Small CDs");
-            CombatRoutine.AddToggle("Use DnD");
             CombatRoutine.AddToggle("MO Heal");
             CombatRoutine.AddToggle("Focus Heal");
             //CBProperties
