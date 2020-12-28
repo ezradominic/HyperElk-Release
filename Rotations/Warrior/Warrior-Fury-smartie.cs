@@ -16,6 +16,7 @@
 // v2.4 spell ids added + Berserker rage in fear + storm bolt as kick
 // v2.5 quick hotfix on phone lul
 // v2.6 Rallying Cry added
+// v2.7 Ignore Pain added
 
 using System.Linq;
 
@@ -63,6 +64,7 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string AoE = "AOE";
         private string AoERaid = "AoERaid";
+        private string IgnorePain = "Ignore Pain";
 
         //Talents
         bool TalentImpendingVictory => API.PlayerIsTalentSelected(2, 2);
@@ -121,11 +123,12 @@ namespace HyperElk.Core
         private string UseSiegebreaker => CDUsage[CombatRoutine.GetPropertyInt(Siegebreaker)];
         private string UseDragonRoar => CDUsageWithAOE[CombatRoutine.GetPropertyInt(DragonRoar)];
         private string UseBladestorm => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Bladestorm)];
+        private int IgnorePainLifePercent => numbList[CombatRoutine.GetPropertyInt(IgnorePain)];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.6");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.7");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, 23881, "D1");
@@ -156,6 +159,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(AncientAftershock,325886, "D1");
             CombatRoutine.AddSpell(SpearofBastion,307865, "D1");
             CombatRoutine.AddSpell(Slam,1464, "None");
+            CombatRoutine.AddSpell(IgnorePain, 190456, "D9");
 
             //Macros
             CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
@@ -174,6 +178,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Victorious, 32216);
             CombatRoutine.AddBuff(WilloftheBerserker, 335597);
             CombatRoutine.AddBuff(Frenzy, 335077);
+            CombatRoutine.AddBuff(IgnorePain, 190456);
 
             //Debuff
             CombatRoutine.AddDebuff(Siegebreaker,280773);
@@ -203,6 +208,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(VictoryRush, VictoryRush + " Life Percent", numbList, "Life percent at which" + VictoryRush + " is used, set to 0 to disable", "Defense", 80);
             CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", numbList, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 80);
+            CombatRoutine.AddProp(IgnorePain, IgnorePain + " Life Percent", numbList, "Life percent at which" + IgnorePain + " is used, set to 0 to disable", "Defense", 0);
             CombatRoutine.AddProp(AoE, "Rallying Cry Party Units ", numbPartyList, " in Party", "Rallying", 3);
             CombatRoutine.AddProp(AoERaid, "Rallying Cry Raid Units ", numbRaidList, "  in Raid", "Rallying", 3);
             CombatRoutine.AddProp(RallyingCry, RallyingCry + "Life Percent", numbList, "Life percent at which" + RallyingCry + " is used, set to 0 to disable", "Rallying", 50);
@@ -240,6 +246,11 @@ namespace HyperElk.Core
             if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
             {
                 API.CastSpell("Healthstone");
+                return;
+            }
+            if (API.CanCast(IgnorePain) && API.PlayerRage >= 60 && !API.PlayerHasBuff(IgnorePain) && API.PlayerHealthPercent <= IgnorePainLifePercent)
+            {
+                API.CastSpell(IgnorePain);
                 return;
             }
             if (API.CanCast(RallyingCry) && RallyAoE)
