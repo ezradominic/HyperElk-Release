@@ -127,7 +127,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FistsofFury, 113656,"D5");
             CombatRoutine.AddSpell(FistsoftheWhiteTiger, 261947,"D6");
             CombatRoutine.AddSpell(WhirlingDragonPunch, 152175,"D7");
-            CombatRoutine.AddSpell(TouchofDeath, 115080,"D7");
+            CombatRoutine.AddSpell(TouchofDeath, 322109,"D7");
             CombatRoutine.AddSpell(ChiWave, 115098,"D7");
             CombatRoutine.AddSpell(StormEarthandFire, 137639,"OemOpenBrackets");
             CombatRoutine.AddSpell(Serenity, 152173,"OemOpenBrackets");
@@ -143,7 +143,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(RushingJadeWind, 116847,"Oem6");
 
             CombatRoutine.AddSpell(Vivify, 116670,"NumPad1");
-            CombatRoutine.AddSpell(ExpelHarm, 115072,"NumPad2");
+            CombatRoutine.AddSpell(ExpelHarm, 322101,"NumPad2");
             CombatRoutine.AddSpell(EnergizingElixir, 115288,"NumPad3");
             CombatRoutine.AddSpell(DampenHarm, 122278,"F1");
             CombatRoutine.AddSpell(FortifyingBrew, 115203,"F2");
@@ -153,12 +153,12 @@ namespace HyperElk.Core
 
             //Buffs
             CombatRoutine.AddBuff("Blackout Kick!", 116768);
-            CombatRoutine.AddBuff("Dance of Chi-Ji", 325201);
+            CombatRoutine.AddBuff("Dance of Chi-Ji", 325202);
             CombatRoutine.AddBuff("Storm,  Earth,  and Fire", 137639);
             CombatRoutine.AddBuff("Serenity", 152173);
 
             //Debuffs
-            CombatRoutine.AddDebuff("Mark of the Crane");
+            CombatRoutine.AddDebuff("Mark of the Crane", 228287);
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -171,6 +171,12 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            //Spinnging Crane Kick
+            if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >= 7 && API.PlayerCurrentChi >= 2 && API.PlayerIsTalentSelected(6, 3) && API.PlayerHasBuff(DanceofChiJi))
+            {
+                API.CastSpell(SpinningCraneKick);
+                return;
+            }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
             {
                 API.CastSpell(PhialofSerenity);
@@ -211,7 +217,7 @@ namespace HyperElk.Core
                 return;
             }
             //InvokeXuen
-            if (!API.SpellISOnCooldown(InvokeXuen) && PlayerLevel >= 42 && (UseInvokeXuen == "with Cooldowns"))
+            if (IsCooldowns && !API.SpellISOnCooldown(InvokeXuen) && PlayerLevel >= 42 && (UseInvokeXuen == "with Cooldowns"))
             {
                 API.CastSpell(InvokeXuen);
                 return;
@@ -309,7 +315,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Spinnging Crane Kick
-                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >=7 && API.PlayerCurrentChi >=2 && API.PlayerIsTalentSelected(6, 3) && API.TargetHasDebuff(MarkoftheCrane) && API.PlayerHasBuff(DanceofChiJi))
+                if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >= 7 && API.PlayerCurrentChi >= 2 && API.PlayerIsTalentSelected(6, 3) && API.PlayerHasBuff(DanceofChiJi))
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;

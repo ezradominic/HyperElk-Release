@@ -142,7 +142,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Vivify, 116670,"NumPad1");
             CombatRoutine.AddSpell(ChiWave, 115098,"NumPad1");
 
-            CombatRoutine.AddSpell(ExpelHarm, 115072,"NumPad2");
+            CombatRoutine.AddSpell(ExpelHarm, 322101,"NumPad2");
             CombatRoutine.AddSpell(PurifyingBrew, 119582,"NumPad3");
             CombatRoutine.AddSpell(CelestialBrew, 322507,"NumPad4");
             CombatRoutine.AddSpell(FortifyingBrew, 115203,"NumPad5");

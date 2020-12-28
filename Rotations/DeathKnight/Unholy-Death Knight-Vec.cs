@@ -11,7 +11,7 @@ namespace HyperElk.Core
         private string ShackletheUnworthy = "Shackle the Unworthy";
         private string SwarmingMist = "Swarming Mist";
         private string DeathsDue = "Death's Due";
-        private string AbominationLimby = "Abomination Limby";
+        private string AbominationLimb = "Abomination Limb";
         private string UnholyAssault = "Unholy Assault";
         private string Apocalypse = "Apocalypse";
         private string ArmyoftheDead = "Army of the Dead";
@@ -170,7 +170,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ShackletheUnworthy, "F");
             CombatRoutine.AddSpell(SwarmingMist, "F");
             CombatRoutine.AddSpell(DeathsDue, "F");
-            CombatRoutine.AddSpell(AbominationLimby, "F");
+            CombatRoutine.AddSpell(AbominationLimb, "F");
             CombatRoutine.AddSpell(Lichborne, "F12");
 
             CombatRoutine.AddBuff("Cold Heart");
@@ -346,9 +346,9 @@ namespace HyperElk.Core
                     API.CastSpell(ShackletheUnworthy);
                     return;
                 }
-                if (API.CanCast(AbominationLimby) && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+                if (API.CanCast(AbominationLimb) && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
                 {
-                    API.CastSpell(AbominationLimby);
+                    API.CastSpell(AbominationLimb);
                     return;
                 }
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)

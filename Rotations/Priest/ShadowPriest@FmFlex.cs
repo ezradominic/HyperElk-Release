@@ -77,61 +77,61 @@ namespace HyperElk.Core
         //actions+=/variable,name=searing_nightmare_cutoff,op=set,value=spell_targets.mind_sear>3
         bool searing_nightmare_cutoff => API.TargetUnitInRangeCount > 3;
         //actions+=/variable,name=pi_or_vf_sync_condition,op=set,value=(priest.self_power_infusion|runeforge.twins_of_the_sun_priestess.equipped)&level>=58&cooldown.power_infusion.up|(level<58|!priest.self_power_infusion&!runeforge.twins_of_the_sun_priestess.equipped)&cooldown.void_eruption.up
-        bool pi_or_vf_sync_condition => (PlayerLevel >= 58 && (API.CanCast(PowerInfusion)|| API.PlayerHasBuff(PowerInfusion)) && API.CanCast(VoidEruption)) || (PlayerLevel < 58 && PlayerLevel >= 23 && API.CanCast(VoidEruption));
+        bool pi_or_vf_sync_condition => (PlayerLevel >= 58 && (API.CanCast(PowerInfusion) || API.PlayerHasBuff(PowerInfusion)) && API.CanCast(VoidEruption)) || (PlayerLevel < 58 && PlayerLevel >= 23 && API.CanCast(VoidEruption));
 
         public override void Initialize()
         {
-            CombatRoutine.Name = "Shadow Priest Rotation @FmFlex";
+            CombatRoutine.Name = "Shadow Priest Rotation @FmFlex!";
             API.WriteLog("Welcome to Shadow Priest rotation @ FmFlex");
             API.WriteLog("Create the following mouseover macro and assigned to the bind:");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
             API.WriteLog("VampiricTouchMO - /cast [@mouseover] Vampiric Touch");
 
             //Buff
-            CombatRoutine.AddBuff(Shadowform);
-            CombatRoutine.AddBuff(PWFortitude);
-            CombatRoutine.AddBuff(Voidform);
-            CombatRoutine.AddBuff(PWShield);
-            CombatRoutine.AddBuff(DarkThoughts);
-            CombatRoutine.AddBuff(UnfurlingDarkness);
-            CombatRoutine.AddBuff(BoonOfTheAscended);
-            CombatRoutine.AddBuff(PowerInfusion);
+            CombatRoutine.AddBuff(Shadowform, 232698);
+            CombatRoutine.AddBuff(PWFortitude, 21562);
+            CombatRoutine.AddBuff(Voidform, 94249);
+            CombatRoutine.AddBuff(PWShield, 17);
+            CombatRoutine.AddBuff(DarkThoughts, 341205);
+            CombatRoutine.AddBuff(UnfurlingDarkness, 341273);
+            CombatRoutine.AddBuff(BoonOfTheAscended, 325013);
+            CombatRoutine.AddBuff(PowerInfusion, 10060);
             //Debuff
-            CombatRoutine.AddDebuff(DevouringPlague);
-            CombatRoutine.AddDebuff(SWPain);
-            CombatRoutine.AddDebuff(WeakenedSoul);
-            CombatRoutine.AddDebuff(VampiricTouch);
-            CombatRoutine.AddDebuff(ShadowCrash);
+            CombatRoutine.AddDebuff(DevouringPlague, 335467);
+            CombatRoutine.AddDebuff(SWPain, 589);
+            CombatRoutine.AddDebuff(WeakenedSoul, 6788);
+            CombatRoutine.AddDebuff(VampiricTouch, 34914);
+            CombatRoutine.AddDebuff(ShadowCrash, 205385);
 
             //Spell
-            CombatRoutine.AddSpell(MindFlay, "D1");
-            CombatRoutine.AddSpell(SWPain, "D2");
-            CombatRoutine.AddSpell(AscendedBlast, "R");
-            CombatRoutine.AddSpell(BoonOfTheAscended, "D2");
-            CombatRoutine.AddSpell(MindBlast, "D3");
-            CombatRoutine.AddSpell(ShadowMend, "Q");
-            CombatRoutine.AddSpell(DevouringPlague, "D4");
-            CombatRoutine.AddSpell(Shadowform, "F5");
-            CombatRoutine.AddSpell(SWDeath, "D5");
-            CombatRoutine.AddSpell(VampiricTouch, "D6");
-            CombatRoutine.AddSpell(Shadowfiend, "D7");
-            CombatRoutine.AddSpell(VoidEruption, "D8");
-            CombatRoutine.AddSpell(VoidBolt, "D8");
-            CombatRoutine.AddSpell(MindSear, "D0");
-            CombatRoutine.AddSpell(SearingNightmare, "D1");
-            CombatRoutine.AddSpell(ShadowCrash, "D1");
-            CombatRoutine.AddSpell(VoidTorrent, "D1");
-            CombatRoutine.AddSpell(SurrendertoMadness, "D1");
-            CombatRoutine.AddSpell(Damnation, "D1");
-            CombatRoutine.AddSpell(Silence, "F");
-            CombatRoutine.AddSpell(Mindbender, "D7");
-            CombatRoutine.AddSpell(PowerInfusion, "0");
-            CombatRoutine.AddSpell(VampiricEmbrace, "E");
-            CombatRoutine.AddSpell(DesperatePrayer, "S");
-            CombatRoutine.AddSpell(PWFortitude, "F6");
-            CombatRoutine.AddSpell(PWShield, "F7");
-            CombatRoutine.AddSpell(Mindgames, "0");
-            CombatRoutine.AddMacro(SWPain + "MO", "D2");
+            CombatRoutine.AddSpell(MindFlay, 15407, "D1");
+            CombatRoutine.AddSpell(SWPain, 589, "D2");
+            CombatRoutine.AddSpell(AscendedBlast, 325315, "R");
+            CombatRoutine.AddSpell(BoonOfTheAscended, 325013, "D2");
+            CombatRoutine.AddSpell(MindBlast, 8092, "D3");
+            CombatRoutine.AddSpell(ShadowMend, 186263, "Q");
+            CombatRoutine.AddSpell(DevouringPlague, 335467, "D4");
+            CombatRoutine.AddSpell(Shadowform, 232698, "F5");
+            CombatRoutine.AddSpell(SWDeath, 32379, "D5");
+            CombatRoutine.AddSpell(VampiricTouch, 34914, "D6");
+            CombatRoutine.AddSpell(Shadowfiend, 34433, "D7");
+            CombatRoutine.AddSpell(VoidEruption, 228260, "D8");
+            CombatRoutine.AddSpell(VoidBolt, 205448, "D8");
+            CombatRoutine.AddSpell(MindSear, 48045, "D0");
+            CombatRoutine.AddSpell(SearingNightmare, 341385, "D1");
+            CombatRoutine.AddSpell(ShadowCrash, 205385, "D1");
+            CombatRoutine.AddSpell(VoidTorrent, 263165, "D1");
+            CombatRoutine.AddSpell(SurrendertoMadness, 193223, "D1");
+            CombatRoutine.AddSpell(Damnation, 341374, "D1");
+            CombatRoutine.AddSpell(Silence, 263715, "F");
+            CombatRoutine.AddSpell(Mindbender, 123040, "D7");
+            CombatRoutine.AddSpell(PowerInfusion, 10060, "0");
+            CombatRoutine.AddSpell(VampiricEmbrace, 15286, "E");
+            CombatRoutine.AddSpell(DesperatePrayer, 19236, "S");
+            CombatRoutine.AddSpell(PWFortitude, 21562, "F6");
+            CombatRoutine.AddSpell(PWShield, 17, "F7");
+            CombatRoutine.AddSpell(Mindgames, 323701, "0");
+            CombatRoutine.AddMacro(SWPain, 589 + "MO", "D2");
             CombatRoutine.AddMacro(VampiricTouch + "MO", "D6");
             CombatRoutine.AddMacro(Trincket1);
             CombatRoutine.AddMacro(Trincket2);

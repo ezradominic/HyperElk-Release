@@ -48,10 +48,13 @@ namespace HyperElk.Core
         private string Mindgames = "Mindgames";
         private string BlessingofProtection = "Blessing of Protection";
 
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         private bool IsMouseover => API.ToggleIsEnabled("MO Heal");
         private bool UseSmallCD => API.ToggleIsEnabled("Small CDs");
         private bool HealFocus => API.ToggleIsEnabled("Focus Heal");
+
         //Misc
         private static bool PlayerHasBuff(string buff)
         {
@@ -92,6 +95,7 @@ namespace HyperElk.Core
         private bool Talent_FinalReckoning => API.PlayerIsTalentSelected(7, 3);
 
         //CBProperties
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         string[] AlwaysCooldownsList = new string[] { "always", "with Cooldowns", "on AOE" };
 
@@ -110,6 +114,8 @@ namespace HyperElk.Core
         private string UseWakeofAshes => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseWakeofAshes")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
 
         public override void Initialize()
@@ -190,7 +196,12 @@ namespace HyperElk.Core
 
             CombatRoutine.AddConduit(RingingClarity);
 
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+
             CombatRoutine.AddToggle("Small CDs");
+            CombatRoutine.AddToggle("Use DnD");
             CombatRoutine.AddToggle("MO Heal");
             CombatRoutine.AddToggle("Focus Heal");
             //CBProperties
@@ -199,6 +210,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("RingingClarity", "Ringing Clarity", false, "Do you have Ringing Clarity?", "Conduits");
             CombatRoutine.AddProp(FlashofLight, "Selfless Healer Life Percent", percentListProp, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", FlashofLight, 5);
 
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp("UseSeraphim", "Use " + Seraphim, CDUsage, "Use " + Seraphim + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("UseWakeofAshes", "Use " + "Wake of Ashes", CDUsageWithAOE, "Use " + WakeofAshes + " always, with Cooldowns", "Cooldowns", 0);
@@ -206,8 +220,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("AURASWITCH", "Auto Aura Switch", true, "Auto Switch Aura between Crusader Aura and Devotion Aura", "Generic");
 
-            CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp(BlessingofProtection, BlessingofProtection + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Items", 2);
+            CombatRoutine.AddProp(BlessingofProtection, BlessingofProtection + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Items", 2);
             CombatRoutine.AddProp(ShieldofVengeance, ShieldofVengeance + " Life Percent", percentListProp, "Life percent at which" + ShieldofVengeance + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", percentListProp, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(WordOfGlory, WordOfGlory + " Life Percent", percentListProp, "Life percent at which Word of Glory is used, set to 0 to disable", "Defense", 4);
@@ -251,7 +265,16 @@ namespace HyperElk.Core
                 return;
             }
             #region healing
-
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
             if (API.PlayerHealthPercent <= LayOnHandsLifePercent && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forbearance, false, false))
             {
                 API.CastSpell(LayOnHands);
