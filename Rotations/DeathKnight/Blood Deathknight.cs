@@ -23,7 +23,7 @@ namespace HyperElk.Core
         private int IceboundFortitudePercentLife => percentListProp[CombatRoutine.GetPropertyInt(IceboundFortitude)];
         private int BlooddrinkerPercentLife => percentListProp[CombatRoutine.GetPropertyInt(Blooddrinker)];
         private int DeathPactPercentLife => percentListProp[CombatRoutine.GetPropertyInt(DeathPact)];
-        private int RuneTap1PercentLife=> percentListProp[CombatRoutine.GetPropertyInt(RuneTap)];
+        private int RuneTap1PercentLife => percentListProp[CombatRoutine.GetPropertyInt(RuneTap)];
         private int RuneTap2PercentLife => percentListProp[CombatRoutine.GetPropertyInt(RuneTap2)];
         private int TombstonePercentLife => percentListProp[CombatRoutine.GetPropertyInt(Tombstone)];
 
@@ -94,47 +94,47 @@ namespace HyperElk.Core
 
 
 
-            CombatRoutine.AddSpell("Marrowrend", "D1");
-            CombatRoutine.AddSpell("Blood Boil", "D2");
-            CombatRoutine.AddSpell("Death Strike", "D3");
-            CombatRoutine.AddSpell("Heart Strike", "D4");
-            CombatRoutine.AddSpell("Anti-Magic Shell", "D6");
-            CombatRoutine.AddSpell("Vampiric Blood", "D7");
-            CombatRoutine.AddSpell("Icebound Fortitude", "D8");
-            CombatRoutine.AddSpell("Dancing Rune Weapon", "F10");
-            CombatRoutine.AddSpell("Death and Decay", "D5");
-            CombatRoutine.AddSpell("Mind Freeze", "F");
-            CombatRoutine.AddSpell("Blooddrinker", "F3");
-            CombatRoutine.AddSpell("Death's Caress", "F8");
-            CombatRoutine.AddSpell("Rune Tap", "F7");
-            CombatRoutine.AddSpell("Raise Dead", "NumPad5");
+            CombatRoutine.AddSpell("Marrowrend", 195182, "D1");
+            CombatRoutine.AddSpell("Blood Boil", 50842, "D2");
+            CombatRoutine.AddSpell("Death Strike", 49998, "D3");
+            CombatRoutine.AddSpell("Heart Strike", 206930, "D4");
+            CombatRoutine.AddSpell("Anti-Magic Shell", 48707, "D6");
+            CombatRoutine.AddSpell("Vampiric Blood", 55233, "D7");
+            CombatRoutine.AddSpell("Icebound Fortitude", 48792, "D8");
+            CombatRoutine.AddSpell("Dancing Rune Weapon", 49028, "F10");
+            CombatRoutine.AddSpell("Death and Decay", 43265, "D5");
+            CombatRoutine.AddSpell("Mind Freeze", 47528, "F");
+            CombatRoutine.AddSpell("Blooddrinker", 206931, "F3");
+            CombatRoutine.AddSpell("Death's Caress", 195292, "F8");
+            CombatRoutine.AddSpell("Rune Tap", 194679, "F7");
+            CombatRoutine.AddSpell("Raise Dead", 46585, "NumPad5");
             CombatRoutine.AddSpell("Concentrated Flame", "NumPad2");
-            CombatRoutine.AddSpell("Anti-Magic Zone", "NumPad6");
-            CombatRoutine.AddSpell("Tombstone", "NumPad4");
-            CombatRoutine.AddSpell("Consumption", "NumPad9");
-            CombatRoutine.AddSpell("Blood Tap", "F1");
-            CombatRoutine.AddSpell("Mark of Blood", "F2");
-            CombatRoutine.AddSpell("Death Pact", "F3");
-            CombatRoutine.AddSpell("Bonestorm", "F4");
-            CombatRoutine.AddSpell(BloodforBlood, "NumPad1");
-            CombatRoutine.AddSpell(DeathChain, "NumPad2");
-            CombatRoutine.AddSpell(SwarmingMist, "NumPad2");
-            CombatRoutine.AddSpell(ShackletheUnworthy, "NumPad2");
-            CombatRoutine.AddSpell(AbominationLimb, "NumPad2");
-            CombatRoutine.AddSpell(DeathsDue, "NumPad2");
+            CombatRoutine.AddSpell("Anti-Magic Zone", 51052, "NumPad6");
+            CombatRoutine.AddSpell("Tombstone", 219809, "NumPad4");
+            CombatRoutine.AddSpell("Consumption", 274156, "NumPad9");
+            CombatRoutine.AddSpell("Blood Tap", 221699, "F1");
+            CombatRoutine.AddSpell("Mark of Blood", 206940, "F2");
+            CombatRoutine.AddSpell("Death Pact", 48743, "F3");
+            CombatRoutine.AddSpell("Bonestorm", 194844, "F4");
+            CombatRoutine.AddSpell(BloodforBlood, 233411, "NumPad1");
+            CombatRoutine.AddSpell(DeathChain, 203173, "NumPad2");
+            CombatRoutine.AddSpell(SwarmingMist, 311648, "NumPad2");
+            CombatRoutine.AddSpell(ShackletheUnworthy, 312202, "NumPad2");
+            CombatRoutine.AddSpell(AbominationLimb, 315443, "NumPad2");
+            CombatRoutine.AddSpell(DeathsDue, 324128, "NumPad2");
 
 
-            CombatRoutine.AddBuff("Bone Shield");
-            CombatRoutine.AddBuff("Crimson Scourge");
-            CombatRoutine.AddBuff("Ossuary");
-            CombatRoutine.AddBuff(DancingRuneWeapon);
-            CombatRoutine.AddBuff("Haemostasis");
-            CombatRoutine.AddBuff("Blood Shield");
+            CombatRoutine.AddBuff("Bone Shield", 195181);
+            CombatRoutine.AddBuff("Crimson Scourge", 81136);
+            CombatRoutine.AddBuff("Ossuary", 219786);
+            CombatRoutine.AddBuff(DancingRuneWeapon, 81256);
+            CombatRoutine.AddBuff("Haemostasis", 235559);
+            CombatRoutine.AddBuff("Blood Shield", 77535);
             CombatRoutine.AddBuff(BloodforBlood);
 
 
-            CombatRoutine.AddDebuff("Blood Plague");
-            CombatRoutine.AddDebuff(MarkofBlood);
+            CombatRoutine.AddDebuff("Blood Plague", 55078);
+            CombatRoutine.AddDebuff(MarkofBlood, 61606);
 
 
             CombatRoutine.AddToggle("Defensive");
@@ -198,7 +198,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //Vampiric Blood
-                    if (API.CanCast(VampiricBlood)&& API.PlayerHealthPercent <= VampiricBloodPercentLife && PlayerLevel >= 29)
+                    if (API.CanCast(VampiricBlood) && API.PlayerHealthPercent <= VampiricBloodPercentLife && PlayerLevel >= 29)
                     {
                         API.CastSpell(VampiricBlood);
                         return;
@@ -226,8 +226,8 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-                    rotation();
-                    return;
+                rotation();
+                return;
             }
 
         }
@@ -243,12 +243,12 @@ namespace HyperElk.Core
         bool boneshieldneedrefresh => (API.PlayerBuffStacks(BoneShield) <= (API.PlayerHasBuff(DancingRuneWeapon) ? 4 : 7)) || API.PlayerBuffTimeRemaining(BoneShield) < 300;
         private void rotation()
         {
-            if (API.PlayerHealthPercent >= 80 && API.CanCast(BloodforBlood,true,true) && IsMelee && !API.PlayerHasBuff(BloodforBlood))
+            if (API.PlayerHealthPercent >= 80 && API.CanCast(BloodforBlood, true, true) && IsMelee && !API.PlayerHasBuff(BloodforBlood))
             {
                 API.CastSpell(BloodforBlood);
                 return;
             }
-            if (IsAOE && API.TargetUnitInRangeCount >= 3 && API.CanCast(DeathChain, true, true) && API.TargetRange<=10)
+            if (IsAOE && API.TargetUnitInRangeCount >= 3 && API.CanCast(DeathChain, true, true) && API.TargetRange <= 10)
             {
                 API.CastSpell(DeathChain);
                 return;
@@ -261,7 +261,7 @@ namespace HyperElk.Core
             //Death Strike
             if (((CurrentRP >= 90 && !(IsAOE && IsCooldowns && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerIsTalentSelected(7, 3) && API.CanCast(Bonestorm)))
                 || API.PlayerHealthPercent <= DeathStrikePercentLife)
-                && API.CanCast(DeathStrike,true,true) 
+                && API.CanCast(DeathStrike, true, true)
                 && IsMelee && PlayerLevel >= 4)
             {
                 API.CastSpell(DeathStrike);
@@ -286,7 +286,7 @@ namespace HyperElk.Core
                 return;
             }
             //Death and Decay on Crimson Scourge
-            if (API.CanCast(DeathandDecay) && IsMelee && API.PlayerIsTalentSelected(3   , 2) && API.PlayerHasBuff(CrimsonScourge) && PlayerLevel >= 3)
+            if (API.CanCast(DeathandDecay) && IsMelee && API.PlayerIsTalentSelected(3, 2) && API.PlayerHasBuff(CrimsonScourge) && PlayerLevel >= 3)
             {
                 API.CastSpell(DeathandDecay);
                 return;
@@ -358,7 +358,7 @@ namespace HyperElk.Core
                 return;
             }
             //Hearth Strike
-            if (API.CanCast(HeartStrike)&& !boneshieldneedrefresh && IsMelee && PlayerLevel >= 10)
+            if (API.CanCast(HeartStrike) && !boneshieldneedrefresh && IsMelee && PlayerLevel >= 10)
             {
                 API.CastSpell(HeartStrike);
                 return;
