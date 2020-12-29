@@ -425,23 +425,23 @@ namespace HyperElk.Core
                     API.CastSpell("Pyroblast");
                     return;
                 }
-                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && (!API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 || !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0) && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") >= 80 && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && !CastScorch)
+                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && (!API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 || !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0) && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") >= 80 && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && !CastScorch && (API.PlayerIsMoving || !API.PlayerIsMoving))
                 {
                     API.CastSpell("Scorch");
                     return;
                 }
-                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") >= 80 && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && CastScorch)
+                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") >= 80 && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && CastScorch && (API.PlayerIsMoving || !API.PlayerIsMoving)) 
                 {
                     API.CastSpell("Scorch");
                     return;
                 }
-                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && !API.PlayerHasBuff(Firestorm) && SearingTouch && API.TargetHealthPercent <= 30 && API.TargetHealthPercent > 0 && (!API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0) && (API.PlayerHasBuff("Combustion") || !API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && !CastScorch)
+                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && !API.PlayerHasBuff(Firestorm) && SearingTouch && API.TargetHealthPercent <= 30 && (!API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0) && (API.PlayerHasBuff("Combustion") || !API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && !CastScorch && (API.PlayerIsMoving || !API.PlayerIsMoving))
                 { 
                     API.CastSpell("Scorch");
                     API.WriteLog("Scorch under 30%");
                     return;
                 }
-                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && !API.PlayerHasBuff(Firestorm) && SearingTouch && API.TargetHealthPercent <= 30 && API.TargetHealthPercent > 0 && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && (API.PlayerHasBuff("Combustion") || !API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && CastScorch)
+                if (API.CanCast("Scorch") && !API.PlayerIsCasting(true) && !API.PlayerHasBuff(Firestorm) && SearingTouch && API.TargetHealthPercent <= 30 && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") == 0 && (API.PlayerHasBuff("Combustion") || !API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 13 && !CastFB && CastScorch && (API.PlayerIsMoving || !API.PlayerIsMoving))
                 {
                    API.CastSpell("Scorch");
                    API.WriteLog("Scorch under 30%");

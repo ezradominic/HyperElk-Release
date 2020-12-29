@@ -53,8 +53,17 @@ namespace HyperElk.Core
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
         private string AoEDPS = "AOEDPS";
+        private string AoEDPSRaid = "AOEDPS Raid";
         private string AoEDPSH = "AOEDPS Health";
+        private string AoEDPSHRaid = "AOEDPS Health Raid";
         private string TargetChange = "Target Change";
+        private string AoERaid = "AOE Healing Raid";
+        private string WOGMax = "Word of Glory Healing at Max HP";
+        private string LODMax = "Light of Dawn Healing at Max HP";
+        private string TargetHostile = "Target Last Hostile";
+        private string RuleofLaw = "Rule of Law";
+        private string GlimmerofLight = "Glimmer of Light";
+        private string ShockBarrier = "Shock Barrier";
 
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
@@ -75,23 +84,25 @@ namespace HyperElk.Core
         bool BlindingLight => API.PlayerIsTalentSelected(3, 3);
         bool UnbreakableSpirit => API.PlayerIsTalentSelected(4, 1);
         bool Calvalier => API.PlayerIsTalentSelected(4, 2);
-        bool RuleofLaw => API.PlayerIsTalentSelected(4, 3);
+        bool RuleofLawTalent => API.PlayerIsTalentSelected(4, 3);
         bool DivinePurpose => API.PlayerIsTalentSelected(5, 1);
         bool HolyAvengerT => API.PlayerIsTalentSelected(5, 2);
         bool SeraphimT => API.PlayerIsTalentSelected(5, 3);
         bool SancifiedWrath => API.PlayerIsTalentSelected(6, 1);
         bool AvengingCrusaderT => API.PlayerIsTalentSelected(6, 2);
         bool Awakening => API.PlayerIsTalentSelected(6, 3);
-        bool GlimmerofLight => API.PlayerIsTalentSelected(7, 1);
+        bool GlimmerofLightTalent => API.PlayerIsTalentSelected(7, 1);
         bool BeaconofFaith => API.PlayerIsTalentSelected(7, 2);
         bool BeaconofVirtue => API.PlayerIsTalentSelected(7, 3);
 
         //CBProperties
+        public string[] LegendaryList = new string[] { "None", "Shock Barrier"};
+        private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
         int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40 };
-        private string[] units = { "player", "party1", "party2", "party3", "party4" };
-        private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
+        string[] units = { "player", "party1", "party2", "party3", "party4" };
+        string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         int PlayerHealth => API.TargetHealthPercent;
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
         string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
@@ -100,14 +111,18 @@ namespace HyperElk.Core
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
+        private int BuffRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p));
+        private int BuffPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p));
 
-        private bool DPSHealthCheck => UnitBelowHealthPercent(AoEDPSHLifePercent) >= AoEDPSNumber;
+        private bool GlimmerTracking => API.PlayerIsInRaid ? BuffRaidTracking(GlimmerofLight) <= 8 : BuffPartyTracking(GlimmerofLight) <= 5;
+        private bool DPSHealthCheck => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber : UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber;
         private bool DPSMouseOver => API.MouseoverHealthPercent <= AoEDPSHLifePercent;
         private bool LoDAoE => UnitBelowHealthPercent(LoDLifePercent) >= AoENumber;
+        private bool LoDMaxAoE => UnitBelowHealthPercent(LoDMaxLifePercent) >= AoENumber;
         private bool BoVAoE => UnitBelowHealthPercent(BoVLifePercent) >= AoENumber;
         private bool HPAoE => UnitBelowHealthPercent(HPLifePercent) >= AoENumber;
         private bool DTAoE => UnitBelowHealthPercent(DTLifePercent) >= AoENumber;
-        private bool AMAoE => UnitBelowHealthPercent(AMLifePercent) >= AoENumber;
+        private bool AMAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AMLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(AMLifePercent) >= AoENumber;
 
         private bool LodParty(int i)
         {
@@ -165,7 +180,7 @@ namespace HyperElk.Core
 
         }
         private bool DTRaid1 => DTRaid(1);
-        private bool IsAutoSwap => CombatRoutine.GetPropertyBool("Auto Swap");
+        private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
         private bool PlayerSwap => API.UnitHealthPercent(Player) <= PartySwapPercent;
         private bool Party1Swap => API.UnitHealthPercent(Party1) <= PartySwapPercent;
         private bool Party2Swap => API.UnitHealthPercent(Party2) <= PartySwapPercent;
@@ -178,12 +193,14 @@ namespace HyperElk.Core
         private int HolyLightLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyLight)];
         private int FoLLifePercent => numbList[CombatRoutine.GetPropertyInt(FoL)];
         private int WoGLifePercent => numbList[CombatRoutine.GetPropertyInt(WoG)];
+        private int WoGMaxLifePercent => numbList[CombatRoutine.GetPropertyInt(WOGMax)];
         private int BoSLifePercent => numbList[CombatRoutine.GetPropertyInt(BoS)];
         private int FolILifePercent => numbList[CombatRoutine.GetPropertyInt(FoLI)];
         private int HoLILifePercent => numbList[CombatRoutine.GetPropertyInt(HoLI)];
         private int LoHLifePercent => numbList[CombatRoutine.GetPropertyInt(LoH)];
         private int BFLifePercent => numbList[CombatRoutine.GetPropertyInt(BF)];
         private int LoDLifePercent => numbList[CombatRoutine.GetPropertyInt(LoD)];
+        private int LoDMaxLifePercent => numbList[CombatRoutine.GetPropertyInt(LODMax)];
         private int BoVLifePercent => numbList[CombatRoutine.GetPropertyInt(BoV)];
         private int HPLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyPrism)];
         private int PartySwapPercent => numbList[CombatRoutine.GetPropertyInt(PartySwap)];
@@ -194,15 +211,18 @@ namespace HyperElk.Core
         private int LoTMLifePercent => numbList[CombatRoutine.GetPropertyInt(LoTM)];
         private int LoTMMovingLifePercent => numbList[CombatRoutine.GetPropertyInt(LoTMM)];
         private int AoEDPSHLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSH)];
+        private int AoEDPSHRaidLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSHRaid)];
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         private int AoENumber => numbPartyList[CombatRoutine.GetPropertyInt(AoE)];
-        private int AoEDPSNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoEDPS)];
+        private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoERaid)];
+        private int AoEDPSNumber => numbPartyList[CombatRoutine.GetPropertyInt(AoEDPS)];
+        private int AoEDPSRaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoEDPSRaid)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         //General
         private int Level => API.PlayerLevel;
-        private bool InRange => IsMouseover ? API.MouseoverRange <= 40 : API.TargetRange <= 40;
+        private bool InRange => IsMouseover ? API.MouseoverRange <= 40 : API.TargetRange <= 40 || API.PlayerHasBuff(RuleofLaw) && IsMouseover ? API.MouseoverRange <= 60 : API.TargetRange <= 60;
         private bool IsMelee => API.TargetRange < 6;
 
         private bool IsMoMelee = API.MouseoverRange < 6;
@@ -219,8 +239,8 @@ namespace HyperElk.Core
         //Spell Check Bools
         private bool LoTMCheck => API.CanCast(LoTM)  && InRange && !API.PlayerCanAttackTarget && !API.PlayerIsTargetTarget && (API.PlayerIsMoving && API.TargetHealthPercent <= LoTMMovingLifePercent || API.TargetHealthPercent <= LoTMLifePercent) && API.PlayerHealthPercent >= LoTMHealthPercent && API.TargetHealthPercent > 0;
         private bool LoTMCheckMO => API.CanCast(LoTM) && IsMouseover && InRange && !API.PlayerCanAttackMouseover && !API.PlayerIsTargetTarget && (API.PlayerIsMoving && API.MouseoverHealthPercent <= LoTMMovingLifePercent || API.MouseoverHealthPercent <= LoTMLifePercent) && API.PlayerHealthPercent >= LoTMHealthPercent && API.MouseoverHealthPercent > 0;
-        private bool HolyShockCheck => API.CanCast(HolyShock) && InRange  && API.TargetHealthPercent <= HolyShockLifePercent && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower <= 4;
-        private bool HolyShockCheckMO => API.CanCast(HolyShock) && InRange && IsMouseover && API.MouseoverHealthPercent <= HolyShockLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && API.PlayerCurrentHolyPower <= 4;
+        private bool HolyShockCheck => API.CanCast(HolyShock) && InRange  && (API.TargetHealthPercent <= HolyShockLifePercent || GlimmerTracking && !API.TargetHasBuff(GlimmerofLight) && GlimmerofLightTalent || UseLeg == "Shock Barrier" && GlimmerTracking && GlimmerofLightTalent && !API.TargetHasBuff(ShockBarrier) && (API.TargetHasBuff(GlimmerofLight) || !API.TargetHasBuff(GlimmerofLight)) || UseLeg == "Shock Barrier" && !API.TargetHasBuff(ShockBarrier)) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower <= 4;
+        private bool HolyShockCheckMO => API.CanCast(HolyShock) && InRange && IsMouseover && (API.MouseoverHealthPercent <= HolyShockLifePercent || GlimmerTracking && !API.MouseoverHasBuff(GlimmerofLight) && GlimmerofLightTalent || UseLeg == "Shock Barrier" && GlimmerTracking && GlimmerofLightTalent && !API.MouseoverHasBuff(ShockBarrier) && (API.MouseoverHasBuff(GlimmerofLight) || !API.MouseoverHasBuff(GlimmerofLight)) || UseLeg == "Shock Barrier" && !API.MouseoverHasBuff(ShockBarrier)) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && API.PlayerCurrentHolyPower <= 4;
         private bool HolyLightCheck => API.CanCast(HolyLight) && InRange  && API.TargetHealthPercent <= HolyLightLifePercent && API.TargetHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget;
         private bool HolyLightCheckMO => API.CanCast(HolyLight) && InRange && IsMouseover && API.MouseoverHealthPercent <= HolyLightLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackMouseover;
         private bool HolyLightInfusionCheck => API.CanCast(HolyLight) && API.PlayerHasBuff(Infusion) && InRange  && API.TargetHealthPercent <= HoLILifePercent && API.TargetHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget;
@@ -229,11 +249,11 @@ namespace HyperElk.Core
         private bool FlashofLightCheckMO => API.CanCast(FoL) && InRange && IsMouseover && API.MouseoverHealthPercent <= FoLLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackMouseover;
         private bool FlashofLightInfusionCheck => API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && InRange  && API.TargetHealthPercent <= FolILifePercent && API.TargetHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget;
         private bool FlashofLightInfusionCheckMO => API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && IsMouseover && InRange && API.MouseoverHealthPercent <= FolILifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackMouseover;
-        private bool WoGCheck => API.CanCast(WoG) && InRange  && API.PlayerCurrentHolyPower >= 3 && (API.TargetHealthPercent <= WoGLifePercent || API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
-        private bool WoGCheckMO => API.CanCast(WoG) && InRange && IsMouseover && API.PlayerCurrentHolyPower >= 3 && (API.MouseoverHealthPercent <= WoGLifePercent || API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
+        private bool WoGCheck => API.CanCast(WoG) && InRange  && API.PlayerCurrentHolyPower >= 3 && (API.TargetHealthPercent <= WoGLifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
+        private bool WoGCheckMO => API.CanCast(WoG) && InRange && IsMouseover && API.PlayerCurrentHolyPower >= 3 && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
         private bool BFCheck => API.CanCast(BF) && BestowFaith && InRange  && API.TargetHealthPercent <= BFLifePercent && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
         private bool BFCheckMO => API.CanCast(BF) && BestowFaith && InRange && IsMouseover && API.MouseoverHealthPercent <= BFLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
-        private bool LoDCheck => API.CanCast(LoD) && (IsMouseover || !IsMouseover) && API.PlayerCurrentHolyPower >= 3 && (API.TargetRange <= 15 || API.MouseoverRange <= 15) && (LoDAoE || LoDAoE && API.PlayerCurrentHolyPower == 5) && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover);
+        private bool LoDCheck => API.CanCast(LoD) && (IsMouseover || !IsMouseover) && API.PlayerCurrentHolyPower >= 3 && (API.TargetRange <= 15 || API.MouseoverRange <= 15) && (LoDAoE || LoDMaxAoE && API.PlayerCurrentHolyPower == 5) && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover);
         private bool BoVCheck => API.CanCast(BoV) && BeaconofVirtue  && InRange && BoVAoE && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
         private bool BoVCheckMO => API.CanCast(BoV) && BeaconofVirtue && InRange && IsMouseover && BoVAoE && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
         private bool DTCheck => API.CanCast(DivineToll) && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && InRange;
@@ -245,6 +265,9 @@ namespace HyperElk.Core
         private bool BoSCheck => API.CanCast(BoS) && InRange  && API.TargetHealthPercent <= BoSLifePercent && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && !API.PlayerIsTargetTarget;
         private bool BoSCheckMO => API.CanCast(BoS) && InRange && IsMouseover && API.MouseoverHealthPercent <= BoSLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackTarget && !API.PlayerIsTargetTarget;
         private bool AuraMasteryCheck => API.CanCast(AuraMastery) && InRange && (IsMouseover || !IsMouseover) && AMAoE && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover);
+        //Auto Target Checks
+        private bool LoHAutoCheck => API.CanCast(LoH) && InRange && !API.TargetHasBuff(Forbearance);
+
         //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
         //  public int interruptDelay => random.Next((int)(CombatRoutine.GetPropertyInt("KICKTime") * 0.9), (int)(CombatRoutine.GetPropertyInt("KICKTime") * 1.1));
 
@@ -258,7 +281,7 @@ namespace HyperElk.Core
             API.WriteLog("If you use Lights Hammer Macro, you need to use an /addonname break to stop the rotation to be able to cast it.");
             API.WriteLog("Maunual targeting, Auto Tareting (For party only) or Mouseover Supported. You need to create /cast [@mouseover] xxxx where xxx is each of the spells that have MO in the bindings in order for Mouseover to work");
             API.WriteLog("Venthyr and Night Fae Cov's are not supported. You can create a /xxx break marco to use those abilties when you would like at this time.");
-            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's's in the spell book. Enable it the settings and set your party swap health perecent and target check percent. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This works ONLY for party at this time.");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Target Last Hostile and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it swap, friendly or enemy. It will NOT swap back to Enemeies. This works ONLY for party at this time. While Raid may be in the spellbook, it is not supported yet.");
             //Buff
             CombatRoutine.AddBuff(Infusion, 54149);
             CombatRoutine.AddBuff(AvengingWrath, 31884);
@@ -266,6 +289,9 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Forbearance, 25771);
             CombatRoutine.AddBuff(CrusaderAura, 32223);
             CombatRoutine.AddBuff(DevotionAura, 465);
+            CombatRoutine.AddBuff(RuleofLaw, 214202);
+            CombatRoutine.AddBuff(GlimmerofLight, 287280);
+            CombatRoutine.AddBuff(ShockBarrier, 337824);
 
             //Debuff
             CombatRoutine.AddDebuff(Forbearance, 25771);
@@ -301,6 +327,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DivineToll, 304971);
             CombatRoutine.AddSpell(VanqusihersHammer, 328204);
             CombatRoutine.AddSpell(AshenHallow, 316958);
+            CombatRoutine.AddSpell(RuleofLaw, 214202);
+            
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -308,6 +336,7 @@ namespace HyperElk.Core
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Auto Target");
 
             //Mouseover
             CombatRoutine.AddMacro(HolyLight + "MO", "None");
@@ -326,11 +355,52 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(WoG + "MO");
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(TargetHostile);
             CombatRoutine.AddMacro(Player);
             CombatRoutine.AddMacro(Party1);
             CombatRoutine.AddMacro(Party2);
             CombatRoutine.AddMacro(Party3);
             CombatRoutine.AddMacro(Party4);
+            CombatRoutine.AddMacro("raid1");
+            CombatRoutine.AddMacro("raid2");
+            CombatRoutine.AddMacro("raid3");
+            CombatRoutine.AddMacro("raid4");
+            CombatRoutine.AddMacro("raid5");
+            CombatRoutine.AddMacro("raid6");
+            CombatRoutine.AddMacro("raid7");
+            CombatRoutine.AddMacro("raid8");
+            CombatRoutine.AddMacro("raid9");
+            CombatRoutine.AddMacro("raid10");
+            CombatRoutine.AddMacro("raid11");
+            CombatRoutine.AddMacro("raid12");
+            CombatRoutine.AddMacro("raid13");
+            CombatRoutine.AddMacro("raid14");
+            CombatRoutine.AddMacro("raid15");
+            CombatRoutine.AddMacro("raid16");
+            CombatRoutine.AddMacro("raid17");
+            CombatRoutine.AddMacro("raid18");
+            CombatRoutine.AddMacro("raid19");
+            CombatRoutine.AddMacro("raid20");
+            CombatRoutine.AddMacro("raid21");
+            CombatRoutine.AddMacro("raid22");
+            CombatRoutine.AddMacro("raid23");
+            CombatRoutine.AddMacro("raid24");
+            CombatRoutine.AddMacro("raid25");
+            CombatRoutine.AddMacro("raid26");
+            CombatRoutine.AddMacro("raid27");
+            CombatRoutine.AddMacro("raid28");
+            CombatRoutine.AddMacro("raid29");
+            CombatRoutine.AddMacro("raid30");
+            CombatRoutine.AddMacro("raid31");
+            CombatRoutine.AddMacro("raid32");
+            CombatRoutine.AddMacro("raid33");
+            CombatRoutine.AddMacro("raid34");
+            CombatRoutine.AddMacro("raid35");
+            CombatRoutine.AddMacro("raid36");
+            CombatRoutine.AddMacro("raid37");
+            CombatRoutine.AddMacro("raid38");
+            CombatRoutine.AddMacro("raid39");
+            CombatRoutine.AddMacro("raid40");
 
 
 
@@ -341,13 +411,14 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 0);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Aura Switch", "Auto Aura Switch", false, "Auto Switch Aura between Crusader Aura|Devotion Aura", "Generic");
-            CombatRoutine.AddProp("Auto Swap", "Auto Swap", false, "Use Auto Swap Logic", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
 
+            CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
+
             CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
-            CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
-            CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
+          //  CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
+         //   CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(HolyShockHealing, HolyShock, true, "If Divine Toll should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
             CombatRoutine.AddProp(HolyLight, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "is used, set to 0 to disable", "Healing", 85);
@@ -358,18 +429,23 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(FoL, FoL + " Life Percent", numbList, "Life percent at which" + FoL + "is used, set to 0 to disable", "Healing", 75);
             CombatRoutine.AddProp(FoLI, FoLI + " Life Percent", numbList, "Life percent at which" + FoLI + "is used, set to 0 to disable", "Healing", 90);
             CombatRoutine.AddProp(WoG, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(WOGMax , WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used when at max holy power, set to 0 to disable", "Healing", 100);
             CombatRoutine.AddProp(BoS, BoS + " Life Percent", numbList, "Life percent at which" + BoS + "is used, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp(LoH, LoH + " Life Percent", numbList, "Life percent at which" + LoH + "is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(BF, BF + " Life Percent", numbList, "Life percent at which" + BF + "is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(LoD, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(LODMax, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when three members are at life percent and you have max holy power, set to 0 to disable", "Healing", 90);
             CombatRoutine.AddProp(BoV, BoV + " Life Percent", numbList, "Life percent at which" + BoV + "is used when three members are at life percent, set to 0 to disable", "Healing", 75);
             CombatRoutine.AddProp(AuraMastery, AuraMastery + " Life Percent", numbList, "Life percent at which" + AuraMastery + "is used, set to 0 to disable", "Healing", 65);
             CombatRoutine.AddProp(HolyPrism, HolyPrism + " Life Percent", numbList, "Life percent at which" + HolyPrism + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
             CombatRoutine.AddProp(DivineToll, DivineToll + " Life Percent", numbList, "Life percent at which" + DivineToll + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
             CombatRoutine.AddProp(DivineTollHealing, DivineToll, true, "If Divine Toll should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
-            CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS ", numbRaidList, " Units above for DPS ", "Healing", 2);
-            CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS" + "is used,", "Healing", 50);
+            CombatRoutine.AddProp(AoERaid, "Number of units for AoE Healing in raid ", numbRaidList, " Units for AoE Healing in raid", "Healing", 7);
+          //  CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS ", numbPartyList, " Units above for DPS ", "Healing", 2);
+          //  CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS" + "is used,", "Healing", 50);
+          //  CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid for Targeting to previous hostile ", numbRaidList, " Units above for DPS ", "Healing", 2);
+          //  CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid for targeting to previous hostile", numbList, "Health percent at which DPS" + "is used,", "Healing", 50);
 
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsage, "When should trinket1 be used", "Trinket", 0);
@@ -460,6 +536,12 @@ namespace HyperElk.Core
                     API.CastSpell(DivineProtection);
                     return;
                 }
+                //Healing
+                if (API.CanCast(RuleofLaw) && RuleofLawTalent && !API.PlayerHasBuff(RuleofLaw) && (API.TargetRange >= 40 || IsMouseover && API.MouseoverRange >= 40))
+                {
+                    API.CastSpell(RuleofLaw);
+                    return;
+                }
                 if (AuraMasteryCheck)
                 {
                     API.CastSpell(AuraMastery);
@@ -503,6 +585,26 @@ namespace HyperElk.Core
                 if (WoGCheck)
                 {
                     API.CastSpell(WoG);
+                    return;
+                }
+                if (API.CanCast(CrusaderStrike) && CrusadersMight && API.SpellISOnCooldown(HolyShock) && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(CrusaderStrike);
+                    return;
+                }
+                if (API.CanCast(CrusaderStrike) && IsMouseover && CrusadersMight && API.SpellISOnCooldown(HolyShock) && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
+                {
+                    API.CastSpell(CrusaderStrike + "MO");
+                    return;
+                }
+                if (API.CanCast(CrusaderStrike) && Level <= 25 && !CrusadersMight && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(CrusaderStrike);
+                    return;
+                }
+                if (API.CanCast(CrusaderStrike) && IsMouseover && Level <= 25 && !CrusadersMight && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
+                {
+                    API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
                 if (FlashofLightCheck)
@@ -571,22 +673,22 @@ namespace HyperElk.Core
                     API.CastSpell(WoG + "MO");
                     return;
                 }
-                if (FlashofLightCheckMO)
-                {
-                    API.CastSpell(FoL + "MO");
-                    return;
-                }
-                if (HolyLightCheckMO)
-                {
-                    API.CastSpell(HolyLight + "MO");
-                    return;
-                }
                 if (FlashofLightInfusionCheckMO)
                 {
                     API.CastSpell(FoL + "MO");
                     return;
                 }
                 if (HolyLightInfusionCheckMO)
+                {
+                    API.CastSpell(HolyLight + "MO");
+                    return;
+                }
+                if (FlashofLightCheckMO)
+                {
+                    API.CastSpell(FoL + "MO");
+                    return;
+                }
+                if (HolyLightCheckMO)
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
@@ -610,26 +712,6 @@ namespace HyperElk.Core
                 if (API.CanCast(Judgment) && IsMouseover && InRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && (JudgementofLight || !JudgementofLight) && API.MouseoverHealthPercent > 0)
                 {
                     API.CastSpell(Judgment + "MO");
-                    return;
-                }
-                if (API.CanCast(CrusaderStrike) && CrusadersMight && API.SpellISOnCooldown(HolyShock) && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(CrusaderStrike);
-                    return;
-                }
-                if (API.CanCast(CrusaderStrike) && IsMouseover && CrusadersMight && API.SpellISOnCooldown(HolyShock) && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(CrusaderStrike + "MO");
-                    return;
-                }
-                if (API.CanCast(CrusaderStrike) && Level <= 25 && !CrusadersMight && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(CrusaderStrike);
-                    return;
-                }
-                if (API.CanCast(CrusaderStrike) && IsMouseover && Level <= 25 && !CrusadersMight && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
                 if (API.CanCast(HolyShock) && !HSHealing && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
@@ -657,7 +739,7 @@ namespace HyperElk.Core
                     API.CastSpell(VanqusihersHammer);
                     return;
                 }
-                if (API.CanCast(HammerofWrath) && InRange && API.TargetHealthPercent <= 20 && Level >= 46 || (Level >= 58 && API.PlayerHasBuff(AvengingWrath) && InRange) && API.TargetHealthPercent > 0)
+                if (API.CanCast(HammerofWrath) && API.PlayerCanAttackTarget && InRange && API.TargetHealthPercent <= 20 && Level >= 46 || (Level >= 58 && API.PlayerHasBuff(AvengingWrath) && InRange) && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(HammerofWrath);
                     return;
@@ -684,28 +766,121 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < units.Length; i++)
                         {
-                            if (API.UnitHealthPercent(units[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            if (API.UnitHealthPercent(units[i]) <= LoHLifePercent && (PlayerHealth >= LoHLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
-                                API.WriteLog("Target Health % " + API.TargetHealthPercent);
-                                API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                                 return;
                             }
-                        }
-                    }
-                    if (API.PlayerIsInRaid)
-                    {
-                        for (int i = 0; i < raidunits.Length; i++)
-                        {
-                            if (API.UnitHealthPercent(raidunits[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (API.UnitHealthPercent(units[i]) <= BoSLifePercent && (PlayerHealth >= BoSLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                             {
-                                API.CastSpell(RaidTargetArray[i]);
+                                API.CastSpell(PlayerTargetArray[i]);
                                 return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= WoGLifePercent && (PlayerHealth >= WoGLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= FolILifePercent && (PlayerHealth >= FolILifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= HoLILifePercent && (PlayerHealth >= HoLILifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= FoLLifePercent && (PlayerHealth >= FoLLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]); ;
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= HolyLightLifePercent && (PlayerHealth >= HolyLightLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= BFLifePercent && (PlayerHealth >= BFLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= LoTMLifePercent && (PlayerHealth >= LoTMLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= HolyShockLifePercent && (PlayerHealth >= HolyShockLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            //   if (DPSHealthCheck && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover))
+                            // {
+                            //    API.CastSpell(TargetHostile);
+                            //    return;
+                            // }
+                            // }
+                        }
+                        if (API.PlayerIsInRaid)
+                        {
+                            for (int i = 0; i < raidunits.Length; i++)
+                            {
+                                if (API.UnitHealthPercent(raidunits[i]) <= LoHLifePercent && (PlayerHealth >= LoHLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= BoSLifePercent && (PlayerHealth >= BoSLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= WoGLifePercent && (PlayerHealth >= WoGLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= FolILifePercent && (PlayerHealth >= FolILifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= HoLILifePercent && (PlayerHealth >= HoLILifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= FoLLifePercent && (PlayerHealth >= FoLLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]); ;
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= HolyLightLifePercent && (PlayerHealth >= HolyLightLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= BFLifePercent && (PlayerHealth >= BFLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= LoTMLifePercent && (PlayerHealth >= LoTMLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(raidunits[i]) <= HolyShockLifePercent && (PlayerHealth >= HolyShockLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
                             }
                         }
                     }
-                }
-            }
+             }  }
         }
         public override void CombatPulse()
         {
@@ -731,8 +906,31 @@ namespace HyperElk.Core
         {
 
         }
-        private void rotation()
+        private void AutoTarget()
         {
+            for (int i = 0; i < units.Length; i++)
+            {
+                if (API.UnitHealthPercent(units[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                {
+                    API.CastSpell(PlayerTargetArray[i]);
+                    API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                    API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    return;
+                }
+            }
+
+            if (API.PlayerIsInRaid)
+            {
+                for (int i = 0; i < raidunits.Length; i++)
+                {
+                    if (API.UnitHealthPercent(raidunits[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                    {
+                        API.CastSpell(RaidTargetArray[i]);
+                        return;
+                    }
+                }
+            }
+        
 
         }
     }    
