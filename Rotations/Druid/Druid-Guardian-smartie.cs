@@ -7,11 +7,13 @@
 // v1.5 Mighty Bash added
 // v1.6 spell ids and alot of other stuff
 // v1.7 new simc apl
+// v1.8 mouseover moonfire added
 
 namespace HyperElk.Core
 {
     public class GuardianDruid : CombatRoutine
     {
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spell,Auras
         private string Moonfire = "Moonfire";
         private string Swipe = "Swipe";
@@ -65,6 +67,7 @@ namespace HyperElk.Core
         private bool isThrashMelee => (TalentBalanceAffinity && API.TargetRange < 12 || !TalentBalanceAffinity && API.TargetRange < 9);
 
         private bool isKickRange => (TalentBalanceAffinity && API.TargetRange < 17 || !TalentBalanceAffinity && API.TargetRange < 14);
+        private bool isMOinRange => (TalentBalanceAffinity && API.TargetRange < 43 || !TalentBalanceAffinity && API.TargetRange < 40);
 
         private bool IncaBerserk => (API.PlayerHasBuff(Incarnation) || API.PlayerHasBuff(Berserk));
         bool IsBerserk => (UseBerserk == "with Cooldowns" && IsCooldowns || UseBerserk == "always");
@@ -74,6 +77,7 @@ namespace HyperElk.Core
         bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isMelee;
 
         //CBProperties
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
@@ -97,7 +101,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.7");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.8");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -152,11 +156,18 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Moonfire, 164812);
             CombatRoutine.AddDebuff(AdaptiveSwarm, 325727);
 
+            //Macros
+            CombatRoutine.AddMacro(Moonfire + "MO", "NumPad7");
+
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
+            //Toggle
+            CombatRoutine.AddToggle("Mouseover");
+
             //Prop
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
@@ -326,6 +337,14 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(AdaptiveSwarm);
                     return;
+                }
+                if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                {
+                    if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
+                    {
+                        API.CastSpell(Moonfire + "MO");
+                        return;
+                    }
                 }
                 //actions.bear+=/thrash_bear,target_if=refreshable|dot.thrash_bear.stack<3|(dot.thrash_bear.stack<4&runeforge.luffainfused_embrace.equipped)|active_enemies>=4
                 if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee && (API.TargetDebuffRemainingTime(Thrash) < 250 || API.TargetDebuffStacks(Thrash) < 3 || API.PlayerUnitInMeleeRangeCount >= 4))
