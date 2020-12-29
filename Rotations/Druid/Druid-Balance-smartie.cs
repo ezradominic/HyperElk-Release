@@ -16,6 +16,8 @@
 // v2.2 Save AP Toggle
 // v2.3 Stellar Flare double cast fix
 // v2.4 Dont dot Toggle added
+// v2.5 aoe detection changed and alot of other small things
+// v2.6 aoe changed a bit
 
 using System.Diagnostics;
 
@@ -106,6 +108,7 @@ namespace HyperElk.Core
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+        public string[] Legendary = new string[] { "None", "Balance of all things", "Dreambinder" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
         private string UseCelestialAlignment => CDUsage[CombatRoutine.GetPropertyInt(CelestialAlignment)];
@@ -113,6 +116,7 @@ namespace HyperElk.Core
         private string UseForceofNature => CDUsageWithAOE[CombatRoutine.GetPropertyInt(ForceofNature)];
         private string UseFuryofElune => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FuryofElune)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        private string IsLegendary => Legendary[CombatRoutine.GetPropertyInt("Legendary")];
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool SpamDots => CombatRoutine.GetPropertyBool("SpamDots");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
@@ -125,11 +129,12 @@ namespace HyperElk.Core
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private bool IncaCelestial => (API.PlayerHasBuff(Incarnation) || API.PlayerHasBuff(CelestialAlignment));
+        private bool Eclipses => (API.PlayerHasBuff(EclipseLunar) || API.PlayerHasBuff(EclipseSolar));
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v2.4");
+            API.WriteLog("Welcome to smartie`s Balance Druid v2.6");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -222,6 +227,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(WarriorofElune, "Use " + WarriorofElune, CDUsageWithAOE, "Use " + WarriorofElune + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(ForceofNature, "Use " + ForceofNature, CDUsageWithAOE, "Use " + ForceofNature + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(FuryofElune, "Use " + FuryofElune, CDUsageWithAOE, "Use " + FuryofElune + " always, with Cooldowns", "Cooldowns", 0);
+            AddProp("Legendary", "Choose " + "Legendary", Legendary, "Choose your Legendary", "Legendary");
             CombatRoutine.AddProp("SpamDots", "SpamDots", true, "Will spam Dots while moving", "Generic");
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
@@ -236,7 +242,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Last Spell ? : " + API.LastSpellCastInGame);
+            //API.WriteLog("Target Count: " + API.PlayerUnitInMeleeRangeCount);
             if (!Lunarwatch.IsRunning && API.PlayerHasBuff(EclipseLunar) && !API.PlayerHasBuff(EclipseSolar))
             {
                 Solarwatch.Stop();
@@ -268,7 +274,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 && Eclipses || !Eclipses && API.PlayerCurrentCastTimeRemaining > 0)
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {
@@ -423,7 +429,7 @@ namespace HyperElk.Core
                     API.CastSpell(ConvoketheSpirits);
                     return;
                 }
-                if (API.CanCast(LoneEmpowerment) && isinRange && API.PlayerHasBuff(LoneSpirit) && PlayerCovenantSettings == "Kyrian" && IsCovenant && (IncaCelestial || TalentIncarnation && API.SpellCDDuration(Incarnation) > 5000 || !TalentIncarnation && API.SpellCDDuration(CelestialAlignment) > 5000 || !IsIncarnation && TalentIncarnation || !IsCelestialAlignment && !TalentIncarnation))
+                if (API.CanCast(LoneEmpowerment) && isinRange && API.PlayerHasBuff(LoneSpirit) && PlayerCovenantSettings == "Kyrian" && IsCovenant && (IncaCelestial || TalentIncarnation && API.SpellCDDuration(Incarnation) > 5000 && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 1000) || !TalentIncarnation && API.SpellCDDuration(CelestialAlignment) > 5000 && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 1000) || !IsIncarnation && TalentIncarnation && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 1000) || !IsCelestialAlignment && !TalentIncarnation && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 1000)))
                 {
                     API.CastSpell(LoneEmpowerment);
                     return;
@@ -434,8 +440,13 @@ namespace HyperElk.Core
                     return;
                 }
                 // Single Target rota
-                if (API.TargetUnitInRangeCount < AOEUnitNumber || !IsAOE)
+                if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
                 {
+                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && !SaveAP && IsLegendary == "Balance of all things" && API.PlayerAstral > 30 && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 1000) && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation ||  API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment))
+                    {
+                        API.CastSpell(Starsurge);
+                        return;
+                    }
                     if (API.CanCast(Moonfire) && PlayerLevel >= 2 && !DontDOT && API.TargetDebuffRemainingTime(Moonfire) < 300)
                     {
                         API.CastSpell(Moonfire);
@@ -456,7 +467,7 @@ namespace HyperElk.Core
                         API.CastSpell(StellarFlare);
                         return;
                     }
-                    if ( API.CanCast(Starfall) && API.PlayerHasBuff(OnethsPerception) && UseStarlord)
+                    if (API.CanCast(Starfall) && API.PlayerHasBuff(OnethsPerception) && UseStarlord)
                     {
                         API.CastSpell(Starfall);
                         return;
@@ -466,7 +477,7 @@ namespace HyperElk.Core
                         API.CastSpell(Starsurge);
                         return;
                     }
-                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && !SaveAP && (API.PlayerAstral > 30 && IncaCelestial || API.PlayerAstral > 30 && (!IsCelestialAlignment && !TalentIncarnation && API.PlayerAstral > 30 || !IsIncarnation && TalentIncarnation && API.PlayerAstral > 30) || API.PlayerAstral > 30 && API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.PlayerAstral > 30 && API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                    if (API.CanCast(Starsurge) && PlayerLevel >= 12 && API.PlayerAstral > 30 && !SaveAP && IsLegendary != "Balance of all things" && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 500 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 500) && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
                     {
                         API.CastSpell(Starsurge);
                         return;
@@ -507,8 +518,7 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-                //AoE Rota
-                if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)
+                if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
                 {
                     if (API.CanCast(Sunfire) && PlayerLevel >= 23 && !DontDOT && API.TargetDebuffRemainingTime(Sunfire) < 300)
                     {
@@ -558,12 +568,12 @@ namespace HyperElk.Core
                         API.CastSpell(Starsurge);
                         return;
                     }
-                    if (API.CanCast(Starfall) && !SaveAP && API.PlayerBuffTimeRemaining(Starfall) < 100 && PlayerLevel >= 34 && (API.PlayerAstral > 50 && IncaCelestial || API.PlayerAstral > 50 && (!IsCelestialAlignment && !TalentIncarnation && API.PlayerAstral > 40 || !IsIncarnation && TalentIncarnation && API.PlayerAstral > 40) || API.PlayerAstral > 50 && API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.PlayerAstral > 50 && API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                    if (API.CanCast(Starfall) && !SaveAP && API.PlayerBuffTimeRemaining(Starfall) < 100 && PlayerLevel >= 34 && API.PlayerAstral > 50 && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation ||  API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
                     {
                         API.CastSpell(Starfall);
                         return;
                     }
-                    if (API.CanCast(Starsurge) && !SaveAP && (API.PlayerBuffTimeRemaining(Starfall) > 400 || PlayerLevel < 34) && PlayerLevel >= 12 && (API.PlayerAstral > 30 && IncaCelestial || API.PlayerAstral > 30 && (!IsCelestialAlignment && !TalentIncarnation && API.PlayerAstral > 30 || !IsIncarnation && TalentIncarnation && API.PlayerAstral > 30) || API.PlayerAstral > 30 && API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.PlayerAstral > 30 && API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                    if (API.CanCast(Starsurge) && !SaveAP && (API.PlayerBuffTimeRemaining(Starfall) > 400 || PlayerLevel < 34) && PlayerLevel >= 12 && API.PlayerAstral > 70 && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation ||  API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
                     {
                         API.CastSpell(Starsurge);
                         return;

@@ -6,6 +6,7 @@
 // v1.4 Racials and Trinkets
 // v1.5 Mighty Bash added
 // v1.6 spell ids and alot of other stuff
+// v1.7 new simc apl
 
 namespace HyperElk.Core
 {
@@ -43,6 +44,7 @@ namespace HyperElk.Core
         private string MightyBash = "Mighty Bash";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string SavageCombatant = "Savage Combatant";
 
 
         //Talents
@@ -95,7 +97,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.6");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.7");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -106,22 +108,22 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Maul, 6807, "D7");
             CombatRoutine.AddSpell(Ironfur, 192081, "F6");
             CombatRoutine.AddSpell(BearForm, 5487, "NumPad1");
-            CombatRoutine.AddSpell(TravelForm,783, "NumPad2");
+            CombatRoutine.AddSpell(TravelForm, 783, "NumPad2");
             CombatRoutine.AddSpell(Barkskin, 22812, "F4");
             CombatRoutine.AddSpell(SurvivalInstincts, 61336, "F1");
             CombatRoutine.AddSpell(FrenziedRegeneration, 22842, "F5");
             CombatRoutine.AddSpell(BristlingFur, 155835, "D0");
             CombatRoutine.AddSpell(Pulverize, 80313, "D9");
             CombatRoutine.AddSpell(Incarnation, 102558, "D8");
-            CombatRoutine.AddSpell(Berserk,50334, "D8");
+            CombatRoutine.AddSpell(Berserk, 50334, "D8");
             CombatRoutine.AddSpell(SkullBash, 106839, "F12");
             CombatRoutine.AddSpell(StampedingRoar, 106898, "NumPad5");
             CombatRoutine.AddSpell(Typhoon, 132469, "F8");
-            CombatRoutine.AddSpell(MightyBash,5211, "D1");
-            CombatRoutine.AddSpell(RavenousFrenzy,323546, "D1");
-            CombatRoutine.AddSpell(ConvoketheSpirits,323764, "D1");
-            CombatRoutine.AddSpell(AdaptiveSwarm,325727, "D1");
-            CombatRoutine.AddSpell(LoneProtection,338018, "D1");
+            CombatRoutine.AddSpell(MightyBash, 5211, "D1");
+            CombatRoutine.AddSpell(RavenousFrenzy, 323546, "D1");
+            CombatRoutine.AddSpell(ConvoketheSpirits, 323764, "D1");
+            CombatRoutine.AddSpell(AdaptiveSwarm, 325727, "D1");
+            CombatRoutine.AddSpell(LoneProtection, 338018, "D1");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -130,19 +132,20 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(GalacticGuardian, 213708);
             CombatRoutine.AddBuff(CatForm, 768);
             CombatRoutine.AddBuff(BearForm, 5487);
-            CombatRoutine.AddBuff(TravelForm,783);
+            CombatRoutine.AddBuff(TravelForm, 783);
             CombatRoutine.AddBuff(SurvivalInstincts, 61336);
             CombatRoutine.AddBuff(Barkskin, 22812);
             CombatRoutine.AddBuff(Ironfur, 192081);
             CombatRoutine.AddBuff(FrenziedRegeneration, 22842);
-            CombatRoutine.AddBuff(Incarnation,102558);
-            CombatRoutine.AddBuff(Berserk,50334);
+            CombatRoutine.AddBuff(Incarnation, 102558);
+            CombatRoutine.AddBuff(Berserk, 50334);
             CombatRoutine.AddBuff(BristlingFur, 155835);
             CombatRoutine.AddBuff(Pulverize, 158792);
             CombatRoutine.AddBuff(ToothandClaw, 135286);
             CombatRoutine.AddBuff(RavenousFrenzy, 323546);
-            CombatRoutine.AddBuff(LoneSpirit,338041);
+            CombatRoutine.AddBuff(LoneSpirit, 338041);
             CombatRoutine.AddBuff(Soulshape, 310143);
+            CombatRoutine.AddBuff(SavageCombatant, 340613);
 
             //Debuff
             CombatRoutine.AddDebuff(Thrash, 192090);
@@ -177,6 +180,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            //API.WriteLog("Targets: "+ API.PlayerUnitInMeleeRangeCount);
             if (API.PlayerCurrentCastTimeRemaining > 40)
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
@@ -280,7 +284,7 @@ namespace HyperElk.Core
             if (API.PlayerHasBuff(BearForm) && PlayerLevel >= 8)
             {
                 //actions.cooldown +=/ berserking,if= buff.tigers_fury.up | buff.bs_inc.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && isMelee &&  IncaBerserk)
+                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && isMelee && IncaBerserk)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -293,142 +297,121 @@ namespace HyperElk.Core
                 {
                     API.CastSpell("Trinket2");
                 }
-                if (API.CanCast(Incarnation) && TalentIncarnation && isMelee && IsIncarnation)
-                {
-                    API.CastSpell(Incarnation);
-                    return;
-                }
-                if (API.CanCast(Berserk) && !TalentIncarnation && isMelee && IsBerserk)
-                {
-                    API.CastSpell(Berserk);
-                    return;
-                }
-                if (API.CanCast(RavenousFrenzy) && isMelee && IncaBerserk && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                //actions.bear+=/ravenous_frenzy
+                if (API.CanCast(RavenousFrenzy) && isMelee && PlayerCovenantSettings == "Venthyr" && IsCovenant && IncaBerserk)
                 {
                     API.CastSpell(RavenousFrenzy);
                     return;
                 }
-                //actions.cooldown+=/convoke_the_spirits,if=(dot.rip.remains>4&(buff.tigers_fury.down|buff.tigers_fury.remains<4)&combo_points=0&dot.thrash_cat.ticking&dot.rake.ticking)|fight_remains<5
+                //actions.bear+=/convoke_the_spirits,if=!druid.catweave_bear&!druid.owlweave_bear
                 if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;
                 }
+                //actions.bear+=/berserk_bear,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
+                if (API.CanCast(Berserk) && !TalentIncarnation && isMelee && IsBerserk)
+                {
+                    API.CastSpell(Berserk);
+                    return;
+                }
+                //actions.bear+=/incarnation,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
+                if (API.CanCast(Incarnation) && TalentIncarnation && isMelee && IsIncarnation)
+                {
+                    API.CastSpell(Incarnation);
+                    return;
+                }
+                //actions.bear+=/adaptive_swarm,if=(!dot.adaptive_swarm_damage.ticking&!action.adaptive_swarm_damage.in_flight&(!dot.adaptive_swarm_heal.ticking|dot.adaptive_swarm_heal.remains>3)|dot.adaptive_swarm_damage.stack<3&dot.adaptive_swarm_damage.remains<5&dot.adaptive_swarm_damage.ticking)
                 if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))
                 {
                     API.CastSpell(AdaptiveSwarm);
                     return;
                 }
-                // Single Target rota
-                if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
+                //actions.bear+=/thrash_bear,target_if=refreshable|dot.thrash_bear.stack<3|(dot.thrash_bear.stack<4&runeforge.luffainfused_embrace.equipped)|active_enemies>=4
+                if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee && (API.TargetDebuffRemainingTime(Thrash) < 250 || API.TargetDebuffStacks(Thrash) < 3 || API.PlayerUnitInMeleeRangeCount >= 4))
                 {
-                    if (API.CanCast(Moonfire) && API.PlayerHasBuff(GalacticGuardian) && API.TargetRange < 40)
-                    {
-                        API.CastSpell(Moonfire);
-                        return;
-                    }
-                    if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee && (API.TargetDebuffRemainingTime(Thrash) < 250 || API.TargetDebuffStacks(Thrash) < 3))
-                    {
-                        API.CastSpell(Thrash);
-                        return;
-                    }
-                    if (API.CanCast(Maul) && PlayerLevel >= 10 && IncaBerserk && API.PlayerRage >= 40 && isMelee)
-                    {
-                        API.CastSpell(Maul);
-                        return;
-                    }
-                    if (API.CanCast(Mangle) && PlayerLevel >= 8 && API.PlayerHasBuff(Incarnation) && isMelee)
-                    {
-                        API.CastSpell(Mangle);
-                        return;
-                    }
-                    if (API.CanCast(Moonfire) && API.TargetDebuffRemainingTime(Moonfire) < 200 && API.TargetRange < 40)
-                    {
-                        API.CastSpell(Moonfire);
-                        return;
-                    }
-                    if (API.CanCast(Maul) && PlayerLevel >= 10 && (API.PlayerBuffStacks(ToothandClaw) >= 2 || API.PlayerBuffTimeRemaining(ToothandClaw) < 150) && API.PlayerRage >= 40 && isMelee)
-                    {
-                        API.CastSpell(Maul);
-                        return;
-                    }
-                    if (API.CanCast(Mangle) && PlayerLevel >= 8 && (API.PlayerRage < 90 || API.PlayerRage < 85 && TalentSouloftheForest) && isMelee)
-                    {
-                        API.CastSpell(Mangle);
-                        return;
-                    }
-                    if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee)
-                    {
-                        API.CastSpell(Thrash);
-                        return;
-                    }
-                    if (API.CanCast(Maul) && PlayerLevel >= 10 && API.PlayerRage >= 40 && isMelee)
-                    {
-                        API.CastSpell(Maul);
-                        return;
-                    }
-                    if (API.CanCast(Swipe) && PlayerLevel >= 36 && isThrashMelee)
-                    {
-                        API.CastSpell(Swipe);
-                        return;
-                    }
+                    API.CastSpell(Thrash);
+                    return;
                 }
-                //AoE rota
-                if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
+                //actions.bear+=/moonfire,if=((buff.galactic_guardian.up)&active_enemies<2)|((buff.galactic_guardian.up)&!dot.moonfire.ticking&active_enemies>1&target.time_to_die>12)
+                if (API.CanCast(Moonfire) && API.TargetRange < 40 && ((API.PlayerHasBuff(GalacticGuardian) && API.PlayerUnitInMeleeRangeCount < 2) || API.PlayerHasBuff(GalacticGuardian) && !API.TargetHasDebuff(Moonfire) && API.PlayerUnitInMeleeRangeCount > 1))
                 {
-                    if (API.CanCast(Moonfire) && API.PlayerHasBuff(GalacticGuardian) && API.TargetRange < 40 && API.PlayerUnitInMeleeRangeCount < 3)
-                    {
-                        API.CastSpell(Moonfire);
-                        return;
-                    }
-                    if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee && (API.TargetDebuffRemainingTime(Thrash) < 250 || API.TargetDebuffStacks(Thrash) < 3 || API.PlayerUnitInMeleeRangeCount > 4))
-                    {
-                        API.CastSpell(Thrash);
-                        return;
-                    }
-                    if (API.CanCast(Swipe) && PlayerLevel >= 36 && isThrashMelee && !IncaBerserk && API.PlayerUnitInMeleeRangeCount >= 4)
-                    {
-                        API.CastSpell(Swipe);
-                        return;
-                    }
-                    if (API.CanCast(Maul) && PlayerLevel >= 10 && API.PlayerRage >= 40 && isMelee && API.PlayerHasBuff(ToothandClaw) && API.PlayerUnitInMeleeRangeCount == 2)
-                    {
-                        API.CastSpell(Maul);
-                        return;
-                    }
-                    if (API.CanCast(Mangle) && PlayerLevel >= 8 && API.PlayerHasBuff(Incarnation) && isMelee && API.PlayerUnitInMeleeRangeCount <= 3)
-                    {
-                        API.CastSpell(Mangle);
-                        return;
-                    }
-                    if (API.CanCast(Moonfire) && API.TargetDebuffRemainingTime(Moonfire) < 200 && API.TargetRange < 40 && API.PlayerUnitInMeleeRangeCount <= 3)
-                    {
-                        API.CastSpell(Moonfire);
-                        return;
-                    }
-                    if (API.CanCast(Maul) && PlayerLevel >= 10 && (API.PlayerBuffStacks(ToothandClaw) >= 2 || API.PlayerBuffTimeRemaining(ToothandClaw) < 150) && API.PlayerRage >= 40 && isMelee && API.PlayerUnitInMeleeRangeCount < 3)
-                    {
-                        API.CastSpell(Maul);
-                        return;
-                    }
-                    if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee)
-                    {
-                        API.CastSpell(Thrash);
-                        return;
-                    }
-                    if (API.CanCast(Mangle) && PlayerLevel >= 8 && (API.PlayerRage < 90 || API.PlayerRage < 85 && TalentSouloftheForest) && API.PlayerUnitInMeleeRangeCount < 3 && isMelee)
-                    {
-                        API.CastSpell(Mangle);
-                        return;
-                    }
-                    if (API.CanCast(Swipe) && PlayerLevel >= 36 && isThrashMelee)
-                    {
-                        API.CastSpell(Swipe);
-                        return;
-                    }
+                    API.CastSpell(Moonfire);
+                    return;
+                }
+                //actions.bear+=/moonfire,if=(dot.moonfire.remains<=3&(buff.galactic_guardian.up)&active_enemies>5&target.time_to_die>12)
+                if (API.CanCast(Moonfire) && API.TargetRange < 40 && (API.TargetDebuffRemainingTime(Moonfire) <= 300 && API.PlayerHasBuff(GalacticGuardian) && API.PlayerUnitInMeleeRangeCount > 5))
+                {
+                    API.CastSpell(Moonfire);
+                    return;
+                }
+                //actions.bear+=/moonfire,if=(refreshable&active_enemies<2&target.time_to_die>12)|(!dot.moonfire.ticking&active_enemies>1&target.time_to_die>12)
+                if (API.CanCast(Moonfire) && API.TargetRange < 40 && (API.TargetDebuffRemainingTime(Moonfire) <= 150 && API.PlayerUnitInMeleeRangeCount < 2 || !API.TargetHasDebuff(Moonfire) && API.PlayerUnitInMeleeRangeCount > 1))
+                {
+                    API.CastSpell(Moonfire);
+                    return;
+                }
+                //actions.bear+=/swipe,if=buff.incarnation_guardian_of_ursoc.down&buff.berserk_bear.down&active_enemies>=4
+                if (API.CanCast(Swipe) && PlayerLevel >= 36 && isThrashMelee && !IncaBerserk && API.PlayerUnitInMeleeRangeCount >= 4)
+                {
+                    API.CastSpell(Swipe);
+                    return;
+                }
+                //actions.bear+=/maul,if=buff.incarnation.up&active_enemies<2
+                if (API.CanCast(Maul) && PlayerLevel >= 10 && API.PlayerHasBuff(Incarnation) && API.PlayerUnitInMeleeRangeCount < 2 && API.PlayerRage >= 40 && isMelee)
+                {
+                    API.CastSpell(Maul);
+                    return;
+                }
+                //actions.bear+=/maul,if=(buff.savage_combatant.stack>=1)&(buff.tooth_and_claw.up)&buff.incarnation.up&active_enemies=2
+                if (API.CanCast(Maul) && PlayerLevel >= 10 && API.PlayerBuffStacks(SavageCombatant) >= 1 && API.PlayerHasBuff(ToothandClaw) && API.PlayerHasBuff(Incarnation) && API.PlayerUnitInMeleeRangeCount == 2 && API.PlayerRage >= 40 && isMelee)
+                {
+                    API.CastSpell(Maul);
+                    return;
+                }
+                //actions.bear+=/mangle,if=buff.incarnation.up&active_enemies<=3
+                if (API.CanCast(Mangle) && PlayerLevel >= 8 && API.PlayerHasBuff(Incarnation) && API.PlayerUnitInMeleeRangeCount <= 3 && isMelee)
+                {
+                    API.CastSpell(Mangle);
+                    return;
+                }
+                //actions.bear+=/maul,if=(((buff.tooth_and_claw.stack>=2)|(buff.tooth_and_claw.up&buff.tooth_and_claw.remains<1.5)|(buff.savage_combatant.stack>=3))&active_enemies<3)
+                if (API.CanCast(Maul) && PlayerLevel >= 10 && API.PlayerRage >= 40 && isMelee && (((API.PlayerBuffStacks(ToothandClaw) >= 2) || (API.PlayerHasBuff(ToothandClaw) && API.PlayerBuffTimeRemaining(ToothandClaw) <= 150) || (API.PlayerBuffStacks(SavageCombatant) >= 3)) && API.PlayerUnitInMeleeRangeCount <3))
+                {
+                    API.CastSpell(Maul);
+                    return;
+                }
+                //actions.bear +=/ thrash_bear,if= active_enemies > 1
+                if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee && API.PlayerUnitInMeleeRangeCount > 1)
+                {
+                    API.CastSpell(Thrash);
+                    return;
+                }
+                //actions.bear+=/mangle,if=((rage<90)&active_enemies<3)|((rage<85)&active_enemies<3&talent.soul_of_the_forest.enabled)
+                if (API.CanCast(Mangle) && PlayerLevel >= 8 && isMelee && (API.PlayerRage < 90 && API.PlayerUnitInMeleeRangeCount < 3 && !TalentSouloftheForest || API.PlayerRage < 85 && API.PlayerUnitInMeleeRangeCount < 3 && TalentSouloftheForest))
+                {
+                    API.CastSpell(Mangle);
+                    return;
+                }
+                //actions.bear+=/thrash_bear
+                if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee)
+                {
+                    API.CastSpell(Thrash);
+                    return;
+                }
+                //actions.bear+=/maul,if=active_enemies<3
+                if (API.CanCast(Maul) && PlayerLevel >= 10 && API.PlayerRage >= 40 && isMelee && API.PlayerUnitInMeleeRangeCount < 3)
+                {
+                    API.CastSpell(Maul);
+                    return;
+                }
+                //actions.bear+=/swipe_bear
+                if (API.CanCast(Swipe) && PlayerLevel >= 36 && isThrashMelee)
+                {
+                    API.CastSpell(Swipe);
+                    return;
                 }
             }
         }
     }
 }
-

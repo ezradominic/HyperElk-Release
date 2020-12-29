@@ -15,6 +15,10 @@
 // v2.25 small apl change
 // v2.3 another ravager fix
 // v2.4 spell ids and alot of other stuff
+// v2.5 Rallying cry added
+// v2.6 Ignore Pain added
+
+using System.Linq;
 
 namespace HyperElk.Core
 {
@@ -43,6 +47,7 @@ namespace HyperElk.Core
         private string Skullsplitter = "Skullsplitter";
         private string Overpower = "Overpower";
         private string DeadlyCalm = "Deadly Calm";
+        private string RallyingCry = "Rallying Cry";
         private string DefensiveStance = "Defensive Stance";
         private string BattleShout = "Battle Shout";
         private string BerserkerRage = "Berserker Rage";
@@ -60,6 +65,9 @@ namespace HyperElk.Core
         private string Exploiter = "Exploiter";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string AoE = "AOE";
+        private string AoERaid = "AoERaid";
+        private string IgnorePain = "Ignore Pain";
 
         //Talents
         bool TalentSkullsplitter => API.PlayerIsTalentSelected(1, 3);
@@ -103,6 +111,19 @@ namespace HyperElk.Core
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+        int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
+        int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40 };
+        private string[] units = { "player", "party1", "party2", "party3", "party4" };
+        private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
+
+        private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
+        private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
+
+        private bool RallyAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(RallyLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(RallyLifePercent) >= AoENumber;
+
+        private int AoENumber => numbPartyList[CombatRoutine.GetPropertyInt(AoE)];
+        private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoERaid)];
+        private int RallyLifePercent => numbList[CombatRoutine.GetPropertyInt(RallyingCry)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseAvatar => CDUsage[CombatRoutine.GetPropertyInt(Avatar)];
         private string UseRavager => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Ravager)];
@@ -116,11 +137,12 @@ namespace HyperElk.Core
         private int DefensiveStanceLifePercent => numbList[CombatRoutine.GetPropertyInt(DefensiveStance)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private int IgnorePainLifePercent => numbList[CombatRoutine.GetPropertyInt(IgnorePain)];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.4");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.6");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -146,6 +168,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Skullsplitter, 260643, "D8");
             CombatRoutine.AddSpell(Overpower, 7384, "NumPad3");
             CombatRoutine.AddSpell(DeadlyCalm, 262228, "NumPad5");
+            CombatRoutine.AddSpell(RallyingCry, 97462, "F2");
             CombatRoutine.AddSpell(DefensiveStance, 197690, "F6");
             CombatRoutine.AddSpell(BattleShout, 6673, "None");
             CombatRoutine.AddSpell(Avatar, 107574, "None");
@@ -155,6 +178,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ConquerorsBanner, 324143, "D1");
             CombatRoutine.AddSpell(AncientAftershock, 325886, "D1");
             CombatRoutine.AddSpell(SpearofBastion, 307865, "D1");
+            CombatRoutine.AddSpell(IgnorePain, 190456, "D9");
 
             //Macros
             CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
@@ -170,6 +194,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Victorious, 32216);
             CombatRoutine.AddBuff(Avatar, 107574);
             CombatRoutine.AddBuff(Exploiter, 335451);
+            CombatRoutine.AddBuff(IgnorePain, 190456);
 
             //Debuff
             CombatRoutine.AddDebuff(ColossusSmash, 208086);
@@ -203,6 +228,10 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(ImpendingVictory, ImpendingVictory + " Life Percent", numbList, "Life percent at which" + ImpendingVictory + " is used, set to 0 to disable", "Defense", 80);
             CombatRoutine.AddProp(DiebytheSword, DiebytheSword + " Life Percent", numbList, "Life percent at which" + DiebytheSword + " is used, set to 0 to disable", "Defense", 35);
             CombatRoutine.AddProp(DefensiveStance, DefensiveStance + " Life Percent", numbList, "Life percent at which" + DefensiveStance + " is used, set to 0 to disable", "Defense", 20);
+            CombatRoutine.AddProp(IgnorePain, IgnorePain + " Life Percent", numbList, "Life percent at which" + IgnorePain + " is used, set to 0 to disable", "Defense", 0);
+            CombatRoutine.AddProp(AoE, "Rallying Cry Party Units ", numbPartyList, " in Party", "Rallying", 3);
+            CombatRoutine.AddProp(AoERaid, "Rallying Cry Raid Units ", numbRaidList, "  in Raid", "Rallying", 3);
+            CombatRoutine.AddProp(RallyingCry, RallyingCry + "Life Percent", numbList, "Life percent at which" + RallyingCry + " is used, set to 0 to disable", "Rallying", 50);
         }
         public override void Pulse()
         {
@@ -237,6 +266,16 @@ namespace HyperElk.Core
             if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
             {
                 API.CastSpell("Healthstone");
+                return;
+            }
+            if (API.CanCast(IgnorePain) && (API.PlayerRage >= 40 || API.PlayerHasBuff(DeadlyCalm)) && API.PlayerBuffTimeRemaining(IgnorePain) < gcd*2 && API.PlayerHealthPercent <= IgnorePainLifePercent)
+            {
+                API.CastSpell(IgnorePain);
+                return;
+            }
+            if (API.CanCast(RallyingCry) && RallyAoE)
+            {
+                API.CastSpell(RallyingCry);
                 return;
             }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)

@@ -116,7 +116,7 @@ private string furious_gaze = "Furious Gaze";
         {
             get
             {
-                if (Talent_EssenceBreak && !PoolingForBladeDance && !PoolingForMeta && !API.CanCast(Essence_Break))
+                if (Talent_EssenceBreak && !PoolingForBladeDance && !PoolingForMeta && API.CanCast(Essence_Break))
                     return true;
                 return false;
             }
@@ -174,6 +174,7 @@ private string furious_gaze = "Furious Gaze";
             CombatRoutine.AddSpell(Blade_Dance,188499, "D2");
             CombatRoutine.AddSpell(Death_Sweep,210152, "D2");
             CombatRoutine.AddSpell(Felblade,232893, "D3");
+            CombatRoutine.AddSpell(Essence_Break, 258860, "F2");
             CombatRoutine.AddSpell(Chaos_Strike,162794, "D4");
             CombatRoutine.AddSpell(Annihilation,201427, "D4");
             CombatRoutine.AddSpell(Demons_Bite,162243, "D5");
@@ -248,7 +249,7 @@ private string furious_gaze = "Furious Gaze";
         {
             if (!API.PlayerIsMounted && !Playeriscasting)
             {
-                //API.WriteLog("debug:" + "cancast "+ API.CanCast(Metamorphosis)+ "when "+ UseMetamorphosis);
+               // API.WriteLog("debug:" + "cancast " + API.CanCast(Metamorphosis) + " when " + UseMetamorphosis + " cooldowns? " + IsCooldowns);
                 if (isInterrupt && MeleeRange && PlayerLevel >= 29)
                 {
                     API.CastSpell(Disrupt);
@@ -257,13 +258,13 @@ private string furious_gaze = "Furious Gaze";
                 //API.WriteLog("lastspell " + API.LastSpellCastInGame);
                 #region Cooldowns
                 //apl_cooldown->add_action(this, "Metamorphosis", "if=!(talent.demonic.enabled|variable.pooling_for_meta)&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)|target.time_to_die<25");
-                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && ((UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && !(Talent_Demonic || PoolingForMeta) || API.TargetTimeToDie < 2500))
+                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) &&(!(Talent_Demonic || PoolingForMeta) || API.TargetTimeToDie < 2500))
                 {
                     API.CastSpell(Metamorphosis);
 
                 }
                 //apl_cooldown->add_action(this, "Metamorphosis", "                                                                                                 if=talent.demonic.enabled&(&level<54|(cooldown.eye_beam.remains>20&(!variable.blade_dance|cooldown.blade_dance.remains>gcd.max)))&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)");
-                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && ((UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && Talent_Demonic && (API.PlayerLevel < 54 || (API.SpellCDDuration(Eye_Beam) > 2000 && (!BladeDance || API.SpellCDDuration(Blade_Dance) > 150)))))
+                if (API.CanCast(Metamorphosis) && API.PlayerLevel >= 8 && UseMetamorphosis != "never" && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns) && (Talent_Demonic && (API.PlayerLevel < 54 || (API.SpellCDDuration(Eye_Beam) > 2000 && (!BladeDance || API.SpellCDDuration(Blade_Dance) > 150)))))
                 {
                     API.CastSpell(Metamorphosis);
 
@@ -311,29 +312,38 @@ private string furious_gaze = "Furious Gaze";
                         API.CastSpell(Essence_Break);
 
                     }
-                    //death_sweep,if= variable.blade_dance & debuff.essence_break.up
-                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 &&!Talent_CycleofHatred&& API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
+                    if (!(API.CanCast(Essence_Break) && (API.PlayerFury >= 80 && (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 || !BladeDance))))
                     {
-                        API.CastSpell(Death_Sweep);
+                        //death_sweep,if= variable.blade_dance & debuff.essence_break.up
+                        if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
+                        {
+                            API.CastSpell(Death_Sweep);
 
-                    }
-                    //blade_dance,if= variable.blade_dance & debuff.essence_break.up
-                    if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
-                    {
-                        API.CastSpell(Blade_Dance);
+                        }
+                        if (!(API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange))
+                        {
+                            //blade_dance,if= variable.blade_dance & debuff.essence_break.up
+                            if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange)
+                            {
+                                API.CastSpell(Blade_Dance);
 
-                    }
-                    //annihilation,if= debuff.essence_break.up
-                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
-                    {
-                        API.CastSpell(Annihilation);
+                            }
+                            if (!(API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange))
+                            {
+                                //annihilation,if= debuff.essence_break.up
+                                if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
+                                {
+                                    API.CastSpell(Annihilation);
 
-                    }
-                    //chaos_strike,if= debuff.essence_break.up
-                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
-                    {
-                        API.CastSpell(Chaos_Strike);
+                                }
+                                //chaos_strike,if= debuff.essence_break.up
+                                if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
+                                {
+                                    API.CastSpell(Chaos_Strike);
 
+                                }
+                            }
+                        }
                     }
                 }
                 #endregion
@@ -347,66 +357,78 @@ private string furious_gaze = "Furious Gaze";
                         API.CastSpell(Death_Sweep);
 
                     }
-                    //glaive_tempest,if= active_enemies > desired_targets | raid_event.adds.in> 10
-                    if (API.CanCast(Glaive_Tempest) && Talent_GlaiveTempest && API.PlayerFury >= 30 && MeleeRange)
+                    if (!(API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange))
                     {
-                        API.CastSpell(Glaive_Tempest);
+                        //glaive_tempest,if= active_enemies > desired_targets | raid_event.adds.in> 10
+                        if (API.CanCast(Glaive_Tempest) && Talent_GlaiveTempest && API.PlayerFury >= 30 && MeleeRange)
+                        {
+                            API.CastSpell(Glaive_Tempest);
 
+                        }
+                        //throw_glaive,if= conduit.serrated_glaive.enabled & cooldown.eye_beam.remains < 6 & !buff.metamorphosis.up & !debuff.exposed_wound.up
+
+                        //eye_beam,if= raid_event.adds.up | raid_event.adds.in> 25
+                        if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
+                        {
+                            API.CastSpell(Eye_Beam);
+
+                        }
+                        if (!(API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange))
+                        {
+                            //blade_dance,if= variable.blade_dance & !cooldown.metamorphosis.ready & (cooldown.eye_beam.remains > (5 - azerite.revolving_blades.rank * 3))
+                            if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && !MetamorphosisUp && BladeDanceCost && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
+                            {
+                                API.CastSpell(Blade_Dance);
+
+                            }
+                            if (!(API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && !MetamorphosisUp && BladeDanceCost && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange))
+                            {
+                                //immolation_aura
+                                if (API.CanCast(Immolation_Aura) && API.PlayerLevel >= 18 && MeleeRange)
+                                {
+                                    API.CastSpell(Immolation_Aura);
+
+                                }
+                                if (!API.CanCast(Immolation_Aura))
+                                {
+                                    //annihilation,if= !variable.pooling_for_blade_dance
+                                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && !PoolingForBladeDance && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
+                                    {
+                                        API.CastSpell(Annihilation);
+
+                                    }
+                                    //felblade,if= fury.deficit >= 40
+                                    if (API.CanCast(Felblade) && API.TargetRange <= 15 && Talent_Felblade && fury_deficit >= 40)
+                                    {
+                                        API.CastSpell(Felblade);
+
+                                    }
+                                    //chaos_strike,if= !variable.pooling_for_blade_dance & !variable.pooling_for_eye_beam
+                                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.PlayerFury >= 40 && !PoolingForBladeDance && !PoolingForEyeBeam && MeleeRange)
+                                    {
+                                        API.CastSpell(Chaos_Strike);
+
+                                    }
+                                    //fel_rush,if= talent.demon_blades.enabled & !cooldown.eye_beam.ready & (charges = 2 | (raid_event.movement.in> 10 & raid_event.adds.in> 10))
+
+                                    //demons_bite
+                                    if (API.CanCast(Demons_Bite) && API.PlayerFury <= API.PlayeMaxFury - 30 && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
+                                    {
+                                        API.CastSpell(Demons_Bite);
+
+                                    }
+                                    //throw_glaive,if= buff.out_of_range.up
+                                    if (API.CanCast(Throw_Glaive) && API.PlayerLevel >= 10 && UseThrowGlaive == "On" && API.TargetRange <= 30 && (Talent_DemonBlades || !MeleeRange))
+                                    {
+                                        API.CastSpell(Throw_Glaive);
+                                    }
+                                    //fel_rush,if= movement.distance > 15 | buff.out_of_range.up
+                                    //vengeful_retreat,if= movement.distance > 15
+                                    //throw_glaive,if= talent.demon_blades.enabled
+                                }
+                            }
+                        }
                     }
-                    //throw_glaive,if= conduit.serrated_glaive.enabled & cooldown.eye_beam.remains < 6 & !buff.metamorphosis.up & !debuff.exposed_wound.up
-
-                    //eye_beam,if= raid_event.adds.up | raid_event.adds.in> 25
-                    if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
-                    {
-                        API.CastSpell(Eye_Beam);
-
-                    }
-                    //blade_dance,if= variable.blade_dance & !cooldown.metamorphosis.ready & (cooldown.eye_beam.remains > (5 - azerite.revolving_blades.rank * 3))
-                    if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && !MetamorphosisUp && BladeDanceCost && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
-                    {
-                        API.CastSpell(Blade_Dance);
-
-                    }
-                    //immolation_aura
-                    if (API.CanCast(Immolation_Aura) && API.PlayerLevel >= 18 && MeleeRange)
-                    {
-                        API.CastSpell(Immolation_Aura);
-
-                    }
-                    //annihilation,if= !variable.pooling_for_blade_dance
-                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && !PoolingForBladeDance && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
-                    {
-                        API.CastSpell(Annihilation);
-
-                    }
-                    //felblade,if= fury.deficit >= 40
-                    if (API.CanCast(Felblade) && API.TargetRange <= 15 && Talent_Felblade && fury_deficit >= 40)
-                    {
-                        API.CastSpell(Felblade);
-
-                    }
-                    //chaos_strike,if= !variable.pooling_for_blade_dance & !variable.pooling_for_eye_beam
-                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.PlayerFury >= 40 && !PoolingForBladeDance && !PoolingForEyeBeam && MeleeRange)
-                    {
-                        API.CastSpell(Chaos_Strike);
-
-                    }
-                    //fel_rush,if= talent.demon_blades.enabled & !cooldown.eye_beam.ready & (charges = 2 | (raid_event.movement.in> 10 & raid_event.adds.in> 10))
-
-                    //demons_bite
-                    if (API.CanCast(Demons_Bite) && API.PlayerFury <= API.PlayeMaxFury - 30 && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
-                    {
-                        API.CastSpell(Demons_Bite);
-
-                    }
-                    //throw_glaive,if= buff.out_of_range.up
-                    if (API.CanCast(Throw_Glaive) && API.PlayerLevel >= 10 && UseThrowGlaive == "On" && API.TargetRange <= 30 && (Talent_DemonBlades || !MeleeRange))
-                    {
-                        API.CastSpell(Throw_Glaive);
-                    }
-                    //fel_rush,if= movement.distance > 15 | buff.out_of_range.up
-                    //vengeful_retreat,if= movement.distance > 15
-                    //throw_glaive,if= talent.demon_blades.enabled
                 }
                 #endregion
                 #region normal
@@ -426,84 +448,96 @@ private string furious_gaze = "Furious Gaze";
                         API.CastSpell(Death_Sweep);
 
                     }
-                    // immolation_aura
-                    if (API.CanCast(Immolation_Aura) && API.PlayerLevel >= 18 && MeleeRange)
+                    if (!(API.CanCast(Death_Sweep) && API.PlayerLevel >= 12 && !Talent_CycleofHatred && MetamorphosisUp && BladeDance && BladeDanceCost && MeleeRange))
                     {
-                        API.CastSpell(Immolation_Aura);
+                        // immolation_aura
+                        if (API.CanCast(Immolation_Aura) && API.PlayerLevel >= 18 && MeleeRange)
+                        {
+                            API.CastSpell(Immolation_Aura);
 
-                    }
-                    // glaive_tempest,if= !variable.waiting_for_momentum & (active_enemies > desired_targets | raid_event.adds.in> 10)
-                    if (API.CanCast(Glaive_Tempest) && !waiting_for_momentum && (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber) && Talent_GlaiveTempest && API.PlayerFury >= 30 && MeleeRange)
-                    {
-                        API.CastSpell(Glaive_Tempest);
+                        }
+                        if (!API.CanCast(Immolation_Aura))
+                        {
+                            // glaive_tempest,if= !variable.waiting_for_momentum & (active_enemies > desired_targets | raid_event.adds.in> 10)
+                            if (API.CanCast(Glaive_Tempest) && !waiting_for_momentum && (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber) && Talent_GlaiveTempest && API.PlayerFury >= 30 && MeleeRange)
+                            {
+                                API.CastSpell(Glaive_Tempest);
 
-                    }
-                    // throw_glaive,if= conduit.serrated_glaive.enabled & cooldown.eye_beam.remains < 6 & !buff.metamorphosis.up & !debuff.exposed_wound.up
+                            }
+                            // throw_glaive,if= conduit.serrated_glaive.enabled & cooldown.eye_beam.remains < 6 & !buff.metamorphosis.up & !debuff.exposed_wound.up
 
-                    // eye_beam,if= active_enemies > 1 & (!raid_event.adds.exists | raid_event.adds.up) & !variable.waiting_for_momentum
-                    if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && API.PlayerUnitInMeleeRangeCount > 1 && !waiting_for_momentum && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
-                    {
-                        API.CastSpell(Eye_Beam);
+                            // eye_beam,if= active_enemies > 1 & (!raid_event.adds.exists | raid_event.adds.up) & !variable.waiting_for_momentum
+                            if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && API.PlayerUnitInMeleeRangeCount > 1 && !waiting_for_momentum && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
+                            {
+                                API.CastSpell(Eye_Beam);
 
-                    }
-                    // blade_dance,if= variable.blade_dance
-                    if (API.CanCast(Blade_Dance) && !MetamorphosisUp && API.PlayerLevel >= 12 && BladeDance && !Talent_CycleofHatred && BladeDanceCost && MeleeRange)
-                    {
-                        API.CastSpell(Blade_Dance);
+                            }
+                            if (!(API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && API.PlayerUnitInMeleeRangeCount > 1 && !waiting_for_momentum && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange))
+                            {
+                                // blade_dance,if= variable.blade_dance
+                                if (API.CanCast(Blade_Dance) && !MetamorphosisUp && API.PlayerLevel >= 12 && BladeDance && !Talent_CycleofHatred && BladeDanceCost && MeleeRange)
+                                {
+                                    API.CastSpell(Blade_Dance);
 
-                    }
-                    // felblade,if= fury.deficit >= 40
-                    if (API.CanCast(Felblade) && API.TargetRange <= 15 && Talent_Felblade && fury_deficit >= 40)
-                    {
-                        API.CastSpell(Felblade);
+                                }
+                                if (!(API.CanCast(Blade_Dance) && !MetamorphosisUp && API.PlayerLevel >= 12 && BladeDance && !Talent_CycleofHatred && BladeDanceCost && MeleeRange))
+                                {
+                                    // felblade,if= fury.deficit >= 40
+                                    if (API.CanCast(Felblade) && API.TargetRange <= 15 && Talent_Felblade && fury_deficit >= 40)
+                                    {
+                                        API.CastSpell(Felblade);
 
-                    }
-                    // eye_beam,if= !talent.blind_fury.enabled & !variable.waiting_for_essence_break & raid_event.adds.in> cooldown
-                    if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && !Talent_BlindFury && !waiting_for_essence_break && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
-                    {
-                        API.CastSpell(Eye_Beam);
+                                    }
+                                    // eye_beam,if= !talent.blind_fury.enabled & !variable.waiting_for_essence_break & raid_event.adds.in> cooldown
+                                    if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && !Talent_BlindFury && !waiting_for_essence_break && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
+                                    {
+                                        API.CastSpell(Eye_Beam);
 
-                    }
-                    // annihilation,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30 | buff.metamorphosis.remains < 5) & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
-                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30 || (API.PlayerBuffTimeRemaining(Metamorphosis) < 500 || API.PlayerBuffTimeRemaining(DemonicMetamorphosis) < 500)) && !BladeDance && !waiting_for_essence_break && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
-                    {
-                        API.CastSpell(Annihilation);
+                                    }
+                                    // annihilation,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30 | buff.metamorphosis.remains < 5) & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
+                                    if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30 || (API.PlayerBuffTimeRemaining(Metamorphosis) < 500 || API.PlayerBuffTimeRemaining(DemonicMetamorphosis) < 500)) && !BladeDance && !waiting_for_essence_break && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
+                                    {
+                                        API.CastSpell(Annihilation);
 
-                    }
-                    // chaos_strike,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30) & !variable.pooling_for_meta & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
-                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30) && !PoolingForBladeDance && !waiting_for_essence_break && !waiting_for_essence_break && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
-                    {
-                        API.CastSpell(Chaos_Strike);
+                                    }
+                                    // chaos_strike,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30) & !variable.pooling_for_meta & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
+                                    if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30) && !PoolingForBladeDance && !waiting_for_essence_break && !waiting_for_essence_break && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
+                                    {
+                                        API.CastSpell(Chaos_Strike);
 
-                    }
-                    // eye_beam,if= talent.blind_fury.enabled & raid_event.adds.in> cooldown
-                    if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && Talent_BlindFury && !waiting_for_essence_break && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
-                    {
-                        API.CastSpell(Eye_Beam);
+                                    }
+                                    // eye_beam,if= talent.blind_fury.enabled & raid_event.adds.in> cooldown
+                                    if (API.CanCast(Eye_Beam) && API.PlayerLevel >= 11 && Talent_BlindFury && !waiting_for_essence_break && !API.PlayerIsMoving && (UseEyeBeam == "always" || (UseEyeBeam == "with Cooldowns" && IsCooldowns)) && API.PlayerFury >= 30 && MeleeRange)
+                                    {
+                                        API.CastSpell(Eye_Beam);
 
-                    }
-                    // demons_bite
-                    if (API.CanCast(Demons_Bite) && API.PlayerFury <=API.PlayeMaxFury-30 && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
-                    {
-                        API.CastSpell(Demons_Bite);
+                                    }
+                                    // demons_bite
+                                    if (API.CanCast(Demons_Bite) && API.PlayerFury <= API.PlayeMaxFury - 30 && API.PlayerLevel >= 8 && !Talent_DemonBlades && MeleeRange && (API.PlayerFury < 30 || !API.CanCast(Eye_Beam) || UseEyeBeam == "with Cooldowns" && !IsCooldowns))
+                                    {
+                                        API.CastSpell(Demons_Bite);
 
-                    }
-                    // fel_rush,if= !talent.momentum.enabled & raid_event.movement.in> charges * 10 & talent.demon_blades.enabled
-                    // felblade,if= movement.distance > 15 | buff.out_of_range.up
-                    if (API.CanCast(Felblade) && API.TargetRange <= 15 && Talent_Felblade && fury_deficit >= 40)
-                    {
-                        API.CastSpell(Felblade);
+                                    }
+                                    // fel_rush,if= !talent.momentum.enabled & raid_event.movement.in> charges * 10 & talent.demon_blades.enabled
+                                    // felblade,if= movement.distance > 15 | buff.out_of_range.up
+                                    if (API.CanCast(Felblade) && API.TargetRange <= 15 && Talent_Felblade && fury_deficit >= 40)
+                                    {
+                                        API.CastSpell(Felblade);
 
+                                    }
+                                    // fel_rush,if= movement.distance > 15 | (buff.out_of_range.up & !talent.momentum.enabled)
+                                    // vengeful_retreat,if= movement.distance > 15
+                                    // throw_glaive,if= talent.demon_blades.enabled
+                                    if (API.CanCast(Throw_Glaive) && API.PlayerLevel >= 10 && UseThrowGlaive == "On" && API.TargetRange <= 30 && (Talent_DemonBlades || !MeleeRange))
+                                    {
+                                        API.CastSpell(Throw_Glaive);
+                                    }
+                                }
+                            }
+                        }
                     }
-                    // fel_rush,if= movement.distance > 15 | (buff.out_of_range.up & !talent.momentum.enabled)
-                    // vengeful_retreat,if= movement.distance > 15
-                    // throw_glaive,if= talent.demon_blades.enabled
-                    if (API.CanCast(Throw_Glaive) && API.PlayerLevel >= 10 && UseThrowGlaive == "On" && API.TargetRange <= 30 && (Talent_DemonBlades || !MeleeRange))
-                    {
-                        API.CastSpell(Throw_Glaive);
-                    }
+                    #endregion
                 }
-                #endregion
             }
         }
 
