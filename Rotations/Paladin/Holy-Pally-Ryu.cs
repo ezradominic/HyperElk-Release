@@ -353,6 +353,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(DivineToll + "MO");
             CombatRoutine.AddMacro(LoTM + "MO");
             CombatRoutine.AddMacro(WoG + "MO");
+            CombatRoutine.AddMacro(BF + "MO");
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
             CombatRoutine.AddMacro(TargetHostile);
@@ -552,14 +553,29 @@ namespace HyperElk.Core
                     API.CastSpell(DivineToll);
                     return;
                 }
+                if (DTCheckMO)
+                {
+                    API.CastSpell(DivineToll + "MO");
+                    return;
+                }
                 if (BoVCheck)
                 {
                     API.CastSpell(BoV);
                     return;
                 }
+                if (BoVCheckMO)
+                {
+                    API.CastSpell(BoV + "MO");
+                    return;
+                }
                 if (HolyPrismCheck)
                 {
                     API.CastSpell(HolyPrism);
+                    return;
+                }
+                if (HolyPrismCheckMO)
+                {
+                    API.CastSpell(HolyPrism + "MO");
                     return;
                 }
                 if (LoDCheck)
@@ -572,9 +588,19 @@ namespace HyperElk.Core
                     API.CastSpell(LoH);
                     return;
                 }
+                if (LoHCheckMO)
+                {
+                    API.CastSpell(LoH + "MO");
+                    return;
+                }
                 if (BoSCheck)
                 {
                     API.CastSpell(BoS);
+                    return;
+                }
+                if (BoSCheckMO)
+                {
+                    API.CastSpell(BoS + "MO");
                     return;
                 }
                 if (HolyShockCheck)
@@ -582,9 +608,19 @@ namespace HyperElk.Core
                     API.CastSpell(HolyShock);
                     return;
                 }
+                if (HolyShockCheckMO)
+                {
+                    API.CastSpell(HolyShock + "MO");
+                    return;
+                }
                 if (WoGCheck)
                 {
                     API.CastSpell(WoG);
+                    return;
+                }
+                if (WoGCheckMO)
+                {
+                    API.CastSpell(WoG + "MO");
                     return;
                 }
                 if (API.CanCast(CrusaderStrike) && CrusadersMight && API.SpellISOnCooldown(HolyShock) && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
@@ -607,70 +643,9 @@ namespace HyperElk.Core
                     API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
-                if (FlashofLightCheck)
-                {
-                    API.CastSpell(FoL);
-                    return;
-                }
-                if (HolyLightCheck)
-                {
-                    API.CastSpell(HolyLight);
-                    return;
-                }
                 if (FlashofLightInfusionCheck)
                 {
                     API.CastSpell(FoL);
-                    return;
-                }
-                if (HolyLightInfusionCheck)
-                {
-                    API.CastSpell(HolyLight);
-                    return;
-                }
-                if (BFCheck)
-                {
-                    API.CastSpell(BF);
-                    return;
-                }
-                if (LoTMCheck)
-                {
-                    API.CastSpell(LoTM);
-                    return;
-                }
-                /// Mouseover
-                if (BoVCheckMO)
-                {
-                    API.CastSpell(BoV + "MO");
-                    return;
-                }
-                if (HolyPrismCheckMO)
-                {
-                    API.CastSpell(HolyPrism + "MO");
-                    return;
-                }
-                if (DTCheckMO)
-                {
-                    API.CastSpell(DivineToll + "MO");
-                    return;
-                }
-                if (LoHCheckMO)
-                {
-                    API.CastSpell(LoH + "MO");
-                    return;
-                }
-                if (BoSCheckMO)
-                {
-                    API.CastSpell(BoS + "MO");
-                    return;
-                }
-                if (HolyShockCheckMO)
-                {
-                    API.CastSpell(HolyShock + "MO");
-                    return;
-                }
-                if (WoGCheckMO)
-                {
-                    API.CastSpell(WoG + "MO");
                     return;
                 }
                 if (FlashofLightInfusionCheckMO)
@@ -678,9 +653,19 @@ namespace HyperElk.Core
                     API.CastSpell(FoL + "MO");
                     return;
                 }
+                if (HolyLightInfusionCheck)
+                {
+                    API.CastSpell(HolyLight);
+                    return;
+                }
                 if (HolyLightInfusionCheckMO)
                 {
                     API.CastSpell(HolyLight + "MO");
+                    return;
+                }
+                if (FlashofLightCheck)
+                {
+                    API.CastSpell(FoL);
                     return;
                 }
                 if (FlashofLightCheckMO)
@@ -688,14 +673,29 @@ namespace HyperElk.Core
                     API.CastSpell(FoL + "MO");
                     return;
                 }
+                if (HolyLightCheck)
+                {
+                    API.CastSpell(HolyLight);
+                    return;
+                }
                 if (HolyLightCheckMO)
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
+                if (BFCheck)
+                {
+                    API.CastSpell(BF);
+                    return;
+                }
                 if (BFCheckMO)
                 {
                     API.CastSpell(BF + "MO");
+                    return;
+                }
+                if (LoTMCheck)
+                {
+                    API.CastSpell(LoTM);
                     return;
                 }
                 if (LoTMCheckMO)
