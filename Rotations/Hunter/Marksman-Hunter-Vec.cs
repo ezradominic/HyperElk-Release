@@ -647,7 +647,7 @@ namespace HyperElk.Core
                      API.CastSpell(Steady_Shot);
                      return;
                  }*/
-                if (Talent_Steady_Focus && !PlayerHasBuff(Trueshot) && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                if (Talent_Steady_Focus && !PlayerHasBuff(Trueshot) && !VolleyTrickShots && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                 {
                     API.CastSpell(Steady_Shot);
                     API.WriteLog("AOE: SS:1 ");
@@ -730,7 +730,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.trickshots +=/ multishot,if= buff.trick_shots.down | buff.precise_shots.up & focus > cost + action.aimed_shot.cost & (!talent.chimaera_shot | active_enemies > 3)
-                if (API.CanCast(Multi_Shot) && (!PlayerHasBuff(Trick_Shots) || !API.CanCast(Rapid_Fire)) && InRange && API.PlayerFocus >= 20 && (!API.PlayerHasBuff(Trick_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)))
+                if (API.CanCast(Multi_Shot) && InRange && API.PlayerFocus >= 20 && (!API.PlayerHasBuff(Trick_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)))
                 {
                     API.CastSpell(Multi_Shot);
                     return;
@@ -776,7 +776,7 @@ namespace HyperElk.Core
                     API.CastSpell(Multi_Shot);
                     return;
                 }
-                if (API.CanCast(Steady_Shot) && !API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) && InRange)
+                if (API.CanCast(Steady_Shot) && (!API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) || (!PlayerHasBuff(Trick_Shots) && !VolleyTrickShots)) && (API.PlayerFocus < 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35))  && InRange)
                 {
                     API.CastSpell(Steady_Shot);
                     API.WriteLog("AOE: SS:2 ");
