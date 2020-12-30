@@ -69,7 +69,7 @@ namespace HyperElk.Core
         private string EclispleSolar = "Eclispe (Solar)";
         private string Starfire = "Starfire";
         private string Starsurge = "Starsurge";
-
+        private string Efflor = "Effloresence";
 
 
         //Talents
@@ -110,6 +110,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch party3 = new Stopwatch();
         private static readonly Stopwatch party4 = new Stopwatch();
         private static readonly Stopwatch LifeBloomwatch = new Stopwatch();
+        private static readonly Stopwatch EfflorWatch = new Stopwatch();
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
@@ -221,9 +222,9 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Resto Druid v1.2 by Ryu");
             API.WriteLog("BETA ROTATION : Some things are still missing. Please post feedback in Druid Channel. Have not fully added defenseive  Innervate will need /break or /break2 macro to use. Cov is supported via Cooldown toggle or break marcos -- Flourish will only work for Party, not for raid currently");
            // API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
-            API.WriteLog("If you want to use Effloresence, you need to use an @Cursor macro with /xxx break or break2 whereas xxx is your addon name(First five only) for it to work");
+            API.WriteLog("If you want to use Effloresence, you need to use an @Cursor macro, a /xxx break2 whereas xxx is your addon name(First five only) for it to work correctly, or ignore it in the spellbook. It will use it every 30 seconds.");
             API.WriteLog("Please us a /cast [target=player] macro for Innervate to work properly or it will cast on your current target");
-            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's's in the spell book. Enable it the settings and set your party swap health perecent and target check percent. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This works ONLY for party at this time.");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's's in the spell book. Enable it Toggles. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This works ONLY for party at this time.");
             API.WriteLog("Special Thanks to Ajax and Goose/Zero for testing");
 
             //Buff
@@ -286,6 +287,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(LifebloomL, 188550);
             CombatRoutine.AddSpell(Starfire, 197628);
             CombatRoutine.AddSpell(Starsurge, 197626);
+            CombatRoutine.AddSpell(Efflor, 145205);
 
             //Toggle
             CombatRoutine.AddToggle("Auto Target");
@@ -357,8 +359,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
             CombatRoutine.AddProp(HeartoftheWild, "Use " + HeartoftheWild, CDUsage, "Use " + HeartoftheWild + "On Cooldown, with Cooldowns, Not Used", "Cooldowns", 1);
 
-            CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
-            CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
+            //CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
+            //CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
             CombatRoutine.AddProp(Rejuvenation, Rejuvenation + " Life Percent", numbList, "Life percent at which " + Rejuvenation + " is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", numbList, "Life percent at which " + Regrowth + " is used, set to 0 to disable", "Healing", 85);
@@ -387,8 +389,14 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && (!API.PlayerHasBuff(TravelForm) || !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(Soulshape)) && (IsOOC || API.PlayerIsInCombat))
+            if (!API.PlayerIsMounted && !API.PlayerIsCasting() && !API.PlayerSpellonCursor && (!API.PlayerHasBuff(TravelForm) || !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(Soulshape)) && (IsOOC || API.PlayerIsInCombat))
             {
+                if (API.CanCast(Efflor) && (!EfflorWatch.IsRunning || EfflorWatch.ElapsedMilliseconds >= 30000))
+                {
+                    API.CastSpell(Efflor);
+                    EfflorWatch.Reset();
+                    EfflorWatch.Start();
+                }
                 if (API.CanCast(Convoke) && NightFaeCheck && InRange)
                 {
                     API.CastSpell(Convoke);
@@ -405,7 +413,7 @@ namespace HyperElk.Core
                     API.CastSpell(RavenousFrenzy);
                     return;
                 }
-                if (API.CanCast(Innervate) && InnervateCheck && InRange)
+                if (API.CanCast(Innervate) && InnervateCheck && InRange) 
                 {
                     API.CastSpell(Innervate);
                     return;
@@ -547,11 +555,24 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < units.Length; i++)
                         {
-                            if (API.UnitHealthPercent(units[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            if (API.UnitHealthPercent(units[i]) <= RegrowthLifePercent && (PlayerHealth >= RegrowthLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
-                                API.WriteLog("Target Health % " + API.TargetHealthPercent);
-                                API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= IronBarkLifePercent && (PlayerHealth >= IronBarkLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= SwiftmendLifePercent && (PlayerHealth >= SwiftmendLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= RejLifePercent && (PlayerHealth >= RejLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
                         }
@@ -560,7 +581,22 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (API.UnitHealthPercent(raidunits[i]) <= PartySwapPercent && (PlayerHealth >= TargetChangePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (API.UnitHealthPercent(raidunits[i]) <= RegrowthLifePercent && (PlayerHealth >= RegrowthLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(raidunits[i]) <= IronBarkLifePercent && (PlayerHealth >= IronBarkLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(raidunits[i]) <= SwiftmendLifePercent && (PlayerHealth >= SwiftmendLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(raidunits[i]) <= RejLifePercent && (PlayerHealth >= RejLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
