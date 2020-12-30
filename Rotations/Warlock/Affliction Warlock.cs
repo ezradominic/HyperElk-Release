@@ -81,9 +81,9 @@ namespace HyperElk.Core
         bool DotCheck => API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && API.TargetHasDebuff(UnstableAffliction) && (API.TargetHasDebuff(SoulRot) || !API.TargetHasDebuff(SoulRot));
         bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
         bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
-        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction || API.LastSpellCastInGame == UnstableAffliction;
+        bool LastCastUnstableAffliction =>  API.PlayerLastSpell == UnstableAffliction || API.LastSpellCastInGame == UnstableAffliction;
         bool CurrenCastUnstableAffliction => API.CurrentCastSpellID("player") == 316099;
-        bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe || API.LastSpellCastInGame == ScouringTithe;
+        bool LastCastScouringTithe =>  API.PlayerLastSpell == ScouringTithe || API.LastSpellCastInGame == ScouringTithe;
         bool CastingAgony => API.PlayerLastSpell == Agony || API.LastSpellCastInGame == Agony;
         bool CastingCorruption => API.PlayerLastSpell == Corruption || API.LastSpellCastInGame == Corruption;
         bool CastingSL => API.PlayerLastSpell == SiphonLife || API.LastSpellCastInGame == SiphonLife;

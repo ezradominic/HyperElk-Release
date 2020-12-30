@@ -12,6 +12,8 @@
 // v2.0 some small changes
 // v2.1 spell ids and alot of other stuff
 // v2.2 Bloodtalons fix 
+// v2.3 swipe bear added
+// v2.4 kitty bear swap adjustment
 
 using System.Diagnostics;
 
@@ -33,6 +35,7 @@ namespace HyperElk.Core
         private string Thrash = "Thrash";
         private string Thrashbear = "Thrash Bear";
         private string Swipe = "Swipe";
+        private string Swipebear = "Swipe Bear";
         private string BrutalSlash = "Brutal Slash";
         private string Moonfire = "Moonfire";
         private string FeralFrenzy = "Feral Frenzy";
@@ -123,13 +126,14 @@ namespace HyperElk.Core
         private int FrenziedRegenerationLifePercent => numbList[CombatRoutine.GetPropertyInt(FrenziedRegeneration)];
         private int IronfurLifePercent => numbList[CombatRoutine.GetPropertyInt(Ironfur)];
         private int BearFormLifePercent => numbList[CombatRoutine.GetPropertyInt(BearForm)];
+        private int KittyFormLifePercent => numbList[CombatRoutine.GetPropertyInt(CatForm)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v2.2");
+            API.WriteLog("Welcome to smartie`s Feral Druid v2.4");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -148,6 +152,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Thrash, 106830, "D4");
             CombatRoutine.AddSpell(Thrashbear, 77758, "D4");
             CombatRoutine.AddSpell(Swipe, 106785, "D5");
+            CombatRoutine.AddSpell(Swipebear, 213771, "D5");
             CombatRoutine.AddSpell(BrutalSlash, 202028, "D5");
             CombatRoutine.AddSpell(Moonfire, 8921, "NumPad2");
             CombatRoutine.AddSpell(FeralFrenzy, 274837, "NumPad4");
@@ -237,7 +242,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SurvivalInstincts, SurvivalInstincts + " Life Percent", numbList, "Life percent at which" + SurvivalInstincts + "is used, set to 0 to disable", "Defense", 30);
             CombatRoutine.AddProp(FrenziedRegeneration, FrenziedRegeneration + " Life Percent", numbList, "Life percent at which" + FrenziedRegeneration + "is used, set to 0 to disable", "Defense", 60);
             CombatRoutine.AddProp(Ironfur, Ironfur + " Life Percent", numbList, "Life percent at which" + Ironfur + "is used, set to 0 to disable", "Defense", 90);
-            CombatRoutine.AddProp(BearForm, BearForm + " Life Percent", numbList, "Life percent at which rota will go into" + BearForm + "set to 0 to disable", "Defense", 10);
+            CombatRoutine.AddProp(BearForm, BearForm + " Life Percent", numbList, "Life percent at which rota will go into" + BearForm + "set to 0 to disable", "Defense", 20);
+            CombatRoutine.AddProp(CatForm, CatForm + " Life Percent", numbList, "Life percent at which rota will go back into" + CatForm + "set to 0 to disable", "Defense", 40);
         }
         public override void Pulse()
         {
@@ -331,7 +337,7 @@ namespace HyperElk.Core
                     API.CastSpell(BearForm);
                     return;
                 }
-                if (API.PlayerHealthPercent > BearFormLifePercent && BearFormLifePercent != 0 && API.CanCast(CatForm) && API.PlayerHasBuff(BearForm) && AutoForm)
+                if (API.PlayerHealthPercent >= KittyFormLifePercent && KittyFormLifePercent != 0 && API.CanCast(CatForm) && API.PlayerHasBuff(BearForm) && AutoForm)
                 {
                     API.CastSpell(CatForm);
                     return;
@@ -379,9 +385,9 @@ namespace HyperElk.Core
                     API.CastSpell(Mangle);
                     return;
                 }
-                if (API.CanCast(Swipe) && isThrashMelee && PlayerLevel >= 42 && API.TargetHasDebuff(Thrashbear))
+                if (API.CanCast(Swipebear) && isThrashMelee && PlayerLevel >= 42 && API.TargetHasDebuff(Thrashbear))
                 {
-                    API.CastSpell(Swipe);
+                    API.CastSpell(Swipebear);
                     return;
                 }
             }

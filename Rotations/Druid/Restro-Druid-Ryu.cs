@@ -64,6 +64,12 @@ namespace HyperElk.Core
         private string PartySwap = "Target Swap";
         private string LifebloomL = "LifebloomL";
         private string TargetChange = "Target Change";
+        private string AoERaid = "AOE Healing Raid";
+        private string EclispeLunar = "Eclispe (Lunar)";
+        private string EclispleSolar = "Eclispe (Solar)";
+        private string Starfire = "Starfire";
+        private string Starsurge = "Starsurge";
+
 
 
         //Talents
@@ -112,7 +118,7 @@ namespace HyperElk.Core
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
 
-        private int FlourishRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(p,buff));
+        private int FlourishRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p));
         private int FlourishPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p));
        // private int FlourishTracking(string buff) => API.PlayerIsInRaid ? FlourishRaidTracking(Rejuvenation) : FlourishPartyTracking(Rejuvenation);
 
@@ -123,12 +129,12 @@ namespace HyperElk.Core
         private bool ConvokeAoE => UnitBelowHealthPercent(ConvLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !API.PlayerIsMoving && !ChannelingTranq;
         private bool WGAoE => UnitBelowHealthPercent(WGLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !API.PlayerIsMoving;
         private bool ToLAoE => UnitBelowHealthPercent(ToLLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
-        private bool TranqAoE => UnitBelowHealthPercent(TranqLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingCov;
-        private bool FloruishRejTracking => FlourishPartyTracking(Rejuvenation) >= AoENumber;
-        private bool FlourishRegTracking => FlourishPartyTracking(Regrowth) >= 1;
-        private bool FlourishLifeTracking => FlourishPartyTracking(Lifebloom) >= 1;
-        private bool FlourishWGTracking => FlourishPartyTracking(WildGrowth) >= AoENumber;
-        private bool FlourishTranqTracking => FlourishPartyTracking(Tranquility) >= AoENumber;
+        private bool TranqAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(TranqLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(TranqLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingCov;
+        private bool FloruishRejTracking => API.PlayerIsInRaid ? FlourishRaidTracking(Rejuvenation) >= AoERaidNumber : FlourishPartyTracking(Rejuvenation) >= AoENumber;
+        private bool FlourishRegTracking => API.PlayerIsInRaid ? FlourishRaidTracking(Regrowth) >= 1 : FlourishPartyTracking(Regrowth) >= 1;
+        private bool FlourishLifeTracking => API.PlayerIsInRaid ? FlourishRaidTracking(Lifebloom) >= 1 : FlourishPartyTracking(Lifebloom) >= 1;
+        private bool FlourishWGTracking => API.PlayerIsInRaid ? FlourishRaidTracking(WildGrowth) >= AoENumber : FlourishPartyTracking(WildGrowth) >= AoENumber;
+        private bool FlourishTranqTracking => API.PlayerIsInRaid ? FlourishRaidTracking(Tranquility) >= AoERaidNumber : FlourishPartyTracking(Tranquility) >= AoENumber;
         private bool FloruishAoE => UnitBelowHealthPercent(FloruishLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool CWCheck => CenarionWardTalent && (API.TargetRoleSpec == API.TankRole && API.TargetHealthPercent <= CWTankLifePercent || API.TargetHealthPercent <= CWPlayerLifePercent) && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool NatureSwiftCheck => API.TargetHealthPercent <= NSLifePercent && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
@@ -139,7 +145,7 @@ namespace HyperElk.Core
         private bool RegrowthCheck => (API.PlayerHasBuff(Clear) && API.TargetHealthPercent <= 90 ||API.TargetHealthPercent <= RegrowthLifePercent) && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving;
         private bool RejCheck => API.TargetHealthPercent <= RejLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Rejuvenation) && (!GerminationTalent || API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT) && API.TargetHealthPercent <= RejGermLifePercent) && !ChannelingCov && !ChannelingTranq && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool SwiftCheck => API.TargetHealthPercent <= SwiftmendLifePercent && !API.PlayerCanAttackTarget && API.SpellCharges(Swiftmend) > 0 && (API.TargetHasBuff(Rejuvenation) || API.TargetHasBuff(Regrowth) || API.TargetHasBuff(WildGrowth)) && (!API.PlayerIsMoving || API.PlayerIsMoving) && NotChanneling && !ChannelingCov && !ChannelingTranq;
-        private bool LifeBloomCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Lifebloom) && (PhotosynthesisTalent && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000)) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool LifeBloomCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && (!PhotosynthesisTalent && !API.TargetHasBuff(Lifebloom) && API.TargetRoleSpec == API.TankRole || PhotosynthesisTalent && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && API.TargetRoleSpec == API.HealerRole && !API.TargetHasBuff(Lifebloom) || API.TargetRoleSpec == API.TankRole && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && !API.TargetHasBuff(Lifebloom)) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool LifeBloomLegCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole);
         private bool FloruishCheck => (FloruishRejTracking && FlourishLifeTracking && FlourishRegTracking || FlourishWGTracking && FlourishTranqTracking) && !API.PlayerCanAttackTarget && FloruishAoE && FlourishTalent;
         private bool KyrianCheck => PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingTranq;
@@ -149,7 +155,7 @@ namespace HyperElk.Core
         private bool Forms => !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(MoonkinForm) || !API.PlayerHasBuff(Soulshape);
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
-        private bool IsAutoSwap => CombatRoutine.GetPropertyBool("Auto Swap");
+        private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
         private bool IsOOC => CombatRoutine.GetPropertyBool("OOC");
         private bool PlayerSwap => API.UnitHealthPercent(Player) <= PartySwapPercent && API.TargetHealthPercent >= PartySwapPercent;
         private bool Party1Swap => API.UnitHealthPercent(Party1) <= PartySwapPercent && API.TargetHealthPercent >= PartySwapPercent;
@@ -184,6 +190,7 @@ namespace HyperElk.Core
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
         private int AoENumber => numbPartyList[CombatRoutine.GetPropertyInt(AoE)];
+        private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoERaid)];
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         private int PartySwapPercent => numbList[CombatRoutine.GetPropertyInt(PartySwap)];
         private int TargetChangePercent => numbList[CombatRoutine.GetPropertyInt(TargetChange)];
@@ -228,7 +235,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Clear, 16870);
             CombatRoutine.AddBuff(BearForm, 5487);
             CombatRoutine.AddBuff(Catform, 768);
-            CombatRoutine.AddBuff(MoonkinForm, 24858);
+            CombatRoutine.AddBuff(MoonkinForm, 197625);
             CombatRoutine.AddBuff(TravelForm, 783);
             CombatRoutine.AddBuff(Soulshape, 310143);
             CombatRoutine.AddBuff(FrenziedRegeneration, 22842);
@@ -236,6 +243,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Tranquility, 157982);
             CombatRoutine.AddBuff(SouloftheForest, 114108);
             CombatRoutine.AddBuff(LifebloomL, 188550);
+            CombatRoutine.AddBuff(EclispeLunar, 48518);
+            CombatRoutine.AddBuff(EclispleSolar, 48517);
 
             //Debuff
             CombatRoutine.AddDebuff(Sunfire, 164815);
@@ -275,6 +284,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Ironfur, 192081);
             CombatRoutine.AddSpell(HeartoftheWild, 319454);
             CombatRoutine.AddSpell(LifebloomL, 188550);
+            CombatRoutine.AddSpell(Starfire, 197628);
+            CombatRoutine.AddSpell(Starsurge, 197626);
+
+            //Toggle
+            CombatRoutine.AddToggle("Auto Target");
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -288,9 +302,48 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(Party2);
             CombatRoutine.AddMacro(Party3);
             CombatRoutine.AddMacro(Party4);
+            CombatRoutine.AddMacro("raid1");
+            CombatRoutine.AddMacro("raid2");
+            CombatRoutine.AddMacro("raid3");
+            CombatRoutine.AddMacro("raid4");
+            CombatRoutine.AddMacro("raid5");
+            CombatRoutine.AddMacro("raid6");
+            CombatRoutine.AddMacro("raid7");
+            CombatRoutine.AddMacro("raid8");
+            CombatRoutine.AddMacro("raid9");
+            CombatRoutine.AddMacro("raid10");
+            CombatRoutine.AddMacro("raid11");
+            CombatRoutine.AddMacro("raid12");
+            CombatRoutine.AddMacro("raid13");
+            CombatRoutine.AddMacro("raid14");
+            CombatRoutine.AddMacro("raid15");
+            CombatRoutine.AddMacro("raid16");
+            CombatRoutine.AddMacro("raid17");
+            CombatRoutine.AddMacro("raid18");
+            CombatRoutine.AddMacro("raid19");
+            CombatRoutine.AddMacro("raid20");
+            CombatRoutine.AddMacro("raid21");
+            CombatRoutine.AddMacro("raid22");
+            CombatRoutine.AddMacro("raid23");
+            CombatRoutine.AddMacro("raid24");
+            CombatRoutine.AddMacro("raid25");
+            CombatRoutine.AddMacro("raid26");
+            CombatRoutine.AddMacro("raid27");
+            CombatRoutine.AddMacro("raid28");
+            CombatRoutine.AddMacro("raid29");
+            CombatRoutine.AddMacro("raid30");
+            CombatRoutine.AddMacro("raid31");
+            CombatRoutine.AddMacro("raid32");
+            CombatRoutine.AddMacro("raid33");
+            CombatRoutine.AddMacro("raid34");
+            CombatRoutine.AddMacro("raid35");
+            CombatRoutine.AddMacro("raid36");
+            CombatRoutine.AddMacro("raid37");
+            CombatRoutine.AddMacro("raid38");
+            CombatRoutine.AddMacro("raid39");
+            CombatRoutine.AddMacro("raid40");
 
             //Prop
-            CombatRoutine.AddProp("Auto Swap", "Auto Swap", false, "Use Auto Swap Logic", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
             CombatRoutine.AddProp("AutoForm", "AutoForm", false, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp(Barkskin, Barkskin + " Life Percent", numbList, "Life percent at which" + Barkskin + "is used, set to 0 to disable", "Defense", 25);
@@ -324,6 +377,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Tranquility, Tranquility + " Life Percent", numbList, "Life percent at which " + Tranquility + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp(TreeofLife, TreeofLife + " Life Percent", numbList, "Life percent at which " + TreeofLife + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 45);
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
+            CombatRoutine.AddProp(AoERaid, "Number of units for AoE Healing in raid ", numbRaidList, " Units for AoE Healing in raid", "Healing", 7);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
             CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " should be used, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
@@ -333,12 +387,12 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && (!API.PlayerHasBuff(TravelForm) || !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(MoonkinForm) || !API.PlayerHasBuff(Soulshape)) && (IsOOC || API.PlayerIsInCombat))
+            if (!API.PlayerIsMounted && (!API.PlayerHasBuff(TravelForm) || !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(Soulshape)) && (IsOOC || API.PlayerIsInCombat))
             {
                 if (API.CanCast(Convoke) && NightFaeCheck && InRange)
                 {
                     API.CastSpell(Convoke);
-              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(AdaptiveSwarm) && NecrolordCheck && InRange)
@@ -365,17 +419,17 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(Natureswiftness);
                     return;
-                }    
+                }
                 if (API.CanCast(TreeofLife) && TreeofLifeTalent && InRange && ToLAoE)
                 {
-                    API.CastSpell(TreeofLife);;
+                    API.CastSpell(TreeofLife); ;
                     return;
                 }
                 if (API.CanCast(Lifebloom) && InRange && LifeBloomCheck)
                 {
                     API.CastSpell(Lifebloom);
-             //       API.WriteLog("Target Spec : " + API.TargetRoleSpec);
-              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //       API.WriteLog("Target Spec : " + API.TargetRoleSpec);
+                    //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     LifeBloomwatch.Reset();
                     LifeBloomwatch.Start();
                     return;
@@ -392,13 +446,13 @@ namespace HyperElk.Core
                 if (API.CanCast(WildGrowth) && InRange && WGAoE || API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InRange)
                 {
                     API.CastSpell(WildGrowth);
-             //       API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //       API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Tranquility) && InRange && TranqAoE)
                 {
                     API.CastSpell(Tranquility);
-              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Flourish) && InRange && FloruishCheck)
@@ -409,22 +463,22 @@ namespace HyperElk.Core
                 if (API.CanCast(Ironbark) && InRange && IBCheck)
                 {
                     API.CastSpell(Ironbark);
-              //      API.WriteLog("Target Health % " + API.TargetHealthPercent);
-              //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //      API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                    //      API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(CenarionWard) && InRange && CWCheck)
                 {
                     API.CastSpell(CenarionWard);
-               //     API.WriteLog("Target Health % " + API.TargetHealthPercent);
-               //     API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //     API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                    //     API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Swiftmend) && InRange && SwiftCheck)
                 {
                     API.CastSpell(Swiftmend);
-               //     API.WriteLog("Target Health % " + API.TargetHealthPercent);
-               //     API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //     API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                    //     API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Rejuvenation) && InRange && RejCheck)
@@ -435,14 +489,14 @@ namespace HyperElk.Core
                 if (API.CanCast(Regrowth) && InRange && RegrowthCheck)
                 {
                     API.CastSpell(Regrowth);
-             //       API.WriteLog("Target Health % " + API.TargetHealthPercent);
-             //       API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //       API.WriteLog("Target Health % " + API.TargetHealthPercent);
+                    //       API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 if (API.CanCast(Nourish) && InRange && NourishCheck)
                 {
                     API.CastSpell(Nourish);
-                  //  API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
+                    //  API.WriteLog("Player Health :" + API.UnitHealthPercent("player") + " Party1 Health :" + API.UnitHealthPercent("party1") + " Party2 Health :" + API.UnitHealthPercent("party2") + " Party3 Health :" + API.UnitHealthPercent("party3") + " Party4 Health :" + API.UnitHealthPercent("party4"));
                     return;
                 }
                 //DPS
@@ -451,17 +505,37 @@ namespace HyperElk.Core
                     API.CastSpell(HeartoftheWild);
                     return;
                 }
+                if (API.CanCast(Starsurge) && API.PlayerHasBuff(MoonkinForm) && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && (API.PlayerHasBuff(EclispeLunar) || API.PlayerHasBuff(EclispleSolar)) && InRange && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(Starsurge);
+                    return;
+                }
+                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar))
+                {
+                    API.CastSpell(Starfire);
+                    return;
+                }
+                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.TargetHealthPercent > 0)
+                {
+                    API.CastSpell(Wrath);
+                    return;
+                }
                 if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(Wrath);
                     return;
                 }
-                if (API.CanCast(Moonfire) && InRange && !API.TargetHasDebuff(Moonfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
+                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.TargetUnitInRangeCount >= 3)
+                {
+                    API.CastSpell(Starfire);
+                    return;
+                }
+                if (API.CanCast(Moonfire) && !API.PlayerIsCasting(true) && InRange && !API.TargetHasDebuff(Moonfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(Moonfire);
                     return;
                 }
-                if (API.CanCast(Sunfire) && InRange && !API.TargetHasDebuff(Sunfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
+                if (API.CanCast(Sunfire) && !API.PlayerIsCasting(true) && InRange && !API.TargetHasDebuff(Sunfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(Sunfire);
                     return;
