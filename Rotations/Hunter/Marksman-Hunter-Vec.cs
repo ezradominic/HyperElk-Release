@@ -6,6 +6,7 @@ namespace HyperElk.Core
     public class MMHunter : CombatRoutine
     {
         private readonly Stopwatch Trueshot_active = new Stopwatch();
+        private readonly Stopwatch VolleyWindow = new Stopwatch();
 
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spells,Buffs,Debuffs
@@ -118,7 +119,7 @@ namespace HyperElk.Core
         private float SteadyShot_CastTime => 175f / (1f + (API.PlayerGetHaste));
         private float gcd => API.SpellGCDTotalDuration;
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
-        private bool VolleyTrickShots => (Talent_Volley && API.SpellCDDuration(Volley) > 3900 && API.SpellCDDuration(Volley) < 4500);
+        private bool VolleyTrickShots => (Talent_Volley && VolleyWindow.IsRunning);
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -301,12 +302,23 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (API.LastSpellCastInGame == Trueshot)
+            if (!VolleyWindow.IsRunning && API.LastSpellCastInGame == Volley)
+            {
+                API.WriteLog("Volley window open" + " AS ready? " + API.CanCast(Aimed_Shot) + " RF ready? " + API.CanCast(Rapid_Fire));
+                VolleyWindow.Start();
+            }
+            if (VolleyWindow.ElapsedMilliseconds >= 6000)
+            {
+                API.WriteLog("Volley window closed");
+                VolleyWindow.Stop();
+                VolleyWindow.Reset();
+            }
+            if (!Trueshot_active.IsRunning && API.LastSpellCastInGame == Trueshot)
             {
                 API.WriteLog("Trueshot window open");
                 Trueshot_active.Start();
             }
-            if (Trueshot_active.ElapsedMilliseconds > 15000)
+            if (Trueshot_active.ElapsedMilliseconds >= 15000)
             {
                 API.WriteLog("Trueshot window closed");
                 Trueshot_active.Stop();
@@ -709,8 +721,9 @@ namespace HyperElk.Core
                     API.CastSpell(Rapid_Fire);
                     return;
                 }
+
                 //actions.trickshots +=/ aimed_shot,target_if = min:dot.serpent_sting.remains + action.serpent_sting.in_flight_to_target * 99,if= buff.trick_shots.remains >= execute_time & (buff.precise_shots.down | full_recharge_time < cast_time + gcd | buff.trueshot.up)
-                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && API.PlayerCurrentCastSpellID!=19434 && (API.PlayerCurrentCastSpellID != 257044 || VolleyTrickShots) &&
+                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && (API.PlayerCurrentCastSpellID!=19434 || !API.CanCast(Rapid_Fire) && VolleyTrickShots) && (API.PlayerCurrentCastSpellID != 257044 || VolleyTrickShots) &&
     (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) &&
     API.PlayerBuffTimeRemaining(Trick_Shots) >= AimedShotCastTime && (!PlayerHasBuff(Precise_Shots) || FullRechargeTime(Aimed_Shot, AimedShotCooldown) < AimedShotCastTime + gcd || PlayerHasBuff(Trueshot)))
                 {
