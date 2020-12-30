@@ -125,7 +125,7 @@ namespace HyperElk.Core
 
 
             CombatRoutine.AddBuff("Bone Shield", 195181);
-            CombatRoutine.AddBuff("Crimson Scourge", 81136);
+            CombatRoutine.AddBuff("Crimson Scourge", 81141);
             CombatRoutine.AddBuff("Ossuary", 219786);
             CombatRoutine.AddBuff(DancingRuneWeapon, 81256);
             CombatRoutine.AddBuff("Haemostasis", 235559);
@@ -145,7 +145,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (!API.PlayerIsCasting())
+            if (!API.PlayerIsCasting() && !API.PlayerSpellonCursor)
             {
                 //KICK
                 if (isInterrupt && API.CanCast(MindFreeze) && IsMelee && PlayerLevel >= 7)

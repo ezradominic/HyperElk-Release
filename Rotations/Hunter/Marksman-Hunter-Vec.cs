@@ -6,6 +6,7 @@ namespace HyperElk.Core
     public class MMHunter : CombatRoutine
     {
         private readonly Stopwatch Trueshot_active = new Stopwatch();
+        private readonly Stopwatch VolleyWindow = new Stopwatch();
 
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spells,Buffs,Debuffs
@@ -95,6 +96,7 @@ namespace HyperElk.Core
         private string UseMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private string UseDoubleTap => DoubleTapList[CombatRoutine.GetPropertyInt(Double_Tap)];
         private string UseTrueshot => TrueshotList[CombatRoutine.GetPropertyInt(Trueshot)];
+        private string UseExplosiveShot => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Explosive_Shot)];
         private string UseAMurderofCrows => AMurderofCrowsList[CombatRoutine.GetPropertyInt(A_Murder_of_Crows)];
         private string UseVolley => VolleyList[CombatRoutine.GetPropertyInt(Volley)];
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
@@ -118,7 +120,7 @@ namespace HyperElk.Core
         private float SteadyShot_CastTime => 175f / (1f + (API.PlayerGetHaste));
         private float gcd => API.SpellGCDTotalDuration;
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
-        private bool VolleyTrickShots => (Talent_Volley && API.SpellCDDuration(Volley) > 3900 && API.SpellCDDuration(Volley) < 4500);
+        private bool VolleyTrickShots => (Talent_Volley && VolleyWindow.IsRunning);
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -216,6 +218,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Double_Tap, "Use " + Double_Tap, DoubleTapList, "Use " + Double_Tap + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(A_Murder_of_Crows, "Use " + A_Murder_of_Crows, AMurderofCrowsList, "Use " + A_Murder_of_Crows + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Volley, "Use " + Volley, VolleyList, "Use " + Volley + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
+            CombatRoutine.AddProp(Explosive_Shot, "Use " + Explosive_Shot, CDUsageWithAOE, "Use " + Explosive_Shot + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
 
             CombatRoutine.AddProp("AOE_Switch", "AoE Switch", true, "Enable if you want to let the rotation switch ST/AOE", "Generic");
             CombatRoutine.AddProp("huntersmark", "Hunter's Mark", false, "Enable if you want to let the rotation use Hunter's Mark", "Generic");
@@ -301,12 +304,23 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (API.LastSpellCastInGame == Trueshot)
+            if (!VolleyWindow.IsRunning && API.LastSpellCastInGame == Volley)
+            {
+                API.WriteLog("Volley window open" + " AS ready? " + API.CanCast(Aimed_Shot) + " RF ready? " + API.CanCast(Rapid_Fire));
+                VolleyWindow.Start();
+            }
+            if (VolleyWindow.ElapsedMilliseconds >= 6000)
+            {
+                API.WriteLog("Volley window closed");
+                VolleyWindow.Stop();
+                VolleyWindow.Reset();
+            }
+            if (!Trueshot_active.IsRunning && API.LastSpellCastInGame == Trueshot)
             {
                 API.WriteLog("Trueshot window open");
                 Trueshot_active.Start();
             }
-            if (Trueshot_active.ElapsedMilliseconds > 15000)
+            if (Trueshot_active.ElapsedMilliseconds >= 15000)
             {
                 API.WriteLog("Trueshot window closed");
                 Trueshot_active.Stop();
@@ -388,7 +402,7 @@ namespace HyperElk.Core
                         API.WriteLog("opener: SS:2 ");
                         return;
                     }
-                    if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                    if (API.CanCast(Explosive_Shot) && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                     {
                         API.CastSpell(Explosive_Shot);
                         return;
@@ -524,7 +538,7 @@ namespace HyperElk.Core
                     //actions.st +=/ flare,if= tar_trap.up & runeforge.soulforge_embers
                     //actions.st +=/ tar_trap,if= runeforge.soulforge_embers & tar_trap.remains < gcd & cooldown.flare.remains < gcd
                     //actions.st +=/ explosive_shot
-                    if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                    if (API.CanCast(Explosive_Shot) && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                     {
                         API.CastSpell(Explosive_Shot);
                         return;
@@ -647,7 +661,7 @@ namespace HyperElk.Core
                      API.CastSpell(Steady_Shot);
                      return;
                  }*/
-                if (Talent_Steady_Focus && !PlayerHasBuff(Trueshot) && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                if (Talent_Steady_Focus && !PlayerHasBuff(Trueshot) && !VolleyTrickShots && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                 {
                     API.CastSpell(Steady_Shot);
                     API.WriteLog("AOE: SS:1 ");
@@ -668,7 +682,7 @@ namespace HyperElk.Core
                 //actions.trickshots +=/ tar_trap,if= runeforge.soulforge_embers & tar_trap.remains < gcd & cooldown.flare.remains < gcd
                 //actions.trickshots +=/ flare,if= tar_trap.up & runeforge.soulforge_embers
                 //actions.trickshots +=/ explosive_shot
-                if (API.CanCast(Explosive_Shot) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                if (API.CanCast(Explosive_Shot) && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                 {
                     API.CastSpell(Explosive_Shot);
                     return;
@@ -709,8 +723,9 @@ namespace HyperElk.Core
                     API.CastSpell(Rapid_Fire);
                     return;
                 }
+
                 //actions.trickshots +=/ aimed_shot,target_if = min:dot.serpent_sting.remains + action.serpent_sting.in_flight_to_target * 99,if= buff.trick_shots.remains >= execute_time & (buff.precise_shots.down | full_recharge_time < cast_time + gcd | buff.trueshot.up)
-                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && API.PlayerCurrentCastSpellID!=19434 && (API.PlayerCurrentCastSpellID != 257044 || VolleyTrickShots) &&
+                if (API.CanCast(Aimed_Shot) && InRange && (API.PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (API.PlayerHasBuff(Lock_and_Load) ? 0 : 35) && (API.PlayerCurrentCastSpellID!=19434 || !API.CanCast(Rapid_Fire) && VolleyTrickShots) && (API.PlayerCurrentCastSpellID != 257044 || VolleyTrickShots) &&
     (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) &&
     API.PlayerBuffTimeRemaining(Trick_Shots) >= AimedShotCastTime && (!PlayerHasBuff(Precise_Shots) || FullRechargeTime(Aimed_Shot, AimedShotCooldown) < AimedShotCastTime + gcd || PlayerHasBuff(Trueshot)))
                 {
@@ -724,13 +739,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.trickshots +=/ rapid_fire,if= buff.trick_shots.remains >= execute_time
-                if (API.CanCast(Rapid_Fire) && API.PlayerCurrentCastSpellID!=19434 && !LastSpell(Rapid_Fire, 257044) && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime)
+                if (API.CanCast(Rapid_Fire) && (API.PlayerCurrentCastSpellID!=19434 || VolleyTrickShots) && InRange && API.PlayerBuffTimeRemaining(Trick_Shots) >= RapidFireChannelTime)
                 {
                     API.CastSpell(Rapid_Fire);
                     return;
                 }
                 //actions.trickshots +=/ multishot,if= buff.trick_shots.down | buff.precise_shots.up & focus > cost + action.aimed_shot.cost & (!talent.chimaera_shot | active_enemies > 3)
-                if (API.CanCast(Multi_Shot) && (!PlayerHasBuff(Trick_Shots) || !API.CanCast(Rapid_Fire)) && InRange && API.PlayerFocus >= 20 && (!API.PlayerHasBuff(Trick_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)))
+                if (API.CanCast(Multi_Shot) && InRange && API.PlayerFocus >= 20 && (!API.PlayerHasBuff(Trick_Shots) || PlayerHasBuff(Precise_Shots) && (!VolleyTrickShots || !API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire))  && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)))
                 {
                     API.CastSpell(Multi_Shot);
                     return;
@@ -776,7 +791,7 @@ namespace HyperElk.Core
                     API.CastSpell(Multi_Shot);
                     return;
                 }
-                if (API.CanCast(Steady_Shot) && !API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) && InRange)
+                if (API.CanCast(Steady_Shot) && (!API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) || (!PlayerHasBuff(Trick_Shots) && !VolleyTrickShots)) && (API.PlayerFocus < 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35))  && InRange)
                 {
                     API.CastSpell(Steady_Shot);
                     API.WriteLog("AOE: SS:2 ");
