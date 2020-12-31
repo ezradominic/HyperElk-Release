@@ -101,6 +101,7 @@ namespace HyperElk.Core
             API.WriteLog("Flamestrike -- /cast [@cursor] Flamestrike");
             API.WriteLog("Meteor -- /cast [@cursor] Meteor");
             API.WriteLog("Create Macro /cast [@player] Arcane Intellect to buff Arcane Intellect so you don't require a target");
+            API.WriteLog("Please create a /stopcasting Macro for Pyroblast and use that as your main pyroblast spell. It is for the triple scorch bug. Without it, you will cast Scorch three times isntead of twice.");
             API.WriteLog("All Talents expect Ring of Frost and Alexstrasza's Fury supported. All Cooldowns are associated with Cooldown toggle.");
             API.WriteLog("Firestrom is auto supported, no need to select in Legendary List.");
             API.WriteLog("Fireblast and Pheonix Flames WILL not be used if you do not have SmallCd's toggle on, or when you have Combustion Buff.");
@@ -219,6 +220,11 @@ namespace HyperElk.Core
                 API.CastSpell("Counterspell");
                 return;
             }
+           // if (API.CanCast(Counterspell) && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= 60 : API.FocusCurrentCastTimeRemaining <= 70))
+           // {
+           //     API.CastSpell(Counterspell);
+           //     return;
+           // }
             if (API.CanCast(Spellsteal) && !API.PlayerIsCasting(true) && !ChannelingShift && NotChanneling)
             {
                 for (int i = 0; i < SpellSpealBuffList.Length; i++)
