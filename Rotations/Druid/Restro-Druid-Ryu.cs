@@ -111,6 +111,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch party4 = new Stopwatch();
         private static readonly Stopwatch LifeBloomwatch = new Stopwatch();
         private static readonly Stopwatch EfflorWatch = new Stopwatch();
+        private static readonly Stopwatch GroundWatch = new Stopwatch();
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
@@ -215,7 +216,6 @@ namespace HyperElk.Core
 
         //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
         //  public int interruptDelay => random.Next((int)(CombatRoutine.GetPropertyInt("KICKTime") * 0.9), (int)(CombatRoutine.GetPropertyInt("KICKTime") * 1.1));
-
         public override void Initialize()
         {
             CombatRoutine.Name = "Resto Druid by Ryu";
@@ -389,13 +389,14 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting() && !API.PlayerSpellonCursor && (!API.PlayerHasBuff(TravelForm) || !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(Soulshape)) && (IsOOC || API.PlayerIsInCombat))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (!API.PlayerHasBuff(TravelForm) || !API.PlayerHasBuff(BearForm) || !API.PlayerHasBuff(CatForm) || !API.PlayerHasBuff(Soulshape)) && (IsOOC || API.PlayerIsInCombat))
             {
                 if (API.CanCast(Efflor) && (!EfflorWatch.IsRunning || EfflorWatch.ElapsedMilliseconds >= 30000))
                 {
                     API.CastSpell(Efflor);
                     EfflorWatch.Reset();
                     EfflorWatch.Start();
+                    return;
                 }
                 if (API.CanCast(Convoke) && NightFaeCheck && InRange)
                 {
