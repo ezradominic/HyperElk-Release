@@ -97,6 +97,7 @@ namespace HyperElk.Core
 
             }
         }
+        private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -186,13 +187,17 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Festering Wound");
             CombatRoutine.AddDebuff("Necrotic Wound");
             CombatRoutine.AddDebuff("Razor Coral");
+
+            CombatRoutine.AddMacro("Trinket1", "F9");
+            CombatRoutine.AddMacro("Trinket2", "F10");
+
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Use DnD");
             CombatRoutine.AddToggle("Mouseover");
 
-            CombatRoutine.AddMacro("Trinket1");
-            CombatRoutine.AddMacro("Trinket2");
+
+
             //Settings
             CombatRoutine.AddProp("RaiseDead", "Raise Dead", true, "Should the rotation try to Raise Dead", "Pet");
             CombatRoutine.AddProp("DarkTransformation", "Use " + "Dark Transformation", CDUsage, "Use " + "Dark Transformation" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
@@ -223,7 +228,7 @@ namespace HyperElk.Core
             if (ApocGhoulActiveTime.IsRunning && ArmyGhoulActiveTime.ElapsedMilliseconds > 15000) { ArmyGhoulActiveTime.Reset(); API.WriteLog("Army Ghoul ran off"); }
             //API.WriteLog("debug" + MultiDot + API.CanCast(Kill_Command) + API.TargetHasDebuff(Kill_Command, false, false)+ " " + API.PlayerUnitInMeleeRangeCount  +" "+ API.PlayerBuffStacks(Predator));
 
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting(true) && !API.PlayerSpellonCursor)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
 
                 #region defensives
@@ -268,7 +273,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (!API.PlayerIsMounted && !API.PlayerIsCasting(true) && !API.PlayerSpellonCursor)
+            if (!API.PlayerIsMounted && !Playeriscasting)
             {
                 if (API.CanCast("Mind Freeze") && isInterrupt && MeleeRange)
                 {

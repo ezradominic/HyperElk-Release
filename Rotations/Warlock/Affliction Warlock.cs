@@ -81,9 +81,9 @@ namespace HyperElk.Core
         bool DotCheck => API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && API.TargetHasDebuff(UnstableAffliction) && (API.TargetHasDebuff(SoulRot) || !API.TargetHasDebuff(SoulRot));
         bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
         bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
-        bool LastCastUnstableAffliction =>  API.PlayerLastSpell == UnstableAffliction || API.LastSpellCastInGame == UnstableAffliction;
+        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction || API.LastSpellCastInGame == UnstableAffliction;
         bool CurrenCastUnstableAffliction => API.CurrentCastSpellID("player") == 316099;
-        bool LastCastScouringTithe =>  API.PlayerLastSpell == ScouringTithe || API.LastSpellCastInGame == ScouringTithe;
+        bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe || API.LastSpellCastInGame == ScouringTithe;
         bool CastingAgony => API.PlayerLastSpell == Agony || API.LastSpellCastInGame == Agony;
         bool CastingCorruption => API.PlayerLastSpell == Corruption || API.LastSpellCastInGame == Corruption;
         bool CastingSL => API.PlayerLastSpell == SiphonLife || API.LastSpellCastInGame == SiphonLife;
@@ -198,7 +198,7 @@ namespace HyperElk.Core
 
             //Buffs
             CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
-            CombatRoutine.AddBuff(ShadowEmbrace);
+
 
             //Debuffs
             CombatRoutine.AddDebuff(ImpendingCatastrophe, 321792);
@@ -211,7 +211,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(PhantomSingularity, 205179);
             CombatRoutine.AddDebuff(Haunt, 48181);
             CombatRoutine.AddDebuff(SoulRot, 325640);
-
+            CombatRoutine.AddDebuff(ShadowEmbrace, 32390);
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -436,20 +436,20 @@ namespace HyperElk.Core
 
 
 
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
                 {
                     API.CastSpell(VileTaint);
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
                 {
                     API.CastSpell(PhantomSingularity);
                     DumpWatchHigh.Start();
@@ -710,20 +710,20 @@ namespace HyperElk.Core
                 }
 
 
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
                 {
                     API.CastSpell(VileTaint);
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.PlayerBuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
                 {
                     API.CastSpell(PhantomSingularity);
                     DumpWatchHigh.Start();
