@@ -67,8 +67,8 @@ namespace HyperElk.Core
         private bool InRange => API.TargetRange <= 40;
         private string UseROP => CDUsage[CombatRoutine.GetPropertyInt(RoP)];
         private string UseCom => CDUsage[CombatRoutine.GetPropertyInt("Combustion")];
-        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns & API.PlayerHasBuff("Combustion") && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 600)  || UseTrinket1 == "On Cooldown" && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 600) || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && (IsAOE || IsForceAOE));
-        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns && API.PlayerHasBuff("Combustion") && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 600) || UseTrinket2 == "On Cooldown" && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 600) || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && (IsAOE || IsForceAOE));
+        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns & API.PlayerHasBuff("Combustion") && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800)  || UseTrinket1 == "On Cooldown" && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && (IsAOE || IsForceAOE));
+        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns && API.PlayerHasBuff("Combustion") && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket2 == "On Cooldown" && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && (IsAOE || IsForceAOE));
 
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
 
@@ -177,6 +177,8 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro(RemoveCurse + "MO");
             CombatRoutine.AddMacro(Spellsteal + "MO");
+            CombatRoutine.AddMacro("Pyroblast" + "Stop");
+            CombatRoutine.AddMacro(Counterspell + "Focus");
 
             //Toggle
             CombatRoutine.AddToggle("SmallCD");
@@ -220,11 +222,11 @@ namespace HyperElk.Core
                 API.CastSpell("Counterspell");
                 return;
             }
-           // if (API.CanCast(Counterspell) && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= 60 : API.FocusCurrentCastTimeRemaining <= 70))
-           // {
-           //     API.CastSpell(Counterspell);
-           //     return;
-           // }
+            if (API.CanCast(Counterspell) && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= 60 : API.FocusCurrentCastTimeRemaining <= 70))
+            {
+                API.CastSpell(Counterspell + "Focus");
+                return;
+           }
             if (API.CanCast(Spellsteal) && !API.PlayerIsCasting(true) && !ChannelingShift && NotChanneling)
             {
                 for (int i = 0; i < SpellSpealBuffList.Length; i++)
@@ -371,7 +373,7 @@ namespace HyperElk.Core
                 }
                 if (CastingScorch && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && InRange && Level >= 12 && (API.PlayerIsMoving || !API.PlayerIsMoving) && (!IsAOE || !IsForceAOE || IsAOE && API.TargetUnitInRangeCount == 1))
                 {
-                    API.CastSpell("Pyroblast");
+                    API.CastSpell("Pyroblast" + "Stop");
                     return;
                 }
                 if (API.CanCast("Pyroblast") && !API.PlayerIsCasting(true) && InRange && Pyroclasm && API.PlayerHasBuff("Pyroclasm") && !API.PlayerIsMoving && !API.PlayerHasBuff("Combustion") && Level >= 12)
