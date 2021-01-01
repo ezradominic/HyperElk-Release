@@ -257,7 +257,7 @@ namespace HyperElk.Core
             {
                 if (UseCO)
                 {
-                    if (!CastingCorruption && API.CanCast(Corruption) && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+                    if (!CastingCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
                     {
                         API.CastSpell(Corruption + "MO");
                         return;
@@ -265,7 +265,7 @@ namespace HyperElk.Core
                 }
                 if (UseAG)
                 {
-                    if (!CastingAgony && API.CanCast(Agony) && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
+                    if (!CastingAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
                     {
                         API.CastSpell(Agony + "MO");
                         return;
@@ -273,7 +273,7 @@ namespace HyperElk.Core
                 }
                 if (UseSL)
                 {
-                    if (!CastingSL && API.CanCast(SiphonLife) && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
+                    if (!CastingSL && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
                     {
                         API.CastSpell(SiphonLife + "MO");
                         return;
@@ -434,22 +434,20 @@ namespace HyperElk.Core
 
 
 
-
-
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
                 {
                     API.CastSpell(VileTaint);
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
                 {
                     API.CastSpell(PhantomSingularity);
                     DumpWatchHigh.Start();
@@ -459,26 +457,34 @@ namespace HyperElk.Core
 
 
 
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
                 {
                     API.CastSpell(VileTaint);
                     DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
                 {
                     API.CastSpell(PhantomSingularity);
                     DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
+
+
+                if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
+                {
+                    API.CastSpell(DrainSoul);
+                    return;
+                }
+
                 //DecimatingBolt
                 if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
                 {
@@ -710,20 +716,20 @@ namespace HyperElk.Core
                 }
 
 
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
                 {
                     API.CastSpell(VileTaint);
                     DumpWatchHigh.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
                 {
                     API.CastSpell(PhantomSingularity);
                     DumpWatchHigh.Start();
@@ -733,20 +739,20 @@ namespace HyperElk.Core
 
 
 
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
                 {
                     API.CastSpell(VileTaint);
                     DumpWatchLow.Start();
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
+                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
                 {
                     API.CastSpell(PhantomSingularity);
                     DumpWatchLow.Start();
@@ -754,6 +760,12 @@ namespace HyperElk.Core
                     return;
                 }
 
+
+                if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
+                {
+                    API.CastSpell(DrainSoul);
+                    return;
+                }
 
 
                 //DecimatingBolt
