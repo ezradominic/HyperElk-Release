@@ -109,6 +109,7 @@ namespace HyperElk.Core
         private int DivineShieldLifePercent => percentListProp[CombatRoutine.GetPropertyInt(DivineShield)];
         private int WordOfGloryLifePercent => percentListProp[CombatRoutine.GetPropertyInt(WordOfGlory)];
         private int FlashofLightLifePercentProc => percentListProp[CombatRoutine.GetPropertyInt(FlashofLight)];
+        private int ConsecrationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Consecration)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseSeraphim => CDUsage[CombatRoutine.GetPropertyInt("UseSeraphim")];
         private string UseWakeofAshes => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseWakeofAshes")];
@@ -195,6 +196,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(FlashofLight + " MO", "F12");
 
             CombatRoutine.AddConduit(RingingClarity);
+            CombatRoutine.AddConduit("Golden Path");
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -219,8 +221,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("AURASWITCH", "Auto Aura Switch", true, "Auto Switch Aura between Crusader Aura and Devotion Aura", "Generic");
 
-            CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Items", 2);
-            CombatRoutine.AddProp(BlessingofProtection, BlessingofProtection + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Items", 2);
+            CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp(Consecration, "Consecration | Golden Path" + " Life Percent", percentListProp, "Life percent at which" + Consecration + "is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp(BlessingofProtection, BlessingofProtection + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(ShieldofVengeance, ShieldofVengeance + " Life Percent", percentListProp, "Life percent at which" + ShieldofVengeance + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", percentListProp, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(WordOfGlory, WordOfGlory + " Life Percent", percentListProp, "Life percent at which Word of Glory is used, set to 0 to disable", "Defense", 4);
@@ -292,6 +295,11 @@ namespace HyperElk.Core
             if (API.SpellIsCanbeCast(WordOfGlory) && !API.PlayerHasDebuff(Mindgames) && API.PlayerHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
+                return;
+            }
+            if (API.CanCast(Consecration) && API.PlayerIsConduitSelected("Golden Path") && API.PlayerHealthPercent <= ConsecrationLifePercent )
+            {
+                API.CastSpell(Consecration);
                 return;
             }
             if (HealFocus)
