@@ -52,13 +52,14 @@ namespace HyperElk.Core
         private string FlayersMark = "Flayer's Mark";
         private string Wild_Mark = "Wild Mark";
         private string HuntersMark = "Hunter's Mark";
+        private string TranquilizingShot = "Tranquilizing Shot";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool InRange => API.TargetRange <= 43;
         private bool isMOinRange => API.MouseoverRange <= 40;
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         public bool NoCovReady => (API.SpellCDDuration(Wild_Spirits) >= gcd || API.SpellCDDuration(Wild_Spirits) == 0) && (API.SpellCDDuration(Flayed_Shot) >= gcd || API.SpellCDDuration(Flayed_Shot) == 0) && (API.SpellCDDuration(Death_Chakram) >= gcd || API.SpellCDDuration(Death_Chakram) == 0) && (API.SpellCDDuration(Resonating_Arrow) >= gcd || API.SpellCDDuration(Death_Chakram) == 0);
-
+        public bool DispellList => API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworm Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
         //Talents
         private bool Talent_A_Murder_of_Crows => API.PlayerIsTalentSelected(1, 3);
         private bool Talent_Serpent_Sting => API.PlayerIsTalentSelected(1, 2);
@@ -102,6 +103,7 @@ namespace HyperElk.Core
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
         private bool Use_HuntersMark => CombatRoutine.GetPropertyBool("huntersmark");
         private bool SurgingShots_enabled => CombatRoutine.GetPropertyBool("SurgingShots");
+        private bool UseTranqShot => CombatRoutine.GetPropertyBool("TranquilizingShot");
         private bool eagletalons_true_focus_enabled => CombatRoutine.GetPropertyBool("eagletalons_true_focus");
         private bool AOESwitch_enabled => CombatRoutine.GetPropertyBool("AOE_Switch");
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
@@ -171,7 +173,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Serpent_Sting, 271788, "D1");
             CombatRoutine.AddSpell(Feign_Death, 5384, "F2");
             CombatRoutine.AddSpell(Aspect_of_the_Turtle, 186265, "G");
-
+            CombatRoutine.AddSpell(TranquilizingShot, 19801, "C");
             CombatRoutine.AddSpell(Mend_Pet, 982, "F5");
 
             CombatRoutine.AddSpell(Wild_Spirits, 328231, "F10");
@@ -196,6 +198,21 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Dead_Eye,321460);
             CombatRoutine.AddBuff(FlayersMark, 324156);
             CombatRoutine.AddBuff(Volley, 260243);
+            //dispell
+            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Unholy Frenzy", 136224);
+            CombatRoutine.AddBuff("Renew", 135953);
+            CombatRoutine.AddBuff("Additional Treads", 965900);
+            CombatRoutine.AddBuff("Slime Coated", 3459153);
+            CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
+            CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
+            CombatRoutine.AddBuff("Unholy Fervor", 2576093);
+            CombatRoutine.AddBuff("Raging Tantrum", 132126);
+            CombatRoutine.AddBuff("Loyal Beasts", 458967);
+            CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
+            CombatRoutine.AddBuff("Seething Rage", 136225);
+            CombatRoutine.AddBuff("Dark Shroud", 2576096);
             //Debuffs
 
             CombatRoutine.AddDebuff(Serpent_Sting,271788);
@@ -203,6 +220,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Wild_Mark, 328275);
             CombatRoutine.AddDebuff(Resonating_Arrow, 308491);
             CombatRoutine.AddDebuff(HuntersMark,257284);
+
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
 
@@ -224,7 +242,10 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("huntersmark", "Hunter's Mark", false, "Enable if you want to let the rotation use Hunter's Mark", "Generic");
 
             CombatRoutine.AddProp("SurgingShots", "Surging Shots", false, "Enable if you have Surging Shots", "Legendary");
+           
             CombatRoutine.AddProp("eagletalons_true_focus", "eagletalons true focus", false, "Enable if you have eagletalons true focus", "Legendary");
+
+            CombatRoutine.AddProp("TranquilizingShot", "Tranquilizing Shot", false, "Enable if you want to use Tranquilizing Shot", "Generic");
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", false, "Should the rotation try to ressurect/call your Pet", "Pet");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
@@ -284,11 +305,16 @@ namespace HyperElk.Core
                 API.CastSpell(Feign_Death);
                 return;
             }
-            if (!Playeriscasting && !API.PlayerIsChanneling && !API.PlayerIsMounted && !API.PlayerHasBuff(Aspect_of_the_Turtle) && !API.PlayerHasBuff(Feign_Death))
+            if (!Playeriscasting && !API.PlayerIsChanneling && !API.PlayerIsMounted && !API.PlayerHasBuff(Aspect_of_the_Turtle) && !API.PlayerHasBuff(Feign_Death) && !API.PlayerSpellonCursor)
             {
                 if (isInterrupt && API.CanCast(Counter_Shot) && InRange && PlayerLevel >= 18)
                 {
                     API.CastSpell(Counter_Shot);
+                    return;
+                }
+                if (API.CanCast(TranquilizingShot) && UseTranqShot && InRange && PlayerLevel >= 18)
+                {
+                    API.CastSpell(TranquilizingShot);
                     return;
                 }
 
