@@ -90,7 +90,7 @@ namespace HyperElk.Core
             //Buff
             CombatRoutine.AddBuff(Shadowform, 232698);
             CombatRoutine.AddBuff(PWFortitude, 21562);
-            CombatRoutine.AddBuff(Voidform, 94249);
+            CombatRoutine.AddBuff(Voidform, 194249);
             CombatRoutine.AddBuff(PWShield, 17);
             CombatRoutine.AddBuff(DarkThoughts, 341205);
             CombatRoutine.AddBuff(UnfurlingDarkness, 341273);
@@ -275,7 +275,7 @@ namespace HyperElk.Core
 
 
             //actions.cwc=searing_nightmare,use_while_casting=1,target_if=(variable.searing_nightmare_cutoff&!variable.pi_or_vf_sync_condition)|(dot.shadow_word_pain.refreshable&spell_targets.mind_sear>1)
-            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && API.CanCast(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
+            if (IsAOE && TalentSearingNightmare && API.PlayerInsanity >= 30 && API.CanCast(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
             {
                 if ((searing_nightmare_cutoff && !pi_or_vf_sync_condition) || (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 1))
                 {
@@ -285,7 +285,7 @@ namespace HyperElk.Core
             }
 
             //actions.cwc+=/searing_nightmare,use_while_casting=1,target_if=talent.searing_nightmare.enabled&dot.shadow_word_pain.refreshable&spell_targets.mind_sear>2
-            if (TalentSearingNightmare && API.PlayerInsanity >= 30 && API.CanCast(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
+            if (IsAOE && TalentSearingNightmare && API.PlayerInsanity >= 30 && API.CanCast(SearingNightmare) && ChannelingMindSear && !API.PlayerIsMoving)
             {
                 if (API.TargetDebuffRemainingTime(SWPain) <= 360 && API.TargetUnitInRangeCount > 2)
                 {
@@ -325,9 +325,9 @@ namespace HyperElk.Core
                 }
             }
 
-            if ((!API.PlayerIsCasting(true) || ChannelingMindFlay) && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if (IsAOE && (!API.PlayerIsCasting(true) || ChannelingMindFlay) && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
-                if (IsAOE && TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) &&
+                if (TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) &&
                     (TalentMindbender ? API.SpellISOnCooldown(Mindbender) : API.SpellISOnCooldown(Shadowfiend)))
                 {
                     API.CastSpell(MindSear);
@@ -441,7 +441,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_flay,if=buff.dark_thoughts.up&variable.dots_up,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-            if ((!API.PlayerIsCasting(true) || ChannelingMindSear) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
+            if (IsAOE && (!API.PlayerIsCasting(true) || ChannelingMindSear) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
                 if (API.PlayerHasBuff(DarkThoughts))
                 {
@@ -517,7 +517,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/mind_sear,target_if=spell_targets.mind_sear>variable.mind_sear_cutoff,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2
-            if ((!API.PlayerIsCasting(true) || ChannelingMindFlay) && IsAOE && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
+            if (IsAOE && (!API.PlayerIsCasting(true) || ChannelingMindFlay) && IsAOE && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (API.TargetUnitInRangeCount > 1)
                 {

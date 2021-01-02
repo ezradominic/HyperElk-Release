@@ -155,7 +155,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/summon_vilefiend,if=cooldown.summon_demonic_tyrant.remains>40|time_to_die<cooldown.summon_demonic_tyrant.remains+25
-                if (TalentSummonVilefiend && API.SpellCDDuration(SummonDemonicTyrant) >= 400 || API.TargetTimeToDie <= API.SpellCDDuration(SummonDemonicTyrant) + 250)
+                if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && API.SpellCDDuration(SummonDemonicTyrant) >= 400 || API.TargetTimeToDie <= API.SpellCDDuration(SummonDemonicTyrant) + 250)
                 {
                     API.CastSpell(SummonVilefiend);
                     return;
@@ -200,7 +200,6 @@ namespace HyperElk.Core
                 if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 5 && API.PlayerHasBuff(NetherPortal))
                 {
                     API.CastSpell(HandofGuldan);
-                    ImpWatch.Reset();
                     ImpWatch.Start();
                     return;
                 }
@@ -208,7 +207,6 @@ namespace HyperElk.Core
                 if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 3 && API.SpellCDDuration(SummonDemonicTyrant) >= 200 && API.SpellCDDuration(SummonVilefiend) >= 500 && API.SpellCDDuration(CallDreadstalkers) >= 200)
                 {
                     API.CastSpell(HandofGuldan);
-                    ImpWatch.Reset();
                     ImpWatch.Start();
                     return;
                 }
@@ -283,7 +281,6 @@ namespace HyperElk.Core
                 if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 5)
                 {
                     API.CastSpell(HandofGuldan);
-                    ImpWatch.Reset();
                     ImpWatch.Start();
                     return;
                 }

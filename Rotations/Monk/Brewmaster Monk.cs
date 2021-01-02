@@ -127,7 +127,7 @@ namespace HyperElk.Core
 
             //Spells
             CombatRoutine.AddSpell(TigerPalm, 100780,"D1");
-            CombatRoutine.AddSpell(BlackOutKick, 116768,"D2");
+            CombatRoutine.AddSpell(BlackOutKick, 205523,"D2");
             CombatRoutine.AddSpell(SpinningCraneKick, 101546,"D3");
             CombatRoutine.AddSpell(SpearHandStrike, 116705,"D4");
             CombatRoutine.AddSpell(BreathOfFire, 115181,"D5");
@@ -159,7 +159,6 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
 
-
             //Buffs
 
 
@@ -180,6 +179,11 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
             //HEALING
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
             {
@@ -496,6 +500,7 @@ namespace HyperElk.Core
          }
         public override void OutOfCombatPulse()
         {
+
             //Vivify
             if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
             {
