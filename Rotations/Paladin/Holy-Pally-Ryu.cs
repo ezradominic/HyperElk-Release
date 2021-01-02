@@ -64,6 +64,7 @@ namespace HyperElk.Core
         private string RuleofLaw = "Rule of Law";
         private string GlimmerofLight = "Glimmer of Light";
         private string ShockBarrier = "Shock Barrier";
+        private string HolyShockLeggoSpread = "Holy Shock Legendary Barrier Spread";
 
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
@@ -123,6 +124,7 @@ namespace HyperElk.Core
         private bool HPAoE => UnitBelowHealthPercent(HPLifePercent) >= AoENumber;
         private bool DTAoE => UnitBelowHealthPercent(DTLifePercent) >= AoENumber;
         private bool AMAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AMLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(AMLifePercent) >= AoENumber;
+        private bool LHAoE => UnitBelowHealthPercent(LightsHammerLifePercent) >= AoENumber;
 
         private bool LodParty(int i)
         {
@@ -190,6 +192,7 @@ namespace HyperElk.Core
         private int DivineShieldLifePercent => numbList[CombatRoutine.GetPropertyInt(DivineShield)];
         private int DivineProtectionLifePercent => numbList[CombatRoutine.GetPropertyInt(DivineProtection)];
         private int HolyShockLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyShock)];
+        private int LightsHammerLifePercent => numbList[CombatRoutine.GetPropertyInt(LightsHammer)];
         private int HolyLightLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyLight)];
         private int FoLLifePercent => numbList[CombatRoutine.GetPropertyInt(FoL)];
         private int WoGLifePercent => numbList[CombatRoutine.GetPropertyInt(WoG)];
@@ -233,14 +236,15 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool DTHealing => CombatRoutine.GetPropertyBool(DivineTollHealing);
         private bool HSHealing => CombatRoutine.GetPropertyBool(HolyShockHealing);
+        private bool HSLeggo => CombatRoutine.GetPropertyBool(HolyShockHealing);
         private bool IsOOC => CombatRoutine.GetPropertyBool("OOC");
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("Aura Switch");
         
         //Spell Check Bools
         private bool LoTMCheck => API.CanCast(LoTM)  && InRange && !API.PlayerCanAttackTarget && !API.PlayerIsTargetTarget && (API.PlayerIsMoving && API.TargetHealthPercent <= LoTMMovingLifePercent || API.TargetHealthPercent <= LoTMLifePercent) && API.PlayerHealthPercent >= LoTMHealthPercent && API.TargetHealthPercent > 0;
         private bool LoTMCheckMO => API.CanCast(LoTM) && IsMouseover && InRange && !API.PlayerCanAttackMouseover && !API.PlayerIsTargetTarget && (API.PlayerIsMoving && API.MouseoverHealthPercent <= LoTMMovingLifePercent || API.MouseoverHealthPercent <= LoTMLifePercent) && API.PlayerHealthPercent >= LoTMHealthPercent && API.MouseoverHealthPercent > 0;
-        private bool HolyShockCheck => API.CanCast(HolyShock) && InRange  && (API.TargetHealthPercent <= HolyShockLifePercent || GlimmerTracking && !API.TargetHasBuff(GlimmerofLight) && GlimmerofLightTalent || UseLeg == "Shock Barrier" && GlimmerTracking && GlimmerofLightTalent && !API.TargetHasBuff(ShockBarrier) && (API.TargetHasBuff(GlimmerofLight) || !API.TargetHasBuff(GlimmerofLight)) || UseLeg == "Shock Barrier" && !API.TargetHasBuff(ShockBarrier)) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower <= 4;
-        private bool HolyShockCheckMO => API.CanCast(HolyShock) && InRange && IsMouseover && (API.MouseoverHealthPercent <= HolyShockLifePercent || GlimmerTracking && !API.MouseoverHasBuff(GlimmerofLight) && GlimmerofLightTalent || UseLeg == "Shock Barrier" && GlimmerTracking && GlimmerofLightTalent && !API.MouseoverHasBuff(ShockBarrier) && (API.MouseoverHasBuff(GlimmerofLight) || !API.MouseoverHasBuff(GlimmerofLight)) || UseLeg == "Shock Barrier" && !API.MouseoverHasBuff(ShockBarrier)) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && API.PlayerCurrentHolyPower <= 4;
+        private bool HolyShockCheck => API.CanCast(HolyShock) && InRange  && (API.TargetHealthPercent <= HolyShockLifePercent || GlimmerTracking && !API.TargetHasBuff(GlimmerofLight) && GlimmerofLightTalent || UseLeg == "Shock Barrier" && GlimmerTracking && GlimmerofLightTalent && !API.TargetHasBuff(ShockBarrier) && HSLeggo && (API.TargetHasBuff(GlimmerofLight) || UseLeg == "Shock Barrier" && !API.TargetHasBuff(ShockBarrier) && HSLeggo)) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower <= 4;
+        private bool HolyShockCheckMO => API.CanCast(HolyShock) && InRange && IsMouseover && (API.MouseoverHealthPercent <= HolyShockLifePercent || GlimmerTracking && !API.MouseoverHasBuff(GlimmerofLight) && GlimmerofLightTalent || UseLeg == "Shock Barrier" && GlimmerTracking && GlimmerofLightTalent && !API.MouseoverHasBuff(ShockBarrier) && HSLeggo && (API.MouseoverHasBuff(GlimmerofLight)) || UseLeg == "Shock Barrier" && HSLeggo && !API.MouseoverHasBuff(ShockBarrier)) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && API.PlayerCurrentHolyPower <= 4;
         private bool HolyLightCheck => API.CanCast(HolyLight) && InRange  && API.TargetHealthPercent <= HolyLightLifePercent && API.TargetHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget;
         private bool HolyLightCheckMO => API.CanCast(HolyLight) && InRange && IsMouseover && API.MouseoverHealthPercent <= HolyLightLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackMouseover;
         private bool HolyLightInfusionCheck => API.CanCast(HolyLight) && API.PlayerHasBuff(Infusion) && InRange  && API.TargetHealthPercent <= HoLILifePercent && API.TargetHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget;
@@ -277,11 +281,10 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Holy Pally by Ryu");
             API.WriteLog("Be advised this a Beta Rotation: Out of Combat Healing is turned on by default. Please use your Pause key when not in a party.");
             API.WriteLog("All Talents expect PVP Talents and Row 3 talents are supported. All Cooldowns are associated with Cooldown toggle.");
-            API.WriteLog("Will add settings for CDs soon, however all CDs will be used when CD on one. If you wish to contorl when to use them, please use the toggle off fuction and use /break marco to cast them when needed");
-            API.WriteLog("If you use Lights Hammer Macro, you need to use an /addonname break to stop the rotation to be able to cast it.");
-            API.WriteLog("Maunual targeting, Auto Tareting (For party only) or Mouseover Supported. You need to create /cast [@mouseover] xxxx where xxx is each of the spells that have MO in the bindings in order for Mouseover to work");
+            API.WriteLog("For all ground spells, either use @Cursor or when it is time to place it, the Bot will pause until you've placed it. If you'd perfer to use your own logic for them, please place them on ignore in the spellbook.");
+            API.WriteLog("Maunual targeting, Auto Tareting, or Mouseover Supported. You need to create /cast [@mouseover] xxxx where xxx is each of the spells that have MO in the bindings in order for Mouseover to work");
             API.WriteLog("Venthyr and Night Fae Cov's are not supported. You can create a /xxx break marco to use those abilties when you would like at this time.");
-            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Target Last Hostile and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it swap, friendly or enemy. It will NOT swap back to Enemeies. This works ONLY for party at this time. While Raid may be in the spellbook, it is not supported yet.");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Target Last Hostile and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it swap, friendly or enemy. It will NOT swap back to Enemeies. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
             //Buff
             CombatRoutine.AddBuff(Infusion, 54149);
             CombatRoutine.AddBuff(AvengingWrath, 31884);
@@ -421,7 +424,8 @@ namespace HyperElk.Core
           //  CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
          //   CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 95);
-            CombatRoutine.AddProp(HolyShockHealing, HolyShock, true, "If Divine Toll should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
+            CombatRoutine.AddProp(HolyShockHealing, HolyShock, true, "If Holy Shock should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
+            CombatRoutine.AddProp(HolyShockLeggoSpread, HolyShock, false, "If Shock barrier should should be spread at max health, set to false by default", "Healing");
             CombatRoutine.AddProp(HolyLight, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "is used, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(LoTM, LoTM + " Life Percent", numbList, "Life percent at which" + LoTM + "is used, set to 0 to disable", "Healing", 60);
             CombatRoutine.AddProp(LoTMH, LoTM + " Player Health Percent", numbList, "Player Health percent at which" + LoTM + "is used, set to 0 to disable", "Healing", 80);
@@ -437,6 +441,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(LoD, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
             CombatRoutine.AddProp(LODMax, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when three members are at life percent and you have max holy power, set to 0 to disable", "Healing", 90);
             CombatRoutine.AddProp(BoV, BoV + " Life Percent", numbList, "Life percent at which" + BoV + "is used when three members are at life percent, set to 0 to disable", "Healing", 75);
+            CombatRoutine.AddProp(LightsHammer, LightsHammer + " Life Percent", numbList, "Life percent at which" + LightsHammer + "is used when three members are at life percent, set to 0 to disable", "Healing", 75);
             CombatRoutine.AddProp(AuraMastery, AuraMastery + " Life Percent", numbList, "Life percent at which" + AuraMastery + "is used, set to 0 to disable", "Healing", 65);
             CombatRoutine.AddProp(HolyPrism, HolyPrism + " Life Percent", numbList, "Life percent at which" + HolyPrism + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
             CombatRoutine.AddProp(DivineToll, DivineToll + " Life Percent", numbList, "Life percent at which" + DivineToll + "is used when three members are at life percent, set to 0 to disable", "Healing", 80);
@@ -538,9 +543,14 @@ namespace HyperElk.Core
                     return;
                 }
                 //Healing
-                if (API.CanCast(RuleofLaw) && RuleofLawTalent && !API.PlayerHasBuff(RuleofLaw) && (API.TargetRange >= 40 || IsMouseover && API.MouseoverRange >= 40))
+                if (API.CanCast(RuleofLaw) && RuleofLawTalent && !API.PlayerHasBuff(RuleofLaw) && (API.TargetRange > 40 || IsMouseover && API.MouseoverRange > 40))
                 {
                     API.CastSpell(RuleofLaw);
+                    return;
+                }
+                if (API.CanCast(LightsHammer) && LightsHammerT && InRange && LHAoE)
+                {
+                    API.CastSpell(LightsHammer);
                     return;
                 }
                 if (AuraMasteryCheck)
