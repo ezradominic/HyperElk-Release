@@ -39,6 +39,8 @@ namespace HyperElk.Core
         private string DecimatingBolt = "Decimating Bolt";
         private string BilescourgeBombers = "Bilescourge Bombers";
         private string SummonFelguard = "Summon Felguard";
+        private string FelDomination = "Fel Domination";
+
 
 
         //Talents
@@ -109,7 +111,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
             CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
 
-
+            CombatRoutine.AddSpell(FelDomination, 333889);
             CombatRoutine.AddSpell(SummonFelguard, 30146, "NumPad5");
             CombatRoutine.AddSpell("Summon Felhunter", 691, "NumPad6");
             CombatRoutine.AddSpell("Summon Succubus", 712, "NumPad7");
@@ -127,7 +129,42 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-
+            //Summon Imp
+            if (API.PlayerIsInCombat && API.CanCast(SummonImp) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonImp);
+                return;
+            }
+            //Summon Voidwalker
+            if (API.PlayerIsInCombat && API.CanCast(SummonVoidwalker) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonVoidwalker);
+                return;
+            }
+            //Summon Succubus
+            if (API.PlayerIsInCombat && API.CanCast(SummonSuccubus) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonSuccubus);
+                return;
+            }
+            //Summon Fellhunter
+            if (API.PlayerIsInCombat && API.CanCast(SummonFelhunter) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonFelhunter);
+                return;
+            }
         }
 
         public override void CombatPulse()

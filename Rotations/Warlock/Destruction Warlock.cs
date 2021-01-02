@@ -45,6 +45,9 @@ namespace HyperElk.Core
         private string RoaringBlaze = "Roaring Blaze";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string FelDomination = "Fel Domination";
+
+
 
         //Talents
         private bool TalentFlashover => API.PlayerIsTalentSelected(1, 1);
@@ -91,8 +94,8 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
         private bool NotChanneling => !API.PlayerIsChanneling;
-        bool LastCastImmolate => API.LastSpellCastInGame == Immolate || API.LastSpellCastInGame == Immolate;
-        bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate || API.LastSpellCastInGame == Conflagrate;
+        bool LastCastImmolate => API.LastSpellCastInGame == Immolate || API.LastSpellCastInGame == Immolate || API.PlayerCurrentCastSpellID == 348;
+        bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate || API.LastSpellCastInGame == Conflagrate || API.PlayerCurrentCastSpellID == 17962;
         bool LastCastSummonVoidwalker => API.PlayerLastSpell == SummonVoidwalker || API.LastSpellCastInGame == SummonVoidwalker;
         bool LastCastSummonImp => API.PlayerLastSpell == SummonImp || API.LastSpellCastInGame == SummonImp;
         bool LastCastSummonSuccubus => API.PlayerLastSpell == SummonSuccubus || API.LastSpellCastInGame == SummonSuccubus;
@@ -151,6 +154,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SoulRot, 325640, "F1");
             CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
             CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
+            CombatRoutine.AddSpell(FelDomination, 333889);
 
             //Buffs
             CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
@@ -171,7 +175,42 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-        //    API.WriteLog("Havoc Time left  " + HavocTime);
+            //Summon Imp
+            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonImp);
+                return;
+            }
+            //Summon Voidwalker
+            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonVoidwalker);
+                return;
+            }
+            //Summon Succubus
+            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonSuccubus);
+                return;
+            }
+            //Summon Fellhunter
+            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
+            {
+                API.WriteLog("Looks like we have no Pet , lets Summon one");
+                API.CastSpell(FelDomination);
+                Thread.Sleep(1000);
+                API.CastSpell(SummonFelhunter);
+                return;
+            }
         }
 
         public override void CombatPulse()
@@ -266,48 +305,6 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
             if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
             {
-                //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
-                if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
-                {
-                    API.CastSpell(SoulFire);
-                    return;
-                }
-
-                //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && HavocWatch.IsRunning && DBTime <= HavocTime)
-                {
-                    API.CanCast(DecimatingBolt);
-                    return;
-                }
-
-                //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && HavocWatch.IsRunning && SCTime <= HavocTime)
-                {
-                    API.CastSpell(ScouringTithe);
-                    return;
-                }
-
-                //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
-
-                //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
-                if (API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions.havoc+=/shadowburn
-                if (API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
-                {
-                    API.CastSpell(ShadowBurn);
-                    return;
-                }
-
-                //actions.havoc+=/incinerate,if=cast_time<havoc_remains
-                if (API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
-                {
-                    API.CastSpell(Incinerate);
-                    return;
-                }
                 //actions.aoe=rain_of_fire,if=pet.infernal.active&(!cooldown.havoc.ready|active_enemies>3)
                 // if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && InfernalWatch.IsRunning && API.SpellISOnCooldown(Havoc) || API.TargetUnitInRangeCount > 3)
                 // {
@@ -448,9 +445,15 @@ namespace HyperElk.Core
                     API.CastSpell(Incinerate);
                     return;
                 }
+                //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
+                if (API.CanCast(Conflagrate) && HavocWatch.IsRunning && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
+                {
+                    API.CastSpell(Conflagrate);
+                    return;
+                }
                 //# Executed every time the actor is available.
                 //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
-                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount > 1)
+                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount == 2)
                 {
                     API.CastSpell(Havoc);
                     HavocWatch.Start();
@@ -570,13 +573,7 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(Incinerate);
                     return;
-                }
-                //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
-                if (API.CanCast(Conflagrate) && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
-                {
-                    API.CastSpell(Conflagrate);
-                    return;
-                }         
+                }       
             }
         }
         public override void OutOfCombatPulse()
