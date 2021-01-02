@@ -185,7 +185,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ConvoketheSpirits,323764, "D1");
             CombatRoutine.AddSpell(AdaptiveSwarm,325727, "D1");
             CombatRoutine.AddSpell(LoneEmpowerment, 338142, "D1");
-            CombatRoutine.AddSpell(EmpowerBond, 326462, "D1");
+            CombatRoutine.AddSpell(EmpowerBond, "D1");
 
             //Macros
             CombatRoutine.AddMacro(Moonfire+"MO", "NumPad7");
