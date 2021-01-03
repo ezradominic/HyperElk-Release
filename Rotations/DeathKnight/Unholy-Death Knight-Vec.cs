@@ -188,20 +188,16 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
-            CombatRoutine.AddBuff("Cold Heart");
-            CombatRoutine.AddBuff("Cold Heart from Chest");
-            CombatRoutine.AddBuff("Dark Succor");
-            CombatRoutine.AddBuff("Unholy Frenzy");
-            CombatRoutine.AddBuff("Sudden Doom");
-            CombatRoutine.AddBuff("Death and Decay");
-            CombatRoutine.AddBuff("Master of Ghouls");
-            CombatRoutine.AddBuff(UnholyStrength);
-            CombatRoutine.AddBuff(UnholyAssault);
+            CombatRoutine.AddBuff("Dark Succor", 101568);
+            CombatRoutine.AddBuff("Sudden Doom", 81340);
+            CombatRoutine.AddBuff("Death and Decay", 188290);
+            CombatRoutine.AddBuff("Master of Ghouls", 246995);
+            CombatRoutine.AddBuff(UnholyStrength, 53365);
+            CombatRoutine.AddBuff(UnholyAssault, 207289);
 
-            CombatRoutine.AddDebuff("Virulent Plague");
-            CombatRoutine.AddDebuff("Festering Wound");
-            CombatRoutine.AddDebuff("Necrotic Wound");
-            CombatRoutine.AddDebuff("Razor Coral");
+            CombatRoutine.AddDebuff("Virulent Plague", 191587);
+            CombatRoutine.AddDebuff("Festering Wound", 194310);
+            CombatRoutine.AddDebuff("Necrotic Wound", 209858);
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
