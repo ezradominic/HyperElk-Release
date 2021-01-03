@@ -29,6 +29,8 @@ namespace HyperElk.Core
         private string fodder_to_the_flame = "Fodder to the Flame";
         private string elysian_decree = "Elysian Decree";
         private string Fel_Bombardment = "Fel Bombardment";
+        private string SigilofSilence = "Sigil of Silence";
+        private string SigilofMisery = "Sigil of Misery";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -69,7 +71,7 @@ namespace HyperElk.Core
         string[] BulkExtractionList = new string[] { "always", "with Cooldowns" };
 
 
-        private int MetamorphosisLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Metamorphosis)];
+        private int MetamorphosisLifePercent => percentListProp[CombatRoutine.GetPropertyInt("MetamorphosisLife")];
         private int DemonSpikes1LifePercent => percentListProp[CombatRoutine.GetPropertyInt(Demon_Spikes)];
         private int DemonSpikes2LifePercent => percentListProp[CombatRoutine.GetPropertyInt(Demon_Spikes+"2")];
         private int SoulBarrierLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Soul_Barrier)];
@@ -77,7 +79,8 @@ namespace HyperElk.Core
         private int SoulFragmentCount => CombatRoutine.GetPropertyInt("SoulFragmentCount");
 
         private bool razelikhs_defilement_equipped => CombatRoutine.GetPropertyBool("razelikhs_defilement");
-
+        private bool UseSigilofSilence => CombatRoutine.GetPropertyBool(SigilofSilence);
+        private bool UseSigilofMisery => CombatRoutine.GetPropertyBool(SigilofMisery);
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
@@ -122,6 +125,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TheHunt, "NumPad6");
             CombatRoutine.AddSpell(fodder_to_the_flame, "NumPad6");
             CombatRoutine.AddSpell(elysian_decree, "NumPad6");
+            CombatRoutine.AddSpell(SigilofSilence, "NumPad7");
+            CombatRoutine.AddSpell(SigilofMisery, "NumPad8");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -151,11 +156,12 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Infernal_Strike, "Use " + Infernal_Strike, InfernalStrikeList, "Use " + Infernal_Strike + "On, Off", "Cooldowns", 0);
             CombatRoutine.AddProp(Fel_Devastation, "Use " + Fel_Devastation, FelDevastationList, "Use " + Fel_Devastation + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Bulk_Extraction, "Use " + Bulk_Extraction, BulkExtractionList, "Use " + Bulk_Extraction + "always, with Cooldowns", "Cooldowns", 0);
-
+            CombatRoutine.AddProp(SigilofSilence, SigilofSilence, true, "Enable if you want to let the rotation use" + SigilofSilence, "Generic");
+            CombatRoutine.AddProp(SigilofMisery, SigilofMisery, true, "Enable if you want to let the rotation use" + SigilofMisery, "Generic");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
-            CombatRoutine.AddProp(Metamorphosis, "Use " + Metamorphosis + " below:", percentListProp, "Life percent at which " + Metamorphosis + " is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp("MetamorphosisLife", "Use " + Metamorphosis + " below:", percentListProp, "Life percent at which " + Metamorphosis + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Demon_Spikes, "Use " + Demon_Spikes + "1st Charge" + " below:", percentListProp, "Life percent at which " + Demon_Spikes + " is used, set to 0 to disable", "Defense", 8);
             CombatRoutine.AddProp(Demon_Spikes+"2", "Use " + Demon_Spikes + "2nd Charge" + " below:", percentListProp, "Life percent at which " + Demon_Spikes + " is used, set to 0 to disable", "Defense", 5);
             CombatRoutine.AddProp(Soul_Barrier, "Use " + Soul_Barrier + " below:", percentListProp, "Life percent at which " + Soul_Barrier + " is used, set to 0 to disable", "Defense", 4);
@@ -167,24 +173,33 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (!API.PlayerIsMounted && !Playeriscasting)
+
+        }
+        public override void CombatPulse()
+        {
+            if (!API.PlayerIsMounted && !Playeriscasting && !API.PlayerSpellonCursor)
             {
+
                 if (API.CanCast(Metamorphosis) && API.PlayerHealthPercent <= MetamorphosisLifePercent)
                 {
                     API.CastSpell(Metamorphosis);
                     return;
                 }
-            }
 
-        }
-        public override void CombatPulse()
-        {
-            if (!API.PlayerIsMounted && !Playeriscasting)
-            {
                 // apl_default->add_action(this, "Disrupt");
                 if (isInterrupt && API.CanCast(Disrupt) && MeleeRange && PlayerLevel >= 29)
                 {
                     API.CastSpell(Disrupt);
+                    return;
+                }
+                if (API.TargetCanInterrupted && UseSigilofSilence && !API.CanCast(Disrupt) && API.TargetCurrentCastTimeRemaining >200 && API.TargetCurrentCastTimeRemaining < 300 && API.CanCast(SigilofSilence) && MeleeRange)
+                {
+                    API.CastSpell(SigilofSilence);
+                    return;
+                }
+                if (API.TargetCanInterrupted && UseSigilofMisery && !API.CanCast(Disrupt) && !API.CanCast(SigilofSilence) && API.TargetCurrentCastTimeRemaining > 200 && API.TargetCurrentCastTimeRemaining < 300 && API.CanCast(SigilofMisery) && MeleeRange)
+                {
+                    API.CastSpell(SigilofMisery);
                     return;
                 }
                 // apl_default->add_action(this, "Consume Magic");
@@ -194,7 +209,7 @@ namespace HyperElk.Core
        return;
    }*/
                 // apl_default->add_action(this, "Throw Glaive", "if=buff.fel_bombardment.stack=5&(buff.immolation_aura.up|!buff.metamorphosis.up)");
-                if (API.CanCast("Throw Glaive") && API.PlayerBuffStacks(Fel_Bombardment) == 5&& (PlayerHasBuff(Immolation_Aura)||!PlayerHasBuff(Metamorphosis)) && API.TargetRange <= 30)
+                if (API.CanCast("Throw Glaive") && API.PlayerBuffStacks(Fel_Bombardment) == 5 && (PlayerHasBuff(Immolation_Aura) || !PlayerHasBuff(Metamorphosis)) && API.TargetRange <= 30)
                 {
                     API.CastSpell("Throw Glaive");
                     return;
@@ -217,7 +232,7 @@ namespace HyperElk.Core
                 }
                 // apl_default->add_action("call_action_list,name=defensives");
                 ////apl_defensives->add_action(this, "Demon Spikes");
-               if (API.CanCast(Demon_Spikes) && API.SpellCharges(Demon_Spikes) >= 2 && API.PlayerHealthPercent <= DemonSpikes1LifePercent && API.PlayerLevel >= 14)
+                if (API.CanCast(Demon_Spikes) && API.SpellCharges(Demon_Spikes) >= 2 && API.PlayerHealthPercent <= DemonSpikes1LifePercent && API.PlayerLevel >= 14)
                 {
                     API.CastSpell(Demon_Spikes);
                     return;
@@ -228,7 +243,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //apl_defensives->add_action(this, "Metamorphosis", "if=!(talent.demonic.enabled)&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)|target.time_to_die<15");
-                if (API.CanCast("Metamorphosis") && !((Talent_Demonic)&&(PlayerCovenantSettings !="Venthyr" || !TargetHasDebuff(SinfulBrand) || API.TargetTimeToDie <1500)) && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns))
+                if (API.CanCast("Metamorphosis") && !((Talent_Demonic) && (PlayerCovenantSettings != "Venthyr" || !TargetHasDebuff(SinfulBrand) || API.TargetTimeToDie < 1500)) && (UseMetamorphosis == "always" || UseMetamorphosis == "with Cooldowns" && IsCooldowns))
                 {
                     API.CastSpell("Metamorphosis");
                 }
