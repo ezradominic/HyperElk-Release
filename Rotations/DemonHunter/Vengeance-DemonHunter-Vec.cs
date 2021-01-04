@@ -139,7 +139,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Immolation_Aura,258920);
 
             //Debuffs
-            CombatRoutine.AddDebuff("Frailty", 224509);
+            CombatRoutine.AddDebuff("Frailty", 247456);
             CombatRoutine.AddDebuff("Fiery Brand", 207771);
             CombatRoutine.AddDebuff(SinfulBrand, 317009);
 
