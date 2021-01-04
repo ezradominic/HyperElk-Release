@@ -600,7 +600,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.st +=/ volley,if= buff.precise_shots.down | !talent.chimaera_shot | active_enemies < 2
-                    if (API.CanCast(Volley) && (PlayerHasBuff(Precise_Shots) || !Talent_Chimaera_Shot || API.TargetUnitInRangeCount < 2) && (UseVolley == "With Cooldowns" && IsCooldowns || UseVolley == "On Cooldown" || UseVolley == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && InRange && Talent_Volley)
+                    if (API.CanCast(Volley) && (!PlayerHasBuff(Precise_Shots) || !Talent_Chimaera_Shot || API.TargetUnitInRangeCount < 2) && (UseVolley == "With Cooldowns" && IsCooldowns || UseVolley == "On Cooldown" || UseVolley == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && InRange && Talent_Volley)
                     {
                         API.CastSpell(Volley);
                         return;
