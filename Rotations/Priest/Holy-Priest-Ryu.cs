@@ -126,7 +126,7 @@ namespace HyperElk.Core
         private bool HaloCheck => API.CanCast(Halo) && HaloAoE && !ChannelingDivine && Mana >= 3 && HaloTalent && !API.PlayerIsMoving;
 
         private bool HWSancitfyCheck => API.CanCast(HolyWordSanctify) && HWSancitfyAoE && !API.PlayerCanAttackTarget && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving);
-        private bool PoMCheck => API.CanCast(PrayerofMending) && API.TargetHealthPercent <= PoMLifePercent && !API.PlayerCanAttackTarget && Mana >= 2 && !API.PlayerIsMoving && !ChannelingDivine && API.TargetRoleSpec == API.TankRole;
+        private bool PoMCheck => API.CanCast(PrayerofMending) && API.TargetHealthPercent <= PoMLifePercent && !API.PlayerCanAttackTarget && Mana >= 2 && !API.PlayerIsMoving && !ChannelingDivine && API.TargetRoleSpec == API.TankRole && !API.TargetHasBuff(PrayerofMending);
         private bool KyrianCheck => API.CanCast(BoonoftheAscended) && PlayerCovenantSettings == "Kyrian" && BoonAoE && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingDivine;
         private bool NightFaeCheck => API.CanCast(FaeGuardians) && PlayerCovenantSettings == "Night Fae" && Mana >= 2 && API.TargetHealthPercent >= FaeLifePercent && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !ChannelingDivine;
         private bool NecrolordCheck => API.CanCast(UnholyNova) && PlayerCovenantSettings == "Necrolord" && UnholyAoE && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingDivine;
@@ -136,7 +136,7 @@ namespace HyperElk.Core
 
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
-        private bool IsOOC => CombatRoutine.GetPropertyBool("OOC");
+        private bool IsOOC => API.ToggleIsEnabled("OOC");
         private int HealLifePercent => numbList[CombatRoutine.GetPropertyInt(Heal)];
         private int FlashHealLifePercent => numbList[CombatRoutine.GetPropertyInt(FlashHeal)];
         private int RenewLifePercent => numbList[CombatRoutine.GetPropertyInt(Renew)];
@@ -199,6 +199,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Apotheosis, 200183);
             CombatRoutine.AddBuff(SpiritOfRedemption, 20711);
             CombatRoutine.AddBuff(Renew, 139);
+            CombatRoutine.AddBuff(PrayerofMending, 41635);
 
 
             //Debuff
@@ -250,6 +251,7 @@ namespace HyperElk.Core
 
             //Toggle
             CombatRoutine.AddToggle("Auto Target");
+            CombatRoutine.AddToggle("OOC");
 
             //Macro
             CombatRoutine.AddMacro(Trinket1);
@@ -307,7 +309,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used and meets the below healing perecents", "Cooldowns", 1);
 
-            CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
+          //  CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
           //  CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
           //  CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp(Heal, Heal + " Life Percent", numbList, "Life percent at which " + Heal + " is used, set to 0 to disable", "Healing", 10);
@@ -458,6 +460,11 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < units.Length; i++)
                         {
+                            if (API.UnitHealthPercent(units[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
                             if (API.UnitHealthPercent(units[i]) <= GuardianSpirtLifePercent && (PlayerHealth >= GuardianSpirtLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
@@ -483,12 +490,22 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
+                            if (API.UnitRoleSpec(units[i]) == 999 && !API.UnitHasBuff(PrayerofMending, units[i]))
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
                         }
                     }
                     if (API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
+                            if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
                             if (API.UnitHealthPercent(raidunits[i]) <= GuardianSpirtLifePercent && (PlayerHealth >= GuardianSpirtLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
