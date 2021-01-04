@@ -59,7 +59,7 @@ namespace HyperElk.Core
         private bool isMOinRange => API.MouseoverRange <= 40;
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         public bool NoCovReady => (API.SpellCDDuration(Wild_Spirits) >= gcd || API.SpellCDDuration(Wild_Spirits) == 0) && (API.SpellCDDuration(Flayed_Shot) >= gcd || API.SpellCDDuration(Flayed_Shot) == 0) && (API.SpellCDDuration(Death_Chakram) >= gcd || API.SpellCDDuration(Death_Chakram) == 0) && (API.SpellCDDuration(Resonating_Arrow) >= gcd || API.SpellCDDuration(Death_Chakram) == 0);
-        public bool DispellList => API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworm Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
+        public bool DispellList => API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
         //Talents
         private bool Talent_A_Murder_of_Crows => API.PlayerIsTalentSelected(1, 3);
         private bool Talent_Serpent_Sting => API.PlayerIsTalentSelected(1, 2);
@@ -80,7 +80,6 @@ namespace HyperElk.Core
         string[] TrueshotList = new string[] { "always", "with Cooldowns" };
         string[] DoubleTapList = new string[] { "always", "with Cooldowns" };
         string[] AMurderofCrowsList = new string[] { "always", "with Cooldowns" };
-        string[] VolleyList = new string[] { "always", "with Cooldowns", "On AOE", "never" };
         string[] BloodshedList = new string[] { "always", "with Cooldowns" };
 
 
@@ -99,7 +98,7 @@ namespace HyperElk.Core
         private string UseTrueshot => TrueshotList[CombatRoutine.GetPropertyInt(Trueshot)];
         private string UseExplosiveShot => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Explosive_Shot)];
         private string UseAMurderofCrows => AMurderofCrowsList[CombatRoutine.GetPropertyInt(A_Murder_of_Crows)];
-        private string UseVolley => VolleyList[CombatRoutine.GetPropertyInt(Volley)];
+        private string UseVolley => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Volley)];
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
         private bool Use_HuntersMark => CombatRoutine.GetPropertyBool("huntersmark");
         private bool SurgingShots_enabled => CombatRoutine.GetPropertyBool("SurgingShots");
@@ -235,7 +234,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Trueshot, "Use " + Trueshot, TrueshotList, "Use " + Trueshot + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Double_Tap, "Use " + Double_Tap, DoubleTapList, "Use " + Double_Tap + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(A_Murder_of_Crows, "Use " + A_Murder_of_Crows, AMurderofCrowsList, "Use " + A_Murder_of_Crows + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(Volley, "Use " + Volley, VolleyList, "Use " + Volley + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
+            CombatRoutine.AddProp(Volley, "Use " + Volley, CDUsageWithAOE, "Use " + Volley + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
             CombatRoutine.AddProp(Explosive_Shot, "Use " + Explosive_Shot, CDUsageWithAOE, "Use " + Explosive_Shot + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
 
             CombatRoutine.AddProp("AOE_Switch", "AoE Switch", true, "Enable if you want to let the rotation switch ST/AOE", "Generic");
@@ -407,7 +406,7 @@ namespace HyperElk.Core
             {
                 #region opener
 
-                if (API.PlayerTimeInCombat <= 17000 && IsCooldowns && (!IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE)))
+                if (IsCooldowns && API.PlayerTimeInCombat <= 17000 && IsCooldowns && (!IsAOE || (AOESwitch_enabled && API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE)))
                 {
                     if (API.CanCast(Double_Tap))
                     {
@@ -426,7 +425,7 @@ namespace HyperElk.Core
                         API.WriteLog("opener: SS:2 ");
                         return;
                     }
-                    if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                    if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                     {
                         API.CastSpell(Explosive_Shot);
                         return;
@@ -441,7 +440,7 @@ namespace HyperElk.Core
                         API.CastSpell(Resonating_Arrow);
                         return;
                     }
-                    if (API.CanCast(Volley) && InRange)
+                    if (API.CanCast(Volley) && (UseVolley == "With Cooldowns" && IsCooldowns || UseVolley == "On Cooldown" || UseVolley == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && InRange)
                     {
                         API.CastSpell(Volley);
                         return;
@@ -565,7 +564,7 @@ namespace HyperElk.Core
                     //actions.st +=/ flare,if= tar_trap.up & runeforge.soulforge_embers
                     //actions.st +=/ tar_trap,if= runeforge.soulforge_embers & tar_trap.remains < gcd & cooldown.flare.remains < gcd
                     //actions.st +=/ explosive_shot
-                    if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                    if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                     {
                         API.CastSpell(Explosive_Shot);
                         return;
@@ -601,7 +600,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.st +=/ volley,if= buff.precise_shots.down | !talent.chimaera_shot | active_enemies < 2
-                    if (API.CanCast(Volley) && (PlayerHasBuff(Precise_Shots) || !Talent_Chimaera_Shot || API.TargetUnitInRangeCount < 2) && (UseVolley == "always" || (UseVolley == "with Cooldowns" && IsCooldowns) || (UseVolley == "On AOE" && IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)) && InRange && Talent_Volley)
+                    if (API.CanCast(Volley) && (PlayerHasBuff(Precise_Shots) || !Talent_Chimaera_Shot || API.TargetUnitInRangeCount < 2) && (UseVolley == "With Cooldowns" && IsCooldowns || UseVolley == "On Cooldown" || UseVolley == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && InRange && Talent_Volley)
                     {
                         API.CastSpell(Volley);
                         return;
@@ -712,7 +711,7 @@ namespace HyperElk.Core
                 //actions.trickshots +=/ tar_trap,if= runeforge.soulforge_embers & tar_trap.remains < gcd & cooldown.flare.remains < gcd
                 //actions.trickshots +=/ flare,if= tar_trap.up & runeforge.soulforge_embers
                 //actions.trickshots +=/ explosive_shot
-                if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
                 {
                     API.CastSpell(Explosive_Shot);
                     return;
@@ -730,7 +729,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.trickshots +=/ volley
-                if (API.CanCast(Volley) && (UseVolley == "always" || (UseVolley == "with Cooldowns" && IsCooldowns) || UseVolley == "On AOE") && InRange && Talent_Volley)
+                if (API.CanCast(Volley) && (UseVolley == "With Cooldowns" && IsCooldowns || UseVolley == "On Cooldown" || UseVolley == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || API.TargetUnitInRangeCount > 1 || IsCooldowns)) && InRange && Talent_Volley)
                 {
                     API.CastSpell(Volley);
                     return;
