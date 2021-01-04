@@ -17,6 +17,7 @@
 // v2.5 quick hotfix on phone lul
 // v2.6 Rallying Cry added
 // v2.7 Ignore Pain added
+// v2.8 Racials and a few other things
 
 using System.Linq;
 
@@ -128,7 +129,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.7");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.8");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, 23881, "D1");
@@ -226,7 +227,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
             if (isInterrupt && API.CanCast(Pummel) && IsMelee && PlayerLevel >= 7)
             {
@@ -238,14 +239,9 @@ namespace HyperElk.Core
                 API.CastSpell(StormBolt);
                 return;
             }
-            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
+            if (PlayerRaceSettings == "Tauren" && API.CanCast(RacialSpell1) && isInterrupt && !API.PlayerIsMoving && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
             {
                 API.CastSpell(RacialSpell1);
-                return;
-            }
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-            {
-                API.CastSpell("Healthstone");
                 return;
             }
             if (API.CanCast(IgnorePain) && API.PlayerRage >= 60 && !API.PlayerHasBuff(IgnorePain) && API.PlayerHealthPercent <= IgnorePainLifePercent)
@@ -328,37 +324,37 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/blood_fury
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && isRacial && IsCooldowns && IsMelee)
+                if (PlayerRaceSettings == "Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions+=/berserking,if=buff.recklessness.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && IsMelee && API.PlayerHasBuff(Recklessness))
+                if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && API.PlayerHasBuff(Recklessness))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions+=/lights_judgment,if=buff.recklessness.down&debuff.siegebreaker.down
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Lightforged" && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(Siegebreaker) && !API.PlayerHasBuff(Recklessness))
+                if (PlayerRaceSettings == "Lightforged" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(Siegebreaker) && !API.PlayerHasBuff(Recklessness))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions+=/fireblood
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && isRacial && IsCooldowns && IsMelee)
+                if (PlayerRaceSettings == "Dark Iron Dwarf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions+=/ancestral_call
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && isRacial && IsCooldowns && IsMelee)
+                if (PlayerRaceSettings == "Mag'har Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions+=/bag_of_tricks,if=buff.recklessness.down&debuff.siegebreaker.down&buff.enrage.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Vulpera" && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(Siegebreaker) && !API.PlayerHasBuff(Recklessness) && API.PlayerHasBuff(Enrage))
+                if (PlayerRaceSettings == "Vulpera" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(Siegebreaker) && !API.PlayerHasBuff(Recklessness) && API.PlayerHasBuff(Enrage))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -366,10 +362,12 @@ namespace HyperElk.Core
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
+                    return;
                 }
                 if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
+                    return;
                 }
                 //Single Target Rota
                 //actions.single_target=raging_blow,if=runeforge.will_of_the_berserker.equipped&buff.will_of_the_berserker.remains<gcd

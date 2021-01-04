@@ -17,6 +17,7 @@
 // v2.4 spell ids and alot of other stuff
 // v2.5 Rallying cry added
 // v2.6 Ignore Pain added
+// v2.7 Racials and a few other fixes
 
 using System.Linq;
 
@@ -142,7 +143,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.6");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.7");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -246,7 +247,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
             if (isInterrupt && API.CanCast(Pummel) && IsMelee && PlayerLevel >= 7)
             {
@@ -258,14 +259,9 @@ namespace HyperElk.Core
                 API.CastSpell(StormBolt);
                 return;
             }
-            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
+            if (PlayerRaceSettings == "Tauren" && API.CanCast(RacialSpell1) && isInterrupt && !API.PlayerIsMoving && isRacial && IsMelee && API.SpellISOnCooldown(Pummel))
             {
                 API.CastSpell(RacialSpell1);
-                return;
-            }
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-            {
-                API.CastSpell("Healthstone");
                 return;
             }
             if (API.CanCast(IgnorePain) && (API.PlayerRage >= 40 || API.PlayerHasBuff(DeadlyCalm)) && API.PlayerBuffTimeRemaining(IgnorePain) < gcd*2 && API.PlayerHealthPercent <= IgnorePainLifePercent)
@@ -332,43 +328,43 @@ namespace HyperElk.Core
             if (IsMelee)
             {
                 //actions +=/ blood_fury,if= debuff.colossus_smash.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && isRacial && IsCooldowns && IsMelee && API.TargetHasDebuff(ColossusSmash))
+                if (PlayerRaceSettings == "Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && API.TargetHasDebuff(ColossusSmash))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ berserking,if= debuff.colossus_smash.remains > 6
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && IsMelee && API.TargetDebuffRemainingTime(ColossusSmash) > 600)
+                if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && API.TargetDebuffRemainingTime(ColossusSmash) > 600)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ arcane_torrent,if= cooldown.mortal_strike.remains > 1.5 & rage < 50
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Blood Elf" && isRacial && IsCooldowns && IsMelee && API.SpellCDDuration(MortalStrike) > 150 && API.PlayerRage < 50)
+                if (PlayerRaceSettings == "Blood Elf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && API.SpellCDDuration(MortalStrike) > 150 && API.PlayerRage < 50)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ lights_judgment,if= debuff.colossus_smash.down & cooldown.mortal_strike.remains
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Lightforged" && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(ColossusSmash) && API.SpellISOnCooldown(MortalStrike))
+                if (PlayerRaceSettings == "Lightforged" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(ColossusSmash) && API.SpellISOnCooldown(MortalStrike))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ fireblood,if= debuff.colossus_smash.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && isRacial && IsCooldowns && IsMelee && API.TargetHasDebuff(ColossusSmash))
+                if (PlayerRaceSettings == "Dark Iron Dwarf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && API.TargetHasDebuff(ColossusSmash))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ ancestral_call,if= debuff.colossus_smash.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && isRacial && IsCooldowns && IsMelee && API.TargetHasDebuff(ColossusSmash))
+                if (PlayerRaceSettings == "Mag'har Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && API.TargetHasDebuff(ColossusSmash))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ bag_of_tricks,if= debuff.colossus_smash.down & cooldown.mortal_strike.remains
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Vulpera" && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(ColossusSmash) && API.SpellISOnCooldown(MortalStrike))
+                if (PlayerRaceSettings == "Vulpera" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && !API.TargetHasDebuff(ColossusSmash) && API.SpellISOnCooldown(MortalStrike))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -376,10 +372,12 @@ namespace HyperElk.Core
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
+                    return;
                 }
                 if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
+                    return;
                 }
                 if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && IsCovenant)
                 {

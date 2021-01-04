@@ -8,6 +8,7 @@
 // v1.6 spell ids and alot of other stuff
 // v1.7 new simc apl
 // v1.8 mouseover moonfire added
+// v1.9 racials and a few other fixes
 
 namespace HyperElk.Core
 {
@@ -101,7 +102,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.8");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v1.9");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -192,7 +193,7 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             //API.WriteLog("Targets: "+ API.PlayerUnitInMeleeRangeCount);
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {
@@ -201,7 +202,7 @@ namespace HyperElk.Core
                     API.CastSpell(SkullBash);
                     return;
                 }
-                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
+                if (PlayerRaceSettings == "Tauren" && API.CanCast(RacialSpell1) && isInterrupt && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -251,11 +252,6 @@ namespace HyperElk.Core
                     API.CastSpell(LoneProtection);
                     return;
                 }
-                if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-                {
-                    API.CastSpell("Healthstone");
-                    return;
-                }
                 if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
                 {
                     API.CastSpell(PhialofSerenity);
@@ -272,7 +268,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
             if (API.CanCast(TravelForm) && AutoTravelForm && API.PlayerIsOutdoor && !API.PlayerHasBuff(TravelForm))
             {
@@ -295,7 +291,7 @@ namespace HyperElk.Core
             if (API.PlayerHasBuff(BearForm) && PlayerLevel >= 8)
             {
                 //actions.cooldown +=/ berserking,if= buff.tigers_fury.up | buff.bs_inc.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && isMelee && IncaBerserk)
+                if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && isMelee && IncaBerserk)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -303,10 +299,12 @@ namespace HyperElk.Core
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
+                    return;
                 }
                 if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
+                    return;
                 }
                 //actions.bear+=/ravenous_frenzy
                 if (API.CanCast(RavenousFrenzy) && isMelee && PlayerCovenantSettings == "Venthyr" && IsCovenant && IncaBerserk)

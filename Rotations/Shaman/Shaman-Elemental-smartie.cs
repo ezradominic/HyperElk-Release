@@ -9,6 +9,7 @@
 // v1.7 Master of the Elements workaround
 // v1.8 chain lightning with stormkeeper change
 // v1.9 spell ids and alot of other stuff
+// v2.0 Racials and few other small fixes
 
 using System.Diagnostics;
 
@@ -115,7 +116,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v1.9");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.0");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, 188443, "D7");
@@ -241,7 +242,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
             if (!API.PlayerIsMounted)
             {
@@ -250,7 +251,7 @@ namespace HyperElk.Core
                     API.CastSpell(WindShear);
                     return;
                 }
-                if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && API.TargetRange < 8 && API.SpellISOnCooldown(WindShear))
+                if (PlayerRaceSettings == "Tauren" && API.CanCast(RacialSpell1) && isInterrupt && !API.PlayerIsMoving && isRacial && API.TargetRange < 8 && API.SpellISOnCooldown(WindShear))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -258,11 +259,6 @@ namespace HyperElk.Core
                 if (API.CanCast(AstralShift) && PlayerLevel >= 42 && API.PlayerHealthPercent <= AstralShiftLifePercent)
                 {
                     API.CastSpell(AstralShift);
-                    return;
-                }
-                if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-                {
-                    API.CastSpell("Healthstone");
                     return;
                 }
                 if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
@@ -301,7 +297,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
             if (AutoWolf && API.CanCast(GhostWolf) && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
             {
@@ -324,31 +320,31 @@ namespace HyperElk.Core
             if (IsInRange)
             {
                 //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
+                if (PlayerRaceSettings == "Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ berserking,if= !talent.ascendance.enabled | buff.ascendance.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance)))
+                if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance)))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ fireblood,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Dark Iron Dwarf" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
+                if (PlayerRaceSettings == "Dark Iron Dwarf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ ancestral_call,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
+                if (PlayerRaceSettings == "Mag'har Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
                 }
                 //actions +=/ bag_of_tricks,if= !talent.ascendance.enabled | !buff.ascendance.up
-                if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Vulpera" && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance)))
+                if (PlayerRaceSettings == "Vulpera" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || API.PlayerHasBuff(Ascendance)))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -356,10 +352,12 @@ namespace HyperElk.Core
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
+                    return;
                 }
                 if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
+                    return;
                 }
                 //actions+=/fire_elemental
                 if (API.CanCast(FireElemental) && PlayerLevel >= 34 && !TalentStormElemental && IsFireElemental)

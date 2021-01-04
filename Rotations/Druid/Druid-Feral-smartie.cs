@@ -15,6 +15,7 @@
 // v2.3 swipe bear added
 // v2.4 kitty bear swap adjustment
 // v2.5 complete rewrite
+// v2.6 racials and a few small fixes
 
 using System.Diagnostics;
 
@@ -171,7 +172,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v2.5");
+            API.WriteLog("Welcome to smartie`s Feral Druid v2.6");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -356,7 +357,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40)
+            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
             if (ProwlOOC && API.CanCast(Prowl) && PlayerLevel >= 17 && !PlayerHasBuff(Prowl) && !API.PlayerIsMounted && !PlayerHasBuff(TravelForm))
             {
@@ -515,7 +516,7 @@ namespace HyperElk.Core
                 API.CastSpell(SkullBash);
                 return;
             }
-            if (API.CanCast(RacialSpell1) && isInterrupt && PlayerRaceSettings == "Tauren" && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
+            if (PlayerRaceSettings == "Tauren" && API.CanCast(RacialSpell1) && isInterrupt && !API.PlayerIsMoving && isRacial && isMelee && API.SpellISOnCooldown(SkullBash))
             {
                 API.CastSpell(RacialSpell1);
                 return;
@@ -817,13 +818,13 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cooldown+=/shadowmeld,if=buff.tigers_fury.up&buff.bs_inc.down&combo_points<4&dot.rake.pmultiplier<1.6&energy>40
-            if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Night Elf" && isRacial && IsCooldowns && isMelee && (PlayerHasBuff(TigersFury) && !IncaBerserk && API.PlayerComboPoints < 4 && API.PlayerEnergy > 40))
+            if (PlayerRaceSettings == "Night Elf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && isMelee && (PlayerHasBuff(TigersFury) && !IncaBerserk && API.PlayerComboPoints < 4 && API.PlayerEnergy > 40))
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cooldown+=/berserking,if=buff.tigers_fury.up|buff.bs_inc.up
-            if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && isRacial && IsCooldowns && isMelee && (PlayerHasBuff(TigersFury) || IncaBerserk))
+            if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && isMelee && (PlayerHasBuff(TigersFury) || IncaBerserk))
             {
                 API.CastSpell(RacialSpell1);
                 return;
