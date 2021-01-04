@@ -312,7 +312,7 @@ namespace HyperElk.Core
                     API.CastSpell(Counter_Shot);
                     return;
                 }
-                if (API.CanCast(TranquilizingShot) && UseTranqShot && InRange && PlayerLevel >= 18)
+                if (API.CanCast(TranquilizingShot) && DispellList && UseTranqShot && InRange && PlayerLevel >= 18)
                 {
                     API.CastSpell(TranquilizingShot);
                     return;
