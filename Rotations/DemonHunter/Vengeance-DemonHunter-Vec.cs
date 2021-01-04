@@ -105,44 +105,43 @@ namespace HyperElk.Core
             API.WriteLog("Metamorphosis Macro : /cast [@player] Metamorphosis");
 
             //Spells
-            CombatRoutine.AddSpell("Infernal Strike", "NumPad2");
-            CombatRoutine.AddSpell("Throw Glaive", "D6");
-            CombatRoutine.AddSpell("Shear", "D2");
-            CombatRoutine.AddSpell("Demon Spikes", "NumPad3");
-            CombatRoutine.AddSpell("Metamorphosis", "D8");
-            CombatRoutine.AddSpell("Fiery Brand", "D9");
-            CombatRoutine.AddSpell("Soul Cleave", "D3");
-            CombatRoutine.AddSpell("Immolation Aura", "D4");
-            CombatRoutine.AddSpell("Sigil of Flame", "D7");
-            CombatRoutine.AddSpell("Fel Devastation", "D5");
-            CombatRoutine.AddSpell("Fracture", "D2");
-            CombatRoutine.AddSpell("Spirit Bomb", "Oem6");
-            CombatRoutine.AddSpell("Disrupt", "NumPad1");
-            CombatRoutine.AddSpell("Sigil of Chains", "F1");
-            CombatRoutine.AddSpell("Soul Barrier", "F2");
-            CombatRoutine.AddSpell("Bulk Extraction", "F3");
-            CombatRoutine.AddSpell("Felblade", "NumPad2");
-            CombatRoutine.AddSpell(SinfulBrand, "NumPad6");
-            CombatRoutine.AddSpell(TheHunt, "NumPad6");
-            CombatRoutine.AddSpell(fodder_to_the_flame, "NumPad6");
-            CombatRoutine.AddSpell(elysian_decree, "NumPad6");
-            CombatRoutine.AddSpell(SigilofSilence, "NumPad7");
-            CombatRoutine.AddSpell(SigilofMisery, "NumPad8");
+            CombatRoutine.AddSpell("Infernal Strike",189110, "NumPad2");
+            CombatRoutine.AddSpell("Throw Glaive",204157, "D6");
+            CombatRoutine.AddSpell("Shear",203782, "D2");
+            CombatRoutine.AddSpell("Demon Spikes",203720, "NumPad3");
+            CombatRoutine.AddSpell("Metamorphosis",187827, "D8");
+            CombatRoutine.AddSpell("Fiery Brand",204021, "D9");
+            CombatRoutine.AddSpell("Soul Cleave",228477, "D3");
+            CombatRoutine.AddSpell("Immolation Aura",258920, "D4");
+            CombatRoutine.AddSpell("Sigil of Flame",204596, "D7");
+            CombatRoutine.AddSpell("Fel Devastation",212084, "D5");
+            CombatRoutine.AddSpell("Fracture",263642, "D2");
+            CombatRoutine.AddSpell("Spirit Bomb",247454, "Oem6");
+            CombatRoutine.AddSpell("Disrupt",183752, "NumPad1");
+            CombatRoutine.AddSpell("Sigil of Chains",202138, "F1");
+            CombatRoutine.AddSpell("Soul Barrier",263648, "F2");
+            CombatRoutine.AddSpell("Bulk Extraction",320341, "F3");
+            CombatRoutine.AddSpell("Felblade",232893, "NumPad2");
+            CombatRoutine.AddSpell(SinfulBrand, 317009, "NumPad6");
+            CombatRoutine.AddSpell(TheHunt, 323639, "NumPad6");
+            CombatRoutine.AddSpell(fodder_to_the_flame, 329554, "NumPad6");
+            CombatRoutine.AddSpell(elysian_decree, 306830, "NumPad6");
+            CombatRoutine.AddSpell(SigilofSilence,202137, "NumPad7");
+            CombatRoutine.AddSpell(SigilofMisery,207684, "NumPad8");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
-            CombatRoutine.AddBuff("Demon Spikes");
-            CombatRoutine.AddBuff("Soul Fragments");
-            CombatRoutine.AddBuff("Metamorphosis");
-            CombatRoutine.AddBuff("Fiery Brand");
-            CombatRoutine.AddBuff(Fel_Bombardment);
-            CombatRoutine.AddBuff(Immolation_Aura);
+            CombatRoutine.AddBuff("Demon Spikes",203819);
+            CombatRoutine.AddBuff("Soul Fragments",203981);
+            CombatRoutine.AddBuff("Metamorphosis",187827);
+            CombatRoutine.AddBuff(Fel_Bombardment, 337775);
+            CombatRoutine.AddBuff(Immolation_Aura,258920);
 
             //Debuffs
-            CombatRoutine.AddDebuff("Frailty");
-            CombatRoutine.AddDebuff("Fiery Brand");
-            CombatRoutine.AddDebuff(SinfulBrand);
+            CombatRoutine.AddDebuff("Frailty", 224509);
+            CombatRoutine.AddDebuff("Fiery Brand", 207771);
+            CombatRoutine.AddDebuff(SinfulBrand, 317009);
 
             CombatRoutine.AddConduit(DemonMuzzle);
             //Toggle
@@ -317,7 +316,7 @@ namespace HyperElk.Core
                     return;
                 }
                 // apl_normal->add_action(this, "Fel Devastation");
-                if (!API.SpellISOnCooldown("Fel Devastation") && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange >= 1)
+                if (!API.SpellISOnCooldown("Fel Devastation") && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange <= 5)
                 {
                     API.CastSpell("Fel Devastation");
                     return;
