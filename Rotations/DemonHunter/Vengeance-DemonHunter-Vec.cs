@@ -309,7 +309,7 @@ namespace HyperElk.Core
                     return;
                 }
                 // apl_normal->add_action(this, "Fel Devastation");
-                if (!API.SpellISOnCooldown("Fel Devastation") && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange >= 1)
+                if (!API.SpellISOnCooldown("Fel Devastation") && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange <= 5)
                 {
                     API.CastSpell("Fel Devastation");
                     return;

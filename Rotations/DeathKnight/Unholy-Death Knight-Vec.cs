@@ -18,6 +18,10 @@ namespace HyperElk.Core
         private string Lichborne = "Lichborne";
         private string UnholyStrength = "Unholy Strength";
         private string DeathCoil = "Death Coil";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string DeathGrip = "Death Grip";
+        private string Fleshcraft = "Fleshcraft";
         //stopwatch
         private readonly Stopwatch Dark_Transformation_Ghoul = new Stopwatch();
         private readonly Stopwatch GargoyleActiveTime = new Stopwatch();
@@ -116,6 +120,7 @@ namespace HyperElk.Core
         private bool ApocGhoulActive => ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds <= 15000;
         private bool ArmyGhoulActive => ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds <= 30000;
         //CBProperties
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
 
 
 
@@ -129,11 +134,14 @@ namespace HyperElk.Core
         private string WhenDarkTransformation => CDUsage[CombatRoutine.GetPropertyInt("DarkTransformation")];
         private string UseRaiseAbomination => CDUsage[CombatRoutine.GetPropertyInt("RaiseAbomination")];
         private string UseApocalypse => CDUsage[CombatRoutine.GetPropertyInt("Apocalypse")];
-
+        private int FleshcraftPercent => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         private bool UseRaiseDead => CombatRoutine.GetPropertyBool("RaiseDead");
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         public override void Initialize()
         {
@@ -142,50 +150,58 @@ namespace HyperElk.Core
 
             //Spells
 
-            CombatRoutine.AddSpell("Outbreak",77575, "D1");
-            CombatRoutine.AddSpell("Soul Reaper",343294, "D2");
-            CombatRoutine.AddSpell("Dark Transformation",63560, "D3");
-            CombatRoutine.AddSpell("Apocalypse",275699, "D4");
-            CombatRoutine.AddSpell(DeathCoil,47541, "D5");
-            CombatRoutine.AddSpell("Death and Decay",43265, "D6");
-            CombatRoutine.AddSpell("Festering Strike",85948, "D7");
-            CombatRoutine.AddSpell("Mind Freeze",47528, "D8");
-            CombatRoutine.AddSpell("Unholy Assault",207289, "D9");
-            CombatRoutine.AddSpell("Chains of Ice",45524, "F1");
-            CombatRoutine.AddSpell("Scourge Strike",55090, "F2");
-            CombatRoutine.AddSpell("Clawing Shadows",207311, "F2");
-            CombatRoutine.AddSpell("Icebound Fortitude",48792, "F3");
-            CombatRoutine.AddSpell("Anti-Magic Shell",48707, "F4");
-            CombatRoutine.AddSpell("Death Strike",49998, "F5");
-            CombatRoutine.AddSpell("Epidemic",207317, "F6");
-            CombatRoutine.AddSpell("Death Pact",48743, "NumPad4");
-            CombatRoutine.AddSpell("Defile",152280, "D6");
-            CombatRoutine.AddSpell("Army of the Dead",42650, "F8");
-            CombatRoutine.AddSpell("Unholy Blight",115989, "F9");
-            CombatRoutine.AddSpell("Summon Gargoyle",49206, "F7");
-            CombatRoutine.AddSpell("Raise Dead",46584, "D0");
-            CombatRoutine.AddSpell("Raise Abomination",288853, "F8");
-            CombatRoutine.AddSpell("Necrotic Strike",223829, "NumPad6");
-            CombatRoutine.AddSpell("Sacrificial Pact",327574, "NumPad5");
-            CombatRoutine.AddSpell(ShackletheUnworthy, 312202, "F");
-            CombatRoutine.AddSpell(SwarmingMist, 311648, "F");
-            CombatRoutine.AddSpell(DeathsDue, 324128, "F");
-            CombatRoutine.AddSpell(AbominationLimb, 315443, "F");
-            CombatRoutine.AddSpell(Lichborne,49039, "F12");
+
+            CombatRoutine.AddSpell("Outbreak", 77575, "D1");
+            CombatRoutine.AddSpell("Soul Reaper", 343294, "D2");
+            CombatRoutine.AddSpell("Dark Transformation", 63560, "D3");
+            CombatRoutine.AddSpell("Apocalypse", 275699, "D4");
+            CombatRoutine.AddSpell(DeathCoil, 47541, "D5");
+            CombatRoutine.AddSpell("Death and Decay", 43265, "D6");
+            CombatRoutine.AddSpell("Festering Strike", 85948, "D7");
+            CombatRoutine.AddSpell("Mind Freeze", 47528, "D8");
+            CombatRoutine.AddSpell("Unholy Assault", 207289, "D9");
+            CombatRoutine.AddSpell("Chains of Ice", 45524, "F1");
+            CombatRoutine.AddSpell("Scourge Strike", 55090, "F2");
+            CombatRoutine.AddSpell("Clawing Shadows", 207311, "F2");
+            CombatRoutine.AddSpell("Icebound Fortitude", 48792, "F3");
+            CombatRoutine.AddSpell("Anti-Magic Shell", 48707, "F4");
+            CombatRoutine.AddSpell("Death Strike", 49998, "F5");
+            CombatRoutine.AddSpell("Epidemic", 207317, "F6");
+            CombatRoutine.AddSpell("Death Pact", 48743, "NumPad4");
+            CombatRoutine.AddSpell("Defile", 152280, "D6");
+            CombatRoutine.AddSpell("Army of the Dead", 42650, "F8");
+            CombatRoutine.AddSpell("Unholy Blight", 115989, "Oemplus");
+            CombatRoutine.AddSpell("Summon Gargoyle", 49206, "F7");
+            CombatRoutine.AddSpell("Raise Dead", 46584, "D0");
+            CombatRoutine.AddSpell("Raise Abomination", 288853, "F7");
+            CombatRoutine.AddSpell("Necrotic Strike", 223829, "NumPad6");
+            CombatRoutine.AddSpell("Sacrificial Pact", 327574, "NumPad5");
+            CombatRoutine.AddSpell(ShackletheUnworthy, 312202, "F11");
+            CombatRoutine.AddSpell(SwarmingMist, 311648, "F11");
+            CombatRoutine.AddSpell(DeathsDue, 324128, "F11");
+            CombatRoutine.AddSpell(AbominationLimb, 315443, "F11");
+            CombatRoutine.AddSpell(Lichborne, 49039, "F12");
+            CombatRoutine.AddSpell(DeathGrip, 49576, "NumPad1");
+            CombatRoutine.AddSpell(Fleshcraft, 324631, "NumPad9");
+
+            //Items
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             CombatRoutine.AddBuff("Dark Succor", 101568);
-            CombatRoutine.AddBuff("Sudden Doom",81340);
-            CombatRoutine.AddBuff("Death and Decay",188290);
+            CombatRoutine.AddBuff("Sudden Doom", 81340);
+            CombatRoutine.AddBuff("Death and Decay", 188290);
             CombatRoutine.AddBuff("Master of Ghouls", 246995);
             CombatRoutine.AddBuff(UnholyStrength, 53365);
             CombatRoutine.AddBuff(UnholyAssault, 207289);
 
-            CombatRoutine.AddDebuff("Virulent Plague",191587);
-            CombatRoutine.AddDebuff("Festering Wound",194310);
+            CombatRoutine.AddDebuff("Virulent Plague", 191587);
+            CombatRoutine.AddDebuff("Festering Wound", 194310);
             CombatRoutine.AddDebuff("Necrotic Wound", 209858);
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
+            CombatRoutine.AddMacro(DeathGrip + "MO", "NumPad1");
 
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
@@ -210,6 +226,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Anti-Magic Shell", "Use " + "Anti-Magic Shell" + " below:", percentListProp, "Life percent at which " + "Anti-Magic Shell" + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp("Death Strike", "Use " + "Death Strike High Priority" + " below:", percentListProp, "Life percent at which " + "Death Strike" + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp("Dark Succor", "Use " + "Death Strike Dark Succor" + " below:", percentListProp, "Life percent at which " + "Death Strike" + " is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
         }
 
         public override void Pulse()
@@ -226,7 +245,17 @@ namespace HyperElk.Core
 
             if (!API.PlayerIsMounted && !Playeriscasting)
             {
-
+                if (IsMouseover)
+                {
+                    if (IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && isMOinRange && API.MouseoverRange >= 10)
+                    {
+                        if (!API.MacroIsIgnored(DeathGrip + "MO"))
+                        {
+                            API.CastSpell(DeathGrip + "MO");
+                            return;
+                        }
+                    }
+                }
                 #region defensives
                 if (API.CanCast("Raise Dead") && UseRaiseDead && (!API.PlayerHasPet || API.PetHealthPercent < 1))
                 {
@@ -274,6 +303,16 @@ namespace HyperElk.Core
                 if (API.CanCast("Mind Freeze") && isInterrupt && MeleeRange)
                 {
                     API.CastSpell("Mind Freeze");
+                    return;
+                }
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && !API.MacroIsIgnored(PhialofSerenity) && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
                     return;
                 }
                 if (isRacial && IsCooldowns)
@@ -349,6 +388,11 @@ namespace HyperElk.Core
                 if (API.CanCast(AbominationLimb) && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
                 {
                     API.CastSpell(AbominationLimb);
+                    return;
+                }
+                if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercent)
+                {
+                    API.CastSpell(Fleshcraft);
                     return;
                 }
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)

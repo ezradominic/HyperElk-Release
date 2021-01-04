@@ -43,6 +43,14 @@
         private string RingingClarity = "Ringing Clarity";
         private string RoyalDecree = "Royal Decree";
         private string BlessingofProtection = "Blessing of Protection";
+        private string BlessingofSacrifice = "Blessing of Sacrifice";
+
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
+
+        private bool IsMouseover => API.ToggleIsEnabled("MO Heal");
+        private bool HealFocus => API.ToggleIsEnabled("Focus Heal");
+
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
@@ -64,6 +72,8 @@
         private bool Talent_Seraphim => API.PlayerIsTalentSelected(5, 3);
         private bool Talent_SanctifiedWrath => API.PlayerIsTalentSelected(7, 1);
 
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+
         //CBProperties
 
 
@@ -84,6 +94,10 @@
         private int DivineShieldLifePercent => percentListProp[CombatRoutine.GetPropertyInt(DivineShield)];
         private int GuardianofAncientKingsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(GuardianofAncientKings)];
 
+        private int BlessingofProtectionPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection)];
+        private int BlessingofSacrificePercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         public override void Initialize()
         {
@@ -91,30 +105,30 @@
             API.WriteLog("Welcome to Protection Paladin by Vec");
 
             //Spells
-            CombatRoutine.AddSpell(Judgment,275779, "D2");
-            CombatRoutine.AddSpell(AvengersShield,31935, "D2");
-            CombatRoutine.AddSpell(HammeroftheRighteous,53595, "D1");
-            CombatRoutine.AddSpell(BlessedHammer,204019, "D1");
-            CombatRoutine.AddSpell(Consecration,26573, "D4");
-            CombatRoutine.AddSpell(ShieldoftheRighteous,53600, "D3");
-            CombatRoutine.AddSpell(WordOfGlory,85673, "F7");
-            CombatRoutine.AddSpell(FlashofLight,19750, "Q");
-            CombatRoutine.AddSpell(Rebuke,96231, "F");
+            CombatRoutine.AddSpell(Judgment, 275779, "D2");
+            CombatRoutine.AddSpell(AvengersShield, 31935, "D2");
+            CombatRoutine.AddSpell(HammeroftheRighteous, 53595, "D1");
+            CombatRoutine.AddSpell(BlessedHammer, 204019, "D1");
+            CombatRoutine.AddSpell(Consecration, 26573, "D4");
+            CombatRoutine.AddSpell(ShieldoftheRighteous, 53600, "D3");
+            CombatRoutine.AddSpell(WordOfGlory, 85673, "F7");
+            CombatRoutine.AddSpell(FlashofLight, 19750, "Q");
+            CombatRoutine.AddSpell(Rebuke, 96231, "F");
 
-            CombatRoutine.AddSpell(CrusaderAura,32223, "F5");
-            CombatRoutine.AddSpell(DevotionAura,465, "F6");
+            CombatRoutine.AddSpell(CrusaderAura, 32223, "F5");
+            CombatRoutine.AddSpell(DevotionAura, 465, "F6");
 
-            CombatRoutine.AddSpell(AvengingWrath,31884, "F");
-            CombatRoutine.AddSpell(HammerofWrath,24275, "D7");
+            CombatRoutine.AddSpell(AvengingWrath, 31884, "F");
+            CombatRoutine.AddSpell(HammerofWrath, 24275, "D7");
 
-            CombatRoutine.AddSpell(LayOnHands,633, "F8");
-            CombatRoutine.AddSpell(ArdentDefender,31850, "S");
-            CombatRoutine.AddSpell(GuardianofAncientKings,86659, "F9");
-            CombatRoutine.AddSpell(DivineShield,642, "F10");
-            CombatRoutine.AddSpell(HolyAvenger,105809, "F11");
-            CombatRoutine.AddSpell(Seraphim,152262, "F11");
-            CombatRoutine.AddSpell(MomentOfGlory,327193, "D6");
-            CombatRoutine.AddSpell(SanctifiedWrath,171648, "F1");
+            CombatRoutine.AddSpell(LayOnHands, 633, "F8");
+            CombatRoutine.AddSpell(ArdentDefender, 31850, "S");
+            CombatRoutine.AddSpell(GuardianofAncientKings, 86659, "F9");
+            CombatRoutine.AddSpell(DivineShield, 642, "F10");
+            CombatRoutine.AddSpell(HolyAvenger, 105809, "F11");
+            CombatRoutine.AddSpell(Seraphim, 152262, "F11");
+            CombatRoutine.AddSpell(MomentOfGlory, 327193, "D6");
+            CombatRoutine.AddSpell(SanctifiedWrath, 171648, "F1");
             CombatRoutine.AddSpell(DivineToll, 304971, "F8");
             CombatRoutine.AddSpell(AshenHallow, 316958, "F8");
             CombatRoutine.AddSpell(BlessingofSpring, 328282, "F8");
@@ -123,31 +137,43 @@
             CombatRoutine.AddSpell(BlessingofWinter, 328281, "F8");
             CombatRoutine.AddSpell(VanquishersHammer, 328204, "F8");
             CombatRoutine.AddSpell(BlessingofProtection, 1022, "F11");
-
+            CombatRoutine.AddSpell(BlessingofSacrifice, 6940, "F12");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
+            CombatRoutine.AddMacro(LayOnHands + " MO", "F10");
+            CombatRoutine.AddMacro(LayOnHands + " Focus", "F10");
+            CombatRoutine.AddMacro(BlessingofProtection + " MO", "F11");
+            CombatRoutine.AddMacro(BlessingofProtection + " Focus", "F11");
+            CombatRoutine.AddMacro(BlessingofSacrifice + " MO", "F11");
+            CombatRoutine.AddMacro(BlessingofSacrifice + " Focus", "F11");
+            CombatRoutine.AddMacro(WordOfGlory + " MO", "F10");
+            CombatRoutine.AddMacro(WordOfGlory + " Focus", "F10");
             //Buffs
-            CombatRoutine.AddBuff(Consecration,188370);
-            CombatRoutine.AddBuff(CrusaderAura,32223);
-            CombatRoutine.AddBuff(DevotionAura,465);
-            CombatRoutine.AddBuff(AvengingWrath,31884);
-            CombatRoutine.AddBuff(ShieldoftheRighteous,132403);
+            CombatRoutine.AddBuff(Consecration, 188370);
+            CombatRoutine.AddBuff(CrusaderAura, 32223);
+            CombatRoutine.AddBuff(DevotionAura, 465);
+            CombatRoutine.AddBuff(AvengingWrath, 31884);
+            CombatRoutine.AddBuff(ShieldoftheRighteous, 132403);
             CombatRoutine.AddBuff(DivinePurpose, 223817);
-            CombatRoutine.AddBuff(ArdentDefender,31850);
-            CombatRoutine.AddBuff(GuardianofAncientKings,86659);
-            CombatRoutine.AddBuff(DivineShield,642);
-            CombatRoutine.AddBuff(ShiningLight,327510);
-            CombatRoutine.AddBuff(HolyAvenger,105809);
+            CombatRoutine.AddBuff(ArdentDefender, 31850);
+            CombatRoutine.AddBuff(GuardianofAncientKings, 86659);
+            CombatRoutine.AddBuff(DivineShield, 642);
+            CombatRoutine.AddBuff(ShiningLight, 327510);
+            CombatRoutine.AddBuff(HolyAvenger, 105809);
             CombatRoutine.AddBuff(VanquishersHammer, 328204);
             CombatRoutine.AddBuff(Seraphim, 152262);
             CombatRoutine.AddBuff(RoyalDecree, 340147);
             //Debuffs
-            CombatRoutine.AddDebuff(Forbearance,25771);
-            CombatRoutine.AddDebuff(Judgment,197277);
+            CombatRoutine.AddDebuff(Forbearance, 25771);
+            CombatRoutine.AddDebuff(Judgment, 197277);
             CombatRoutine.AddDebuff(vengeful_shock, 340007);
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
-
+            CombatRoutine.AddToggle("MO Heal");
+            CombatRoutine.AddToggle("Focus Heal");
 
             //CBProperties
             CombatRoutine.AddProp("FOLOOCPCTOOC", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
@@ -156,7 +182,8 @@
             CombatRoutine.AddProp("FOLOOCPCTIC", "In combat Life Percent", percentListProp, "Life percent at which Flash of Light is used in combat to heal you", FlashofLight, 7);
             CombatRoutine.AddProp("VengefulShockConduit", "Vengeful Shock Conduit", false, "Do you have the Vengeful Shock Conduit?", "Conduit");
 
-
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
 
             CombatRoutine.AddProp("AURASWITCH", "Auto Aura Switch", true, "Auto Switch Aura between Crusader Aura|Devotion Aura", "Generic");
             CombatRoutine.AddProp(AvengingWrath, "Use Avenging Wrath", true, "Use Avenging Wrath with cooldowns", "Generic");
@@ -169,7 +196,8 @@
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", percentListProp, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(GuardianofAncientKings, GuardianofAncientKings + " Life Percent", percentListProp, "Life percent at which" + GuardianofAncientKings + "is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp("WOGPCT", WordOfGlory, percentListProp, "Life percent at which Word of Glory is used", "Defense", 5);
-
+            CombatRoutine.AddProp(BlessingofProtection, BlessingofProtection + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp(BlessingofSacrifice, BlessingofSacrifice + " Life Percent", percentListProp, "Life percent at which" + BlessingofSacrifice + "is used, set to 0 to disable", "Defense", 2);
 
         }
 
@@ -208,26 +236,8 @@
 
             if (IsCooldowns)
             {
-                if (API.PlayerHealthPercent <= LayOnHandsLifePercent && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forbearance, false, false))
-                {
-                    API.CastSpell(LayOnHands);
-                    return;
-                }
-                if (API.PlayerHealthPercent <= DivineShieldLifePercent && API.CanCast(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forbearance, false, false))
-                {
-                    API.CastSpell(DivineShield);
-                    return;
-                }
-                if (API.PlayerHealthPercent <= GuardianofAncientKingsLifePercent && API.CanCast(GuardianofAncientKings) && PlayerLevel >= 39 && !HasDefenseBuff)
-                {
-                    API.CastSpell(GuardianofAncientKings);
-                    return;
-                }
-                if (API.PlayerHealthPercent <= ArdentDefenderLifePercent && API.CanCast(ArdentDefender) && PlayerLevel >= 42 && !HasDefenseBuff)
-                {
-                    API.CastSpell(ArdentDefender);
-                    return;
-                }
+
+
             }
             rotation();
             return;
@@ -243,6 +253,37 @@
         }
         private void rotation()
         {
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
+            if (API.PlayerHealthPercent <= LayOnHandsLifePercent && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forbearance, false, false))
+            {
+                API.CastSpell(LayOnHands);
+                return;
+            }
+            if (API.PlayerHealthPercent <= DivineShieldLifePercent && API.CanCast(DivineShield) && PlayerLevel >= 10 && !HasDefenseBuff && !API.PlayerHasDebuff(Forbearance, false, false))
+            {
+                API.CastSpell(DivineShield);
+                return;
+            }
+            if (API.PlayerHealthPercent <= GuardianofAncientKingsLifePercent && API.CanCast(GuardianofAncientKings) && PlayerLevel >= 39 && !HasDefenseBuff)
+            {
+                API.CastSpell(GuardianofAncientKings);
+                return;
+            }
+            if (API.PlayerHealthPercent <= ArdentDefenderLifePercent && API.CanCast(ArdentDefender) && PlayerLevel >= 42 && !HasDefenseBuff)
+            {
+                API.CastSpell(ArdentDefender);
+                return;
+            }
+
             if (API.PlayerHealthPercent <= WordOfGloryLifePercent && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLight)) && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
@@ -253,11 +294,57 @@
                 API.CastSpell(FlashofLight);
                 return;
             }
+            if (HealFocus)
+            {
+                if (!API.MacroIsIgnored(LayOnHands + " Focus") && API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
+                {
+                    API.CastSpell(LayOnHands + " Focus");
+                    return;
+                }
+                if (!API.MacroIsIgnored(WordOfGlory + " Focus") && API.SpellIsCanbeCast(WordOfGlory) && API.FocusRange <= 40 && API.FocusHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
+                {
+                    API.CastSpell(WordOfGlory + " Focus");
+                    return;
+                }
+                if (!API.MacroIsIgnored(BlessingofProtection + " Focus") && API.FocusRange <= 40 && API.FocusHealthPercent <= BlessingofProtectionPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
+                {
+                    API.CastSpell(BlessingofProtection + " Focus");
+                    return;
+                }
+                if (!API.MacroIsIgnored(BlessingofSacrifice + " Focus") && API.FocusRange <= 40 && API.FocusHealthPercent <= BlessingofSacrificePercent && API.CanCast(BlessingofSacrifice))
+                {
+                    API.CastSpell(BlessingofSacrifice + " Focus");
+                    return;
+                }
+            }
+            if (IsMouseover)
+            {
+                if (!API.MacroIsIgnored(LayOnHands + " MO") && API.MouseoverHealthPercent <= LayOnHandsLifePercent && API.MouseoverRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.MouseoverHasDebuff(Forbearance, false, false))
+                {
+                    API.CastSpell(LayOnHands + " MO");
+                    return;
+                }
+                if (!API.MacroIsIgnored(BlessingofProtection + " MO") && API.SpellIsCanbeCast(BlessingofProtection) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofProtectionPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
+                {
+                    API.CastSpell(BlessingofProtection + " MO");
+                    return;
+                }
+                if (!API.MacroIsIgnored(WordOfGlory + " MO") && API.SpellIsCanbeCast(WordOfGlory) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
+                {
+                    API.CastSpell(WordOfGlory + " MO");
+                    return;
+                }
+                if (!API.MacroIsIgnored(BlessingofSacrifice + " MO") && API.SpellIsCanbeCast(BlessingofSacrifice) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofSacrificePercent && API.CanCast(BlessingofSacrifice))
+                {
+                    API.CastSpell(BlessingofSacrifice + " MO");
+                    return;
+                }
+            }
             if (IsCooldowns)
             {
                 //cds->add_action("fireblood,if=buff.avenging_wrath.up");
                 //cds->add_talent(this, "Seraphim");
-                if (API.CanCast(Seraphim) && API.PlayerCurrentHolyPower>=3 && Talent_Seraphim && IsMelee)
+                if (API.CanCast(Seraphim) && API.PlayerCurrentHolyPower >= 3 && Talent_Seraphim && IsMelee)
                 {
                     API.CastSpell(Seraphim);
                     return;
@@ -294,7 +381,7 @@
                     API.CastSpell("Trinket2");
                 }
             }
-            if (API.SpellCDDuration(Seraphim)>API.SpellGCDDuration || !Talent_Seraphim || !IsCooldowns)
+            if (API.SpellCDDuration(Seraphim) > API.SpellGCDDuration || !Talent_Seraphim || !IsCooldowns)
             {
                 //std->add_action(this, "Shield of the Righteous", "if=debuff.judgment.up&(debuff.vengeful_shock.up|!conduit.vengeful_shock.enabled)");
                 if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && API.TargetHasDebuff(Judgment) && (API.TargetHasDebuff(vengeful_shock) || !VengefulShockConduit))

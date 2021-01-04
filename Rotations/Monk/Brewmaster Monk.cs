@@ -132,7 +132,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SpearHandStrike, 116705,"D4");
             CombatRoutine.AddSpell(BreathOfFire, 115181,"D5");
             CombatRoutine.AddSpell(KegSmash, 121253,"D6");
-            CombatRoutine.AddSpell(TouchofDeath, 115080,"D7");
+            CombatRoutine.AddSpell(TouchofDeath, 322109,"D7");
             CombatRoutine.AddSpell(InvokeNiuzao, 132578,"D8");
             CombatRoutine.AddSpell(ChiBurst, 123986,"D9");
             CombatRoutine.AddSpell(RushingJadeWind, 116847,"D0");
@@ -313,7 +313,7 @@ namespace HyperElk.Core
                 return;
             }
             //Touch of Death
-            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
+            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
             {
                 API.CastSpell(TouchofDeath);
                 return;
