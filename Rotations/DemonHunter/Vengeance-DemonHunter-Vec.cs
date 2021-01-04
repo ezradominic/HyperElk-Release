@@ -31,6 +31,7 @@ namespace HyperElk.Core
         private string Fel_Bombardment = "Fel Bombardment";
         private string SigilofSilence = "Sigil of Silence";
         private string SigilofMisery = "Sigil of Misery";
+        private string DemonMuzzle = "Demon Muzzle";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -142,6 +143,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Frailty");
             CombatRoutine.AddDebuff("Fiery Brand");
             CombatRoutine.AddDebuff(SinfulBrand);
+
+            CombatRoutine.AddConduit(DemonMuzzle);
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
@@ -193,6 +196,11 @@ namespace HyperElk.Core
                     return;
                 }
                 if (API.TargetCanInterrupted && UseSigilofSilence && !API.CanCast(Disrupt) && API.TargetCurrentCastTimeRemaining >200 && API.TargetCurrentCastTimeRemaining < 300 && API.CanCast(SigilofSilence) && MeleeRange)
+                {
+                    API.CastSpell(SigilofSilence);
+                    return;
+                }
+                if (UseSigilofSilence && API.CanCast(SigilofSilence) && API.PlayerIsConduitSelected(DemonMuzzle) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.TargetTimeToDie > 200 && MeleeRange)
                 {
                     API.CastSpell(SigilofSilence);
                     return;
@@ -309,7 +317,7 @@ namespace HyperElk.Core
                     return;
                 }
                 // apl_normal->add_action(this, "Fel Devastation");
-                if (!API.SpellISOnCooldown("Fel Devastation") && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange <= 5)
+                if (!API.SpellISOnCooldown("Fel Devastation") && (UseFelDevastation == "with Cooldowns" && IsCooldowns || UseFelDevastation == "always") && API.PlayerFury >= 50 && API.TargetRange >= 1)
                 {
                     API.CastSpell("Fel Devastation");
                     return;
