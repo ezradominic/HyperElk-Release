@@ -301,6 +301,11 @@
                     API.CastSpell(LayOnHands + " Focus");
                     return;
                 }
+                if (!API.MacroIsIgnored(WordOfGlory + " Focus") && API.SpellIsCanbeCast(WordOfGlory) && API.FocusRange <= 40 && API.FocusHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
+                {
+                    API.CastSpell(WordOfGlory + " Focus");
+                    return;
+                }
                 if (!API.MacroIsIgnored(BlessingofProtection + " Focus") && API.FocusRange <= 40 && API.FocusHealthPercent <= BlessingofProtectionPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
                 {
                     API.CastSpell(BlessingofProtection + " Focus");
@@ -322,6 +327,11 @@
                 if (!API.MacroIsIgnored(BlessingofProtection + " MO") && API.SpellIsCanbeCast(BlessingofProtection) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofProtectionPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
                 {
                     API.CastSpell(BlessingofProtection + " MO");
+                    return;
+                }
+                if (!API.MacroIsIgnored(WordOfGlory + " MO") && API.SpellIsCanbeCast(WordOfGlory) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
+                {
+                    API.CastSpell(WordOfGlory + " MO");
                     return;
                 }
                 if (!API.MacroIsIgnored(BlessingofSacrifice + " MO") && API.SpellIsCanbeCast(BlessingofSacrifice) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofSacrificePercent && API.CanCast(BlessingofSacrifice))
