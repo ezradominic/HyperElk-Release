@@ -16,6 +16,7 @@
 // v2.4 kitty bear swap adjustment
 // v2.5 complete rewrite
 // v2.6 racials and a few small fixes
+// v2.7 roots for Torghast
 
 using System.Diagnostics;
 
@@ -83,6 +84,8 @@ namespace HyperElk.Core
         private string Wrath = "Wrath";
         private string Starfire = "Starfire";
         private string MoonfireOwl = "MoonfireOwl";
+        private string EntanglingRoots = "Entangling Roots";
+        private string MassEntanglement = "Mass Entanglement";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
@@ -92,6 +95,7 @@ namespace HyperElk.Core
         bool TalentMightyBash => API.PlayerIsTalentSelected(4, 1);
         bool TalentBalanceAffinity => API.PlayerIsTalentSelected(3, 1);
         bool TalentGuardianAffinity => API.PlayerIsTalentSelected(3, 2);
+        bool TalentMassEntanglement => API.PlayerIsTalentSelected(4, 2);
         bool TalentHeartoftheWild => API.PlayerIsTalentSelected(4, 3);
         bool TalentIncarnation => API.PlayerIsTalentSelected(5, 3);
         bool TalentSavageRoar => API.PlayerIsTalentSelected(5, 2);
@@ -157,6 +161,8 @@ namespace HyperElk.Core
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool ProwlOOC => CombatRoutine.GetPropertyBool("ProwlOOC");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
+        private bool RootsTorghast => CombatRoutine.GetPropertyBool("RootsTorghast");
+        private bool DontAttackRoots => CombatRoutine.GetPropertyBool("DontAttackRoots");
         private bool AutoMoonkin => CombatRoutine.GetPropertyBool(MoonkinForm);
         private int RegrowthLifePercent => numbList[CombatRoutine.GetPropertyInt(Regrowth)];
         private int RenewalLifePercent => numbList[CombatRoutine.GetPropertyInt(Renewal)];
@@ -172,7 +178,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v2.6");
+            API.WriteLog("Welcome to smartie`s Feral Druid v2.7");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -222,6 +228,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(HeartoftheWild, 319454, "D1");
             CombatRoutine.AddSpell(Wrath,5176, "D1");
             CombatRoutine.AddSpell(Starfire, 197628, "D1");
+            CombatRoutine.AddSpell(EntanglingRoots, 339, "D1");
+            CombatRoutine.AddSpell(MassEntanglement, 102359, "D1");
 
 
             //Macros
@@ -267,6 +275,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(MoonfireOwl, 164812);
             CombatRoutine.AddDebuff(AdaptiveSwarm, 325727);
             CombatRoutine.AddDebuff(Sunfire, 164815);
+            CombatRoutine.AddDebuff(EntanglingRoots, 339);
+            CombatRoutine.AddDebuff(MassEntanglement, 102359);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
@@ -287,6 +297,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Berserk, "Use " + Berserk, CDUsage, "Use " + Berserk + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("ProwlOOC", "ProwlOOC", true, "Use Prowl out of Combat", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
+            CombatRoutine.AddProp("RootsTorghast", "Use Roots in Torghast", false, "Use Roots in Torghast", "Roots");
+            CombatRoutine.AddProp("DontAttackRoots", "Dont Attack roots", false, "Rota wont attack Targets that are rooted", "Roots");
             CombatRoutine.AddProp(MoonkinForm, "Auto Moonkin Form", false, "Will auto switch to Moonkin Form when out of melee Range", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
@@ -378,6 +390,8 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
+                return;
+            if (DontAttackRoots && (TargetHasDebuff(EntanglingRoots) || TargetHasDebuff(MassEntanglement)))
                 return;
             if (!API.PlayerIsMounted && !PlayerHasBuff(TravelForm))
             {
@@ -574,6 +588,16 @@ namespace HyperElk.Core
             if (API.PlayerHealthPercent >= KittyFormLifePercent && KittyFormLifePercent != 0 && API.CanCast(CatForm) && PlayerHasBuff(BearForm) && IsAutoForm)
             {
                 API.CastSpell(CatForm);
+                return;
+            }
+            if (API.CanCast(MassEntanglement) && RootsTorghast && TalentMassEntanglement && API.PlayerUnitInMeleeRangeCount > 2 && API.TargetRange < 30)
+            {
+                API.CastSpell(MassEntanglement);
+                return;
+            }
+            if (API.CanCast(EntanglingRoots) && RootsTorghast && !TargetHasDebuff(MassEntanglement) && PlayerHasBuff(PredatorySwiftness) && API.TargetRange < 35)
+            {
+                API.CastSpell(EntanglingRoots);
                 return;
             }
         }
