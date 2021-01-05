@@ -130,33 +130,33 @@ namespace HyperElk.Core
             API.WriteLog("Kill Shot Mouseover - /cast [@mouseover] Kill Shot");
 
             //Spells
-            CombatRoutine.AddSpell(Steady_Shot,56641, "D1");
-            CombatRoutine.AddSpell(Arcane_Shot,185358, "D2");
-            CombatRoutine.AddSpell(Kill_Command,34026, "D2");
-            CombatRoutine.AddSpell(Barbed_Shot,217200, "R");
-            CombatRoutine.AddSpell(Mend_Pet,136, "X");
-            CombatRoutine.AddSpell(Revive_Pet,982, "X");
+            CombatRoutine.AddSpell(Steady_Shot, 56641, "D1");
+            CombatRoutine.AddSpell(Arcane_Shot, 185358, "D2");
+            CombatRoutine.AddSpell(Kill_Command, 34026, "D2");
+            CombatRoutine.AddSpell(Barbed_Shot, 217200, "R");
+            CombatRoutine.AddSpell(Mend_Pet, 136, "X");
+            CombatRoutine.AddSpell(Revive_Pet, 982, "X");
             CombatRoutine.AddSpell("Call Pet", "F1");
-            CombatRoutine.AddSpell(Cobra_Shot,193455, "D5");
-            CombatRoutine.AddSpell(Bestial_Wrath,19574, "C");
-            CombatRoutine.AddSpell(Aspect_of_the_Wild,193530, "V");
-            CombatRoutine.AddSpell(Kill_Shot,53351, "D6");
-            CombatRoutine.AddSpell(Multi_Shot,2643, "D4");
+            CombatRoutine.AddSpell(Cobra_Shot, 193455, "D5");
+            CombatRoutine.AddSpell(Bestial_Wrath, 19574, "C");
+            CombatRoutine.AddSpell(Aspect_of_the_Wild, 193530, "V");
+            CombatRoutine.AddSpell(Kill_Shot, 53351, "D6");
+            CombatRoutine.AddSpell(Multi_Shot, 2643, "D4");
 
-            CombatRoutine.AddSpell(Counter_Shot,147362, "D0");
-            CombatRoutine.AddSpell(Exhilaration,109304, "NumPad9");
-            CombatRoutine.AddSpell(Misdirection,34477, "Q");
+            CombatRoutine.AddSpell(Counter_Shot, 147362, "D0");
+            CombatRoutine.AddSpell(Exhilaration, 109304, "NumPad9");
+            CombatRoutine.AddSpell(Misdirection, 34477, "Q");
 
-            CombatRoutine.AddSpell(Dire_Beast,120679, "F8");
-            CombatRoutine.AddSpell(Chimaera_Shot,53209, "D3");
-            CombatRoutine.AddSpell(A_Murder_of_Crows,131894, "F");
-            CombatRoutine.AddSpell(Barrage,120360, "F7");
-            CombatRoutine.AddSpell(Stampede,201430, "F7");
-            CombatRoutine.AddSpell(Bloodshed,321530, "F11");
-            CombatRoutine.AddSpell(Feign_Death,5384, "F2");
-            CombatRoutine.AddSpell(Aspect_of_the_Turtle,186265, "G");
+            CombatRoutine.AddSpell(Dire_Beast, 120679, "F8");
+            CombatRoutine.AddSpell(Chimaera_Shot, 53209, "D3");
+            CombatRoutine.AddSpell(A_Murder_of_Crows, 131894, "F");
+            CombatRoutine.AddSpell(Barrage, 120360, "F7");
+            CombatRoutine.AddSpell(Stampede, 201430, "F7");
+            CombatRoutine.AddSpell(Bloodshed, 321530, "F11");
+            CombatRoutine.AddSpell(Feign_Death, 5384, "F2");
+            CombatRoutine.AddSpell(Aspect_of_the_Turtle, 186265, "G");
 
-            CombatRoutine.AddSpell(Wild_Spirits,328231, "F10");
+            CombatRoutine.AddSpell(Wild_Spirits, 328231, "F10");
             CombatRoutine.AddSpell(Resonating_Arrow, 308491, "F10");
             CombatRoutine.AddSpell(Flayed_Shot, 324149, "F10");
             CombatRoutine.AddSpell(Death_Chakram, 325028, "F10");
@@ -174,13 +174,13 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("246152");
             CombatRoutine.AddBuff("246851");
             CombatRoutine.AddBuff("217200");
-            CombatRoutine.AddBuff(Frenzy,272790);
-            CombatRoutine.AddBuff(Beast_Cleave,268877);
-            CombatRoutine.AddBuff(Aspect_of_the_Turtle,186265);
-            CombatRoutine.AddBuff(Aspect_of_the_Wild,193530);
-            CombatRoutine.AddBuff(Misdirection,34477);
-            CombatRoutine.AddBuff(Bestial_Wrath,19574);
-            CombatRoutine.AddBuff(Feign_Death,5384);
+            CombatRoutine.AddBuff(Frenzy, 272790);
+            CombatRoutine.AddBuff(Beast_Cleave, 268877);
+            CombatRoutine.AddBuff(Aspect_of_the_Turtle, 186265);
+            CombatRoutine.AddBuff(Aspect_of_the_Wild, 193530);
+            CombatRoutine.AddBuff(Misdirection, 34477);
+            CombatRoutine.AddBuff(Bestial_Wrath, 19574);
+            CombatRoutine.AddBuff(Feign_Death, 5384);
             CombatRoutine.AddBuff(FlayersMark, 324156);
 
             //Debuffs
@@ -225,7 +225,7 @@ namespace HyperElk.Core
                 CallPetTimer.Stop();
                 CallPetTimer.Reset();
             }
-            if (!API.PlayerIsMounted && !Playeriscasting  && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
+            if (!API.PlayerIsMounted && !Playeriscasting && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
             {
                 if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && CallPetTimer.ElapsedMilliseconds > gcd * 20 && UseCallPet && ((API.PlayerIsInCombat && UseRevivePet == "In Combat") || (!API.PlayerIsInCombat && UseRevivePet == "Out Of Combat") || UseRevivePet == "Everytime")
                       && API.CanCast(Revive_Pet))
@@ -270,7 +270,7 @@ namespace HyperElk.Core
                 API.CastSpell(HuntersMark);
                 return;
             }
-            if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !Playeriscasting  && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
+            if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !Playeriscasting && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
             {
                 if (API.CanCast(Misdirection) && !API.PlayerHasBuff(Misdirection) && API.PlayerHasPet && PlayerLevel >= 21 && (UseMisdirection == "On" || (UseMisdirection == "On AOE" & IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)))
                 {
@@ -337,7 +337,7 @@ namespace HyperElk.Core
                         API.CastSpell("Trinket2");
                     }
                     //st->add_action("barbed_shot,if=pet.main.buff.frenzy.up&pet.main.buff.frenzy.remains<=gcd");
-                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange&& InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount >0) && API.PlayerLevel >= 12 && PetHasBuff(Frenzy) && API.PetBuffTimeRemaining(Frenzy) < 200)
+                    if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && PetHasBuff(Frenzy) && API.PetBuffTimeRemaining(Frenzy) < 200)
                     {
                         API.CastSpell(Barbed_Shot);
                         return;
@@ -546,7 +546,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("kill_command,if=focus>cost+action.multishot.cost");
-                    if (API.CanCast(Kill_Command) && API.PlayerLevel >= 10 && InRange && API.PlayerFocus >= 30 + 40 - (RealFocusRegen*(gcd/100)))
+                    if (API.CanCast(Kill_Command) && API.PlayerLevel >= 10 && InRange && API.PlayerFocus >= 30 + 40 - (RealFocusRegen * (gcd / 100)))
                     {
                         API.CastSpell(Kill_Command);
                         return;
