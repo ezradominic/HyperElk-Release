@@ -590,12 +590,12 @@ namespace HyperElk.Core
                 API.CastSpell(CatForm);
                 return;
             }
-            if (API.CanCast(MassEntanglement) && RootsTorghast && TalentMassEntanglement && API.PlayerUnitInMeleeRangeCount > 2 && API.TargetRange < 30)
+            if (API.CanCast(MassEntanglement) && RootsTorghast && TalentMassEntanglement && !TargetHasDebuff(MassEntanglement) && !TargetHasDebuff(EntanglingRoots) && API.PlayerUnitInMeleeRangeCount > 2 && API.TargetRange < 30)
             {
                 API.CastSpell(MassEntanglement);
                 return;
             }
-            if (API.CanCast(EntanglingRoots) && RootsTorghast && !TargetHasDebuff(MassEntanglement) && PlayerHasBuff(PredatorySwiftness) && API.TargetRange < 35)
+            if (API.CanCast(EntanglingRoots) && RootsTorghast && !TargetHasDebuff(MassEntanglement) && !TargetHasDebuff(EntanglingRoots) && PlayerHasBuff(PredatorySwiftness) && API.TargetRange < 35)
             {
                 API.CastSpell(EntanglingRoots);
                 return;
