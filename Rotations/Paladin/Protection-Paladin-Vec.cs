@@ -82,19 +82,25 @@
         private bool FLashofLightOutofCombat => CombatRoutine.GetPropertyBool("FOLOOC");
         private bool FLashofLightInCombat => CombatRoutine.GetPropertyBool("FOLIC");
         private bool VengefulShockConduit => CombatRoutine.GetPropertyBool("VengefulShockConduit");
-        private int WordOfGloryLifePercent => percentListProp[CombatRoutine.GetPropertyInt("WOGPCT")];
+        private int WordOfGloryPlayerLifePercent => percentListProp[CombatRoutine.GetPropertyInt("WOGplayer")];
+        private int WordOfGloryFocusLifePercent => percentListProp[CombatRoutine.GetPropertyInt("WOGfocus")];
+        private int WordOfGloryMouseoverLifePercent => percentListProp[CombatRoutine.GetPropertyInt("WOGmouseover")];
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("AURASWITCH");
         private bool IsAvengingWrath => CombatRoutine.GetPropertyBool(AvengingWrath);
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
 
-        private int LayOnHandsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands)];
+        private int LayOnHandsPlayerLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands + "player")];
+        private int LayOnHandsFocusLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands + "focus")];
+        private int LayOnHandsMouseoverLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands + "mouseover")];
         private int ArdentDefenderLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ArdentDefender)];
         private int DivineShieldLifePercent => percentListProp[CombatRoutine.GetPropertyInt(DivineShield)];
         private int GuardianofAncientKingsLifePercent => percentListProp[CombatRoutine.GetPropertyInt(GuardianofAncientKings)];
 
-        private int BlessingofProtectionPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection)];
+        private int BlessingofProtectionPlayerPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection + "player")];
+        private int BlessingofProtectionFocusPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection + "focus")];
+        private int BlessingofProtectionMouseoverPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection + "mouseover")];
         private int BlessingofSacrificePercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
@@ -176,10 +182,10 @@
             CombatRoutine.AddToggle("Focus Heal");
 
             //CBProperties
-            CombatRoutine.AddProp("FOLOOCPCTOOC", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
-            CombatRoutine.AddProp("FOLOOC", "Out of Combat Healing", true, "Should the bot use Flash of Light out of combat to heal you between pulls", FlashofLight);
+            CombatRoutine.AddProp("FOLOOCPCTOOC", "Out of combat Life Percent", percentListProp, "Life percent at which Flash of Light is used out of combat to heal you between pulls", "Defense - " + FlashofLight, 7);
+            CombatRoutine.AddProp("FOLOOC", "Out of Combat Healing", true, "Should the bot use Flash of Light out of combat to heal you between pulls", "Defense - " + FlashofLight);
             CombatRoutine.AddProp("FOLIC", "Combat Healing", true, "Should the bot use Flash of Light in combat to heal yo", FlashofLight);
-            CombatRoutine.AddProp("FOLOOCPCTIC", "In combat Life Percent", percentListProp, "Life percent at which Flash of Light is used in combat to heal you", FlashofLight, 7);
+            CombatRoutine.AddProp("FOLOOCPCTIC", "In combat Life Percent", percentListProp, "Life percent at which Flash of Light is used in combat to heal you", "Defense - " + FlashofLight, 7);
             CombatRoutine.AddProp("VengefulShockConduit", "Vengeful Shock Conduit", false, "Do you have the Vengeful Shock Conduit?", "Conduit");
 
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
@@ -191,12 +197,18 @@
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
-            CombatRoutine.AddProp(LayOnHands, LayOnHands + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp(LayOnHands + "player", LayOnHands + " Player" + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
+            CombatRoutine.AddProp(LayOnHands + "focus", LayOnHands + " Focus" + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
+            CombatRoutine.AddProp(LayOnHands + "mouseover", LayOnHands + " Mouseover" + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
             CombatRoutine.AddProp(ArdentDefender, ArdentDefender + " Life Percent", percentListProp, "Life percent at which" + ArdentDefender + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", percentListProp, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 3);
             CombatRoutine.AddProp(GuardianofAncientKings, GuardianofAncientKings + " Life Percent", percentListProp, "Life percent at which" + GuardianofAncientKings + "is used, set to 0 to disable", "Defense", 4);
-            CombatRoutine.AddProp("WOGPCT", WordOfGlory, percentListProp, "Life percent at which Word of Glory is used", "Defense", 5);
-            CombatRoutine.AddProp(BlessingofProtection, BlessingofProtection + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense", 2);
+            CombatRoutine.AddProp("WOGplayer", WordOfGlory + " Player", percentListProp, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 5);
+            CombatRoutine.AddProp("WOGfocus", WordOfGlory + " Focus", percentListProp, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 5);
+            CombatRoutine.AddProp("WOGmouseover", WordOfGlory + " Mouseover", percentListProp, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 5);
+            CombatRoutine.AddProp(BlessingofProtection + "player", BlessingofProtection + " Player" + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
+            CombatRoutine.AddProp(BlessingofProtection + "focus", BlessingofProtection + " Focus" + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
+            CombatRoutine.AddProp(BlessingofProtection + "mouseover", BlessingofProtection + " Mouseover" + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
             CombatRoutine.AddProp(BlessingofSacrifice, BlessingofSacrifice + " Life Percent", percentListProp, "Life percent at which" + BlessingofSacrifice + "is used, set to 0 to disable", "Defense", 2);
 
         }
@@ -263,7 +275,7 @@
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            if (API.PlayerHealthPercent <= LayOnHandsLifePercent && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forbearance, false, false))
+            if (API.PlayerHealthPercent <= LayOnHandsPlayerLifePercent && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.PlayerHasDebuff(Forbearance, false, false))
             {
                 API.CastSpell(LayOnHands);
                 return;
@@ -284,7 +296,7 @@
                 return;
             }
 
-            if (API.PlayerHealthPercent <= WordOfGloryLifePercent && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLight)) && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
+            if (API.PlayerHealthPercent <= WordOfGloryPlayerLifePercent && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(ShiningLight)) && !API.SpellISOnCooldown(WordOfGlory) && PlayerLevel >= 7)
             {
                 API.CastSpell(WordOfGlory);
                 return;
@@ -296,17 +308,17 @@
             }
             if (HealFocus)
             {
-                if (!API.MacroIsIgnored(LayOnHands + " Focus") && API.FocusHealthPercent <= LayOnHandsLifePercent && API.FocusRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
+                if (!API.MacroIsIgnored(LayOnHands + " Focus") && API.FocusHealthPercent <= LayOnHandsFocusLifePercent && API.FocusRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.FocusHasDebuff(Forbearance, false, false))
                 {
                     API.CastSpell(LayOnHands + " Focus");
                     return;
                 }
-                if (!API.MacroIsIgnored(WordOfGlory + " Focus") && API.SpellIsCanbeCast(WordOfGlory) && API.FocusRange <= 40 && API.FocusHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
+                if (!API.MacroIsIgnored(WordOfGlory + " Focus") && API.SpellIsCanbeCast(WordOfGlory) && API.FocusRange <= 40 && API.FocusHealthPercent <= WordOfGloryFocusLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
                 {
                     API.CastSpell(WordOfGlory + " Focus");
                     return;
                 }
-                if (!API.MacroIsIgnored(BlessingofProtection + " Focus") && API.FocusRange <= 40 && API.FocusHealthPercent <= BlessingofProtectionPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
+                if (!API.MacroIsIgnored(BlessingofProtection + " Focus") && API.FocusRange <= 40 && API.FocusHealthPercent <= BlessingofProtectionFocusPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
                 {
                     API.CastSpell(BlessingofProtection + " Focus");
                     return;
@@ -319,17 +331,17 @@
             }
             if (IsMouseover)
             {
-                if (!API.MacroIsIgnored(LayOnHands + " MO") && API.MouseoverHealthPercent <= LayOnHandsLifePercent && API.MouseoverRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.MouseoverHasDebuff(Forbearance, false, false))
+                if (!API.MacroIsIgnored(LayOnHands + " MO") && API.MouseoverHealthPercent <= LayOnHandsMouseoverLifePercent && API.MouseoverRange <= 40 && API.CanCast(LayOnHands) && PlayerLevel >= 9 && !API.MouseoverHasDebuff(Forbearance, false, false))
                 {
                     API.CastSpell(LayOnHands + " MO");
                     return;
                 }
-                if (!API.MacroIsIgnored(BlessingofProtection + " MO") && API.SpellIsCanbeCast(BlessingofProtection) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofProtectionPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
+                if (!API.MacroIsIgnored(BlessingofProtection + " MO") && API.SpellIsCanbeCast(BlessingofProtection) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= BlessingofProtectionMouseoverPercent && API.CanCast(BlessingofProtection) && PlayerLevel >= 10)
                 {
                     API.CastSpell(BlessingofProtection + " MO");
                     return;
                 }
-                if (!API.MacroIsIgnored(WordOfGlory + " MO") && API.SpellIsCanbeCast(WordOfGlory) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= WordOfGloryLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
+                if (!API.MacroIsIgnored(WordOfGlory + " MO") && API.SpellIsCanbeCast(WordOfGlory) && API.MouseoverRange <= 40 && API.MouseoverHealthPercent <= WordOfGloryMouseoverLifePercent && API.CanCast(WordOfGlory) && PlayerLevel >= 7)
                 {
                     API.CastSpell(WordOfGlory + " MO");
                     return;
@@ -384,13 +396,13 @@
             if (API.SpellCDDuration(Seraphim) > API.SpellGCDDuration || !Talent_Seraphim || !IsCooldowns)
             {
                 //std->add_action(this, "Shield of the Righteous", "if=debuff.judgment.up&(debuff.vengeful_shock.up|!conduit.vengeful_shock.enabled)");
-                if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && API.TargetHasDebuff(Judgment) && (API.TargetHasDebuff(vengeful_shock) || !VengefulShockConduit))
+                if (API.PlayerHealthPercent > WordOfGloryPlayerLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && API.TargetHasDebuff(Judgment) && (API.TargetHasDebuff(vengeful_shock) || !VengefulShockConduit))
                 {
                     API.CastSpell(ShieldoftheRighteous);
                     return;
                 }
                 //std->add_action(this, "Shield of the Righteous", "if=holy_power=5|buff.holy_avenger.up|holy_power=4&talent.sanctified_wrath.enabled&buff.avenging_wrath.up");
-                if (API.PlayerHealthPercent > WordOfGloryLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && (API.PlayerCurrentHolyPower == 5 || API.PlayerHasBuff(HolyAvenger) || API.PlayerCurrentHolyPower == 4 && Talent_SanctifiedWrath || API.PlayerHasBuff(AvengingWrath)))
+                if (API.PlayerHealthPercent > WordOfGloryPlayerLifePercent && API.CanCast(ShieldoftheRighteous, true, true) && IsMelee && (API.PlayerCurrentHolyPower >= 3 || API.PlayerHasBuff(DivinePurpose)) && PlayerLevel >= 2 && (API.PlayerCurrentHolyPower == 5 || API.PlayerHasBuff(HolyAvenger) || API.PlayerCurrentHolyPower == 4 && Talent_SanctifiedWrath || API.PlayerHasBuff(AvengingWrath)))
                 {
                     API.CastSpell(ShieldoftheRighteous);
                     return;
