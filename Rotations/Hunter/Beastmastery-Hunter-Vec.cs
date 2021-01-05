@@ -120,6 +120,7 @@ namespace HyperElk.Core
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private bool Use_HuntersMark => CombatRoutine.GetPropertyBool("huntersmark");
 
         public override void Initialize()
         {
@@ -160,7 +161,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Flayed_Shot, 324149, "F10");
             CombatRoutine.AddSpell(Death_Chakram, 325028, "F10");
 
-
+            CombatRoutine.AddSpell(HuntersMark, 257284, "F11");
 
 
             //Macros
@@ -201,7 +202,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Revive_Pet, "Use " + Revive_Pet, combatList, "Use " + "Revive/Call Pet" + "In Combat, Out Of Combat, Everytime", "Pet", 0);
 
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
-
+            CombatRoutine.AddProp("huntersmark", "Hunter's Mark", false, "Enable if you want to let the rotation use Hunter's Mark", "Generic");
             CombatRoutine.AddProp("BarbedShot", "Barbed Shot", false, "Use Barbed Shot with pet in range", "Pet");
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", true, "Should the rotation try to ressurect/call your Pet", "Pet");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
@@ -218,7 +219,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("MS  " + Barbed_Shot_FullRechargeTime);
+            //API.WriteLog("MS  " + Barbed_Shot_FullRechargeTime);
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
                 CallPetTimer.Stop();
@@ -264,6 +265,11 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            if (API.CanCast(HuntersMark) && Use_HuntersMark && !API.TargetHasDebuff(HuntersMark) && InRange)
+            {
+                API.CastSpell(HuntersMark);
+                return;
+            }
             if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !Playeriscasting  && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
             {
                 if (API.CanCast(Misdirection) && !API.PlayerHasBuff(Misdirection) && API.PlayerHasPet && PlayerLevel >= 21 && (UseMisdirection == "On" || (UseMisdirection == "On AOE" & IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)))
