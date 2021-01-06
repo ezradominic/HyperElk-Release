@@ -101,7 +101,7 @@
         private int BlessingofProtectionPlayerPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection + "player")];
         private int BlessingofProtectionFocusPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection + "focus")];
         private int BlessingofProtectionMouseoverPercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection + "mouseover")];
-        private int BlessingofSacrificePercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofProtection)];
+        private int BlessingofSacrificePercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofSacrifice)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
