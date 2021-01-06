@@ -23,6 +23,7 @@ namespace HyperElk.Core
         private string DeathGrip = "Death Grip";
         private string Fleshcraft = "Fleshcraft";
         private string UnholyBlight = "Unholy Blight";
+        private string ConvocationoftheDead = "Convocation of the Dead";
         //stopwatch
         private readonly Stopwatch Dark_Transformation_Ghoul = new Stopwatch();
         private readonly Stopwatch GargoyleActiveTime = new Stopwatch();
@@ -200,6 +201,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Virulent Plague", 191587);
             CombatRoutine.AddDebuff("Festering Wound", 194310);
             CombatRoutine.AddDebuff("Necrotic Wound", 209858);
+
+            CombatRoutine.AddConduit("Convocation of the Dead");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -407,7 +410,7 @@ namespace HyperElk.Core
                 }
                 #region cooldowns
 
-                if (API.CanCast("Dark Transformation") && (PlayerHasBuff(UnholyBlight) || !Talent_UnholyBlight) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
+                if (API.CanCast("Dark Transformation") && (PlayerHasBuff(UnholyBlight) || !Talent_UnholyBlight) && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
                 {
                     API.CastSpell("Dark Transformation");
                     return;
@@ -417,7 +420,7 @@ namespace HyperElk.Core
                     API.CastSpell("Raise Abomination");
                     return;
                 }
-                if (API.CanCast("Apocalypse") && (UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns") && Festering_Wound_Stacks >= 4 && MeleeRange)
+                if (API.CanCast("Apocalypse") && (!API.PlayerIsConduitSelected(ConvocationoftheDead) || API.PlayerIsConduitSelected(ConvocationoftheDead) && Dark_Transformation_Ghoul.IsRunning) && (UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns") && Festering_Wound_Stacks >= 4 && MeleeRange)
                 {
                     API.CastSpell("Apocalypse");
                     return;
@@ -455,7 +458,7 @@ namespace HyperElk.Core
                             API.CastSpell("Death Strike");
                             return;
                         }
-                        if (API.CanCast("Unholy Blight") && (SmallCDs || IsCooldowns) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
+                        if (API.CanCast("Unholy Blight") && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 2 * gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && (SmallCDs || IsCooldowns) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
                         {
                             API.CastSpell("Unholy Blight");
                             return;
@@ -485,7 +488,7 @@ namespace HyperElk.Core
                     {
                         #endregion
                         #region ST - outside cd
-                        if (API.CanCast("Unholy Blight") && (SmallCDs || IsCooldowns) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
+                        if (API.CanCast("Unholy Blight") && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 2 * gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && (SmallCDs || IsCooldowns) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
                         {
                             API.CastSpell("Unholy Blight");
                             return;
@@ -541,7 +544,7 @@ namespace HyperElk.Core
                 if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)
                 {
                     #region AoE
-                    if (API.CanCast("Unholy Blight") && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
+                    if (API.CanCast("Unholy Blight") && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 2 * gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
                     {
                         API.CastSpell("Unholy Blight");
                         return;
