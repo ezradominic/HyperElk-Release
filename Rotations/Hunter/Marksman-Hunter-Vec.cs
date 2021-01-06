@@ -195,7 +195,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Steady_Focus, 193534);
             CombatRoutine.AddBuff(Trueshot, 288613);
             CombatRoutine.AddBuff(Double_Tap, 260402);
-            CombatRoutine.AddBuff(Lock_and_Load, 194595);
+            CombatRoutine.AddBuff(Lock_and_Load, 194594);
             CombatRoutine.AddBuff(Dead_Eye, 321460);
             CombatRoutine.AddBuff(FlayersMark, 324156);
             CombatRoutine.AddBuff(Volley, 260243);
@@ -786,7 +786,7 @@ namespace HyperElk.Core
                     API.CastSpell(Rapid_Fire);
                     return;
                 }
-
+                //API.WriteLog("PlayerHasBuff(Lock_and_Load) " + PlayerHasBuff(Lock_and_Load) + " API.PlayerIsMoving "+ API.PlayerIsMoving +" API.PlayerBuffTimeRemaining(Trick_Shots) " + API.PlayerBuffTimeRemaining(Trick_Shots) + " AimedShotCastTime " + AimedShotCastTime);
                 //actions.trickshots +=/ aimed_shot,target_if = min:dot.serpent_sting.remains + action.serpent_sting.in_flight_to_target * 99,if= buff.trick_shots.remains >= execute_time & (buff.precise_shots.down | full_recharge_time < cast_time + gcd | buff.trueshot.up)
                 if (API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && (API.PlayerCurrentCastSpellID != 19434 || !API.CanCast(Rapid_Fire) && VolleyTrickShots) && (API.PlayerCurrentCastSpellID != 257044 || VolleyTrickShots) &&
     (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) &&
@@ -849,12 +849,12 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.trickshots +=/ multishot,if= focus > cost + action.aimed_shot.cost
-                if (API.CanCast(Multi_Shot) && !API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) && InRange && API.PlayerFocus >= 20 && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35))
+                if (API.CanCast(Multi_Shot) && (!API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) || API.PlayerIsMoving) && InRange && API.PlayerFocus >= 20 && API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35))
                 {
                     API.CastSpell(Multi_Shot);
                     return;
                 }
-                if (API.CanCast(Steady_Shot) && (!API.CanCast(Aimed_Shot) && !API.CanCast(Rapid_Fire) || (!PlayerHasBuff(Trick_Shots) && !VolleyTrickShots)) && (API.PlayerFocus < 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)) && InRange)
+                if (API.CanCast(Steady_Shot) && ((!API.CanCast(Aimed_Shot) || API.PlayerIsMoving) && !API.CanCast(Rapid_Fire) || (!PlayerHasBuff(Trick_Shots) && !VolleyTrickShots)) && (API.PlayerFocus < 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)) && InRange)
                 {
                     API.CastSpell(Steady_Shot);
                     API.WriteLog("AOE: SS:2 ");
