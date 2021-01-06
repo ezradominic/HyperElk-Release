@@ -308,7 +308,7 @@ namespace HyperElk.Core
             {
                 if (API.PlayerIsInGroup)
                 {
-                    for (int i = 0; i < units.Length; i++)
+                    for (int i = 0; i < DetoxList.Length; i++)
                     {
                         if (API.TargetHasDebuff(DetoxList[i]))
                         {
