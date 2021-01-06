@@ -60,7 +60,6 @@ namespace HyperElk.Core
 
 
         //Misc
-        private static readonly Stopwatch HealthFunnelWatch = new Stopwatch();
         private static readonly Stopwatch DumpWatchLow = new Stopwatch();
         private static readonly Stopwatch DumpWatchHigh = new Stopwatch();
 
@@ -126,9 +125,6 @@ namespace HyperElk.Core
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
             API.WriteLog("Welcome to Affliction Warlock rotation @ Mufflon12");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-
-            API.WriteLog("Use /stopcasting /cast agony macro");
-            API.WriteLog("Use /stopcasting /cast corruption macro");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("Create the following mouseover macro and assigned to the bind:");
             API.WriteLog("/cast [@mouseover] Agony");
@@ -270,7 +266,7 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            if (DumpShards && API.PlayerCurrentSoulShards <= 0)
+            if (DumpShards && API.PlayerCurrentSoulShards == 0)
             {
                 API.WriteLog("No More Shards left.");
                 DumpWatchLow.Stop();
@@ -333,23 +329,11 @@ namespace HyperElk.Core
                 API.CastSpell(DrainLife);
                 return;
             }
-            if (HealthFunnelWatch.IsRunning && API.PetHealthPercent >= 70)
-            {
-                HealthFunnelWatch.Stop();
-                HealthFunnelWatch.Reset();
-            }
-            if (HealthFunnelWatch.IsRunning && API.CanCast(HealthFunnel))
+            if (API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 9 && NotChanneling)
             {
                 API.CastSpell(HealthFunnel);
                 return;
             }
-            // Health Funnel
-            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
-            {
-                HealthFunnelWatch.Start();
-                return;
-            }
-
             //Trinkets
             if (UseTrinket1 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
@@ -364,7 +348,7 @@ namespace HyperElk.Core
         {
 
             //ROTATION AOE
-            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange && !HealthFunnelWatch.IsRunning)
+            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
                 //actions.aoe+=/haunt
                 //Haunt 
@@ -462,13 +446,6 @@ namespace HyperElk.Core
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-
-
-
-
-
-
-
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
@@ -509,7 +486,6 @@ namespace HyperElk.Core
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-
                 if (!DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
                 {
                     API.CastSpell(DrainSoul);
@@ -601,7 +577,7 @@ namespace HyperElk.Core
                 }
             }
             //ROTATION SINGLE TARGET
-            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber && !HealthFunnelWatch.IsRunning)
+            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
             {
                 //actions+=/agony,if=dot.agony.remains<4
                 //Agony
@@ -630,7 +606,6 @@ namespace HyperElk.Core
                     API.CastSpell(VileTaint);
                     return;
                 }
-
                 //actions+=/haunt
                 //Haunt 
                 if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && TalentHaunt && PlayerLevel >= 45)
@@ -697,8 +672,6 @@ namespace HyperElk.Core
                     API.CastSpell(DarkSoulMisery);
                     return;
                 }
-
-
                 //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
                 //VileTaint
                 if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
@@ -750,8 +723,6 @@ namespace HyperElk.Core
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-
-
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
@@ -772,9 +743,6 @@ namespace HyperElk.Core
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-
-
-
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchLow.Start();
@@ -795,15 +763,11 @@ namespace HyperElk.Core
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-
-
                 if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
                 {
                     API.CastSpell(DrainSoul);
                     return;
                 }
-
-
                 //DecimatingBolt
                 if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always")
                 {
