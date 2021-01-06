@@ -22,6 +22,7 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string DeathGrip = "Death Grip";
         private string Fleshcraft = "Fleshcraft";
+        private string UnholyBlight = "Unholy Blight";
         //stopwatch
         private readonly Stopwatch Dark_Transformation_Ghoul = new Stopwatch();
         private readonly Stopwatch GargoyleActiveTime = new Stopwatch();
@@ -170,7 +171,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Death Pact", 48743, "NumPad4");
             CombatRoutine.AddSpell("Defile", 152280, "D6");
             CombatRoutine.AddSpell("Army of the Dead", 42650, "F8");
-            CombatRoutine.AddSpell("Unholy Blight", 115989, "Oemplus");
+            CombatRoutine.AddSpell(UnholyBlight, 115989, "NumPad5");
             CombatRoutine.AddSpell("Summon Gargoyle", 49206, "F7");
             CombatRoutine.AddSpell("Raise Dead", 46584, "D0");
             CombatRoutine.AddSpell("Raise Abomination", 288853, "F7");
@@ -194,6 +195,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Master of Ghouls", 246995);
             CombatRoutine.AddBuff(UnholyStrength, 53365);
             CombatRoutine.AddBuff(UnholyAssault, 207289);
+            CombatRoutine.AddBuff(UnholyBlight, 115989);
 
             CombatRoutine.AddDebuff("Virulent Plague", 191587);
             CombatRoutine.AddDebuff("Festering Wound", 194310);
@@ -405,7 +407,7 @@ namespace HyperElk.Core
                 }
                 #region cooldowns
 
-                if (API.CanCast("Dark Transformation") && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
+                if (API.CanCast("Dark Transformation") && PlayerHasBuff(UnholyBlight) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
                 {
                     API.CastSpell("Dark Transformation");
                     return;
@@ -458,7 +460,7 @@ namespace HyperElk.Core
                             API.CastSpell("Unholy Blight");
                             return;
                         }
-                        if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
+                        if (API.CanCast("Outbreak") & !Talent_UnholyBlight && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
                         {
                             API.CastSpell("Outbreak");
                             return;
@@ -489,7 +491,7 @@ namespace HyperElk.Core
                             return;
                         }
 
-                        if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
+                        if (API.CanCast("Outbreak") && !Talent_UnholyBlight && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
                         {
                             API.CastSpell("Outbreak");
                             return;
@@ -544,7 +546,7 @@ namespace HyperElk.Core
                         API.CastSpell("Unholy Blight");
                         return;
                     }
-                    if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 200 && API.TargetRange <= 30)
+                    if (API.CanCast("Outbreak") & !Talent_UnholyBlight && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 200 && API.TargetRange <= 30)
                     {
                         API.CastSpell("Outbreak");
                         return;
