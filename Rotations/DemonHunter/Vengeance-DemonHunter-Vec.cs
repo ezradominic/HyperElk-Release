@@ -147,7 +147,9 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Frailty", 247456);
             CombatRoutine.AddDebuff("Fiery Brand", 207771);
             CombatRoutine.AddDebuff(SinfulBrand, 317009);
-
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
             CombatRoutine.AddConduit(DemonMuzzle);
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
