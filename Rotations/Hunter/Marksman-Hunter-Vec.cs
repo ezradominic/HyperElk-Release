@@ -239,6 +239,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Explosive_Shot, "Use " + Explosive_Shot, CDUsageWithAOE, "Use " + Explosive_Shot + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
 
             CombatRoutine.AddProp("AOE_Switch", "AoE Switch", true, "Enable if you want to let the rotation switch ST/AOE", "Generic");
+            CombatRoutine.AddProp("Cleave", "Cleave rotation", true, "Enable if you want to test the cleave rotation", "Generic");
             CombatRoutine.AddProp("huntersmark", "Hunter's Mark", false, "Enable if you want to let the rotation use Hunter's Mark", "Generic");
 
             CombatRoutine.AddProp("SurgingShots", "Surging Shots", false, "Enable if you have Surging Shots", "Legendary");
@@ -471,6 +472,7 @@ namespace HyperElk.Core
                         if (API.CanCast(Arcane_Shot) && InRange && API.PlayerFocus > 50 && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > gcd && !API.CanCast(Rapid_Fire))
                         {
                             API.CastSpell(Arcane_Shot);
+                            API.WriteLog("Arcane: " + "rechargetime: "+FullRechargeTime(Aimed_Shot, AimedShotCooldown));
                             return;
                         }
                         if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
@@ -541,6 +543,12 @@ namespace HyperElk.Core
                 }
                 if (VolleyTrickShots && API.TargetUnitInRangeCount > 1)
                 {
+                    if (API.CanCast(Trueshot) && NoCovReady && (UseTrueshot == "always" || (UseTrueshot == "with Cooldowns" && IsCooldowns)) && InRange &&
+    (!PlayerHasBuff(Precise_Shots) || API.TargetHasDebuff(Resonating_Arrow) || API.TargetHasDebuff(Wild_Mark) || VolleyTrickShots && API.TargetUnitInRangeCount > 1))
+                    {
+                        API.CastSpell(Trueshot);
+                        return;
+                    }
                     if (API.CanCast(Aimed_Shot) && (!API.PlayerIsMoving || PlayerHasBuff(Lock_and_Load)) && (API.SpellCharges(Aimed_Shot) >= 2 || !API.CanCast(Rapid_Fire)) && InRange && API.PlayerCurrentCastSpellID != 19434)
                     {
                         API.CastSpell(Aimed_Shot);
