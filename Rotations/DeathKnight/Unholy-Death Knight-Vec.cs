@@ -407,7 +407,7 @@ namespace HyperElk.Core
                 }
                 #region cooldowns
 
-                if (API.CanCast("Dark Transformation") && PlayerHasBuff(UnholyBlight) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
+                if (API.CanCast("Dark Transformation") && (PlayerHasBuff(UnholyBlight) || !Talent_UnholyBlight) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
                 {
                     API.CastSpell("Dark Transformation");
                     return;
