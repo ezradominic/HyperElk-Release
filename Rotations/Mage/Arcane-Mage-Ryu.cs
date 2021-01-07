@@ -17,8 +17,8 @@ namespace HyperElk.Core
         private string Deathborne = "Deathborne";
         private string MirrorsofTorment = "Mirrors of Torment";
         private string Fleshcraft = "Fleshcraft";
-        private string trinket1 = "trinket1";
-        private string trinket2 = "trinket2";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
         private string ManaGem = "Mana Gem";
         private string TimeWarp = "Time Warp";
         private string Temp = "Temporal Displacement";
@@ -33,6 +33,7 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string Spellsteal = "Spellsteal";
         private string RemoveCurse = "Remove Curse";
+        private string SoulIgnite = "Soul Ignition";
 
         //Talents
         bool RuleofThrees => API.PlayerIsTalentSelected(1, 2);
@@ -67,8 +68,8 @@ namespace HyperElk.Core
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
 
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
-        private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
-        private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
+        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         //General
         private int Level => API.PlayerLevel;
        // private bool NotCasting => !API.PlayerIsCasting;
@@ -85,6 +86,8 @@ namespace HyperElk.Core
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         bool ChannelingEvo => API.CurrentCastSpellID("player") == 12051;
         bool ChannelingMissile => API.CurrentCastSpellID("player") == 5143;
+        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns & API.PlayerHasBuff("Arcane Power") && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket1 == "On Cooldown" && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
+        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns && API.PlayerHasBuff("Arcane Power") && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket2 == "On Cooldown" && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private bool BLDebuffs => !API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued);
         private bool BLBuFfs => !API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW);
         public override void Initialize()
@@ -118,6 +121,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Turn to Stone", 326607);
             CombatRoutine.AddBuff("Wonder Grow", 328016);
             CombatRoutine.AddBuff("Stoneskin", 322433);
+            CombatRoutine.AddBuff(SoulIgnite, 345211);
 
             //Debuff
             CombatRoutine.AddDebuff("Nether Tempest", 114923);
@@ -162,8 +166,8 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(ManaGem, 36799);
 
             //Macro
-            CombatRoutine.AddMacro(trinket1);
-            CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro(RemoveCurse + "MO");
             CombatRoutine.AddMacro(Spellsteal + "MO");
 
@@ -182,8 +186,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Arcane Power", "Use " + "Arcane Power", CDUsage, "Use " + "Arcane Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Rune of Power", "Use " + "Rune of Power", CDUsage, "Use " + "Rune of Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
-            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket1", CDUsageWithAOE, "Use " + "Trinket 1" + " On Cooldown, With Cooldown, On AOEs or Not Used", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket2", CDUsageWithAOE, "Use " + "Trinket 2" + "On Cooldown, With Cooldown, On AOEs or Not Used", "Trinkets", 0);
 
 
 
@@ -286,19 +290,19 @@ namespace HyperElk.Core
                 API.CastSpell(TimeWarp);
                 return;
             }
-            if (API.PlayerItemCanUse(ManaGem) && API.PlayerItemRemainingCD(ManaGem) == 0 && API.PlayerMana < 90 && !API.PlayerIsCasting(true) && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
+            if (API.PlayerItemCanUse(ManaGem) && !API.MacroIsIgnored(ManaGem) && API.PlayerItemRemainingCD(ManaGem) <= 40 && API.PlayerMana < 90 && !API.PlayerIsCasting(true) && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
             {
                 API.CastSpell(ManaGem);
                 return;
             }
-            if (Trinket1Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
-                API.CastSpell(trinket1);
-            if (Trinket1Usage == 2 && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
-                API.CastSpell(trinket1);
-            if (Trinket2Usage == 1 && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
-                API.CastSpell(trinket2);
-            if (Trinket2Usage == 2 && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !ChannelingShift && !ChannelingEvo && !ChannelingMissile)
-                API.CastSpell(trinket2);
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1 && !ChannelingShift && !ChannelingMissile && !ChannelingEvo)
+            {
+                API.CastSpell(Trinket1);
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2 && !ChannelingShift && !ChannelingMissile && !ChannelingEvo)
+            {
+                API.CastSpell(Trinket2);
+            }
             if (Level <= 60)
             {
                 rotation();
@@ -353,14 +357,14 @@ namespace HyperElk.Core
                 API.CastSpell(RacialSpell1);
                 return;
             }
-            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 13 && InRange && (API.PlayerHasBuff("Clearcasting") && Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
-            {
-                API.CastSpell("Arcane Missiles");
-                return;
-            }
             if (API.CanCast("Arcane Power") && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && (Burn || Conserve && API.PlayerCurrentArcaneCharges == 4) && (IsCooldowns && UseAP == "With Cooldowns" || UseAP == "On Cooldown") && !API.PlayerHasBuff(RoP) && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && !API.PlayerIsCasting(true))
             {
                 API.CastSpell("Arcane Power");
+                return;
+            }
+            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 13 && InRange && (API.PlayerHasBuff("Clearcasting") && Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving))
+            {
+                API.CastSpell("Arcane Missiles");
                 return;
             }
             if (RuneofPower && API.CanCast("Rune of Power") && Mana > 15 && API.SpellCDDuration("Arcane Power") > 1200 && !CastArcanePower && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling)
@@ -403,7 +407,7 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Explosion");
                 return;
             }
-            if (API.CanCast("Arcane Barrage") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (API.SpellISOnCooldown("Evocation") && API.PlayerCurrentArcaneCharges <= 4 && Mana <= 60 || !API.SpellISOnCooldown("Touch of the Magi") && API.PlayerCurrentArcaneCharges == 4 || API.PlayerBuffStacks(AHL) == 15 && API.PlayerCurrentArcaneCharges >= 4 && UseLeg == "Arcane Harmony"  || API.TargetHealthPercent <= 35 && API.TargetHealthPercent > 0 && UseLeg == "Arcane Bombardment" && API.PlayerCurrentArcaneCharges == 4)  && (!API.PlayerHasBuff("Rune of Power") || !API.PlayerHasBuff("Arcane Power")) && (API.PlayerIsMoving || !API.PlayerIsMoving))
+            if (API.CanCast("Arcane Barrage") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (API.SpellISOnCooldown("Evocation") && API.PlayerCurrentArcaneCharges <= 4 && Mana <= 75 || !API.SpellISOnCooldown("Touch of the Magi") && API.PlayerCurrentArcaneCharges == 4 || API.PlayerBuffStacks(AHL) == 15 && API.PlayerCurrentArcaneCharges >= 4 && UseLeg == "Arcane Harmony"  || API.TargetHealthPercent <= 35 && API.TargetHealthPercent > 0 && UseLeg == "Arcane Bombardment" && API.PlayerCurrentArcaneCharges == 4)  && (!API.PlayerHasBuff("Rune of Power") || !API.PlayerHasBuff("Arcane Power")) && (API.PlayerIsMoving || !API.PlayerIsMoving))
             {
                 API.CastSpell("Arcane Barrage");
                 return;

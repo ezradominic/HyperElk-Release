@@ -365,15 +365,15 @@ namespace HyperElk.Core
                     API.CastSpell(IV);
                     return;
                 }
+                //actions.st=flurry,if=(remaining_winters_chill=0|debuff.winters_chill.down)&(prev_gcd.1.ebonbolt|buff.brain_freeze.react&(prev_gcd.1.glacial_spike|prev_gcd.1.frostbolt&(!conduit.ire_of_the_ascended|cooldown.radiant_spark.remains|runeforge.freezing_winds)|prev_gcd.1.radiant_spark|buff.fingers_of_frost.react=0&(debuff.mirrors_of_torment.up|buff.freezing_winds.up|buff.expanded_potential.react)))
+                if (API.CanCast(Flurry) && !API.PlayerIsCasting(true) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && !CastTW && API.TargetRange <= 40 && (!API.PlayerHasBuff(FoF) || API.PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && (CastFB || CastEB && Ebonbolt || CastIL || CastIV))
+                {
+                    API.CastSpell(Flurry);
+                    return;
+                }
                 if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !CastIV && !API.PlayerHasBuff(RoP) && !API.PlayerHasBuff(BrainFreeze) && !API.PlayerHasBuff(FoF) && !API.TargetHasDebuff(WC) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && API.SpellCDDuration(IV) >= 1200 )
                 {
                     API.CastSpell(RoP);
-                    return;
-                }
-                //actions.st=flurry,if=(remaining_winters_chill=0|debuff.winters_chill.down)&(prev_gcd.1.ebonbolt|buff.brain_freeze.react&(prev_gcd.1.glacial_spike|prev_gcd.1.frostbolt&(!conduit.ire_of_the_ascended|cooldown.radiant_spark.remains|runeforge.freezing_winds)|prev_gcd.1.radiant_spark|buff.fingers_of_frost.react=0&(debuff.mirrors_of_torment.up|buff.freezing_winds.up|buff.expanded_potential.react)))
-                if (API.CanCast(Flurry) && !API.PlayerIsCasting(true) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && !CastTW && API.TargetRange <= 40 && (!API.PlayerHasBuff(FoF) || API.PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && (CastFB || CastEB && Ebonbolt || CastIL || CastIV) && !CastRune)
-                {
-                    API.CastSpell(Flurry);
                     return;
                 }
           //      if (API.CanCast(Flurry) && !API.PlayerIsCasting(true) && Level >= 19 && API.PlayerHasBuff(BrainFreeze) && !CastTW && API.TargetRange <= 40 && (!API.PlayerHasBuff(FoF) || API.PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && API.PlayerLastSpell == EB && Ebonbolt)
