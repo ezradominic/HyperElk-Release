@@ -329,7 +329,7 @@ namespace HyperElk.Core
             }
             if (IsAutoDetox)
             {
-                if (API.PlayerIsInGroup)
+                if (API.CanCast(Detox))
                 {
                     for (int i = 0; i < DetoxList.Length; i++)
                     {
