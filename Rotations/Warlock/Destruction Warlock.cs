@@ -161,6 +161,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(ChrashingChaos, 277705);
             CombatRoutine.AddBuff(Backdraft, 196406);
             CombatRoutine.AddBuff(darkSoulInstability, 113858);
+            CombatRoutine.AddBuff(FelDomination, 333889);
 
             //Debuffs
             CombatRoutine.AddDebuff(Immolate, 157736);
@@ -176,39 +177,36 @@ namespace HyperElk.Core
         public override void Pulse()
         {
             //Summon Imp
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && PlayerLevel >= 22)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && PlayerLevel >= 23)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonFelhunter);
+                return;
+            }
+            if (!API.PlayerHasPet && API.PlayerIsInCombat && API.CanCast(FelDomination))
+            {
+                API.CastSpell(FelDomination);
                 return;
             }
         }

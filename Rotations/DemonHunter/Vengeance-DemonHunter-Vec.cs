@@ -32,6 +32,8 @@ namespace HyperElk.Core
         private string SigilofSilence = "Sigil of Silence";
         private string SigilofMisery = "Sigil of Misery";
         private string DemonMuzzle = "Demon Muzzle";
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -71,6 +73,7 @@ namespace HyperElk.Core
         string[] FelDevastationList = new string[] { "always", "with Cooldowns" };
         string[] BulkExtractionList = new string[] { "always", "with Cooldowns" };
 
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
 
         private int MetamorphosisLifePercent => percentListProp[CombatRoutine.GetPropertyInt("MetamorphosisLife")];
         private int DemonSpikes1LifePercent => percentListProp[CombatRoutine.GetPropertyInt(Demon_Spikes)];
@@ -91,6 +94,8 @@ namespace HyperElk.Core
         private string UseInfernalStrike => InfernalStrikeList[CombatRoutine.GetPropertyInt(Infernal_Strike)];
         private string UseFelDevastation => FelDevastationList[CombatRoutine.GetPropertyInt(Fel_Devastation)];
         private string UseBulkExtraction => BulkExtractionList[CombatRoutine.GetPropertyInt(Bulk_Extraction)];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         private float fury_deficit => API.PlayeMaxFury - API.PlayerFury;
         //pooling_for_meta,value=!talent.demonic.enabled&cooldown.metamorphosis.remains<6&fury.deficit>30
@@ -131,6 +136,8 @@ namespace HyperElk.Core
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
+            CombatRoutine.AddMacro(PhialofSerenity, "F11");
+            CombatRoutine.AddMacro(SpiritualHealingPotion, "F12");
             //Buffs
             CombatRoutine.AddBuff("Demon Spikes",203819);
             CombatRoutine.AddBuff("Soul Fragments",203981);
@@ -142,7 +149,9 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Frailty", 247456);
             CombatRoutine.AddDebuff("Fiery Brand", 207771);
             CombatRoutine.AddDebuff(SinfulBrand, 317009);
-
+            //Item
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
             CombatRoutine.AddConduit(DemonMuzzle);
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
@@ -169,8 +178,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Soul_Barrier, "Use " + Soul_Barrier + " below:", percentListProp, "Life percent at which " + Soul_Barrier + " is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp("SoulFragmentCount", "Use Soul Barrier Soul Fragments Count", 4, "How many Soul Fragments to use Soul Barrier", "Defense");
             CombatRoutine.AddProp(Fiery_Brand, "Use " + Fiery_Brand + " below:", percentListProp, "Life percent at which " + Fiery_Brand + " is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
 
-            
         }
 
         public override void Pulse()
@@ -187,7 +197,16 @@ namespace HyperElk.Core
                     API.CastSpell(Metamorphosis);
                     return;
                 }
-
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
+                    return;
+                }
                 // apl_default->add_action(this, "Disrupt");
                 if (isInterrupt && API.CanCast(Disrupt) && MeleeRange && PlayerLevel >= 29)
                 {

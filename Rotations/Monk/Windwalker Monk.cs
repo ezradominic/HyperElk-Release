@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
+using System.Diagnostics;
 
 
 namespace HyperElk.Core
@@ -30,8 +30,6 @@ namespace HyperElk.Core
         private bool TalentWhirlingDragonPunch => API.PlayerIsTalentSelected(7, 2);
         private bool TalentSerenty => API.PlayerIsTalentSelected(7, 3);
 
-
-
         //CBProperties
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
@@ -39,13 +37,20 @@ namespace HyperElk.Core
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int DampenHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
+        private int TouchofKarmaPercentProc => numbList[CombatRoutine.GetPropertyInt(TouchofKarma)];
+
 
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         bool LastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
         string[] TouchofDeathList = new string[] { "always", "with Cooldowns", "Manual" };
-
+        //Trinket1
+        private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
+        string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
+        //Trinket2
+        private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
+        string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
         string[] InvokeXuenList = new string[] { "always", "with Cooldowns", "Manual" };
         //Kyrian
@@ -94,6 +99,9 @@ namespace HyperElk.Core
         private string FallenOrder = "Fallen Order";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string TouchofKarma = "Touch of Karma";
+        private string trinket1 = "trinket1";
+        private string trinket2 = "trinket2";
 
         public override void Initialize()
         {
@@ -103,6 +111,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Vivify, "Vivify", numbList, "Life percent at which " + Vivify + " is used, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 90);
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
+            CombatRoutine.AddProp(TouchofKarma, "Touch of Karma", numbList, "Life percent at which " + TouchofKarma + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 70);
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket", 3);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket", 3);
             CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
             CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
             CombatRoutine.AddProp(InvokeXuen, "Use " + InvokeXuen, InvokeXuenList, "Use " + InvokeXuenList + "always, with Cooldowns", "Cooldowns", 1);
@@ -120,6 +131,7 @@ namespace HyperElk.Core
 
 
             //Spells
+
             CombatRoutine.AddSpell(TigerPalm, 100780, "D1");
             CombatRoutine.AddSpell(BlackOutKick, 100784, "D2");
             CombatRoutine.AddSpell(SpinningCraneKick, 101546, "D3");
@@ -146,9 +158,12 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ExpelHarm, 322101,"NumPad2");
             CombatRoutine.AddSpell(EnergizingElixir, 115288,"NumPad3");
             CombatRoutine.AddSpell(DampenHarm, 122278,"F1");
-            CombatRoutine.AddSpell(FortifyingBrew, 115203,"F2");
+            CombatRoutine.AddSpell(FortifyingBrew, 243435,"F2");
             CombatRoutine.AddSpell(InvokeXuen, 123904,"F3");
-
+            CombatRoutine.AddSpell(TouchofKarma, 122470, "NumPad3");
+            //Macro
+            CombatRoutine.AddMacro(trinket1);
+            CombatRoutine.AddMacro(trinket2);
 
 
             //Buffs
@@ -171,6 +186,10 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
             //Spinnging Crane Kick
             if (API.CanCast(SpinningCraneKick) && NotChanneling && IsMelee && PlayerLevel >= 7 && API.PlayerCurrentChi >= 2 && API.PlayerIsTalentSelected(6, 3) && API.PlayerHasBuff(DanceofChiJi))
             {
@@ -333,7 +352,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //BlackOutKick
-                if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
+                if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -399,8 +418,19 @@ namespace HyperElk.Core
                 API.CastSpell(FortifyingBrew);
                 return;
             }
-
+            //Fortifying Brew
+            if (API.PlayerHealthPercent <= TouchofKarmaPercentProc && !API.SpellISOnCooldown(TouchofKarma) && PlayerLevel >= 28 && NotChanneling)
+            {
+                API.CastSpell(TouchofKarma);
+                return;
+            }
             //ROTATION
+            //Rushing Jadewind
+            if (API.CanCast(RushingJadeWind) && NotChanneling && IsMelee && TalentRushingJadeWind && API.PlayerCurrentChi >= 1)
+            {
+                API.CastSpell(RushingJadeWind);
+                return;
+            }
             //Covenant Kyrian
             //WeaponsofOrder
             if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "always")
@@ -460,7 +490,7 @@ namespace HyperElk.Core
                 return;
             }
             //BlackOutKick
-            if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
+            if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
             {
                 API.CastSpell(BlackOutKick);
                 return;
@@ -514,7 +544,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //BlackOutKick
-                    if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && IsMelee)
+                    if (API.CanCast(BlackOutKick) && NotChanneling && IsMelee)
                     {
                         API.CastSpell(BlackOutKick);
                         return;
@@ -582,7 +612,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //BlackOutKick
-                    if (API.CanCast(BlackOutKick) && !LastBlackoutkick && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
+                    if (API.CanCast(BlackOutKick) && NotChanneling && API.PlayerCurrentChi >= 3 && API.PlayerLevel >= 2 && NotChanneling)
                     {
                         API.CastSpell(BlackOutKick);
                         return;
@@ -616,12 +646,6 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            //Vivify
-            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
-            {
-                API.CastSpell(Vivify);
-                return;
-            }
         }
     }
 }

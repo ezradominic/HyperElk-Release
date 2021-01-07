@@ -60,7 +60,6 @@ namespace HyperElk.Core
 
 
         //Misc
-        private static readonly Stopwatch HealthFunnelWatch = new Stopwatch();
         private static readonly Stopwatch DumpWatchLow = new Stopwatch();
         private static readonly Stopwatch DumpWatchHigh = new Stopwatch();
 
@@ -126,9 +125,6 @@ namespace HyperElk.Core
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
             API.WriteLog("Welcome to Affliction Warlock rotation @ Mufflon12");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-
-            API.WriteLog("Use /stopcasting /cast agony macro");
-            API.WriteLog("Use /stopcasting /cast corruption macro");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("Create the following mouseover macro and assigned to the bind:");
             API.WriteLog("/cast [@mouseover] Agony");
@@ -200,6 +196,7 @@ namespace HyperElk.Core
 
             //Buffs
             CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
+            CombatRoutine.AddBuff(FelDomination, 333889);
 
 
             //Debuffs
@@ -224,39 +221,36 @@ namespace HyperElk.Core
         public override void Pulse()
         {
             //Summon Imp
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp)  && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker)  && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && PlayerLevel >= 22)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && PlayerLevel >= 23)
             {
-                API.WriteLog("Looks like we have no Pet , lets Summon one");
-                API.CastSpell(FelDomination);
-                Thread.Sleep(1000);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonFelhunter);
+                return;
+            }
+            if (!API.PlayerHasPet && API.PlayerIsInCombat && API.CanCast(FelDomination))
+            {
+                API.CastSpell(FelDomination);
                 return;
             }
         }
@@ -272,7 +266,7 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            if (DumpShards && API.PlayerCurrentSoulShards <= 0)
+            if (DumpShards && API.PlayerCurrentSoulShards == 0)
             {
                 API.WriteLog("No More Shards left.");
                 DumpWatchLow.Stop();
@@ -335,23 +329,11 @@ namespace HyperElk.Core
                 API.CastSpell(DrainLife);
                 return;
             }
-            if (HealthFunnelWatch.IsRunning && API.PetHealthPercent >= 70)
-            {
-                HealthFunnelWatch.Stop();
-                HealthFunnelWatch.Reset();
-            }
-            if (HealthFunnelWatch.IsRunning && API.CanCast(HealthFunnel))
+            if (API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 9 && NotChanneling)
             {
                 API.CastSpell(HealthFunnel);
                 return;
             }
-            // Health Funnel
-            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 8 && NotChanneling)
-            {
-                HealthFunnelWatch.Start();
-                return;
-            }
-
             //Trinkets
             if (UseTrinket1 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
@@ -366,11 +348,11 @@ namespace HyperElk.Core
         {
 
             //ROTATION AOE
-            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange && !HealthFunnelWatch.IsRunning)
+            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
                 //actions.aoe+=/haunt
                 //Haunt 
-                if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && API.PlayerCurrentCastTimeRemaining > 40 && TalentHaunt && NotMoving && IsRange && NotChanneling && PlayerLevel >= 45)
+                if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && !API.PlayerIsCasting(true) && TalentHaunt && NotMoving && IsRange && NotChanneling && PlayerLevel >= 45)
                 {
                     API.CastSpell(Haunt);
                     return;
@@ -399,7 +381,7 @@ namespace HyperElk.Core
                 //Unstable Affliction
                 if (UseUA)
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && !CurrenCastUnstableAffliction && API.PlayerCurrentCastTimeRemaining > 40 && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
+                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && !CurrenCastUnstableAffliction && !API.PlayerIsCasting(true) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
@@ -464,13 +446,6 @@ namespace HyperElk.Core
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-
-
-
-
-
-
-
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
@@ -511,7 +486,6 @@ namespace HyperElk.Core
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-
                 if (!DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
                 {
                     API.CastSpell(DrainSoul);
@@ -596,14 +570,14 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/shadow_bolt
                 //ShadowBolt
-                if (API.CanCast(ShadowBolt) && !TalentDrainSoul && NotChanneling && API.PlayerCurrentCastTimeRemaining > 40 && PlayerLevel >= 1)
+                if (API.CanCast(ShadowBolt) && !TalentDrainSoul && NotChanneling && !API.PlayerIsCasting(true) && PlayerLevel >= 1)
                 {
                     API.CastSpell(ShadowBolt);
                     return;
                 }
             }
             //ROTATION SINGLE TARGET
-            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber && !HealthFunnelWatch.IsRunning)
+            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
             {
                 //actions+=/agony,if=dot.agony.remains<4
                 //Agony
@@ -632,7 +606,6 @@ namespace HyperElk.Core
                     API.CastSpell(VileTaint);
                     return;
                 }
-
                 //actions+=/haunt
                 //Haunt 
                 if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && TalentHaunt && PlayerLevel >= 45)
@@ -699,8 +672,6 @@ namespace HyperElk.Core
                     API.CastSpell(DarkSoulMisery);
                     return;
                 }
-
-
                 //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
                 //VileTaint
                 if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
@@ -752,8 +723,6 @@ namespace HyperElk.Core
                     API.CastSpell(MaleficRapture);
                     return;
                 }
-
-
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchHigh.Start();
@@ -774,9 +743,6 @@ namespace HyperElk.Core
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-
-
-
                 if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
                 {
                     DumpWatchLow.Start();
@@ -797,15 +763,11 @@ namespace HyperElk.Core
                     API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-
-
                 if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
                 {
                     API.CastSpell(DrainSoul);
                     return;
                 }
-
-
                 //DecimatingBolt
                 if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always")
                 {
@@ -850,27 +812,27 @@ namespace HyperElk.Core
                 return;
             }
             //Summon Imp
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerIsCasting(true) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 3)
             {
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerIsCasting(true) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 10)
             {
                 API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerIsCasting(true) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 19)
             {
                 API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && API.PlayerCurrentCastTimeRemaining > 40 && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
+            if (!TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerIsCasting(true) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && IsRange && NotChanneling && PlayerLevel >= 23)
             {
                 API.WriteLog("Looks like we have no Pet , lets Summon one");
                 API.CastSpell(SummonFelhunter);
