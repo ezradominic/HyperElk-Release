@@ -44,6 +44,8 @@ namespace HyperElk.Core
         private string FaelineStomp = "FaelineStomp";
         private string FallenOrder = "Fallen Order";
 
+        private string trinket1 = "trinket1";
+        private string trinket2 = "trinket2";
         //Target Misc
         private string Party1 = "party1";
         private string Party2 = "party2";
@@ -126,7 +128,11 @@ namespace HyperElk.Core
         private string UseFaelineStomp => FaelineStompList[CombatRoutine.GetPropertyInt(FaelineStomp)];
         string[] FallenOrderList = new string[] { "always", "Cooldowns", "AOE" };
         private string UseFallenOrder => FallenOrderList[CombatRoutine.GetPropertyInt(FallenOrder)];
+        private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
+        string[] TrinketList1 = new string[] { "always", "Cooldowns", "never" };
 
+        private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
+        string[] TrinketList2 = new string[] { "always", "Cooldowns", "never" };
         public override void Initialize()
         {
             CombatRoutine.Name = "Mistweaver Monk by Mufflon12";
@@ -306,9 +312,17 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Fleshcraft, Fleshcraft, numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Necrolord", 5);
             CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
             CombatRoutine.AddProp(FallenOrder, "Use " + FallenOrder, FallenOrderList, "How to use Fallen Order", "Covenant Venthyr", 0);
+
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket");
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket");
         }
         public override void Pulse()
         {
+                        if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
             if (IsAutoDetox)
             {
                 if (API.PlayerIsInGroup)
@@ -343,6 +357,19 @@ namespace HyperElk.Core
                 API.CastSpell(Fleshcraft);
                 return;
             }
+            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            {
+                API.CastSpell("Healthstone");
+                return;
+            }
+            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
+            if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
             if (API.PlayerItemCanUse(SpiritualManaPotion) && API.PlayerItemRemainingCD(SpiritualManaPotion) == 0 && API.PlayerMana <= SpiritualManaPotionManaPercent)
             {
                 API.CastSpell(SpiritualManaPotion);
