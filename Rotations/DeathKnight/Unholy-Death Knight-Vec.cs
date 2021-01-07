@@ -463,7 +463,7 @@ namespace HyperElk.Core
                             API.CastSpell("Unholy Blight");
                             return;
                         }
-                        if (API.CanCast("Outbreak") & !Talent_UnholyBlight && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
+                        if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30 && !(API.CanCast("Unholy Blight") && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 2 * gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && (SmallCDs || IsCooldowns) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange))
                         {
                             API.CastSpell("Outbreak");
                             return;
@@ -494,7 +494,7 @@ namespace HyperElk.Core
                             return;
                         }
 
-                        if (API.CanCast("Outbreak") && !Talent_UnholyBlight && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
+                        if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30 && !(API.CanCast("Unholy Blight") && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 2 * gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && (SmallCDs || IsCooldowns) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange))
                         {
                             API.CastSpell("Outbreak");
                             return;
@@ -549,7 +549,7 @@ namespace HyperElk.Core
                         API.CastSpell("Unholy Blight");
                         return;
                     }
-                    if (API.CanCast("Outbreak") & !Talent_UnholyBlight && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 200 && API.TargetRange <= 30)
+                    if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 200 && API.TargetRange <= 30 && !(API.CanCast("Unholy Blight") && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 2 * gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange))
                     {
                         API.CastSpell("Outbreak");
                         return;
@@ -560,7 +560,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //death_coil,if=CombatRoutine.sudden_doom.react&rune.time_to_4>gcd&!variable.pooling_for_gargoyle|pet.gargoyle.active
-                    if (API.CanCast("Epidemic") && ((API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && ((API.PlayerHasBuff("Sudden Doom") || API.PlayerRunicPower > 80) && !PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && ((API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && ((API.PlayerHasBuff("Sudden Doom") || API.PlayerRunicPower > 80) && !PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;
@@ -586,7 +586,7 @@ namespace HyperElk.Core
                         API.CastSpell("Clawing Shadows");
                         return;
                     }
-                    if (API.CanCast("Epidemic") && ((API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && ((API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;
