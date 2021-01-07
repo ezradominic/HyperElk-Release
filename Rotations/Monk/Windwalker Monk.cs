@@ -260,11 +260,11 @@ namespace HyperElk.Core
                 return;
             }
             //StormEarthandFire
-           // if (IsCooldowns && !API.SpellISOnCooldown(StormEarthandFire) && !TalentSerenty && API.SpellCharges(StormEarthandFire) >= 1 && !API.PlayerHasBuff(StormEarthandFire) && IsMelee && API.PlayerCurrentChi >= 3 && PlayerLevel >= 27)
-           // {
-          //      API.CastSpell(StormEarthandFire);
-          //      return;
-         //   }
+            if (IsCooldowns && !API.SpellISOnCooldown(StormEarthandFire) && !TalentSerenty && API.SpellCharges(StormEarthandFire) >= 1 && !API.PlayerHasBuff(StormEarthandFire) && IsMelee && API.PlayerCurrentChi >= 3 && PlayerLevel >= 27)
+            {
+                API.CastSpell(StormEarthandFire);
+                return;
+            }
             //EnergizingElixir
             if (IsCooldowns && !API.SpellISOnCooldown(EnergizingElixir) && TalentEnergizingElixir && IsMelee && API.PlayerCurrentChi <= 2 && API.PlayerCurrentChi < 50)
             {
