@@ -25,6 +25,8 @@ namespace HyperElk.Core
         private string UnholyBlight = "Unholy Blight";
         private string ConvocationoftheDead = "Convocation of the Dead";
         private string DarkTransformation = "Dark Transformation";
+        private string SacrificialPact = "Sacrificial Pact";
+        private string VirulentPlague = "Virulent Plague";
         //stopwatch
         private readonly Stopwatch Dark_Transformation_Ghoul = new Stopwatch();
         private readonly Stopwatch GargoyleActiveTime = new Stopwatch();
@@ -132,6 +134,7 @@ namespace HyperElk.Core
         private int AntiMagicShellLifePercent => percentListProp[CombatRoutine.GetPropertyInt("Anti-Magic Shell")];
         private int DeathStrikePercent => percentListProp[CombatRoutine.GetPropertyInt("Death Strike")];
         private int DarkSuccorPercent => percentListProp[CombatRoutine.GetPropertyInt("Dark Succor")];
+        private int SacrificialPactPercent => percentListProp[CombatRoutine.GetPropertyInt(SacrificialPact)];
         private int LichborneLifePercent => API.getFromArray(percentListProp, CombatRoutine.GetPropertyInt(Lichborne));
 
         private string WhenDarkTransformation => CDUsage[CombatRoutine.GetPropertyInt("DarkTransformation")];
@@ -203,6 +206,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Virulent Plague", 191587);
             CombatRoutine.AddDebuff("Festering Wound", 194310);
             CombatRoutine.AddDebuff("Necrotic Wound", 209858);
+            CombatRoutine.AddDebuff(UnholyBlight, 115994);
 
             CombatRoutine.AddConduit("Convocation of the Dead");
 
@@ -229,6 +233,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " On Cooldown, with Cooldowns", "Trinkets", 0);
 
             CombatRoutine.AddProp(Lichborne, Lichborne + " Life Percent", percentListProp, "Life percent at which" + Lichborne + "is used, set to 0 to disable", "Defense", 5);
+            CombatRoutine.AddProp(SacrificialPact, SacrificialPact + " Life Percent", percentListProp, "Life percent at which" + SacrificialPact + "is used, set to 0 to disable", "Defense", 5);
             CombatRoutine.AddProp("Icebound", "Use " + "Icebound Fortitude" + " below:", percentListProp, "Life percent at which " + "Icebound Fortitude" + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp("Death Pact", "Use " + "Death Pact" + " below:", percentListProp, "Life percent at which " + "Death Pact" + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp("Anti-Magic Shell", "Use " + "Anti-Magic Shell" + " below:", percentListProp, "Life percent at which " + "Anti-Magic Shell" + " is used, set to 0 to disable", "Defense", 2);
@@ -393,7 +398,7 @@ namespace HyperElk.Core
                     API.CastSpell(ShackletheUnworthy);
                     return;
                 }
-                if (API.CanCast(AbominationLimb) && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+                if (API.CanCast(AbominationLimb) && ((API.TargetDebuffRemainingTime(UnholyBlight) > 1100 | !Talent_UnholyBlight && !API.SpellISOnCooldown(DarkTransformation)) || API.PlayerUnitInMeleeRangeCount >= 2) && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
                 {
                     API.CastSpell(AbominationLimb);
                     return;
@@ -412,7 +417,13 @@ namespace HyperElk.Core
                     API.CastSpell("Trinket2");
                 }
                 #region cooldowns
-
+                #region opener
+                if (API.CanCast("Festering Strike") && API.PlayerTimeInCombat <= 500 && API.PlayerCurrentRunes >= 2 && Festering_Wound_Stacks < 2 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
+                {
+                    API.CastSpell("Festering Strike");
+                    return;
+                }
+                #endregion
                 if (API.CanCast("Dark Transformation") && (PlayerHasBuff(UnholyBlight) || !Talent_UnholyBlight) && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
                 {
                     API.CastSpell("Dark Transformation");
@@ -428,12 +439,12 @@ namespace HyperElk.Core
                     API.CastSpell("Apocalypse");
                     return;
                 }
-                if (API.CanCast("Sacrificial Pact") && API.PlayerHealthPercent <= 50 && IsCooldowns && !Dark_Transformation_Ghoul.IsRunning && API.PlayerLevel >= 54 && MeleeRange)
+                if (API.CanCast("Sacrificial Pact") && API.PlayerHealthPercent <= SacrificialPactPercent && IsCooldowns && !Dark_Transformation_Ghoul.IsRunning && API.PlayerLevel >= 54 && MeleeRange)
                 {
                     API.CastSpell("Sacrificial Pact");
                     return;
                 }
-                if (API.CanCast("Unholy Assault") && IsCooldowns && Talent_UnholyAssault && MeleeRange)
+                if (API.CanCast("Unholy Assault") && (!Talent_UnholyBlight || API.SpellISOnCooldown(UnholyBlight)) && ApocGhoulActiveTime.IsRunning && Festering_Wound_Stacks < 3 && IsCooldowns && Talent_UnholyAssault && MeleeRange)
                 {
                     API.CastSpell("Unholy Assault");
                     return;
