@@ -38,6 +38,8 @@ namespace HyperElk.Core
         private string Detox = "Detox";
         private string SpiritualManaPotion = "Spiritual Mana Potion";
         private string WeaponsofOrder = "Weapons of Order";
+        private string WeaponsofOrderAOE = "Weapons of Order AOE";
+
         private string Fleshcraft = "Fleshcraft";
         private string FaelineStomp = "FaelineStomp";
         private string FallenOrder = "Fallen Order";
@@ -88,7 +90,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch JadeSerpentStatueWatch = new Stopwatch();
 
         int ViVifyCounter = 0;
-        string[] ThunderFocusTeaList = new string[] { "always", "Cooldowns", "Manual" };
+        string[] ThunderFocusTeaList = new string[] { "always", "Cooldowns", "Manual", };
         private string UseThunderFocusTea => ThunderFocusTeaList[CombatRoutine.GetPropertyInt(ThunderFocusTea)];
         private bool NotChanneling => API.PlayerCurrentCastTimeRemaining == 0;
         private bool NotCasting => !API.PlayerIsCasting(false);
@@ -114,8 +116,9 @@ namespace HyperElk.Core
         private int HealingElixirPercent => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int RefreshingJadeWindPercent => numbList[CombatRoutine.GetPropertyInt(RefreshingJadeWind)];
         private int SpiritualManaPotionManaPercent => numbList[CombatRoutine.GetPropertyInt(SpiritualManaPotion)];
+
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
-        string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE %" };
+        string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE%", };
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         bool ChannelSoothingMist => API.CurrentCastSpellID("player") == 115175;
 
@@ -297,9 +300,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(ChiWave, ChiWave + " Life Percent", numbList, "Life percent at which" + ChiWave + "is used when three members are at life percent, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(RefreshingJadeWind, RefreshingJadeWind + " Life Percent", numbList, "Life percent at which" + RefreshingJadeWind + "is used when three members are at life percent, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(ThunderFocusTea, "Use " + ThunderFocusTea, ThunderFocusTeaList, "Use " + ThunderFocusTea + "always, Cooldowns, AOE", "Healing", 0);
-            CombatRoutine.AddProp(WeaponsofOrder, WeaponsofOrder + " Group", numbList, "Group percent at which" + WeaponsofOrder + "is used when three members are at life percent, set to 0 to disable", "Covenant Kyrian", 85);
-
             CombatRoutine.AddProp(WeaponsofOrder, "Use " + WeaponsofOrder, WeaponsofOrderList, "How to use Weapons of Order", "Covenant Kyrian", 0);
+            CombatRoutine.AddProp(WeaponsofOrderAOE, WeaponsofOrder + " Life Percent", numbList, "Life percent at which" + WeaponsofOrder + "is used when three members are at life percent, set to 0 to disable", "Covenant Kyrian", 85);
+
             CombatRoutine.AddProp(Fleshcraft, Fleshcraft, numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Necrolord", 5);
             CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
             CombatRoutine.AddProp(FallenOrder, "Use " + FallenOrder, FallenOrderList, "How to use Fallen Order", "Covenant Venthyr", 0);
@@ -320,7 +323,7 @@ namespace HyperElk.Core
                     }
                 }
             }
-            if (API.CanCast(WeaponsofOrder) && WeaponsofOrderAoE && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "AOE %")
+            if (API.CanCast(WeaponsofOrder) && WeaponsofOrderAoE && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "AOE%" && API.PlayerIsInCombat)
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
@@ -395,7 +398,7 @@ namespace HyperElk.Core
                 API.CastSpell(ThunderFocusTea);
                 return;
             }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) &&  UseThunderFocusTea == "Cooldowns" && IsCooldowns && API.PlayerIsInCombat)
+            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "Cooldowns" && IsCooldowns && API.PlayerIsInCombat)
             {
                 API.CastSpell(ThunderFocusTea);
                 return;
