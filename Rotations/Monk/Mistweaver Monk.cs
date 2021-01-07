@@ -626,22 +626,22 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && API.PlayerMana >= ManaTeaPercent && TalentManaTea && UseThunderFocusTea == "Cooldowns" && IsCooldowns && API.PlayerIsInCombat)
+            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && API.PlayerMana >= ManaTeaPercent && TalentManaTea && UseThunderFocusTea == "Cooldowns" && IsCooldowns)
             {
                 API.CastSpell(ThunderFocusTea);
                 return;
             }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "Cooldowns" && IsCooldowns && API.PlayerIsInCombat)
+            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "Cooldowns" && IsCooldowns)
             {
                 API.CastSpell(ThunderFocusTea);
                 return;
             }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "always" && API.PlayerIsInCombat)
+            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "always")
             {
                 API.CastSpell(ThunderFocusTea);
                 return;
             }
-            if (API.CanCast(ChiWave) && TalentChiWave && API.TargetHealthPercent <= ChiWavePercent && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(ChiWave) && TalentChiWave && API.TargetHealthPercent <= ChiWavePercent && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(ChiWave);
                 return;
@@ -651,17 +651,17 @@ namespace HyperElk.Core
                 API.CastSpell(ManaTea);
                 return;
             }
-            if (API.CanCast(RenewingMist) && NotCasting && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(RenewingMist) && NotCasting && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(RenewingMist);
                 return;
             }
-            if (API.CanCast(EnvelopingMist) && NotCasting && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(EnvelopingMist) && NotCasting && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(EnvelopingMist);
                 return;
             }
-            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && ViVifyCounter <= 2 && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && ViVifyCounter <= 2 && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(Vivify);
                 if (API.PlayerCurrentCastTimeRemaining <= 0)
@@ -670,7 +670,7 @@ namespace HyperElk.Core
                 }
                 return;
             }
-            if (API.CanCast(SoothingMist) && ViVifyCounter >= 2 && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(SoothingMist) && ViVifyCounter >= 2 && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(SoothingMist);
                 ViVifyCounter = 0;
