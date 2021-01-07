@@ -256,34 +256,6 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
-            {
-                API.CastSpell(PhialofSerenity);
-                return;
-            }
-            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
-            {
-                API.CastSpell(SpiritualHealingPotion);
-                return;
-            }
-            if (DumpShards && API.PlayerCurrentSoulShards == 0)
-            {
-                API.WriteLog("No More Shards left.");
-                DumpWatchLow.Stop();
-                DumpWatchHigh.Stop();
-                DumpWatchLow.Reset();
-                DumpWatchHigh.Reset();
-            }
-            if (DumpShards && DumpWatchHigh.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
-            {
-                API.CastSpell(MaleficRapture);
-                return;
-            }
-            if (DumpShards && DumpWatchLow.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
-            {
-                API.CastSpell(MaleficRapture);
-                return;
-            }
             if (IsMouseover)
             {
                 if (UseCO)
@@ -311,19 +283,47 @@ namespace HyperElk.Core
                     }
                 }
             }
+            rotation();
+            return;
+        }
+
+
+        private void rotation()
+        {
+            if (DumpShards && API.PlayerCurrentSoulShards == 0)
+            {
+                API.WriteLog("No More Shards left.");
+                DumpWatchLow.Stop();
+                DumpWatchHigh.Stop();
+                DumpWatchLow.Reset();
+                DumpWatchHigh.Reset();
+            }
+            if (DumpShards && DumpWatchHigh.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
+            {
+                API.CastSpell(MaleficRapture);
+                return;
+            }
+            if (DumpShards && DumpWatchLow.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
+            {
+                API.CastSpell(MaleficRapture);
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
             // Dark Pact
             if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
             {
                 API.CastSpell(DarkPact);
                 return;
             }
-            //MortalCoil
-            //if (API.CanCast(MortalCoil) && TalentMortalCoil && API.PlayerHealthPercent <= MortalCoilPercentProc && PlayerLevel >= 40)
-            //{
-            //    API.CastSpell(MortalCoil);
-            //    return;
-            //}
-            // Drain Life
             if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
             {
                 API.CastSpell(DrainLife);
@@ -339,14 +339,6 @@ namespace HyperElk.Core
                 API.CastSpell(trinket1);
             if (UseTrinket2 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
                 API.CastSpell(trinket2);
-            rotation();
-            return;
-        }
-
-
-        private void rotation()
-        {
-
             //ROTATION AOE
             if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
