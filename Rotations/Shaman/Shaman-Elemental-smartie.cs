@@ -10,6 +10,7 @@
 // v1.8 chain lightning with stormkeeper change
 // v1.9 spell ids and alot of other stuff
 // v2.0 Racials and few other small fixes
+// v2.1 Echoes of Great Sundering fixed
 
 using System.Diagnostics;
 
@@ -116,7 +117,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.0");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.1");
 
             //Spells
             CombatRoutine.AddSpell(ChainLightning, 188443, "D7");
@@ -166,7 +167,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SpiritwalkersGrace, 79206);
             CombatRoutine.AddBuff(PrimordialWave, 326059);
             CombatRoutine.AddBuff(WindGust, 263806);
-            CombatRoutine.AddBuff(EchoesofGreatSundering, 336215);
+            CombatRoutine.AddBuff(EchoesofGreatSundering, 336217);
             CombatRoutine.AddBuff(EchoingShock, 320125);
             CombatRoutine.AddBuff(VesperTotem, 324386);
 
