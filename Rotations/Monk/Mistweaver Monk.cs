@@ -175,6 +175,9 @@ namespace HyperElk.Core
 
 
             //Macros
+            CombatRoutine.AddMacro(trinket1);
+            CombatRoutine.AddMacro(trinket2);
+
             CombatRoutine.AddMacro(Player, "F1");
             CombatRoutine.AddMacro(Party1, "F2");
             CombatRoutine.AddMacro(Party2, "F3");
@@ -279,6 +282,7 @@ namespace HyperElk.Core
 
             //Items
             CombatRoutine.AddItem(SpiritualManaPotion, 171268);
+
 
             //Toggle
             //CombatRoutine.AddToggle("Mouseover");
