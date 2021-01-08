@@ -89,6 +89,7 @@ namespace HyperElk.Core
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791 && API.PlayerHasBuff(ShiftingPower);
         bool CastCombustion => API.PlayerLastSpell == "Combustion";
         bool CastingScorch => API.CurrentCastSpellID("player") == 2948;
+        bool CastingFlame => API.CurrentCastSpellID("player") == 2120;
         private bool BLDebuffs => (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued));
         private bool BLBuFfs => (!API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW));
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
@@ -120,8 +121,8 @@ namespace HyperElk.Core
             CombatRoutine.Name = "Fire Mage by Ryu";
             API.WriteLog("Welcome to Fire Mage v1.8 by Ryu");
             API.WriteLog("Create the following cursor macro for Flamestrike and Meteor");
-            API.WriteLog("Flamestrike -- /cast [@cursor] Flamestrike");
-            API.WriteLog("Meteor -- /cast [@cursor] Meteor");
+            API.WriteLog("Flamestrike -- /cast [@cursor] Flamestrike -- Or you may go ahead and not use @cursor, the program will pause until you place it yourself");
+            API.WriteLog("Meteor -- /cast [@cursor] Meteor -- Or you may go ahead and not use @cursor, the program will pause until you place it yourself");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
             API.WriteLog("Create Macro /cast [@player] Arcane Intellect to buff Arcane Intellect so you don't require a target");
             API.WriteLog("Please create a /stopcasting Macro for Pyroblast and use that as your main pyroblast spell. It is for the triple scorch bug. Without it, you will cast Scorch three times isntead of twice.");
@@ -203,6 +204,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(RemoveCurse + "MO");
             CombatRoutine.AddMacro(Spellsteal + "MO");
             CombatRoutine.AddMacro("Pyroblast" + "Stop");
+            CombatRoutine.AddMacro("Flamestrike" + "Stop");
             CombatRoutine.AddMacro(Counterspell + "Focus");
             CombatRoutine.AddMacro("Stopcast", "F10");
 
@@ -258,7 +260,7 @@ namespace HyperElk.Core
             {
                 API.CastSpell(Counterspell + "Focus");
                 return;
-           }
+            }
             if (API.CanCast(Spellsteal) && !API.PlayerIsCasting(true) && !ChannelingShift && NotChanneling)
             {
                 for (int i = 0; i < SpellSpealBuffList.Length; i++)
@@ -333,11 +335,11 @@ namespace HyperElk.Core
                 API.CastSpell("Blazing Barrier");
                 return;
             }
-            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1 && !ChannelingShift && NotChanneling)
             {
                 API.CastSpell(Trinket1);
             }
-            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2 && !ChannelingShift && NotChanneling)
             {
                 API.CastSpell(Trinket2);
             }
@@ -355,7 +357,7 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            if (!ChannelingShift && NotChanneling)
+            if (!ChannelingShift && NotChanneling && !API.PlayerSpellonCursor)
             {
                 if (IsTimeWarp && !API.PlayerIsCasting(true) && API.CanCast(TimeWarp) && (!API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Fatigued) || !API.PlayerHasDebuff(Exhaustion) || UseLeg == "Temporal Warp") && (!API.PlayerHasBuff(TW) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(BL)))
                 {
@@ -372,7 +374,7 @@ namespace HyperElk.Core
                     API.CastSpell(MirrorsofTorment);
                     return;
                 }
-                if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingDeathborne || QuakingRadiant && QuakingHelper))
+                if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingDeathborne || QuakingDeathborne && QuakingHelper))
                 {
                     API.CastSpell(Deathborne);
                     return;
@@ -401,6 +403,18 @@ namespace HyperElk.Core
                 if (API.CanCast("Flamestrike") && !API.PlayerIsCasting(true) && InRange && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && !API.PlayerHasBuff("Combustion") && (FlamePatchTalent && (IsForceAOE || API.TargetUnitInRangeCount >= 3 && IsAOE) || IsForceAOE || API.TargetUnitInRangeCount >= 3 && IsAOE) && Level >= 17)
                 {
                     API.CastSpell("Flamestrike");
+                    API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
+                    return;
+                }
+                if ((CastingScorch || CastingFlame) && InRange && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && API.PlayerHasBuff("Combustion") && (FlamePatchTalent && (IsForceAOE || API.TargetUnitInRangeCount >= 3 && IsAOE) || IsForceAOE || API.TargetUnitInRangeCount >= 6 && IsAOE) && Level >= 17)
+                {
+                    API.CastSpell("Flamestrike" + "Stop");
+                    API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
+                    return;
+                }
+                if ((CastingScorch || CastingFlame) && InRange && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && !API.PlayerHasBuff("Combustion") && (FlamePatchTalent && (IsForceAOE || API.TargetUnitInRangeCount >= 3 && IsAOE) || IsForceAOE || API.TargetUnitInRangeCount >= 3 && IsAOE) && Level >= 17)
+                {
+                    API.CastSpell("Flamestrike" + "Stop");
                     API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
                     return;
                 }
