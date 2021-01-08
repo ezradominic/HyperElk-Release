@@ -389,7 +389,7 @@ namespace HyperElk.Core
                 }
                 //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
                 //VileTaint
-                if (!DumpShards &&TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
+                if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
                 {
                     API.CastSpell(VileTaint);
                     return;
