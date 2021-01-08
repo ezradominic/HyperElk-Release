@@ -61,7 +61,7 @@ namespace HyperElk.Core
         private string Party4 = "party4";
         private string Player = "player";
         private string PartySwap = "Target Swap";
-
+        private string Quake = "Quake";
 
 
         //Talents
@@ -105,6 +105,7 @@ namespace HyperElk.Core
 
        // bool ChannelingCov => API.CurrentCastSpellID("player") == 323764;
        bool ChannelingDivine => API.CurrentCastSpellID("player") == 64843;
+        private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
 
         private bool CoHAoE => UnitBelowHealthPercent(CoHLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
         private bool PoHAoE => UnitBelowHealthPercent(PoHLifePercent) >= AoENumber && !API.PlayerCanAttackTarget && NotChanneling;
@@ -175,8 +176,31 @@ namespace HyperElk.Core
         bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private int Mana => API.PlayerMana;
-
-        
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake) || API.PlayerCurrentCastTimeRemaining > API.PlayerBuffTimeRemaining(Quake)) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingPoM => (API.PlayerDebuffRemainingTime(Quake) > PoMCastTime || API.PlayerBuffTimeRemaining(Quake) > PoMCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingHalo => (API.PlayerDebuffRemainingTime(Quake) > HaloCastTime || API.PlayerBuffTimeRemaining(Quake) > HaloCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingFlash => (API.PlayerDebuffRemainingTime(Quake) > FlashCastTime || API.PlayerBuffTimeRemaining(Quake) > FlashCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingMind => (API.PlayerDebuffRemainingTime(Quake) > MindCastTime || API.PlayerBuffTimeRemaining(Quake) > MindCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingPoH => (API.PlayerDebuffRemainingTime(Quake) > PoHCastTime || API.PlayerBuffTimeRemaining(Quake) > PoHCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingHWSalv => (API.PlayerDebuffRemainingTime(Quake) > HWSalvCastTime || API.PlayerBuffTimeRemaining(Quake) > HWSalvCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingDivine => (API.PlayerDebuffRemainingTime(Quake) > DivineHymnCastTime || API.PlayerBuffTimeRemaining(Quake) > DivineHymnCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingHeal => (API.PlayerDebuffRemainingTime(Quake) > HealCastTime || API.PlayerBuffTimeRemaining(Quake) > HealCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingHolyFire => (API.PlayerDebuffRemainingTime(Quake) > HolyFireCastTime || API.PlayerBuffTimeRemaining(Quake) > HolyFireCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingSmite => (API.PlayerDebuffRemainingTime(Quake) > SmiteCastTime || API.PlayerBuffTimeRemaining(Quake) > SmiteCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingBoon => (API.PlayerDebuffRemainingTime(Quake) > BoonCastTime || API.PlayerBuffTimeRemaining(Quake) > BoonCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingSymbol => (API.PlayerDebuffRemainingTime(Quake) > SymbolCastTime || API.PlayerBuffTimeRemaining(Quake) > SymbolCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        float PoMCastTime => 150f / (1f + API.PlayerGetHaste);
+        float HaloCastTime => 150f / (1f + API.PlayerGetHaste);
+        float FlashCastTime => 150f / (1f + API.PlayerGetHaste);
+        float MindCastTime => 150f / (1f + API.PlayerGetHaste);
+        float PoHCastTime => 200f / (1f + API.PlayerGetHaste);
+        float HWSalvCastTime => 250f / (1f + API.PlayerGetHaste);
+        float DivineHymnCastTime => 800f / (1f + API.PlayerGetHaste);
+        float HealCastTime => 250f / (1f + API.PlayerGetHaste);
+        float HolyFireCastTime => 150f / (1f + API.PlayerGetHaste);
+        float SmiteCastTime => 150f / (1f + API.PlayerGetHaste);
+        float BoonCastTime => 150f / (1f + API.PlayerGetHaste);
+        float SymbolCastTime => 500f / (1f + API.PlayerGetHaste);
 
 
         //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
@@ -189,6 +213,7 @@ namespace HyperElk.Core
             API.WriteLog("BETA ROTATION : Things may be missing or not work correctly yet. Please post feedback in Priest channel. Cov expect Unholy Nova is supported via Cooldown toggle or break marcos");
            // API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
             API.WriteLog("For all ground spells, either use @Cursor or when it is time to place it, the Bot will pause until you've placed it. If you'd perfer to use your own logic for them, please place them on ignore in the spellbook.");
+            API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
             API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's in the spell book. Enable it in the toggle. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This does work for raid, however, requires the addon Bindpad. See Video in discord.");
 
             //Buff
@@ -200,11 +225,12 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SpiritOfRedemption, 20711);
             CombatRoutine.AddBuff(Renew, 139);
             CombatRoutine.AddBuff(PrayerofMending, 41635);
-
+            CombatRoutine.AddBuff(Quake, 240447);
 
             //Debuff
             CombatRoutine.AddDebuff(WeakenedSoul, 6788);
             CombatRoutine.AddDebuff(ShadowWordPain, 589);
+            CombatRoutine.AddDebuff(Quake, 240447);
 
             //Spell
             CombatRoutine.AddSpell(Heal, 2060);
@@ -256,6 +282,7 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
+            CombatRoutine.AddMacro("Stopcast", "F10");
             CombatRoutine.AddMacro(Player);
             CombatRoutine.AddMacro(Party1);
             CombatRoutine.AddMacro(Party2);
@@ -308,10 +335,11 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used and meets the below healing perecents", "Cooldowns", 1);
+            CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
 
-          //  CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
-          //  CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
-          //  CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
+            //  CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
+            //  CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
+            //  CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             CombatRoutine.AddProp(Heal, Heal + " Life Percent", numbList, "Life percent at which " + Heal + " is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(FlashHeal, FlashHeal + " Life Percent", numbList, "Life percent at which " + FlashHeal + " is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(PrayerofMending, PrayerofMending + " Life Percent", numbList, "Life percent at which " + PrayerofMending + " is used, set to 0 to disable", "Healing", 10);
@@ -337,6 +365,11 @@ namespace HyperElk.Core
         {
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat))
             {
+                if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
+                {
+                    API.CastSpell("Stopcast");
+                    return;
+                }
                 if (GSCheck && InRange)
                 {
                     API.CastSpell(GuardianSpirit);
@@ -347,12 +380,12 @@ namespace HyperElk.Core
                     API.CastSpell(CoH);
                     return;
                 }
-                if (PoHCheck && InRange)
+                if (PoHCheck && InRange && (!QuakingPoH || QuakingPoH && QuakingHelper))
                 {
                     API.CastSpell(PoH);
                     return;
                 }
-                if (DHCheck && InRange)
+                if (DHCheck && InRange && (!QuakingDivine || QuakingDivine && QuakingHelper))
                 {
                     API.CastSpell(DivineHymn);
                     return;
@@ -372,22 +405,22 @@ namespace HyperElk.Core
                     API.CastSpell(Renew);
                     return;
                 }
-                if (PoMCheck && InRange)
+                if (PoMCheck && InRange && (!QuakingPoM || QuakingPoM && QuakingHelper))
                 {
                     API.CastSpell(PrayerofMending);
                     return;
                 }
-                if (FlashHealCheck && InRange)
+                if (FlashHealCheck && InRange && (!QuakingFlash || QuakingFlash && QuakingHelper))
                 {
                     API.CastSpell(FlashHeal);
                     return;
                 }
-                if (HealCheck && InRange)
+                if (HealCheck && InRange && (!QuakingHeal || QuakingHeal && QuakingHelper))
                 {
                     API.CastSpell(Heal);
                     return;
-                }
-                if (HWSCheck && InRange)
+                } 
+                if (HWSCheck && InRange && (!QuakingHWSalv || QuakingHWSalv && QuakingHelper))
                 {
                     API.CastSpell(HolyWordSalvation);
                     return;
@@ -397,7 +430,7 @@ namespace HyperElk.Core
                     API.CastSpell(HolyWordSerenity);
                     return;
                 }
-                if (KyrianCheck && InRange)
+                if (KyrianCheck && InRange && (!QuakingBoon || QuakingBoon && QuakingHelper))
                 {
                     API.CastSpell(BoonoftheAscended);
                     return;
@@ -407,13 +440,13 @@ namespace HyperElk.Core
                     API.CastSpell(FaeGuardians);
                     return;
                 }
-                if (HaloCheck && InRange)
+                if (HaloCheck && InRange && (!QuakingHalo || QuakingHalo && QuakingHelper))
                 {
                     API.CastSpell(Halo);
                     return;
                 }
                 //DPS
-                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMind || QuakingMind && QuakingHelper))
                 {
                     API.CastSpell(Mindgames);
                     return;
@@ -443,12 +476,12 @@ namespace HyperElk.Core
                     API.CanCast(AscendedNova);
                     return;
                 }
-                if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+                if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingBoon || QuakingBoon && QuakingHelper))
                 {
                     API.CastSpell(AscendedBlast);
                     return;
                 }
-                if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+                if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
                 {
                     API.CastSpell(Smite);
                     return;
