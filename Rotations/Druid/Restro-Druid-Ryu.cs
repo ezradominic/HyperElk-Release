@@ -285,6 +285,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(LifebloomL, 188550);
             CombatRoutine.AddBuff(EclispeLunar, 48518);
             CombatRoutine.AddBuff(EclispleSolar, 48517);
+            CombatRoutine.AddBuff(Quake, 240447);
 
             //Debuff
             CombatRoutine.AddDebuff(Sunfire, 164815);
@@ -293,7 +294,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Thrashkitty, 106830);
             CombatRoutine.AddDebuff(Rip, 1079);
             CombatRoutine.AddDebuff(Rake, 155722);
-
+            CombatRoutine.AddDebuff(Quake, 240447);
             //Spell
             CombatRoutine.AddSpell(Rejuvenation, 774);
             CombatRoutine.AddSpell(Regrowth, 8936);
