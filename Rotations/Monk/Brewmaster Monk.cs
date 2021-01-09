@@ -27,6 +27,8 @@ namespace HyperElk.Core
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int ChiWaveLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
+        private int DampenHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
+
 
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE", "Manual" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
@@ -57,6 +59,7 @@ namespace HyperElk.Core
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
 
 
+        private bool TalentDampenHarm => API.PlayerIsTalentSelected(5, 3);
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
         private string BlackOutKick = "Blackout Kick";
@@ -92,6 +95,7 @@ namespace HyperElk.Core
         private string ChiWave = "Chi Wave";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string DampenHarm = "Dampen Harm";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
@@ -122,6 +126,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket", 3);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
 
 
 
@@ -154,6 +159,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Fleshcraft, 324631,"OemOpenBrackets");
             CombatRoutine.AddSpell(FaelineStomp, 327104,"Oem6");
             CombatRoutine.AddSpell(FallenOrder, 326860,"Oem6");
+            CombatRoutine.AddSpell(DampenHarm, 122278, "F1");
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -193,6 +199,11 @@ namespace HyperElk.Core
             if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
             {
                 API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
+            if (API.PlayerHealthPercent <= DampenHarmLifePercentProc && !API.SpellISOnCooldown(DampenHarm) && !API.PlayerIsMounted && TalentDampenHarm && NotChanneling)
+            {
+                API.CastSpell(DampenHarm);
                 return;
             }
             //NECROLORDS FLESHCRAFT
