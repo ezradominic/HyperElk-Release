@@ -520,7 +520,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //death_coil,if=CombatRoutine.sudden_doom.react&rune.time_to_4>gcd&!variable.pooling_for_gargoyle|pet.gargoyle.active
-                        if (API.CanCast(DeathCoil) && ((API.PlayerRunicPower >= 40 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && (API.PlayerHasBuff("Sudden Doom") && API.PlayerRuneCD(4) > gcd && !PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns) && API.TargetRange <= 30)
+						if (API.CanCast(DeathCoil) && API.PlayerHasBuff("Sudden Doom") && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -547,7 +547,7 @@ namespace HyperElk.Core
                             API.CastSpell("Festering Strike");
                             return;
                         }
-                        if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
+						if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -574,8 +574,8 @@ namespace HyperElk.Core
                         return;
                     }
                     //death_coil,if=CombatRoutine.sudden_doom.react&rune.time_to_4>gcd&!variable.pooling_for_gargoyle|pet.gargoyle.active
-                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && ((API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && ((API.PlayerHasBuff("Sudden Doom") || API.PlayerRunicPower > 80) && !PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
-                    {
+						if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+					{
                         API.CastSpell("Epidemic");
                         return;
                     }
@@ -600,7 +600,7 @@ namespace HyperElk.Core
                         API.CastSpell("Clawing Shadows");
                         return;
                     }
-                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && ((API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                     if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;
