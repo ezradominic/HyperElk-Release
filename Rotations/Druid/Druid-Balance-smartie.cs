@@ -22,6 +22,7 @@
 // v2.8 Racials and a few small fixes
 // v2.9 Balance of all Things support
 // v3.0 Quaking Helper and small adjustment
+// v3.1 Quaking channeling fix
 
 using System.Diagnostics;
 
@@ -140,7 +141,7 @@ namespace HyperElk.Core
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private bool IncaCelestial => (PlayerHasBuff(Incarnation) || PlayerHasBuff(CelestialAlignment));
         private bool Eclipses => (PlayerHasBuff(EclipseLunar) || PlayerHasBuff(EclipseSolar));
-        private bool Quaking => API.PlayerCurrentCastTimeRemaining >= 200 && API.PlayerDebuffRemainingTime(Quake) < 200 && PlayerHasDebuff(Quake);
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
         private static bool PlayerHasBuff(string buff)
         {
