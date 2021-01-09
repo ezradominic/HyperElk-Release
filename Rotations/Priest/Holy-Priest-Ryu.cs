@@ -176,7 +176,8 @@ namespace HyperElk.Core
         bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private int Mana => API.PlayerMana;
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake) || API.PlayerCurrentCastTimeRemaining > API.PlayerBuffTimeRemaining(Quake)) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+        private bool SaveQuake => (API.PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !API.PlayerHasDebuff(Quake) || !QuakingHelper);
         private bool QuakingPoM => (API.PlayerDebuffRemainingTime(Quake) > PoMCastTime || API.PlayerBuffTimeRemaining(Quake) > PoMCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingHalo => (API.PlayerDebuffRemainingTime(Quake) > HaloCastTime || API.PlayerBuffTimeRemaining(Quake) > HaloCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingFlash => (API.PlayerDebuffRemainingTime(Quake) > FlashCastTime || API.PlayerBuffTimeRemaining(Quake) > FlashCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
@@ -368,6 +369,7 @@ namespace HyperElk.Core
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
                 {
                     API.CastSpell("Stopcast");
+                    API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                     return;
                 }
                 if (GSCheck && InRange)
@@ -380,12 +382,12 @@ namespace HyperElk.Core
                     API.CastSpell(CoH);
                     return;
                 }
-                if (PoHCheck && InRange && (!QuakingPoH || QuakingPoH && QuakingHelper))
+                if (PoHCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(PoH);
                     return;
                 }
-                if (DHCheck && InRange && (!QuakingDivine || QuakingDivine && QuakingHelper))
+                if (DHCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(DivineHymn);
                     return;
@@ -405,22 +407,22 @@ namespace HyperElk.Core
                     API.CastSpell(Renew);
                     return;
                 }
-                if (PoMCheck && InRange && (!QuakingPoM || QuakingPoM && QuakingHelper))
+                if (PoMCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(PrayerofMending);
                     return;
                 }
-                if (FlashHealCheck && InRange && (!QuakingFlash || QuakingFlash && QuakingHelper))
+                if (FlashHealCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(FlashHeal);
                     return;
                 }
-                if (HealCheck && InRange && (!QuakingHeal || QuakingHeal && QuakingHelper))
+                if (HealCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(Heal);
                     return;
                 } 
-                if (HWSCheck && InRange && (!QuakingHWSalv || QuakingHWSalv && QuakingHelper))
+                if (HWSCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(HolyWordSalvation);
                     return;
@@ -430,7 +432,7 @@ namespace HyperElk.Core
                     API.CastSpell(HolyWordSerenity);
                     return;
                 }
-                if (KyrianCheck && InRange && (!QuakingBoon || QuakingBoon && QuakingHelper))
+                if (KyrianCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(BoonoftheAscended);
                     return;
@@ -440,13 +442,13 @@ namespace HyperElk.Core
                     API.CastSpell(FaeGuardians);
                     return;
                 }
-                if (HaloCheck && InRange && (!QuakingHalo || QuakingHalo && QuakingHelper))
+                if (HaloCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(Halo);
                     return;
                 }
                 //DPS
-                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMind || QuakingMind && QuakingHelper))
+                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && SaveQuake)
                 {
                     API.CastSpell(Mindgames);
                     return;
@@ -476,12 +478,12 @@ namespace HyperElk.Core
                     API.CanCast(AscendedNova);
                     return;
                 }
-                if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingBoon || QuakingBoon && QuakingHelper))
+                if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && SaveQuake)
                 {
                     API.CastSpell(AscendedBlast);
                     return;
                 }
-                if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
+                if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && SaveQuake)
                 {
                     API.CastSpell(Smite);
                     return;

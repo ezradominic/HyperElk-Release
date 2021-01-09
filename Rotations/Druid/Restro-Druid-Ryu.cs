@@ -224,7 +224,8 @@ namespace HyperElk.Core
         private string UseHeart => CDUsage[CombatRoutine.GetPropertyInt(HeartoftheWild)];
 
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake) || API.PlayerCurrentCastTimeRemaining > API.PlayerBuffTimeRemaining(Quake)) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+        private bool SaveQuake => (API.PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !API.PlayerHasDebuff(Quake) || !QuakingHelper);
         private bool QuakingWG => (API.PlayerDebuffRemainingTime(Quake) > WGCastTime || API.PlayerBuffTimeRemaining(Quake) > WGCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingRegrowth => (API.PlayerDebuffRemainingTime(Quake) > RegrowthCastTime || API.PlayerBuffTimeRemaining(Quake) > RegrowthCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingConvoke => (API.PlayerDebuffRemainingTime(Quake) > ConvokeCastTime || API.PlayerBuffTimeRemaining(Quake) > ConvokeCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
@@ -455,6 +456,7 @@ namespace HyperElk.Core
             if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
             {
                 API.CastSpell("Stopcast");
+                API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                 return;
             }
             if (API.LastSpellCastInGame == Efflor)
@@ -468,7 +470,7 @@ namespace HyperElk.Core
                     API.CastSpell(Efflor);
                     return;
                 }
-                if (API.CanCast(Convoke) && NightFaeCheck && InRange && (!QuakingConvoke || QuakingConvoke && QuakingHelper))
+                if (API.CanCast(Convoke) && NightFaeCheck && InRange && SaveQuake)
                 {
                     API.CastSpell(Convoke);
                     return;
@@ -513,12 +515,12 @@ namespace HyperElk.Core
                     API.CastSpell(LifebloomL);
                     return;
                 }
-                if (API.CanCast(WildGrowth) && InRange && WGAoE || API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InRange && (!QuakingWG || QuakingWG && QuakingHelper))
+                if (API.CanCast(WildGrowth) && InRange && WGAoE || API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InRange && SaveQuake)
                 {
                     API.CastSpell(WildGrowth);
                     return;
                 }
-                if (API.CanCast(Tranquility) && InRange && TranqAoE && (!QuakingTranq || QuakingTranq && QuakingHelper))
+                if (API.CanCast(Tranquility) && InRange && TranqAoE && SaveQuake)
                 {
                     API.CastSpell(Tranquility);
                     return;
@@ -548,12 +550,12 @@ namespace HyperElk.Core
                     API.CastSpell(Rejuvenation);
                     return;
                 }
-                if (API.CanCast(Regrowth) && InRange && RegrowthCheck && (!QuakingRegrowth || QuakingRegrowth && QuakingHelper))
+                if (API.CanCast(Regrowth) && InRange && RegrowthCheck && SaveQuake)
                 {
                     API.CastSpell(Regrowth);
                     return;
                 }
-                if (API.CanCast(Nourish) && InRange && NourishCheck && (!QuakingNourish || QuakingNourish && QuakingHelper))
+                if (API.CanCast(Nourish) && InRange && NourishCheck && SaveQuake)
                 {
                     API.CastSpell(Nourish);
                     return;
@@ -569,17 +571,17 @@ namespace HyperElk.Core
                     API.CastSpell(Starsurge);
                     return;
                 }
-                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingStar || QuakingStar && QuakingHelper))
+                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && SaveQuake)
                 {
                     API.CastSpell(Starfire);
                     return;
                 }
-                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.TargetHealthPercent > 0 && SaveQuake)
                 {
                     API.CastSpell(Wrath);
                     return;
                 }
-                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && SaveQuake)
                 {
                     API.CastSpell(Wrath);
                     return;

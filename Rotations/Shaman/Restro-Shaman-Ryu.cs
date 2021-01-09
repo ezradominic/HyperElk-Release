@@ -185,7 +185,8 @@ namespace HyperElk.Core
         private int RaidCDNumber => numbRaidList[CombatRoutine.GetPropertyInt(RaidCD)];
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
 
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake) || API.PlayerCurrentCastTimeRemaining > API.PlayerBuffTimeRemaining(Quake)) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+        private bool SaveQuake => (API.PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !API.PlayerHasDebuff(Quake) || !QuakingHelper);
         private bool QuakingHS => (API.PlayerDebuffRemainingTime(Quake) > HealingSurgeCastTime || API.PlayerBuffTimeRemaining(Quake) > HealingSurgeCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingHW => (API.PlayerDebuffRemainingTime(Quake) > HealingWaveCastTime || API.PlayerBuffTimeRemaining(Quake) > HealingWaveCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingCH => (API.PlayerDebuffRemainingTime(Quake) > ChainHealCastTime || API.PlayerBuffTimeRemaining(Quake) > ChainHealCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
@@ -422,6 +423,7 @@ namespace HyperElk.Core
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
                 {
                     API.CastSpell("Stopcast");
+                    API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                     return;
                 }
                 if (API.CanCast(Ascendance) && AscendanceTalent && (UseAscend == "With Cooldowns" && IsCooldowns || UseAscend == "On Cooldown"))
@@ -480,7 +482,7 @@ namespace HyperElk.Core
                     API.CastSpell(WaterShield);
                     return;
                 }
-              if (API.CanCast(HealingRain) && HealingRainAoE && InRange && API.TargetHealthPercent > 0 && (!QuakingHR || QuakingHR && QuakingHelper))
+              if (API.CanCast(HealingRain) && HealingRainAoE && InRange && API.TargetHealthPercent > 0 && SaveQuake)
                 {
                     API.CastSpell(HealingRain);
                     return;
@@ -517,7 +519,7 @@ namespace HyperElk.Core
                     API.CastSpell(VesperTotem);
                     return;
                 }
-                if (NightFaeCheck && InRange && API.TargetHealthPercent > 0 && (!QuakingFae || QuakingFae && QuakingHelper))
+                if (NightFaeCheck && InRange && API.TargetHealthPercent > 0 && SaveQuake)
                 {
                     API.CastSpell(FaeTransfusion);
                     return;
@@ -532,57 +534,57 @@ namespace HyperElk.Core
                     API.CastSpell(UnleashLife + MO);
                     return;
                 }
-                if (API.CanCast(Downpour) && API.TargetHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackTarget && (!QuakingDownpour || QuakingDownpour && QuakingHelper))
+                if (API.CanCast(Downpour) && API.TargetHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackTarget && SaveQuake)
                 {
                     API.CastSpell(Downpour);
                     return;
                 }
-                if (API.CanCast(Downpour) && !API.MacroIsIgnored(Downpour + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackMouseover && (!QuakingDownpour || QuakingDownpour && QuakingHelper))
+                if (API.CanCast(Downpour) && !API.MacroIsIgnored(Downpour + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackMouseover && SaveQuake)
                 {
                     API.CastSpell(Downpour + MO);
                     return;
                 }
-                if (API.CanCast(ChainHeal) && API.TargetHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.TargetHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper))
+                if (API.CanCast(ChainHeal) && API.TargetHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.TargetHasBuff(Riptide)) && SaveQuake)
                 {
                     API.CastSpell(ChainHeal);
                     return;
                 }
-                if (API.CanCast(ChainHeal) && !API.MacroIsIgnored(ChainHeal + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.MouseoverHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper))
+                if (API.CanCast(ChainHeal) && !API.MacroIsIgnored(ChainHeal + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.MouseoverHasBuff(Riptide)) && SaveQuake)
                 {
                     API.CastSpell(ChainHeal + MO);
                     return;
                 }
-                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && (!QuakingChainHarvest || QuakingChainHarvest && QuakingHelper))
+                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && SaveQuake)
                 {
                     API.CastSpell(ChainHarvest);
                     return;
                 }
-                if (VenthyrMOCheck && !API.MacroIsIgnored(ChainHarvest + MO) && IsMouseover && InRange && API.MouseoverHealthPercent > 0 && (!QuakingChainHarvest || QuakingChainHarvest && QuakingHelper))
+                if (VenthyrMOCheck && !API.MacroIsIgnored(ChainHarvest + MO) && IsMouseover && InRange && API.MouseoverHealthPercent > 0 && SaveQuake)
                 {
                     API.CastSpell(ChainHarvest + MO);
                     return;
                 }
-                if (API.CanCast(Wellspring) && WellspringTalent && WellSpringAoE && (!QuakingWellspring || QuakingWellspring && QuakingHelper))
+                if (API.CanCast(Wellspring) && WellspringTalent && WellSpringAoE && SaveQuake)
                 {
                     API.CastSpell(Wellspring);
                     return;
                 }
-                if (API.CanCast(HealingSurge) && API.TargetHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackTarget && (!QuakingHS|| QuakingHS && QuakingHelper))
+                if (API.CanCast(HealingSurge) && API.TargetHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackTarget && SaveQuake)
                 {
                     API.CastSpell(HealingSurge);
                     return;
                 }
-                if (API.CanCast(HealingSurge) && !API.MacroIsIgnored(HealingSurge + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackMouseover && (!QuakingHS || QuakingHS && QuakingHelper))
+                if (API.CanCast(HealingSurge) && !API.MacroIsIgnored(HealingSurge + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackMouseover && SaveQuake)
                 {
                     API.CastSpell(HealingSurge + MO);
                     return;
                 }
-                if (API.CanCast(HealingWave)  && API.TargetHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackTarget && (!QuakingHW || QuakingHW && QuakingHelper))
+                if (API.CanCast(HealingWave)  && API.TargetHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackTarget && SaveQuake)
                 {
                     API.CastSpell(HealingWave);
                     return;
                 }
-                if (API.CanCast(HealingWave) && !API.MacroIsIgnored(HealingWave + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackMouseover && (!QuakingHW || QuakingHW && QuakingHelper))
+                if (API.CanCast(HealingWave) && !API.MacroIsIgnored(HealingWave + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackMouseover && SaveQuake)
                 {
                     API.CastSpell(HealingWave + MO);
                     return;
@@ -598,32 +600,32 @@ namespace HyperElk.Core
                     API.CastSpell(FlameShock + "MO");
                     return;
                 }
-                if (API.CanCast(LavaBurst) && InRange && API.PlayerCanAttackTarget && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper))
+                if (API.CanCast(LavaBurst) && InRange && API.PlayerCanAttackTarget && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && SaveQuake)
                 {
                     API.CastSpell(LavaBurst);
                     return;
                 }
-                if (API.CanCast(LavaBurst) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper))
+                if (API.CanCast(LavaBurst) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && SaveQuake)
                 {
                     API.CastSpell(LavaBurst + "MO");
                     return;
                 }
-                if (API.CanCast(ChainLightning) && InRange && API.PlayerCanAttackTarget && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper))
+                if (API.CanCast(ChainLightning) && InRange && API.PlayerCanAttackTarget && API.TargetUnitInRangeCount >= 3 && SaveQuake)
                 {
                     API.CastSpell(ChainLightning);
                     return;
                 }
-                if (API.CanCast(ChainLightning) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper))
+                if (API.CanCast(ChainLightning) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && API.TargetUnitInRangeCount >= 3 && SaveQuake)
                 {
                     API.CastSpell(ChainLightning + "MO");
                     return;
                 }
-                if (API.CanCast(LightningBolt) && InRange && API.PlayerCanAttackTarget && (!QuakingLightning || QuakingLightning && QuakingHelper))
+                if (API.CanCast(LightningBolt) && InRange && API.PlayerCanAttackTarget && SaveQuake)
                 {
                     API.CastSpell(LightningBolt);
                     return;
                 }
-                if (API.CanCast(LightningBolt) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!QuakingLightning || QuakingLightning && QuakingHelper))
+                if (API.CanCast(LightningBolt) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && SaveQuake)
                 {
                     API.CastSpell(LightningBolt + "MO");
                     return;
@@ -718,7 +720,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotChanneling && !API.PlayerIsMoving)
+            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotChanneling && !API.PlayerIsMoving && SaveQuake)
             {
                 API.CastSpell(Fleshcraft);
                 return;

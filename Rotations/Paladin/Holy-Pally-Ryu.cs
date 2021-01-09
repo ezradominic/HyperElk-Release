@@ -239,7 +239,8 @@ namespace HyperElk.Core
         private bool LoHAutoCheck => API.CanCast(LoH) && InRange && !API.TargetHasBuff(Forbearance);
         bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && TrinketAoE);
         bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && TrinketAoE);
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake) || API.PlayerCurrentCastTimeRemaining > API.PlayerBuffTimeRemaining(Quake)) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+        private bool SaveQuake => (API.PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !API.PlayerHasDebuff(Quake) || !QuakingHelper);
         private bool QuakingHoly => (API.PlayerDebuffRemainingTime(Quake) > HolyLightCastTime || API.PlayerBuffTimeRemaining(Quake) > HolyLightCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingFlash => (API.PlayerDebuffRemainingTime(Quake) > FlashOfLightCastTime || API.PlayerBuffTimeRemaining(Quake) > FlashOfLightCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
         private bool QuakingAshen => (API.PlayerDebuffRemainingTime(Quake) > AshenCastTime || API.PlayerBuffTimeRemaining(Quake) > AshenCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
@@ -511,6 +512,7 @@ namespace HyperElk.Core
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
                 {
                     API.CastSpell("Stopcast");
+                    API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                     return;
                 }
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1 && NotChanneling && InRange)
@@ -542,7 +544,7 @@ namespace HyperElk.Core
                     API.CastSpell(LightsHammer);
                     return;
                 }
-                if (API.CanCast(AshenHallow) && InRange && PlayerCovenantSettings == "Venthyr" && AHAoE && (!QuakingAshen || QuakingAshen && QuakingHelper))
+                if (API.CanCast(AshenHallow) && InRange && PlayerCovenantSettings == "Venthyr" && AHAoE && SaveQuake)
                 {
                     API.CastSpell(AshenHallow);
                     return;
@@ -647,42 +649,42 @@ namespace HyperElk.Core
                     API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
-                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper))
+                if (FlashofLightInfusionCheck && SaveQuake)
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
+                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && SaveQuake)
                 {
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightInfusionCheck && SaveQuake)
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && SaveQuake)
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper))
+                if (FlashofLightCheck && SaveQuake)
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
+                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && SaveQuake)
                 {
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightCheck && SaveQuake)
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && SaveQuake)
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
@@ -780,6 +782,12 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < units.Length; i++)
                         {
+                            if (UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover) && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist"))
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                API.CastSpell("Assist");
+                                return;
+                            }
                             if (API.UnitHealthPercent(units[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
@@ -815,17 +823,17 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover) && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist"))
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                API.CastSpell("Assist");
-                                return;
-                            }
                         }
                         if (API.PlayerIsInRaid && InRange)
                         {
                             for (int i = 0; i < raidunits.Length; i++)
                             {
+                                if (UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover) && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist"))
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    API.CastSpell("Assist");
+                                    return;
+                                }
                                 if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
@@ -859,12 +867,6 @@ namespace HyperElk.Core
                                 if (API.UnitHealthPercent(raidunits[i]) <= HolyShockLifePercent && (PlayerHealth >= HolyShockLifePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover) && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist"))
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    API.CastSpell("Assist");
                                     return;
                                 }
                             }
