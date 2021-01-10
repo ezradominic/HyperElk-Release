@@ -80,7 +80,14 @@ namespace HyperElk.Core
         private string Swipekitty = "Swipe Cat";
         private string Thrashkitty = "Thrash Cat";
         private string Quake = "Quake";
-
+        private string Wake = "The Necrotic Wake";
+        private string OtherSide = "De Other Side";
+        private string Halls = "Halls of Atonement";
+        private string Mists = "Mists of Tirna Scithe";
+        private string Depths = "Sanguine Depths";
+        private string Plague = "Plaguefall";
+        private string Spires = "Spires of Ascension";
+        private string ToP = "Theater of Pain";
 
         //Talents
         bool AbundanceTalent => API.PlayerIsTalentSelected(1, 1);
@@ -113,7 +120,15 @@ namespace HyperElk.Core
         int PlayerHealth => API.TargetHealthPercent;
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
         string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
-
+        string[] NecoritcWakeDispell = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter" };
+        string[] PlaugeFallDispell = {"Slime Injection", "Gripping Infection", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm"  };
+        string[] MistsofTirnaScitheDispell = { "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen", "Bramblethorn Entanglement", "Dying Breath","Debilitating Poison",   };
+        string[] HallofAtonementDispell = {"Sinlight Visions", "Siphon Life", "Turn to Stone" ,"Stony Veins","Curse of Stone", "Turned to Stone", "Curse of Obliteration"};
+        string[] SanguineDepthsDispell = {"Anguished Cries","Wrack Soul","Sintouched Anima", "Curse of Suppression","Explosive Anger"  };
+        string[] TheaterofPainDispell = {"Soul Corruption","Spectral Reach","Death Grasp","Shadow Vulnerability", "Curse of Desolation" };
+        string[] DeOtherSideDispell = {"Cosmic Artifice", "Wailing Grief","Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust", "Hex" };
+        string[] SpireofAscensionDispell = {"Dark Lance","Insidious Venom","Charged Anima","Lost Confidence","Burden of Knowledge","Internal Strife","Forced Confession", "Insidious Venom" };
+        public string[] InstanceList = { "The Necrotic Wake", "De Other Side", "Halls of Atonement", "Mists of Tirna Scithe", "Plaguefall", "Sanguine Depths", "Spires of Ascension", "Theater of Pain" };
         private static readonly Stopwatch player = new Stopwatch();
         private static readonly Stopwatch party1 = new Stopwatch();
         private static readonly Stopwatch party2 = new Stopwatch();
@@ -125,6 +140,7 @@ namespace HyperElk.Core
 
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
+        private string UseDispell => InstanceList[CombatRoutine.GetPropertyInt("Instance List")];
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
@@ -168,7 +184,7 @@ namespace HyperElk.Core
         private bool RegrowthCheck => (API.PlayerHasBuff(Clear) && API.TargetHealthPercent <= 90 ||API.TargetHealthPercent <= RegrowthLifePercent) && !API.PlayerCanAttackTarget && NotChanneling && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving;
         private bool RejCheck => API.TargetHealthPercent <= RejLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Rejuvenation) && (!GerminationTalent || API.TargetHasBuff(Rejuvenation) && GerminationTalent && !API.TargetHasBuff(GerminationHoT) && API.TargetHealthPercent <= RejGermLifePercent) && !ChannelingCov && !ChannelingTranq && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool SwiftCheck => API.TargetHealthPercent <= SwiftmendLifePercent && !API.PlayerCanAttackTarget && API.SpellCharges(Swiftmend) > 0 && (API.TargetHasBuff(Rejuvenation) || API.TargetHasBuff(Regrowth) || API.TargetHasBuff(WildGrowth)) && (!API.PlayerIsMoving || API.PlayerIsMoving) && NotChanneling && !ChannelingCov && !ChannelingTranq;
-        private bool LifeBloomCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Lifebloom) && (!PhotosynthesisTalent && API.TargetRoleSpec == API.TankRole || PhotosynthesisTalent && (API.TargetRoleSpec == API.HealerRole  || API.TargetRoleSpec == API.TankRole)) && LifeBloomTracking && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
+        private bool LifeBloomCheck => API.TargetHealthPercent <= LifebloomLifePercent && UseLeg != "The Dark Titan's Lesson" && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Lifebloom) && (!PhotosynthesisTalent && API.TargetRoleSpec == API.TankRole || PhotosynthesisTalent && (API.TargetRoleSpec == API.HealerRole  || API.TargetRoleSpec == API.TankRole)) && LifeBloomTracking && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
 
         private bool LifeBloom2Check => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(Lifebloom) && (UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole) || PhotosynthesisTalent && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole && !API.TargetHasBuff(Lifebloom)) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool LifeBloomLegCheck => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !API.TargetHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole);
@@ -249,7 +265,7 @@ namespace HyperElk.Core
        // private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
-
+        public bool SootheList => API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
 
 
 
@@ -258,10 +274,11 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Resto Druid by Ryu";
-            API.WriteLog("Welcome to Resto Druid v1.2 by Ryu");
+            API.WriteLog("Welcome to Resto Druid v1.3 by Ryu");
             API.WriteLog("BETA ROTATION : Some things are still missing. Please post feedback in Druid Channel.");
-            // API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
+            API.WriteLog("Mouseover Support is added FOR DISPELLS ONLY. Please create /cast [@mouseover] xx whereas xx is your Dispell and assign it the bind with MO on it in keybinds.");
             API.WriteLog("For all ground spells, either use @Cursor or when it is time to place it, the Bot will pause until you've placed it. If you'd perfer to use your own logic for them, please place them on ignore in the spellbook.");
+            API.WriteLog("For using Dark Titan's Lesson, please BIND LifebloomL in your bindings to YOUR Lifebloom and select in the Legendary select. It changes the ID of the spell and that will mess the rotation if these things aren't done.");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
             API.WriteLog("Please us a /cast [target=player] macro for Innervate to work properly or it will cast on your current target");
             API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's in the spell book. Enable it in the toggles. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This does work for raid, however, requires the addon Bindpad. See Video in discord.");
@@ -296,6 +313,74 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Rip, 1079);
             CombatRoutine.AddDebuff(Rake, 155722);
             CombatRoutine.AddDebuff(Quake, 240447);
+            //Soothe
+            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Unholy Frenzy", 136224);
+            CombatRoutine.AddBuff("Renew", 135953);
+            CombatRoutine.AddBuff("Additional Treads", 965900);
+            CombatRoutine.AddBuff("Slime Coated", 3459153);
+            CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
+            CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
+            CombatRoutine.AddBuff("Unholy Fervor", 2576093);
+            CombatRoutine.AddBuff("Raging Tantrum", 132126);
+            CombatRoutine.AddBuff("Loyal Beasts", 458967);
+            CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
+            CombatRoutine.AddBuff("Seething Rage", 136225);
+            CombatRoutine.AddBuff("Dark Shroud", 2576096);
+
+            //Dispels
+            CombatRoutine.AddDebuff("Chilled", 328664);
+            CombatRoutine.AddDebuff("Frozen Binds", 320788);
+            CombatRoutine.AddDebuff("Clinging Darkness", 323347);
+            CombatRoutine.AddDebuff("Rasping Scream", 324293);
+            CombatRoutine.AddDebuff("Heaving Retch", 320596);
+            CombatRoutine.AddDebuff("Goresplatter", 338353);
+            CombatRoutine.AddDebuff("Slime Injection", 329110);
+            CombatRoutine.AddDebuff("Gripping Infection", 328180);
+            CombatRoutine.AddDebuff("Cytotoxic Slash", 325552);
+            CombatRoutine.AddDebuff("Venompiercer", 328395);
+            CombatRoutine.AddDebuff("Wretched Phlegm", 334926);
+            CombatRoutine.AddDebuff("Repulsive Visage", 328756);
+            CombatRoutine.AddDebuff("Soul Split", 322557);
+            CombatRoutine.AddDebuff("Anima Injection", 325224);
+            CombatRoutine.AddDebuff("Bewildering Pollen", 321968);
+            CombatRoutine.AddDebuff("Bramblethorn Entanglement", 324859);
+            CombatRoutine.AddDebuff("Dying Breath", 322968);
+            CombatRoutine.AddDebuff("Debilitating Poison", 326092);
+            CombatRoutine.AddDebuff("Sinlight Visions", 339237);
+            CombatRoutine.AddDebuff("Siphon Life", 325701);
+            CombatRoutine.AddDebuff("Turn to Stone", 326607);
+            CombatRoutine.AddDebuff("Stony Veins", 326632);
+            CombatRoutine.AddDebuff("Curse of Stone", 319603);
+            CombatRoutine.AddDebuff("Turned to Stone", 319611);
+            CombatRoutine.AddDebuff("Curse of Obliteration", 325876);
+            CombatRoutine.AddDebuff("Cosmic Artifice", 325725);
+            CombatRoutine.AddDebuff("Wailing Grief", 340026);
+            CombatRoutine.AddDebuff("Shadow Word:  Pain", 332707);
+            CombatRoutine.AddDebuff("Soporific Shimmerdust", 334493);
+            CombatRoutine.AddDebuff("Soporific Shimmerdust", 334496);
+            CombatRoutine.AddDebuff("Hex", 332605);
+            CombatRoutine.AddDebuff("Anguished Cries", 325885);
+            CombatRoutine.AddDebuff("Wrack Soul", 321038);
+            CombatRoutine.AddDebuff("Sintouched Anima", 328494);
+            CombatRoutine.AddDebuff("Curse of Suppression", 326836);
+            CombatRoutine.AddDebuff("Explosive Anger", 336277);
+            CombatRoutine.AddDebuff("Dark Lance", 327481);
+            CombatRoutine.AddDebuff("Insidious Venom", 323636);
+            CombatRoutine.AddDebuff("Charged Anima", 338731);
+            CombatRoutine.AddDebuff("Lost Confidence", 322818);
+            CombatRoutine.AddDebuff("Burden of Knowledge", 317963);
+            CombatRoutine.AddDebuff("Internal Strife", 327648);
+            CombatRoutine.AddDebuff("Forced Confession", 328331);
+            CombatRoutine.AddDebuff("Insidious Venom", 317661);
+            CombatRoutine.AddDebuff("Soul Corruption", 333708);
+            CombatRoutine.AddDebuff("Spectral Reach", 319669);
+            CombatRoutine.AddDebuff("Death Grasp", 323831);
+            CombatRoutine.AddDebuff("Shadow Vulnerability", 330725);
+            CombatRoutine.AddDebuff("Curse of Desolation", 333299);
+
+
             //Spell
             CombatRoutine.AddSpell(Rejuvenation, 774);
             CombatRoutine.AddSpell(Regrowth, 8936);
@@ -353,12 +438,14 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Auto Target");
             CombatRoutine.AddToggle("OOC");
+            CombatRoutine.AddToggle("Mouseover");
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Macro
+            CombatRoutine.AddMacro(NaturesCure + "MO");
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro("Stopcast", "F10");
@@ -446,6 +533,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoERaid, "Number of units for AoE Healing in raid ", numbRaidList, " Units for AoE Healing in raid", "Healing", 7);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
             CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " should be used, set to 0 to disable", "Healing", 55);
+            CombatRoutine.AddProp("Instance List", "Select your instance", InstanceList, "Select Your Instance for Dispells", "Dispell");
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket 1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket 2 be used", "Trinket", 0);
 
@@ -459,12 +547,196 @@ namespace HyperElk.Core
                 API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                 return;
             }
-            if (API.LastSpellCastInGame == Efflor)
+            if ((API.LastSpellCastInGame == Efflor || API.PlayerLastSpell == Efflor))
             {
-                EfflorWatch.Restart();
+                EfflorWatch.Stop();
+                EfflorWatch.Start();
             }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat))
             {
+                #region Dispell
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Wake)
+                {
+                    for (int i = 0; i < NecoritcWakeDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(NecoritcWakeDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Wake)
+                {
+                    for (int i = 0; i < NecoritcWakeDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(NecoritcWakeDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == OtherSide)
+                {
+                    for (int i = 0; i < DeOtherSideDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(DeOtherSideDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == OtherSide)
+                {
+                    for (int i = 0; i < DeOtherSideDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(DeOtherSideDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Halls)
+                {
+                    for (int i = 0; i < HallofAtonementDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(HallofAtonementDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Halls)
+                {
+                    for (int i = 0; i < HallofAtonementDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(HallofAtonementDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Mists)
+                {
+                    for (int i = 0; i < MistsofTirnaScitheDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(MistsofTirnaScitheDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Mists)
+                {
+                    for (int i = 0; i < MistsofTirnaScitheDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(MistsofTirnaScitheDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Plague)
+                {
+                    for (int i = 0; i < PlaugeFallDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(PlaugeFallDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Plague)
+                {
+                    for (int i = 0; i < PlaugeFallDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(PlaugeFallDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Depths)
+                {
+                    for (int i = 0; i < SanguineDepthsDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(SanguineDepthsDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Depths)
+                {
+                    for (int i = 0; i < SanguineDepthsDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(SanguineDepthsDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Spires)
+                {
+                    for (int i = 0; i < SpireofAscensionDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(SpireofAscensionDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Spires)
+                {
+                    for (int i = 0; i < SpireofAscensionDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(SpireofAscensionDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == ToP)
+                {
+                    for (int i = 0; i < TheaterofPainDispell.Length; i++)
+                    {
+                        if (API.TargetHasDebuff(TheaterofPainDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure);
+                            return;
+                        }
+                    }
+                }
+                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == ToP)
+                {
+                    for (int i = 0; i < TheaterofPainDispell.Length; i++)
+                    {
+                        if (API.MouseoverHasDebuff(TheaterofPainDispell[i]))
+                        {
+                            API.CastSpell(NaturesCure + "MO");
+                            return;
+                        }
+                    }
+                }
+                #endregion
+                if (API.CanCast(Soothe) && (SootheList) && InRange)
+                {
+                    API.CastSpell(Soothe);
+                    return;
+                }
                 if (API.CanCast(Efflor) && API.PlayerIsInCombat && (!EfflorWatch.IsRunning || EfflorWatch.ElapsedMilliseconds >= 30000))
                 {
                     API.CastSpell(Efflor);
@@ -638,7 +910,12 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if ((API.UnitRoleSpec(units[i]) == API.TankRole || API.UnitRoleSpec(units[i]) == API.HealerRole) && UseLeg == "The Dark Titan's Lesson" && !API.UnitHasBuff(LifebloomL, units[i]) && LifeBloomLTracking)
+                            if (API.UnitRoleSpec(units[i]) == API.TankRole && UseLeg == "The Dark Titan's Lesson" && !API.UnitHasBuff(LifebloomL, units[i]) && LifeBloomLTracking)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitRoleSpec(units[i]) == API.HealerRole && UseLeg == "The Dark Titan's Lesson" && !API.UnitHasBuff(LifebloomL, units[i]) && LifeBloomLTracking)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
@@ -679,7 +956,12 @@ namespace HyperElk.Core
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
                             }
-                            if ((API.UnitRoleSpec(raidunits[i]) == API.TankRole || API.UnitRoleSpec(raidunits[i]) == API.HealerRole) && UseLeg == "The Dark Titan's Lesson" && !API.UnitHasBuff(LifebloomL, raidunits[i]) && LifeBloomLTracking)
+                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && UseLeg == "The Dark Titan's Lesson" && !API.UnitHasBuff(LifebloomL, raidunits[i]) && LifeBloomLTracking)
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitRoleSpec(raidunits[i]) == API.HealerRole && UseLeg == "The Dark Titan's Lesson" && !API.UnitHasBuff(LifebloomL, raidunits[i]) && LifeBloomLTracking)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
