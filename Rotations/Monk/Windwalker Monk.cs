@@ -60,7 +60,7 @@ namespace HyperElk.Core
         string[] InvokeXuenList = new string[] {"with Cooldowns" };
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
-        string[] WeaponsofOrderList = new string[] {"with Cooldowns" };
+        string[] WeaponsofOrderList = new string[] {"with Cooldowns", "AOE" };
         //Necrolords
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         string[] BonedustBrewList = new string[] {"with Cooldowns" };
@@ -310,6 +310,11 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=aoe,if=active_enemies>=3
             if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
+                if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "AOE")
+                {
+                    API.CastSpell(WeaponsofOrder);
+                    return;
+                }
                 //actions.aoe=whirling_dragon_punch
                 if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && NotChanneling && !CurrenCastFistsOfFury)
                 {
@@ -723,7 +728,7 @@ namespace HyperElk.Core
             }
             //actions.cd_serenity+=/touch_of_karma,if=fight_remains>90|pet.xuen_the_white_tiger.active|fight_remains<10
             //actions.cd_serenity+=/weapons_of_order,if=cooldown.rising_sun_kick.remains<execute_time
-            if (API.CanCast(WeaponsofOrder) && API.SpellCDDuration(RisingSunKick) < API.TargetTimeToExec)
+            if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "with Cooldowns" && API.SpellCDDuration(RisingSunKick) < API.TargetTimeToExec)
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
@@ -780,7 +785,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_sef+=/weapons_of_order,if=(raid_event.adds.in>45|raid_event.adds.up)&cooldown.rising_sun_kick.remains<execute_time
-            if (API.CanCast(WeaponsofOrder))
+            if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "with Cooldowns")
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
