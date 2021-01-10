@@ -96,6 +96,7 @@ namespace HyperElk.Core
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string DampenHarm = "Dampen Harm";
+        private string LegSweep = "Leg Sweep";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
@@ -160,7 +161,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FaelineStomp, 327104,"Oem6");
             CombatRoutine.AddSpell(FallenOrder, 326860,"Oem6");
             CombatRoutine.AddSpell(DampenHarm, 122278, "F1");
-
+            CombatRoutine.AddSpell(LegSweep, 119381);
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
@@ -333,6 +334,11 @@ namespace HyperElk.Core
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
             {
                 API.CastSpell(SpearHandStrike);
+                return;
+            }
+            if (isInterrupt && API.SpellISOnCooldown(SpearHandStrike) && API.CanCast(LegSweep) && IsMelee && PlayerLevel >= 18)
+            {
+                API.CastSpell(LegSweep);
                 return;
             }
             rotation();
