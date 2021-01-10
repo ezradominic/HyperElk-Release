@@ -265,6 +265,7 @@ namespace HyperElk.Core
        // private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool IsDispell => API.ToggleIsEnabled("Dispell");
         public bool SootheList => API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
 
 
@@ -439,6 +440,7 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("Auto Target");
             CombatRoutine.AddToggle("OOC");
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Dispell");
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -555,179 +557,182 @@ namespace HyperElk.Core
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat))
             {
                 #region Dispell
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Wake)
+                if (IsDispell)
                 {
-                    for (int i = 0; i < NecoritcWakeDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Wake)
                     {
-                        if (API.TargetHasDebuff(NecoritcWakeDispell[i]))
+                        for (int i = 0; i < NecoritcWakeDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(NecoritcWakeDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Wake)
-                {
-                    for (int i = 0; i < NecoritcWakeDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Wake)
                     {
-                        if (API.MouseoverHasDebuff(NecoritcWakeDispell[i]))
+                        for (int i = 0; i < NecoritcWakeDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(NecoritcWakeDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == OtherSide)
-                {
-                    for (int i = 0; i < DeOtherSideDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == OtherSide)
                     {
-                        if (API.TargetHasDebuff(DeOtherSideDispell[i]))
+                        for (int i = 0; i < DeOtherSideDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(DeOtherSideDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == OtherSide)
-                {
-                    for (int i = 0; i < DeOtherSideDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == OtherSide)
                     {
-                        if (API.MouseoverHasDebuff(DeOtherSideDispell[i]))
+                        for (int i = 0; i < DeOtherSideDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(DeOtherSideDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Halls)
-                {
-                    for (int i = 0; i < HallofAtonementDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Halls)
                     {
-                        if (API.TargetHasDebuff(HallofAtonementDispell[i]))
+                        for (int i = 0; i < HallofAtonementDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(HallofAtonementDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Halls)
-                {
-                    for (int i = 0; i < HallofAtonementDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Halls)
                     {
-                        if (API.MouseoverHasDebuff(HallofAtonementDispell[i]))
+                        for (int i = 0; i < HallofAtonementDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(HallofAtonementDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Mists)
-                {
-                    for (int i = 0; i < MistsofTirnaScitheDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Mists)
                     {
-                        if (API.TargetHasDebuff(MistsofTirnaScitheDispell[i]))
+                        for (int i = 0; i < MistsofTirnaScitheDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(MistsofTirnaScitheDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Mists)
-                {
-                    for (int i = 0; i < MistsofTirnaScitheDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Mists)
                     {
-                        if (API.MouseoverHasDebuff(MistsofTirnaScitheDispell[i]))
+                        for (int i = 0; i < MistsofTirnaScitheDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(MistsofTirnaScitheDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Plague)
-                {
-                    for (int i = 0; i < PlaugeFallDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Plague)
                     {
-                        if (API.TargetHasDebuff(PlaugeFallDispell[i]))
+                        for (int i = 0; i < PlaugeFallDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(PlaugeFallDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Plague)
-                {
-                    for (int i = 0; i < PlaugeFallDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Plague)
                     {
-                        if (API.MouseoverHasDebuff(PlaugeFallDispell[i]))
+                        for (int i = 0; i < PlaugeFallDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(PlaugeFallDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Depths)
-                {
-                    for (int i = 0; i < SanguineDepthsDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Depths)
                     {
-                        if (API.TargetHasDebuff(SanguineDepthsDispell[i]))
+                        for (int i = 0; i < SanguineDepthsDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(SanguineDepthsDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Depths)
-                {
-                    for (int i = 0; i < SanguineDepthsDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Depths)
                     {
-                        if (API.MouseoverHasDebuff(SanguineDepthsDispell[i]))
+                        for (int i = 0; i < SanguineDepthsDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(SanguineDepthsDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Spires)
-                {
-                    for (int i = 0; i < SpireofAscensionDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Spires)
                     {
-                        if (API.TargetHasDebuff(SpireofAscensionDispell[i]))
+                        for (int i = 0; i < SpireofAscensionDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(SpireofAscensionDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Spires)
-                {
-                    for (int i = 0; i < SpireofAscensionDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == Spires)
                     {
-                        if (API.MouseoverHasDebuff(SpireofAscensionDispell[i]))
+                        for (int i = 0; i < SpireofAscensionDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(SpireofAscensionDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == ToP)
-                {
-                    for (int i = 0; i < TheaterofPainDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == ToP)
                     {
-                        if (API.TargetHasDebuff(TheaterofPainDispell[i]))
+                        for (int i = 0; i < TheaterofPainDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure);
-                            return;
+                            if (API.TargetHasDebuff(TheaterofPainDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure);
+                                return;
+                            }
                         }
                     }
-                }
-                if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == ToP)
-                {
-                    for (int i = 0; i < TheaterofPainDispell.Length; i++)
+                    if (API.CanCast(NaturesCure) && IsMouseover && !ChannelingTranq && !ChannelingCov && NotChanneling && UseDispell == ToP)
                     {
-                        if (API.MouseoverHasDebuff(TheaterofPainDispell[i]))
+                        for (int i = 0; i < TheaterofPainDispell.Length; i++)
                         {
-                            API.CastSpell(NaturesCure + "MO");
-                            return;
+                            if (API.MouseoverHasDebuff(TheaterofPainDispell[i]))
+                            {
+                                API.CastSpell(NaturesCure + "MO");
+                                return;
+                            }
                         }
                     }
                 }
