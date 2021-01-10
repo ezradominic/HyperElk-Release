@@ -147,7 +147,6 @@ namespace HyperElk.Core
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private string UseUnholyBlight => CDUsageWithAOE[CombatRoutine.GetPropertyInt(UnholyBlight)];
-        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
@@ -218,7 +217,6 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Use DnD");
-            CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("Wounds");
 
 
