@@ -127,7 +127,7 @@ namespace HyperElk.Core
         string[] SanguineDepthsDispell = {"Anguished Cries","Wrack Soul","Sintouched Anima", "Curse of Suppression","Explosive Anger"  };
         string[] TheaterofPainDispell = {"Soul Corruption","Spectral Reach","Death Grasp","Shadow Vulnerability", "Curse of Desolation" };
         string[] DeOtherSideDispell = {"Cosmic Artifice", "Wailing Grief","Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust 2", "Hex" };
-        string[] SpireofAscensionDispell = {"Dark Lance","Insidious Venom","Charged Anima","Lost Confidence","Burden of Knowledge","Internal Strife","Forced Confession", "Insidious Venom" };
+        string[] SpireofAscensionDispell = {"Dark Lance","Insidious Venom","Charged Anima","Lost Confidence","Burden of Knowledge","Internal Strife","Forced Confession", "Insidious Venom 2" };
         public string[] InstanceList = { "The Necrotic Wake", "De Other Side", "Halls of Atonement", "Mists of Tirna Scithe", "Plaguefall", "Sanguine Depths", "Spires of Ascension", "Theater of Pain" };
         private static readonly Stopwatch player = new Stopwatch();
         private static readonly Stopwatch party1 = new Stopwatch();
@@ -374,7 +374,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Burden of Knowledge", 317963);
             CombatRoutine.AddDebuff("Internal Strife", 327648);
             CombatRoutine.AddDebuff("Forced Confession", 328331);
-            CombatRoutine.AddDebuff("Insidious Venom", 317661);
+            CombatRoutine.AddDebuff("Insidious Venom 2", 317661);
             CombatRoutine.AddDebuff("Soul Corruption", 333708);
             CombatRoutine.AddDebuff("Spectral Reach", 319669);
             CombatRoutine.AddDebuff("Death Grasp", 323831);
