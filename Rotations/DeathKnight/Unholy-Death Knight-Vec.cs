@@ -218,6 +218,7 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Use DnD");
+            CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("Wounds");
 
 
@@ -309,6 +310,16 @@ namespace HyperElk.Core
                     API.CastSpell("Mind Freeze");
                     return;
                 }
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && !API.MacroIsIgnored(PhialofSerenity) && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
+                    return;
+                }
                 if (isRacial && IsCooldowns)
                 {
                     //actions +=/ arcane_torrent,if= runic_power.deficit > 65 & (pet.gargoyle.active | !talent.summon_gargoyle.enabled) & rune.deficit >= 5
@@ -379,7 +390,11 @@ namespace HyperElk.Core
                     API.CastSpell(ShackletheUnworthy);
                     return;
                 }
-
+                if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercent)
+                {
+                    API.CastSpell(Fleshcraft);
+                    return;
+                }
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                 {
                     API.CastSpell("Trinket1");
