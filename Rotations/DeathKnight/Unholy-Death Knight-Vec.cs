@@ -8,7 +8,7 @@ namespace HyperElk.Core
     {
         private bool SmallCDs => API.ToggleIsEnabled("Small CDs");
         private bool UseDnD => API.ToggleIsEnabled("Use DnD");
-        private bool PoolWounds => API.ToggleIsEnabled("Wounds");
+        private bool PoolWounds => API.ToggleIsEnabled("Pool Wounds");
         private string ShackletheUnworthy = "Shackle the Unworthy";
         private string SwarmingMist = "Swarming Mist";
         private string DeathsDue = "Death's Due";
@@ -217,7 +217,7 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Use DnD");
-            CombatRoutine.AddToggle("Wounds");
+            CombatRoutine.AddToggle("Pool Wounds");
 
 
             //Settings
