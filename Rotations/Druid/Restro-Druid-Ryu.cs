@@ -126,7 +126,7 @@ namespace HyperElk.Core
         string[] HallofAtonementDispell = {"Sinlight Visions", "Siphon Life", "Turn to Stone" ,"Stony Veins","Curse of Stone", "Turned to Stone", "Curse of Obliteration"};
         string[] SanguineDepthsDispell = {"Anguished Cries","Wrack Soul","Sintouched Anima", "Curse of Suppression","Explosive Anger"  };
         string[] TheaterofPainDispell = {"Soul Corruption","Spectral Reach","Death Grasp","Shadow Vulnerability", "Curse of Desolation" };
-        string[] DeOtherSideDispell = {"Cosmic Artifice", "Wailing Grief","Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust", "Hex" };
+        string[] DeOtherSideDispell = {"Cosmic Artifice", "Wailing Grief","Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust 2", "Hex" };
         string[] SpireofAscensionDispell = {"Dark Lance","Insidious Venom","Charged Anima","Lost Confidence","Burden of Knowledge","Internal Strife","Forced Confession", "Insidious Venom" };
         public string[] InstanceList = { "The Necrotic Wake", "De Other Side", "Halls of Atonement", "Mists of Tirna Scithe", "Plaguefall", "Sanguine Depths", "Spires of Ascension", "Theater of Pain" };
         private static readonly Stopwatch player = new Stopwatch();
@@ -360,7 +360,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Wailing Grief", 340026);
             CombatRoutine.AddDebuff("Shadow Word:  Pain", 332707);
             CombatRoutine.AddDebuff("Soporific Shimmerdust", 334493);
-            CombatRoutine.AddDebuff("Soporific Shimmerdust", 334496);
+            CombatRoutine.AddDebuff("Soporific Shimmerdust 2", 334496);
             CombatRoutine.AddDebuff("Hex", 332605);
             CombatRoutine.AddDebuff("Anguished Cries", 325885);
             CombatRoutine.AddDebuff("Wrack Soul", 321038);
