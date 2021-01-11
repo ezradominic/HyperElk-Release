@@ -88,6 +88,7 @@ namespace HyperElk.Core
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
         private bool IsAutoDetox => API.ToggleIsEnabled("Auto Detox");
         private bool AoEHeal => API.ToggleIsEnabled("AOE Heal");
+
         //General
         private static readonly Stopwatch JadeSerpentStatueWatch = new Stopwatch();
 
@@ -133,6 +134,15 @@ namespace HyperElk.Core
 
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "never" };
+        private static bool CanDetoxTarget(string debuff)
+        {
+            return API.TargetHasDebuff(debuff, false, true);
+        }
+        private static bool CanDetoxTarget(string debuff, string unit)
+        {
+            return API.UnitHasDebuff(debuff, unit, false, true);
+        }
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Mistweaver Monk by Mufflon12";
@@ -322,13 +332,14 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+
             if (IsAutoDetox)
             {
-                if (API.CanCast(Detox))
+                if (API.CanCast(Detox) && NotChanneling)
                 {
                     for (int i = 0; i < DetoxList.Length; i++)
                     {
-                        if (API.TargetHasDebuff(DetoxList[i]))
+                        if (CanDetoxTarget(DetoxList[i]))
                         {
                             API.CastSpell(Detox);
                             return;
