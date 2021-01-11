@@ -785,9 +785,9 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitRoleSpec(units[i]) == API.HealerRole && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, units[i]))
+                            if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson")
                             {
-                                API.CastSpell(PlayerTargetArray[i]);
+                                API.CastSpell(Player);
                                 return;
                             }
                         }
