@@ -77,7 +77,7 @@ namespace HyperElk.Core
         private bool HasDefenseBuff => API.PlayerHasBuff(ShieldofVengeance, false, false) || API.PlayerHasBuff(DivineShield, false, false);
         private float CrusaderStrikeCooldown => (6 / (1 + API.PlayerGetHaste / 100)) * 100;
         private float Crusader_Strike_Fractional => (API.SpellCharges(CrusaderStrike) * 100 + ((CrusaderStrikeCooldown - API.SpellChargeCD(CrusaderStrike)) / (CrusaderStrikeCooldown / 100)));
-        private bool gcd_to_hpg => API.SpellCDDuration(CrusaderStrike) >= gcd && API.SpellCDDuration(BladeofJustice) >= gcd && API.SpellCDDuration(Judgment) >= gcd && (API.SpellCDDuration(HammerofWrath) >= gcd || API.TargetHealthPercent > 20) && API.SpellCDDuration(WakeofAshes) >= gcd;
+        private bool gcd_to_hpg => API.SpellCDDuration(CrusaderStrike) >= gcd && API.SpellCDDuration(BladeofJustice) >= gcd && API.SpellCDDuration(Judgment) >= gcd && (API.SpellCDDuration(HammerofWrath) >= gcd || API.TargetHealthPercent > 20) && (API.SpellCDDuration(WakeofAshes) >= gcd || !(UseWakeofAshes == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE));
         private bool Conduit_enabled(string conduit)
         {
             return API.PlayerIsConduitSelected(conduit);
