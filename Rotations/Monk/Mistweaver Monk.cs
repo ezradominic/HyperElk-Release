@@ -103,7 +103,7 @@ namespace HyperElk.Core
         private bool RevivalAoE => UnitBelowHealthPercent(RevivalPercent) >= AoENumber;
         private bool EssenceFontAoE => UnitBelowHealthPercent(EssenceFontPercent) >= AoENumber;
         private bool RefreshingJadeWindAoE => UnitBelowHealthPercent(RefreshingJadeWindPercent) >= AoENumber;
-        private int WeaponsofOrderPercent => numbList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
+        private int WeaponsofOrderPercent => numbList[CombatRoutine.GetPropertyInt(WeaponsofOrderAOE)];
         private int EnvelopingMistPercent => numbList[CombatRoutine.GetPropertyInt(EnvelopingMist)];
         private int VivifyPercent => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int SoothingMistPercent => numbList[CombatRoutine.GetPropertyInt(SoothingMist)];
@@ -120,7 +120,7 @@ namespace HyperElk.Core
         private int SpiritualManaPotionManaPercent => numbList[CombatRoutine.GetPropertyInt(SpiritualManaPotion)];
 
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
-        string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE%", };
+        string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE", };
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         bool ChannelSoothingMist => API.CurrentCastSpellID("player") == 115175;
 
@@ -311,7 +311,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(RefreshingJadeWind, RefreshingJadeWind + " Life Percent", numbList, "Life percent at which" + RefreshingJadeWind + "is used when three members are at life percent, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(ThunderFocusTea, "Use " + ThunderFocusTea, ThunderFocusTeaList, "Use " + ThunderFocusTea + "always, Cooldowns, AOE", "Healing", 0);
             CombatRoutine.AddProp(WeaponsofOrder, "Use " + WeaponsofOrder, WeaponsofOrderList, "How to use Weapons of Order", "Covenant Kyrian", 0);
-            CombatRoutine.AddProp(WeaponsofOrderAOE, WeaponsofOrder + " Life Percent", numbList, "Life percent at which" + WeaponsofOrder + "is used when three members are at life percent, set to 0 to disable", "Covenant Kyrian", 85);
+            CombatRoutine.AddProp(WeaponsofOrderAOE, WeaponsofOrderAOE + " Life Percent", numbList, "Life percent at which " + WeaponsofOrderAOE + "is used when three members are at life percent, set to 0 to disable", "Covenant Kyrian", 85);
 
             CombatRoutine.AddProp(Fleshcraft, Fleshcraft, numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Necrolord", 5);
             CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
@@ -322,11 +322,6 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-                        if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-            {
-                API.CastSpell("Healthstone");
-                return;
-            }
             if (IsAutoDetox)
             {
                 if (API.CanCast(Detox))
@@ -341,7 +336,7 @@ namespace HyperElk.Core
                     }
                 }
             }
-            if (API.CanCast(WeaponsofOrder) && WeaponsofOrderAoE && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "AOE%" && API.PlayerIsInCombat)
+            if (API.CanCast(WeaponsofOrder) && WeaponsofOrderAoE && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "AOE" && API.PlayerIsInCombat)
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
@@ -359,11 +354,6 @@ namespace HyperElk.Core
             if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.TargetHealthPercent <= FleshcraftPercentProc)
             {
                 API.CastSpell(Fleshcraft);
-                return;
-            }
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-            {
-                API.CastSpell("Healthstone");
                 return;
             }
             if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
