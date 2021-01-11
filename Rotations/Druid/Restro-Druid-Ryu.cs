@@ -568,10 +568,9 @@ namespace HyperElk.Core
                 API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                 return;
             }
-            if ((API.LastSpellCastInGame == Efflor || API.PlayerLastSpell == Efflor))
+            if (API.LastSpellCastInGame == Efflor)
             {
-                EfflorWatch.Stop();
-                EfflorWatch.Start();
+                EfflorWatch.Restart();
             }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat))
             {
@@ -610,6 +609,7 @@ namespace HyperElk.Core
                 if (API.CanCast(Efflor) && API.PlayerIsInCombat && (!EfflorWatch.IsRunning || EfflorWatch.ElapsedMilliseconds >= 30000))
                 {
                     API.CastSpell(Efflor);
+                    EfflorWatch.Start();
                     return;
                 }
                 if (API.CanCast(Convoke) && NightFaeCheck && InRange && (!QuakingConvoke || QuakingConvoke && QuakingHelper))
