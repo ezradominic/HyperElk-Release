@@ -17,6 +17,7 @@
 // v2.5 complete rewrite
 // v2.6 racials and a few small fixes
 // v2.7 roots for Torghast
+// v2.8 regrowth fix
 
 using System.Diagnostics;
 
@@ -174,11 +175,12 @@ namespace HyperElk.Core
         private int KittyFormLifePercent => numbList[CombatRoutine.GetPropertyInt(CatForm)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private bool needheal => PlayerHasBuff(PredatorySwiftness) && API.PlayerHealthPercent <= RegrowthLifePercent && !API.SpellIsIgnored(Regrowth);
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v2.7");
+            API.WriteLog("Welcome to smartie`s Feral Druid v2.8");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -395,6 +397,8 @@ namespace HyperElk.Core
                 return;
             if (!API.PlayerIsMounted && !PlayerHasBuff(TravelForm))
             {
+                //Def cds and kick
+                Defensive();
                 if (PlayerHasBuff(BearForm))
                 {
                     if (API.CanCast(Thrashbear) && isThrashMelee && PlayerLevel >= 11 && !TargetHasDebuff(Thrashbear))
@@ -461,10 +465,8 @@ namespace HyperElk.Core
                 {
                     Stealth();
                 }
-                //Def cds and kick
-                Defensive();
                 //actions+=/call_action_list,name=cooldown
-                if (PlayerHasBuff(CatForm))
+                if (PlayerHasBuff(CatForm) && !needheal)
                 {
                     Cooldowns();
                     //actions+=/run_action_list,name=finisher,if=combo_points>=(5-variable.4cp_bite)
@@ -525,7 +527,7 @@ namespace HyperElk.Core
         }
         private void Defensive()
         {
-            if (isInterrupt && API.CanCast(SkullBash) && PlayerLevel >= 26 && isKickRange)
+            if (isInterrupt && API.CanCast(SkullBash) && PlayerLevel >= 26 && isKickRange && (PlayerHasBuff(CatForm) || PlayerHasBuff(BearForm)))
             {
                 API.CastSpell(SkullBash);
                 return;
