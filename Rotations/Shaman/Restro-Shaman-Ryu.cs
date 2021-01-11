@@ -320,6 +320,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Internal Strife", 327648);
             CombatRoutine.AddDebuff("Forced Confession", 328331);
             CombatRoutine.AddDebuff("Insidious Venom 2", 317661);
+            CombatRoutine.AddDebuff("Dark Lance", 327481);
             CombatRoutine.AddDebuff("Soul Corruption", 333708);
             CombatRoutine.AddDebuff("Spectral Reach", 319669);
             CombatRoutine.AddDebuff("Death Grasp", 323831);
