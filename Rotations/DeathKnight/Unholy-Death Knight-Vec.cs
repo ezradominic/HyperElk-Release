@@ -8,6 +8,7 @@ namespace HyperElk.Core
     {
         private bool SmallCDs => API.ToggleIsEnabled("Small CDs");
         private bool UseDnD => API.ToggleIsEnabled("Use DnD");
+        private bool PoolWounds => API.ToggleIsEnabled("Pool Wounds");
         private string ShackletheUnworthy = "Shackle the Unworthy";
         private string SwarmingMist = "Swarming Mist";
         private string DeathsDue = "Death's Due";
@@ -142,11 +143,11 @@ namespace HyperElk.Core
         private string UseApocalypse => CDUsage[CombatRoutine.GetPropertyInt("Apocalypse")];
         private int FleshcraftPercent => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         private bool UseRaiseDead => CombatRoutine.GetPropertyBool("RaiseDead");
+        private bool DeadliestCoil_equipped => CombatRoutine.GetPropertyBool("Deadliest Coil");
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private string UseUnholyBlight => CDUsageWithAOE[CombatRoutine.GetPropertyInt(UnholyBlight)];
-        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
@@ -217,12 +218,12 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Use DnD");
-            CombatRoutine.AddToggle("Mouseover");
-
+            CombatRoutine.AddToggle("Pool Wounds");
 
 
             //Settings
             CombatRoutine.AddProp("RaiseDead", "Raise Dead", true, "Should the rotation try to Raise Dead", "Pet");
+            CombatRoutine.AddProp("Deadliest Coil", "Deadliest Coil", false, "Do you have the Deadliest Coil Legendary?", "Legendary");
             CombatRoutine.AddProp("DarkTransformation", "Use " + "Dark Transformation", CDUsage, "Use " + "Dark Transformation" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("RaiseAbomination", "Use " + "Raise Abomination", CDUsage, "Use " + "Raise Abomination" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("Apocalypse", "Use " + "Apocalypse", CDUsage, "Use " + "Apocalypse" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
@@ -256,25 +257,24 @@ namespace HyperElk.Core
             if (ApocGhoulActiveTime.IsRunning && ArmyGhoulActiveTime.ElapsedMilliseconds > 15000) { ArmyGhoulActiveTime.Reset(); API.WriteLog("Army Ghoul ran off"); }
             //API.WriteLog("debug" + MultiDot + API.CanCast(Kill_Command) + API.TargetHasDebuff(Kill_Command, false, false)+ " " + API.PlayerUnitInMeleeRangeCount  +" "+ API.PlayerBuffStacks(Predator));
 
-            if (!API.PlayerIsMounted && !Playeriscasting)
+            if (!API.PlayerIsMounted && !API.PlayerIsCasting(true) && !API.PlayerSpellonCursor)
             {
-                if (IsMouseover)
-                {
-                    if (IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && isMOinRange && API.MouseoverRange >= 10)
-                    {
-                        if (!API.MacroIsIgnored(DeathGrip + "MO"))
-                        {
-                            API.CastSpell(DeathGrip + "MO");
-                            return;
-                        }
-                    }
-                }
+
                 #region defensives
                 if (API.CanCast("Raise Dead") && UseRaiseDead && (!API.PlayerHasPet || API.PetHealthPercent < 1))
                 {
                     API.CastSpell("Raise Dead");
                     return;
                 }
+                #endregion
+            }
+        }
+
+        public override void CombatPulse()
+        {
+            if (!API.PlayerIsMounted && !API.PlayerIsCasting(true) && !API.PlayerSpellonCursor)
+            {
+
                 if (API.CanCast("Icebound Fortitude") && API.PlayerLevel >= 38 && API.PlayerHealthPercent <= IceboundFortitudeLifePercent)
                 {
                     API.CastSpell("Icebound Fortitude");
@@ -305,14 +305,6 @@ namespace HyperElk.Core
                     API.CastSpell("Death Strike");
                     return;
                 }
-                #endregion
-            }
-        }
-
-        public override void CombatPulse()
-        {
-            if (!API.PlayerIsMounted && !Playeriscasting)
-            {
                 if (API.CanCast("Mind Freeze") && isInterrupt && MeleeRange)
                 {
                     API.CastSpell("Mind Freeze");
@@ -398,11 +390,6 @@ namespace HyperElk.Core
                     API.CastSpell(ShackletheUnworthy);
                     return;
                 }
-                if (API.CanCast(AbominationLimb) && ((API.TargetDebuffRemainingTime(UnholyBlight) > 1100 | !Talent_UnholyBlight && !API.SpellISOnCooldown(DarkTransformation)) || API.PlayerUnitInMeleeRangeCount >= 2) && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
-                {
-                    API.CastSpell(AbominationLimb);
-                    return;
-                }
                 if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercent)
                 {
                     API.CastSpell(Fleshcraft);
@@ -417,14 +404,12 @@ namespace HyperElk.Core
                     API.CastSpell("Trinket2");
                 }
                 #region cooldowns
-                #region opener
-                if (API.CanCast("Festering Strike") && API.PlayerTimeInCombat <= 500 && API.PlayerCurrentRunes >= 2 && Festering_Wound_Stacks < 2 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
+                if (API.CanCast("Unholy Blight") && IsCooldowns && !API.SpellISOnCooldown("Dark Transformation") && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
                 {
-                    API.CastSpell("Festering Strike");
+                    API.CastSpell("Unholy Blight");
                     return;
                 }
-                #endregion
-                if (API.CanCast("Dark Transformation") && (PlayerHasBuff(UnholyBlight) || !Talent_UnholyBlight) && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= gcd || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
+                if (API.CanCast("Dark Transformation") && (!Talent_UnholyBlight || API.PlayerHasBuff("Unholy Blight")) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
                 {
                     API.CastSpell("Dark Transformation");
                     return;
@@ -434,17 +419,22 @@ namespace HyperElk.Core
                     API.CastSpell("Raise Abomination");
                     return;
                 }
-                if (API.CanCast("Apocalypse") && (PlayerHasBuff(UnholyBlight) || !Talent_UnholyBlight) && (!API.PlayerIsConduitSelected(ConvocationoftheDead) || API.PlayerIsConduitSelected(ConvocationoftheDead) && Dark_Transformation_Ghoul.IsRunning) && (UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns") && Festering_Wound_Stacks >= 4 && MeleeRange)
+                if (API.CanCast(AbominationLimb) && Dark_Transformation_Ghoul.IsRunning && MeleeRange && (UseCovenant == "With Cooldowns" && (IsCooldowns) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+                {
+                    API.CastSpell(AbominationLimb);
+                    return;
+                }
+                if (API.CanCast("Apocalypse") && (UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns") && Festering_Wound_Stacks >= 4 && MeleeRange)
                 {
                     API.CastSpell("Apocalypse");
                     return;
                 }
-                if (API.CanCast("Sacrificial Pact") && API.PlayerHealthPercent <= SacrificialPactPercent && IsCooldowns && !Dark_Transformation_Ghoul.IsRunning && API.PlayerLevel >= 54 && MeleeRange)
+                if (API.CanCast("Sacrificial Pact") && API.PlayerHealthPercent <= 20 && IsCooldowns && !Dark_Transformation_Ghoul.IsRunning && API.PlayerLevel >= 54 && MeleeRange)
                 {
                     API.CastSpell("Sacrificial Pact");
                     return;
                 }
-                if (API.CanCast("Unholy Assault") && (!Talent_UnholyBlight || API.SpellISOnCooldown(UnholyBlight)) && ApocGhoulActiveTime.IsRunning && Festering_Wound_Stacks < 3 && IsCooldowns && Talent_UnholyAssault && MeleeRange)
+                if (API.CanCast("Unholy Assault") && API.SpellISOnCooldown("Apocalypse") && Festering_Wound_Stacks <= 3 && IsCooldowns && Talent_UnholyAssault && MeleeRange)
                 {
                     API.CastSpell("Unholy Assault");
                     return;
@@ -462,7 +452,7 @@ namespace HyperElk.Core
                     #region Gargoyle active ST
                     if (GargoyleActive)
                     {
-                        if (API.CanCast(DeathCoil) && ((API.PlayerRunicPower >= 40 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -472,22 +462,17 @@ namespace HyperElk.Core
                             API.CastSpell("Death Strike");
                             return;
                         }
-                        if (API.CanCast(UnholyBlight) && (API.SpellCDDuration(DarkTransformation) <= gcd || !(WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns")) && (UseUnholyBlight == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseUnholyBlight == "On Cooldown" || UseUnholyBlight == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 500 || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
-                        {
-                            API.CastSpell(UnholyBlight);
-                            return;
-                        }
-                        if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30 && (!Talent_UnholyBlight || !(UseUnholyBlight == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseUnholyBlight == "On Cooldown" || UseUnholyBlight == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)))
+                        if (API.CanCast("Outbreak") && (!Talent_UnholyBlight || !IsCooldowns) && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
                         {
                             API.CastSpell("Outbreak");
                             return;
                         }
-                        if (API.CanCast("Scourge Strike") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !(UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns")) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && !Talent_ClawingShadows && MeleeRange)
+                        if (API.CanCast("Scourge Strike") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !IsCooldowns) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && !Talent_ClawingShadows && MeleeRange)
                         {
                             API.CastSpell("Scourge Strike");
                             return;
                         }
-                        if (API.CanCast("Clawing Shadows") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && Talent_ClawingShadows && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !(UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns")) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && API.TargetRange <= 30)
+                        if (API.CanCast("Clawing Shadows") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && Talent_ClawingShadows && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !IsCooldowns) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && API.TargetRange <= 30)
                         {
                             API.CastSpell("Clawing Shadows");
                             return;
@@ -502,13 +487,7 @@ namespace HyperElk.Core
                     {
                         #endregion
                         #region ST - outside cd
-                        if (API.CanCast(UnholyBlight) && (API.SpellCDDuration(DarkTransformation) <= gcd || !(WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns")) && (UseUnholyBlight == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseUnholyBlight == "On Cooldown" || UseUnholyBlight == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 500 || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
-                        {
-                            API.CastSpell(UnholyBlight);
-                            return;
-                        }
-
-                        if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30 && (!Talent_UnholyBlight || !(UseUnholyBlight == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseUnholyBlight == "On Cooldown" || UseUnholyBlight == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)))
+                        if (API.CanCast("Outbreak") && (!Talent_UnholyBlight || !IsCooldowns) && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
                         {
                             API.CastSpell("Outbreak");
                             return;
@@ -520,24 +499,24 @@ namespace HyperElk.Core
                             return;
                         }
                         //death_coil,if=CombatRoutine.sudden_doom.react&rune.time_to_4>gcd&!variable.pooling_for_gargoyle|pet.gargoyle.active
-						if (API.CanCast(DeathCoil) && API.PlayerHasBuff("Sudden Doom") && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns) && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && API.PlayerHasBuff("Sudden Doom") && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
                         }
                         //death_coil,if=runic_power.deficit<14&rune.time_to_4>gcd&!variable.pooling_for_gargoyle
-                        if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && API.PlayerRunicPower > 80 && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || !IsCooldowns) && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && API.PlayerRunicPower > 80 && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || !IsCooldowns) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
                         }
                         // scourge_strike,if=deCombatRoutine.festering_wound.up
-                        if (API.CanCast("Scourge Strike") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !(UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns")) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && !Talent_ClawingShadows && MeleeRange)
+                        if (API.CanCast("Scourge Strike") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !IsCooldowns) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && !Talent_ClawingShadows && MeleeRange)
                         {
                             API.CastSpell("Scourge Strike");
                             return;
                         }
-                        if (API.CanCast("Clawing Shadows") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && Talent_ClawingShadows && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !(UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns")) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && API.TargetRange <= 30)
+                        if (API.CanCast("Clawing Shadows") && Festering_Wound_Stacks >= 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && Talent_ClawingShadows && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !IsCooldowns) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && API.TargetRange <= 30)
                         {
                             API.CastSpell("Clawing Shadows");
                             return;
@@ -547,7 +526,7 @@ namespace HyperElk.Core
                             API.CastSpell("Festering Strike");
                             return;
                         }
-						if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -555,37 +534,38 @@ namespace HyperElk.Core
                     }
                     #endregion
                 }
-                if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber)
+                if (IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber))
                 {
+
                     #region AoE
-                    if (API.CanCast(UnholyBlight) && (API.SpellCDDuration(DarkTransformation) <= gcd || !(WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns")) && (UseUnholyBlight == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseUnholyBlight == "On Cooldown" || UseUnholyBlight == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && (API.PlayerIsConduitSelected(ConvocationoftheDead) && API.SpellCDDuration(Apocalypse) <= 500 || !API.PlayerIsConduitSelected(ConvocationoftheDead)) && API.PlayerCurrentRunes >= 1 && Talent_UnholyBlight && MeleeRange)
-                    {
-                        API.CastSpell(UnholyBlight);
-                        return;
-                    }
-                    if (API.CanCast("Outbreak") && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30 && (!Talent_UnholyBlight || !(UseUnholyBlight == "With Cooldowns" && (IsCooldowns || SmallCDs) || UseUnholyBlight == "On Cooldown" || UseUnholyBlight == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) || API.SpellCDDuration(UnholyBlight) > API.TargetDebuffRemainingTime("Virulent Plague")))
+                    if (API.CanCast("Outbreak") && (!Talent_UnholyBlight || API.SpellISOnCooldown("Unholy Blight") || !IsCooldowns) && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
                     {
                         API.CastSpell("Outbreak");
                         return;
                     }
-                    if (API.CanCast("Soul Reaper") && API.PlayerCurrentRunes >= 1 && Talent_SoulReaper && API.TargetHealthPercent < 35 && MeleeRange)
+                    if (API.CanCast("Soul Reaper") && API.PlayerCurrentRunes >= 1 && Talent_SoulReaper && API.TargetHealthPercent <= 36 && MeleeRange)
                     {
                         API.CastSpell("Soul Reaper");
                         return;
                     }
+                    if (API.CanCast(DeathCoil) && DeadliestCoil_equipped && API.SpellISOnCooldown(DarkTransformation) && API.PlayerUnitInMeleeRangeCount <= 3 && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    {
+                        API.CastSpell(DeathCoil);
+                        return;
+                    }
                     //death_coil,if=CombatRoutine.sudden_doom.react&rune.time_to_4>gcd&!variable.pooling_for_gargoyle|pet.gargoyle.active
-						if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
-					{
+                    if (API.CanCast("Epidemic") && (DeadliestCoil_equipped && API.PlayerUnitInMeleeRangeCount > 3 || !DeadliestCoil_equipped || !API.SpellISOnCooldown(DarkTransformation)) && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    {
                         API.CastSpell("Epidemic");
                         return;
                     }
-                    if (API.CanCast("Death and Decay") && UseDnD && !API.PlayerIsMoving && !Talent_Defile)
+                    if (!PoolWounds && API.CanCast("Death and Decay") && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && UseDnD && !API.PlayerIsMoving && !Talent_Defile)
                     {
                         API.CastSpell("Death and Decay");
                         return;
                     }
 
-                    if (API.CanCast("Defile") && UseDnD && !API.PlayerIsMoving && Talent_Defile)
+                    if (!PoolWounds && API.CanCast("Defile") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && UseDnD && !API.PlayerIsMoving && Talent_Defile)
                     {
                         API.CastSpell("Defile");
                         return;
@@ -600,18 +580,23 @@ namespace HyperElk.Core
                         API.CastSpell("Clawing Shadows");
                         return;
                     }
-                     if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    if (API.CanCast(DeathCoil) && DeadliestCoil_equipped && API.SpellISOnCooldown(DarkTransformation) && API.PlayerUnitInMeleeRangeCount <= 3 && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    {
+                        API.CastSpell(DeathCoil);
+                        return;
+                    }
+                    if (API.CanCast("Epidemic") && (DeadliestCoil_equipped && API.PlayerUnitInMeleeRangeCount > 3 || !DeadliestCoil_equipped || !API.SpellISOnCooldown(DarkTransformation)) && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;
                     }
                     // scourge_strike,if=deCombatRoutine.festering_wound.up
-                    if (API.CanCast("Scourge Strike") && Festering_Wound_Stacks > 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !(UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns")) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && !Talent_ClawingShadows && MeleeRange)
+                    if (!PoolWounds && API.CanCast("Scourge Strike") && Festering_Wound_Stacks > 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !IsCooldowns) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && !Talent_ClawingShadows && MeleeRange)
                     {
                         API.CastSpell("Scourge Strike");
                         return;
                     }
-                    if (API.CanCast("Clawing Shadows") && Festering_Wound_Stacks > 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && Talent_ClawingShadows && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !(UseApocalypse == "On Cooldown" || IsCooldowns && UseApocalypse == "With Cooldowns")) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && API.TargetRange <= 30)
+                    if (!PoolWounds && API.CanCast("Clawing Shadows") && Festering_Wound_Stacks > 1 && API.PlayerCurrentRunes >= 1 && (!PoolingForGargoyle || !IsCooldowns) && Talent_ClawingShadows && (Festering_Wound_Stacks >= 1 && (API.SpellCDDuration("Apocalypse") > 500 || !IsCooldowns) || (Festering_Wound_Stacks >= 4 && !API.CanCast("Apocalypse"))) && API.TargetRange <= 30)
                     {
                         API.CastSpell("Clawing Shadows");
                         return;
@@ -634,7 +619,3 @@ namespace HyperElk.Core
         }
     }
 }
-
-
-
-

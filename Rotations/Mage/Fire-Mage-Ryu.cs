@@ -76,16 +76,17 @@ namespace HyperElk.Core
 
         //private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake) || API.PlayerCurrentCastTimeRemaining > API.PlayerBuffTimeRemaining(Quake)) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingFireBall => (API.PlayerDebuffRemainingTime(Quake) > FireballCastTime || API.PlayerBuffTimeRemaining(Quake) > FireballCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingFlamestrike => (API.PlayerDebuffRemainingTime(Quake) > FlamestrikeCastTime || API.PlayerBuffTimeRemaining(Quake) > FlamestrikeCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingScorch => (API.PlayerDebuffRemainingTime(Quake) > ScorchCastTime || API.PlayerBuffTimeRemaining(Quake) > ScorchCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingShifting => (API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime || API.PlayerBuffTimeRemaining(Quake) > ShiftingPowerCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingMirrors => (API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime || API.PlayerBuffTimeRemaining(Quake) > MirrorsofTormentCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingRadiant => (API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime || API.PlayerBuffTimeRemaining(Quake) > RadiantSparkCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingDeathborne => (API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime || API.PlayerBuffTimeRemaining(Quake) > DeathborneCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
+        private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
+        private bool QuakingFireBall => API.PlayerDebuffRemainingTime(Quake) > FireballCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingFlamestrike => API.PlayerDebuffRemainingTime(Quake) > FlamestrikeCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingScorch => API.PlayerDebuffRemainingTime(Quake) > ScorchCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingShifting => API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingMirrors => API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingRadiant => API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingDeathborne => API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime && PlayerHasDebuff(Quake);
         private bool QuakingPyro => (API.PlayerDebuffRemainingTime(Quake) > PyroBlastCastTime || API.PlayerBuffTimeRemaining(Quake) > PyroBlastCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingRune => (API.PlayerDebuffRemainingTime(Quake) > RuneCastTime || API.PlayerBuffTimeRemaining(Quake) > RuneCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingRune => API.PlayerDebuffRemainingTime(Quake) > RuneCastTime && PlayerHasDebuff(Quake);
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791 && API.PlayerHasBuff(ShiftingPower);
         bool CastCombustion => API.PlayerLastSpell == "Combustion";
         bool CastingScorch => API.CurrentCastSpellID("player") == 2948;
@@ -101,7 +102,7 @@ namespace HyperElk.Core
         private bool CastPF => API.PlayerLastSpell == "Phoenix Flames";
         private bool CastScorch => API.PlayerLastSpell == "Scorch";
         int FBTime => FlameOn ? 900 : 1200;
-        float FBRecharge => FlameOn ? 900f : 1200f / (1f + API.PlayerGetHaste / 1);
+        float FBRecharge => FlameOn ? 900f : 1200f / (1f + API.PlayerGetHaste);
         float FireballCastTime => 225f / (1f + API.PlayerGetHaste);
         float ScorchCastTime => 150f / (1f + API.PlayerGetHaste);
         float FlamestrikeCastTime => 400f / (1f + API.PlayerGetHaste);
@@ -111,7 +112,10 @@ namespace HyperElk.Core
         float DeathborneCastTime => 150f / (1f + API.PlayerGetHaste);
         float PyroBlastCastTime => 450f / (1f + API.PlayerGetHaste);
         float RuneCastTime => 150f / (1f + API.PlayerGetHaste);
-
+        private static bool PlayerHasDebuff(string buff)
+        {
+            return API.PlayerHasDebuff(buff, false, false);
+        }
 
 
 
@@ -163,9 +167,10 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Sintouched Anima", 328494);
             CombatRoutine.AddDebuff("Curse of Stone", 319603);
             CombatRoutine.AddDebuff(Quake, 240447);
+            CombatRoutine.AddDebuff("Hypothermia", 41425);
 
             CombatRoutine.AddConduit(InfernalCascade);
-
+            
             //Spell
             CombatRoutine.AddSpell("Rune of Power", 116011, "None");
             CombatRoutine.AddSpell("Ice Block", 45438);
@@ -249,6 +254,7 @@ namespace HyperElk.Core
             if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
             {
                 API.CastSpell("Stopcast");
+                API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                 return;
             }
             if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && !API.PlayerIsCasting(true) && NotChanneling && !ChannelingShift)
@@ -364,17 +370,17 @@ namespace HyperElk.Core
                     API.CastSpell(TimeWarp);
                     return;
                 }
-                if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingRadiant || QuakingRadiant && QuakingHelper))
+                if (API.CanCast(RadiantSpark) && InRange && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && SaveQuake)
                 {
                     API.CastSpell(RadiantSpark);
                     return;
                 }
-                if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingMirrors || QuakingMirrors && QuakingHelper))
+                if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && SaveQuake)
                 {
                     API.CastSpell(MirrorsofTorment);
                     return;
                 }
-                if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingDeathborne || QuakingDeathborne && QuakingHelper))
+                if (API.CanCast(Deathborne) && InRange && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && SaveQuake)
                 {
                     API.CastSpell(Deathborne);
                     return;
@@ -428,7 +434,7 @@ namespace HyperElk.Core
                     API.CastSpell("Pyroblast" + "Stop");
                     return;
                 }
-                if (API.CanCast("Pyroblast") && !API.PlayerIsCasting(true) && InRange && Pyroclasm && API.PlayerHasBuff("Pyroclasm") && !API.PlayerIsMoving && !API.PlayerHasBuff("Combustion") && Level >= 12 && (!QuakingPyro || QuakingPyro && QuakingHelper))
+                if (API.CanCast("Pyroblast") && !API.PlayerIsCasting(true) && InRange && Pyroclasm && API.PlayerHasBuff("Pyroclasm") && !API.PlayerIsMoving && !API.PlayerHasBuff("Combustion") && Level >= 12 && SaveQuake)
                 {
                     API.CastSpell("Pyroblast");
                     return;
@@ -437,7 +443,7 @@ namespace HyperElk.Core
                 if (API.CanCast("Fire Blast") && (IsSmallCD || API.PlayerHasBuff("Combustion")) && API.SpellCharges("Fire Blast") == 3 && (!API.SpellISOnCooldown("Combustion") || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > FBRecharge*2) && (!API.PlayerHasBuff("Combustion") || API.PlayerHasBuff("Combustion")) && !API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33 && !CastingScorch)
                  {
                      API.CastSpell("Fire Blast");
-                     return;
+                    return;
                  }
                 if (API.CanCast("Fire Blast") && (IsSmallCD || API.PlayerHasBuff("Combustion")) && API.SpellCharges("Fire Blast") > 0 && (API.PlayerHasBuff("Combustion") || !API.PlayerHasBuff("Combustion")) && (!API.SpellISOnCooldown("Combustion") || API.SpellISOnCooldown("Combustion") && API.SpellCDDuration("Combustion") > FBRecharge*2) && API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!") && !API.PlayerHasBuff(Firestorm) && InRange && Level >= 33 && (!IsForceAOE || IsForceAOE))
                 {
