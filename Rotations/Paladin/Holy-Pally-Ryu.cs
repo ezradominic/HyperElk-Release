@@ -886,10 +886,12 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < units.Length; i++)
                         {
-                            if (API.SpellISOnCooldown(HolyShock) && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover) && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist"))
+                            if (API.SpellISOnCooldown(HolyShock) && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover) && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (!DPSWatch.IsRunning || DPSWatch.ElapsedMilliseconds >= 1500))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
+                                DPSWatch.Stop();
+                                DPSWatch.Start();
                                 return;
                             }
                             if (UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!API.PlayerCanAttackTarget || !API.PlayerCanAttackMouseover) && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist"))
