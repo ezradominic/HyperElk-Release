@@ -846,9 +846,9 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_sef+=/ancestral_call,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-            if (API.CanCast(AncestralCall) && API.SpellCDDuration(InvokeXuen) > 30000)
+            if (API.CanCast(RacialSpell1) && API.SpellCDDuration(InvokeXuen) > 30000)
             {
-                API.CastSpell(AncestralCall);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/bag_of_tricks,if=buff.storm_earth_and_fire.down
