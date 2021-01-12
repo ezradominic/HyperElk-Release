@@ -775,7 +775,7 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitRoleSpec(units[i]) == API.TankRole && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lession")
+                            if (API.UnitRoleSpec(units[i]) == API.TankRole && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson")
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
