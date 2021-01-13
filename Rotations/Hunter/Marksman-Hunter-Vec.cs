@@ -81,7 +81,7 @@ namespace HyperElk.Core
         string[] DoubleTapList = new string[] { "always", "with Cooldowns" };
         string[] AMurderofCrowsList = new string[] { "always", "with Cooldowns" };
         string[] BloodshedList = new string[] { "always", "with Cooldowns" };
-
+        string[] TrinketList = new string[] { "Something Else", "Dreadfire Vessel" };
 
         string[] LegendaryList = new string[] { "always", "with Cooldowns" };
 
@@ -99,6 +99,8 @@ namespace HyperElk.Core
         private string UseExplosiveShot => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Explosive_Shot)];
         private string UseAMurderofCrows => AMurderofCrowsList[CombatRoutine.GetPropertyInt(A_Murder_of_Crows)];
         private string UseVolley => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Volley)];
+        private string EquippedTrinket1 => TrinketList[CombatRoutine.GetPropertyInt("EquippedTrinket1")];
+        private string EquippedTrinket2 => TrinketList[CombatRoutine.GetPropertyInt("EquippedTrinket2")];
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
         private bool UseCleaveRotation => CombatRoutine.GetPropertyBool("Cleave");
         private bool Use_HuntersMark => CombatRoutine.GetPropertyBool("huntersmark");
@@ -238,7 +240,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(A_Murder_of_Crows, "Use " + A_Murder_of_Crows, AMurderofCrowsList, "Use " + A_Murder_of_Crows + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Volley, "Use " + Volley, CDUsageWithAOE, "Use " + Volley + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
             CombatRoutine.AddProp(Explosive_Shot, "Use " + Explosive_Shot, CDUsageWithAOE, "Use " + Explosive_Shot + " always, with Cooldowns, On AOE, never", "Cooldowns", 0);
-
+            CombatRoutine.AddProp("EquippedTrinket1", "Equipped Trinket 1", TrinketList, "Select your Equipped Trinket", "Trinkets", 0);
+            CombatRoutine.AddProp("EquippedTrinket2", "Equipped Trinket 2", TrinketList, "Select your Equipped Trinket", "Trinkets", 0);
             CombatRoutine.AddProp("AOE_Switch", "AoE Switch", true, "Enable if you want to let the rotation switch ST/AOE", "Generic");
             CombatRoutine.AddProp("Cleave", "Cleave rotation", false, "Enable if you want to test the cleave rotation", "Generic");
             CombatRoutine.AddProp("huntersmark", "Hunter's Mark", false, "Enable if you want to let the rotation use Hunter's Mark", "Generic");
@@ -249,7 +252,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("TranquilizingShot", "Tranquilizing Shot", false, "Enable if you want to use Tranquilizing Shot", "Generic");
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", false, "Should the rotation try to ressurect/call your Pet", "Pet");
-            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp(Exhilaration, "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Exhilaration + "PET", "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used to heal your pet, set to 0 to disable", "Pet", 2);
@@ -416,81 +419,86 @@ namespace HyperElk.Core
                         API.CastSpell(Double_Tap);
                         return;
                     }
-                    if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
+                    if (API.SpellCDDuration(Double_Tap) > gcd)
                     {
-                        API.CastSpell(Steady_Shot);
-                        API.WriteLog("opener: SS:1 ");
-                        return;
-                    }
-                    if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
-                    {
-                        API.CastSpell(Steady_Shot);
-                        API.WriteLog("opener: SS:2 ");
-                        return;
-                    }
-                    if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || (UseCleaveRotation || API.TargetUnitInRangeCount > 1) || IsCooldowns)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
-                    {
-                        API.CastSpell(Explosive_Shot);
-                        return;
-                    }
-                    if (API.CanCast(Wild_Spirits) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                    {
-                        API.CastSpell(Wild_Spirits);
-                        return;
-                    }
-                    if (API.CanCast(Resonating_Arrow) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
-                    {
-                        API.CastSpell(Resonating_Arrow);
-                        return;
-                    }
-                    if (API.CanCast(Volley) && (UseVolley == "With Cooldowns" && IsCooldowns || UseVolley == "On Cooldown" || UseVolley == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || (UseCleaveRotation || API.TargetUnitInRangeCount > 1) || IsCooldowns)) && InRange)
-                    {
-                        API.CastSpell(Volley);
-                        return;
-                    }
-                    if (API.CanCast(Trueshot) && InRange && (VolleyTrickShots || !Talent_Volley) && (API.TargetHasDebuff(Resonating_Arrow) || API.TargetHasDebuff(Wild_Mark) || (API.SpellCDDuration(Resonating_Arrow) > gcd || API.SpellCDDuration(Wild_Spirits) > gcd)))
-                    {
-                        API.CastSpell(Trueshot);
-                        return;
-                    }
-                    if (PlayerHasBuff(Trueshot))
-                    {
-                        if (API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus > 35)
-                        {
-                            API.CastSpell(Aimed_Shot);
-                            return;
-                        }
-                        if (API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime)
-                        {
-                            API.CastSpell(Aimed_Shot);
-                            return;
-                        }
-                        if (API.CanCast(Rapid_Fire) && !eagletalons_true_focus_enabled && InRange && API.PlayerFocus + FocusRegen * (gcd / 100) + 7 < API.PlayerMaxFocus && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > RapidFireChannelTime)
-                        {
-                            API.CastSpell(Rapid_Fire);
-                            return;
-                        }
-                        if (API.CanCast(Arcane_Shot) && InRange && API.PlayerFocus > 50 && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > gcd && !API.CanCast(Rapid_Fire))
-                        {
-                            API.CastSpell(Arcane_Shot);
-                            API.WriteLog("Arcane: " + "rechargetime: " + FullRechargeTime(Aimed_Shot, AimedShotCooldown));
-                            return;
-                        }
-                        if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
+                        if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
                         {
                             API.CastSpell(Steady_Shot);
-                            API.WriteLog("opener: SS:3 ");
+                            API.WriteLog("opener: SS:1 ");
                             return;
+                        }
+                        if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
+                        {
+                            API.CastSpell(Steady_Shot);
+                            API.WriteLog("opener: SS:2 ");
+                            return;
+                        }
+                        if (API.CanCast(Explosive_Shot) && API.TargetTimeToDie > 300 && (UseExplosiveShot == "With Cooldowns" && IsCooldowns || UseExplosiveShot == "On Cooldown" || UseExplosiveShot == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || (UseCleaveRotation || API.TargetUnitInRangeCount > 1) || IsCooldowns)) && API.PlayerFocus >= 20 && InRange && Talent_Explosive_Shot)
+                        {
+                            API.CastSpell(Explosive_Shot);
+                            return;
+                        }
+                        if (API.CanCast(Wild_Spirits) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                        {
+                            API.CastSpell(Wild_Spirits);
+                            return;
+                        }
+                        if (API.CanCast(Resonating_Arrow) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                        {
+                            API.CastSpell(Resonating_Arrow);
+                            return;
+                        }
+                        if (API.CanCast(Volley) && (UseVolley == "With Cooldowns" && IsCooldowns || UseVolley == "On Cooldown" || UseVolley == "on AOE" && ((IsAOE && (API.TargetUnitInRangeCount >= AOEUnitNumber || !AOESwitch_enabled)) || (UseCleaveRotation || API.TargetUnitInRangeCount > 1) || IsCooldowns)) && InRange)
+                        {
+                            API.CastSpell(Volley);
+                            return;
+                        }
+                        if (API.CanCast(Trueshot) && InRange && (VolleyTrickShots || !Talent_Volley) && (API.TargetHasDebuff(Resonating_Arrow) || API.TargetHasDebuff(Wild_Mark) || (API.SpellCDDuration(Resonating_Arrow) > gcd || API.SpellCDDuration(Wild_Spirits) > gcd)))
+                        {
+                            API.CastSpell(Trueshot);
+                            return;
+                        }
+                        if (PlayerHasBuff(Trueshot))
+                        {
+                            if (API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus > 35)
+                            {
+                                API.CastSpell(Aimed_Shot);
+                                return;
+                            }
+                            if (API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime)
+                            {
+                                API.CastSpell(Aimed_Shot);
+                                return;
+                            }
+                            if (API.CanCast(Rapid_Fire) && !eagletalons_true_focus_enabled && InRange && API.PlayerFocus + FocusRegen * (gcd / 100) + 7 < API.PlayerMaxFocus && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > RapidFireChannelTime)
+                            {
+                                API.CastSpell(Rapid_Fire);
+                                return;
+                            }
+                            if (API.CanCast(Arcane_Shot) && InRange && API.PlayerFocus > 50 && FullRechargeTime(Aimed_Shot, AimedShotCooldown) > gcd && !API.CanCast(Rapid_Fire))
+                            {
+                                API.CastSpell(Arcane_Shot);
+                                API.WriteLog("Arcane: " + "rechargetime: " + FullRechargeTime(Aimed_Shot, AimedShotCooldown));
+                                return;
+                            }
+                            if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
+                            {
+                                API.CastSpell(Steady_Shot);
+                                API.WriteLog("opener: SS:3 ");
+                                return;
+                            }
                         }
                     }
                 }
                 #endregion
                 #region cooldowns
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                // trinket1,if=buff.trueshot.up&(trinket.1.cooldown.duration>=trinket.2.cooldown.duration            |trinket.2.cooldown.remains)|                                 buff.trueshot.down&cooldown.trueshot.remains>20&trinket.2.cooldown.duration>=trinket.1.cooldown.duration&                    trinket.2.cooldown.remains-5<cooldown.trueshot.remains              &!trinket.2.is.dreadfire_vessel|(trinket.1.cooldown.duration-5<cooldown.trueshot.remains                          &(trinket.1.cooldown.duration>=trinket.2.cooldown.duration|trinket.2.cooldown.remains))|target.time_to_die<cooldown.trueshot.remains
+                if (API.PlayerTrinketIsUsable(1) && (PlayerHasBuff(Trueshot) && (API.PlayerTrinketRemainingCD(1) >= API.PlayerTrinketRemainingCD(2) || API.PlayerTrinketRemainingCD(2) > 0) || !PlayerHasBuff(Trueshot) && API.SpellCDDuration(Trueshot) > 2000 && API.PlayerTrinketRemainingCD(2) >= API.PlayerTrinketRemainingCD(1) && API.PlayerTrinketRemainingCD(2) - 500 < API.SpellCDDuration(Trueshot) && EquippedTrinket2 != "Dreadfire Vessel" || (API.PlayerTrinketRemainingCD(1) - 5 < API.SpellCDDuration(Trueshot) && (API.PlayerTrinketRemainingCD(1) >= API.PlayerTrinketRemainingCD(2) || API.PlayerTrinketRemainingCD(2) > 0)) || API.TargetTimeToDie < API.SpellCDDuration(Trueshot)) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                 {
                     API.CastSpell("Trinket1");
                 }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
+                //trinket2,if=buff.trueshot.up&(trinket.2.cooldown.duration>=trinket.1.cooldown.duration|trinket.1.cooldown.remains)|buff.trueshot.down&cooldown.trueshot.remains>20&trinket.1.cooldown.duration>=trinket.2.cooldown.duration&trinket.1.cooldown.remains-5<cooldown.trueshot.remains&!trinket.1.is.dreadfire_vessel|(trinket.2.cooldown.duration-5<cooldown.trueshot.remains&(trinket.2.cooldown.duration>=trinket.1.cooldown.duration|trinket.1.cooldown.remains))|target.time_to_die<cooldown.trueshot.remains
+                if (API.PlayerTrinketIsUsable(2) && (PlayerHasBuff(Trueshot) && (API.PlayerTrinketRemainingCD(2) >= API.PlayerTrinketRemainingCD(1) || API.PlayerTrinketRemainingCD(1) > 0) || !PlayerHasBuff(Trueshot) && API.SpellCDDuration(Trueshot) > 2000 && API.PlayerTrinketRemainingCD(1) >= API.PlayerTrinketRemainingCD(1) && API.PlayerTrinketRemainingCD(1) - 500 < API.SpellCDDuration(Trueshot) && EquippedTrinket2 != "Dreadfire Vessel" || (API.PlayerTrinketRemainingCD(2) - 5 < API.SpellCDDuration(Trueshot) && (API.PlayerTrinketRemainingCD(2) >= API.PlayerTrinketRemainingCD(1) || API.PlayerTrinketRemainingCD(1) > 0)) || API.TargetTimeToDie < API.SpellCDDuration(Trueshot)) && PlayerHasBuff(Trueshot) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                 {
                     API.CastSpell("Trinket2");
                 }
