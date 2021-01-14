@@ -228,6 +228,11 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            if (API.PlayerIsCC(CCList.STUN) && PlayerRaceSettings == "Human" && API.CanCast(RacialSpell1))
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
             if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
             if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
