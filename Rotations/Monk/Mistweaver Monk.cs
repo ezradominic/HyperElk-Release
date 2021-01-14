@@ -154,7 +154,7 @@ namespace HyperElk.Core
 
             //Combat
             CombatRoutine.AddSpell(TigerPalm, 100780, "D1");
-            CombatRoutine.AddSpell(BlackoutKick, 100784, "D2");
+            CombatRoutine.AddSpell(BlackoutKick, 205523, "D2");
             CombatRoutine.AddSpell(SpinningCraneKick, 101546, "D3");
             CombatRoutine.AddSpell(ExpelHarm, 322101, "D4");
             CombatRoutine.AddSpell(RisingSunKick, 107428, "D5");
@@ -332,21 +332,6 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-
-            if (IsAutoDetox)
-            {
-                if (API.CanCast(Detox) && NotChanneling)
-                {
-                    for (int i = 0; i < DetoxList.Length; i++)
-                    {
-                        if (CanDetoxTarget(DetoxList[i]))
-                        {
-                            API.CastSpell(Detox);
-                            return;
-                        }
-                    }
-                }
-            }
             if (API.CanCast(WeaponsofOrder) && WeaponsofOrderAoE && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "AOE" && API.PlayerIsInCombat)
             {
                 API.CastSpell(WeaponsofOrder);
@@ -491,88 +476,110 @@ namespace HyperElk.Core
                 if (API.PlayerIsInGroup)
                 {
                     for (int i = 0; i < units.Length; i++)
-                    {
-                        if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]); ;
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                    }
+                        for (int j = 0; j < DetoxList.Length; j++)
+                            if (IsAutoDetox)
+                            {
+                                if (API.CanCast(Detox))
+                                {
+                                    if (CanDetoxTarget(DetoxList[j], units[i]))
+                                    {
+                                        API.CastSpell(Detox);
+                                        return;
+                                    }
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]); ;
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                            }
                     if (API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < raidunits.Length; i++)
-                        {
-                            if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]); ;
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                        }
+                            for (int j = 0; j < DetoxList.Length; j++)
+                                if (IsAutoDetox)
+                                {
+                                    if (API.CanCast(Detox))
+                                    {
+                                        if (CanDetoxTarget(DetoxList[j], units[i]))
+                                        {
+                                            API.CastSpell(Detox);
+                                            return;
+                                        }
+                                    }
+                                    {
+                                        if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]);
+                                            return;
+                                        }
+                                        if (API.UnitHealthPercent(raidunits[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]);
+                                            return;
+                                        }
+                                        if (API.UnitHealthPercent(raidunits[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]);
+                                            return;
+                                        }
+                                        if (API.UnitHealthPercent(raidunits[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]);
+                                            return;
+                                        }
+                                        if (API.UnitHealthPercent(raidunits[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]);
+                                            return;
+                                        }
+                                        if (API.UnitHealthPercent(raidunits[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]); ;
+                                            return;
+                                        }
+                                        if (API.UnitHealthPercent(raidunits[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]);
+                                            return;
+                                        }
+                                        if (API.UnitHealthPercent(raidunits[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                        {
+                                            API.CastSpell(RaidTargetArray[i]);
+                                            return;
+                                        }
+                                    }
+                                }
                     }
                 }
             }
@@ -589,7 +596,7 @@ namespace HyperElk.Core
                 API.CastSpell(FallenOrder);
                 return;
             }
-            if (IsAOE && API.CanCast(FallenOrder) && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "AOE" || UseFallenOrder == "always")
+            if (IsAOE && API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
             {
                 API.CastSpell(FallenOrder);
                 return;
@@ -599,7 +606,6 @@ namespace HyperElk.Core
                 API.CastSpell(FaelineStomp);
                 return;
             }
-            //FaelineStomp
             if (IsAOE && API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
             {
                 API.CastSpell(FaelineStomp);
