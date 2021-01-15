@@ -243,6 +243,11 @@ namespace HyperElk.Core
                 API.CastSpell(SpearHandStrike);
                 return;
             }
+            if (API.PlayerHealthPercent <= TouchofKarmaPercentProc && API.CanCast(TouchofKarma))
+            {
+                API.CastSpell(TouchofKarma);
+                return;
+            }
             if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4 && NotChanneling)
             {
                 API.CastSpell(Vivify);
