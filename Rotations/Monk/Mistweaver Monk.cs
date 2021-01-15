@@ -483,12 +483,17 @@ namespace HyperElk.Core
                 API.CastSpell(Yulon);
                 return;
             }
-            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && API.TargetRoleSpec == API.TankRole && UseLifeCocoonRaid == "yes" && API.PlayerIsInRaid)
-            {
-                API.CastSpell(LifeCocoon);
-                return;
-            }
-            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+ //           if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && API.TargetRoleSpec == API.TankRole && UseLifeCocoonRaid == "yes" && API.PlayerIsInRaid)
+ //           {
+ //               API.CastSpell(LifeCocoon);
+ //               return;
+ //           }
+ //           if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && UseLifeCocoonRaid == "no" && API.PlayerIsInRaid)
+ //           {
+ //               API.CastSpell(LifeCocoon);
+ //               return;
+ //           }
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && API.PlayerIsInGroup && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(LifeCocoon);
                 return;
