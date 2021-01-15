@@ -39,7 +39,7 @@ namespace HyperElk.Core
         private string SpiritualManaPotion = "Spiritual Mana Potion";
         private string WeaponsofOrder = "Weapons of Order";
         private string WeaponsofOrderAOE = "Weapons of Order AOE";
-        private string LifeCocoonRaid = "Life Cocoon Raid";
+        private string LCT = "Life Cocoon on Tank Only";
 
 
         private string Fleshcraft = "Fleshcraft";
@@ -57,8 +57,13 @@ namespace HyperElk.Core
         private string AoE = "AOE";
         private string PartySwap = "Target Swap";
         private string TargetChange = "Target Change";
-        private string TargetHostile = "Target Hostile";
         private string Assist = "Assist";
+        private string AoEDPS = "AOEDPS";
+        private string AoEDPSH = "AOEDPS Health";
+        private string AoEDPSHRaid = "AOEDPS Health Raid";
+        private string AoEDPSRaid = "AOEDPS Raid";
+
+
         //Talents
         private bool TalentChiWave => API.PlayerIsTalentSelected(1, 2);
         private bool TalentChiBurst => API.PlayerIsTalentSelected(1, 3);
@@ -123,8 +128,7 @@ namespace HyperElk.Core
         private int HealingElixirPercent => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int RefreshingJadeWindPercent => numbList[CombatRoutine.GetPropertyInt(RefreshingJadeWind)];
         private int SpiritualManaPotionManaPercent => numbList[CombatRoutine.GetPropertyInt(SpiritualManaPotion)];
-        private string UseLifeCocoonRaid => LifeCocoonRaidList[CombatRoutine.GetPropertyInt(LifeCocoon)];
-        string[] LifeCocoonRaidList = new string[] { "yes", "no" };
+        private bool LCTank => CombatRoutine.GetPropertyBool(LCT);
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE", };
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
@@ -147,6 +151,14 @@ namespace HyperElk.Core
         {
             return API.UnitHasDebuff(debuff, unit, false, true);
         }
+        private int UnitAboveHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) >= HealthPercent && API.UnitHealthPercent(p) > 0);
+        private int UnitAboveHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) >= HealthPercent && API.UnitHealthPercent(p) > 0);
+        private int UnitAboveHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitAboveHealthPercentRaid(HealthPercent) : UnitAboveHealthPercentParty(HealthPercent);
+        private int AoEDPSHLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSH)];
+        private int AoEDPSHRaidLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSHRaid)];
+        private int AoEDPSNumber => numbPartyList[CombatRoutine.GetPropertyInt(AoEDPS)];
+        private int AoEDPSRaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoEDPSRaid)];
+
 
         public override void Initialize()
         {
@@ -159,7 +171,7 @@ namespace HyperElk.Core
 
             //Combat
             CombatRoutine.AddSpell(TigerPalm, 100780, "D1");
-            CombatRoutine.AddSpell(BlackoutKick, 205523, "D2");
+            CombatRoutine.AddSpell(BlackoutKick, 100784, "D2");
             CombatRoutine.AddSpell(SpinningCraneKick, 101546, "D3");
             CombatRoutine.AddSpell(ExpelHarm, 322101, "D4");
             CombatRoutine.AddSpell(RisingSunKick, 107428, "D5");
@@ -190,7 +202,6 @@ namespace HyperElk.Core
 
 
             //Macros
-            CombatRoutine.AddMacro(TargetHostile);
             CombatRoutine.AddMacro(Assist);
 
             CombatRoutine.AddMacro(trinket1);
@@ -321,7 +332,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Vivify, Vivify + " Life Percent", numbList, "Life percent at which" + Vivify + "is used, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(SoothingMist, SoothingMist + " Life Percent", numbList, "Life percent at which" + SoothingMist + "is, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(LifeCocoon, LifeCocoon + " Life Percent", numbList, "Life percent at which" + LifeCocoon + "is, set to 0 to disable", "Healing", 50);
-            CombatRoutine.AddProp(LifeCocoonRaid, LifeCocoon + " in Raid", LifeCocoonRaidList, "Use " + LifeCocoon + "in Raid only on Tank ?");
+            CombatRoutine.AddProp(LCT, "Life Cocoon Tank", true, "Use Life Cocoon only on Tank ? change to false, set to true by default", "Healing");
 
             CombatRoutine.AddProp(RenewingMist, RenewingMist + " Life Percent", numbList, "Life percent at which" + RenewingMist + "is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(Revival, Revival + " Life Percent", numbList, "Life percent at which" + Revival + "is used, set to 0 to disable", "Healing", 10);
@@ -339,6 +350,11 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket");
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket");
+
+            CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "DPS Heal Group", 2);
+            CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS in party" + "is used,", "DPS Heal Group", 80);
+            CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "DPS Heal Raid", 4);
+            CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "DPS Heal Raid", 70);
         }
         public override void Pulse()
         {
@@ -464,17 +480,17 @@ namespace HyperElk.Core
                 API.CastSpell(Yulon);
                 return;
             }
-            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && UseLifeCocoonRaid == "no")
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && API.TargetRoleSpec == API.TankRole && LCTank && API.PlayerIsInRaid)
             {
                 API.CastSpell(LifeCocoon);
                 return;
             }
-            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && API.TargetRoleSpec == API.TankRole && UseLifeCocoonRaid == "yes" && API.PlayerIsInRaid)
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && !LCTank && API.PlayerIsInRaid)
             {
                 API.CastSpell(LifeCocoon);
                 return;
             }
-            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && API.PlayerIsInGroup && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(LifeCocoon);
                 return;
@@ -492,16 +508,11 @@ namespace HyperElk.Core
             if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(Vivify);
-                if (API.PlayerCurrentCastTimeRemaining <= 0)
-                {
-                    ViVifyCounter++;
-                }
                 return;
             }
             if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(SoothingMist);
-                ViVifyCounter = 0;
                 return;
             }
             // Auto Target
@@ -546,13 +557,17 @@ namespace HyperElk.Core
                             API.CastSpell(PlayerTargetArray[i]); ;
                             return;
                         }
+                        if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber)
+                        {
+                            API.CastSpell(PlayerTargetArray[i]);
+                            API.CastSpell("Assist");
+                            return;
+                        }
                     }
                     if (API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < raidunits.Length; i++)
-                            if (IsAutoDetox)
                             {
-
                                 if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
@@ -645,12 +660,12 @@ namespace HyperElk.Core
                 API.CastSpell(BlackoutKick);
                 return;
             }
-            if (API.CanCast(RisingSunKick) && !API.SpellISOnCooldown(RisingSunKick))
+            if (API.CanCast(RisingSunKick))
             {
                 API.CastSpell(RisingSunKick);
                 return;
             }
-            if (API.CanCast(TigerPalm) && API.SpellISOnCooldown(BlackoutKick) && API.SpellISOnCooldown(RisingSunKick))
+            if (API.CanCast(TigerPalm))
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -680,21 +695,6 @@ namespace HyperElk.Core
                     API.CastSpell(EssenceFont);
                     return;
                 }
-            }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && API.PlayerMana >= ManaTeaPercent && TalentManaTea && UseThunderFocusTea == "Cooldowns" && IsCooldowns)
-            {
-                API.CastSpell(ThunderFocusTea);
-                return;
-            }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "Cooldowns" && IsCooldowns)
-            {
-                API.CastSpell(ThunderFocusTea);
-                return;
-            }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "always")
-            {
-                API.CastSpell(ThunderFocusTea);
-                return;
             }
             if (API.CanCast(ChiWave) && TalentChiWave && API.TargetHealthPercent <= ChiWavePercent && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {

@@ -42,11 +42,11 @@ namespace HyperElk.Core
 
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private bool NotCasting => !API.PlayerIsCasting(false);
-        bool LastCastTigerPalm => API.LastSpellCastInGame == TigerPalm;
-        bool LastCastBlackoutkick => API.LastSpellCastInGame == BlackOutKick;
-        bool LastCastSpinningCraneKick => API.LastSpellCastInGame == SpinningCraneKick;
-        bool LastCastRisingSunKick => API.LastSpellCastInGame == RisingSunKick;
-        bool LastCastChiWave => API.LastSpellCastInGame == ChiWave;
+        bool LastCastTigerPalm => API.PlayerLastSpell == TigerPalm;
+        bool LastCastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
+        bool LastCastSpinningCraneKick => API.PlayerLastSpell == SpinningCraneKick;
+        bool LastCastRisingSunKick => API.PlayerLastSpell == RisingSunKick;
+        bool LastCastChiWave => API.PlayerLastSpell == ChiWave;
         bool CurrenCastFistsOfFury => API.CurrentCastSpellID("player") == 113656;
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
         string[] TouchofDeathList = new string[] {"with Cooldowns", "Manual" };
@@ -113,18 +113,15 @@ namespace HyperElk.Core
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
         private string StormEarthAndFire = "Storm,  Earth,  and Fire";
-        private string BloodFury = "Blood Fury";
-        private string Berserking = "Berserking";
-        private string ArcaneTorrent = "Arcane Torrent";
-        private string Fireblood = "Fireblood";
         private string CracklingJadeLightning = "Crackling Jade Lightning";
         private string TheEmperorsCapacitor = "The Emperor's Capacitor";
         private string SkyreachExhaustion = "Skyreach Exhaustion";
         private string Stopcast = "Stopcast";
         private string ChiEnergy = "Chi Energy";
         private string CoordinatedOffensive = "Coordinated Offensive";
-        private string AncestralCall = "Ancestral Call";
-        private string BagOfTricks = "Bag of Tricks";
+
+        private string LegSweep = "Leg Sweep";
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Windwalker Monk @Mufflon12";
@@ -183,12 +180,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FortifyingBrew, 243435,"F2");
             CombatRoutine.AddSpell(InvokeXuen, 123904,"F3");
             CombatRoutine.AddSpell(TouchofKarma, 122470, "NumPad3");
-//            CombatRoutine.AddSpell(BloodFury, 20572);
-//            CombatRoutine.AddSpell(Berserking, 26297);
-//            CombatRoutine.AddSpell(ArcaneTorrent, 28730);
-//            CombatRoutine.AddSpell(Fireblood, 265221);
-//            CombatRoutine.AddSpell(AncestralCall, 274738);
-//            CombatRoutine.AddSpell(BagOfTricks, 312411);
+            CombatRoutine.AddSpell(LegSweep, 119381);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -241,6 +233,11 @@ namespace HyperElk.Core
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18 && NotChanneling)
             {
                 API.CastSpell(SpearHandStrike);
+                return;
+            }
+            if (isInterrupt && API.SpellISOnCooldown(SpearHandStrike) && API.CanCast(LegSweep) && IsMelee && PlayerLevel >= 18)
+            {
+                API.CastSpell(LegSweep);
                 return;
             }
             if (API.PlayerHealthPercent <= TouchofKarmaPercentProc && API.CanCast(TouchofKarma))
