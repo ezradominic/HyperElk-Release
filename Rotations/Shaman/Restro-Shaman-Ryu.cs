@@ -135,6 +135,7 @@ namespace HyperElk.Core
         private bool DownpourAoE => UnitBelowHealthPercent(DownpourLifePercent) >= AoENumber;
         private bool WellSpringAoE => UnitBelowHealthPercent(WellspringLifePercent) >= AoENumber;
         private bool ChainHealAoE => UnitBelowHealthPercent(ChainHealLifePercent) >= AoENumber;
+        private bool ChainHarvestAoE => UnitBelowHealthPercent(ChainHarvestLifePercent) >= AoENumber;
         private bool SpiritLinkAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(SpiritLinkTotemLifePercent) >= RaidCDNumber : UnitBelowHealthPercentParty(SpiritLinkTotemLifePercent) >= DungeonCDNumber;
         private bool EarthenWallAoE => UnitBelowHealthPercent(EarthenWallTotemLifePercent) >= AoENumber;
         private bool HealingRainAoE => UnitBelowHealthPercent(HealingRainLifePercent) >= AoENumber;
@@ -146,8 +147,8 @@ namespace HyperElk.Core
         private bool NightFaeCheck =>API.CanCast(FaeTransfusion) && PlayerCovenantSettings == "Night Fae" && FaeAoE && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving;
         private bool NecrolordCheck => API.CanCast(PrimordialWave) && PlayerCovenantSettings == "Necrolord" && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && API.TargetHealthPercent <= PrimordialWaveLifePercent && RiptideTracking;
         private bool NecrolordMOCheck => API.CanCast(PrimordialWave) && PlayerCovenantSettings == "Necrolord" && NotChanneling && !API.PlayerCanAttackMouseover && (!API.PlayerIsMoving || API.PlayerIsMoving) && API.MouseoverHealthPercent <= PrimordialWaveLifePercent && RiptideTracking;
-        private bool VenthyrCheck => API.CanCast(ChainHarvest) && ChainHealAoE && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && (!API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && !API.PlayerIsMoving;
-        private bool VenthyrMOCheck => API.CanCast(ChainHarvest) && ChainHealAoE && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && (!API.PlayerCanAttackMouseover || API.PlayerCanAttackMouseover) && !API.PlayerIsMoving;
+        private bool VenthyrCheck => API.CanCast(ChainHarvest) && ChainHarvestAoE && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && (!API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && !API.PlayerIsMoving;
+        private bool VenthyrMOCheck => API.CanCast(ChainHarvest) && ChainHarvestAoE && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && (!API.PlayerCanAttackMouseover || API.PlayerCanAttackMouseover) && !API.PlayerIsMoving;
         private bool RiptideCheck => API.CanCast(Riptide) && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving) && !API.PlayerHasBuff(Riptide) && API.TargetHealthPercent <= RiptideLifePercent;
         private bool RiptideMOCheck => API.CanCast(Riptide) && !API.PlayerCanAttackMouseover && (!API.PlayerIsMoving || API.PlayerIsMoving) && !API.MouseoverHasBuff(Riptide) && API.MouseoverHealthPercent <= RiptideLifePercent;
         private bool SpiritLinkCheck => API.CanCast(SpiritLinkTotem) && SpiritLinkAoE;
@@ -166,6 +167,7 @@ namespace HyperElk.Core
         private int SpiritLinkTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritLinkTotem)];
         private int VesperTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(VesperTotem)];
         private int ChainHealLifePercent => numbList[CombatRoutine.GetPropertyInt(ChainHeal)];
+        private int ChainHarvestLifePercent => numbList[CombatRoutine.GetPropertyInt(ChainHarvest)];
         private int HealingRainLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingRain)];
         private int HealingStreamTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingStreamTotem)];
         private int HealingTideTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingTideTotem)];
@@ -245,6 +247,7 @@ namespace HyperElk.Core
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool IsDispell => API.ToggleIsEnabled("Dispel");
+        private bool IsHealingRain => API.ToggleIsEnabled("Healing Rain");
 
 
 
@@ -320,6 +323,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Internal Strife", 327648);
             CombatRoutine.AddDebuff("Forced Confession", 328331);
             CombatRoutine.AddDebuff("Insidious Venom 2", 317661);
+            CombatRoutine.AddDebuff("Dark Lance", 327481);
             CombatRoutine.AddDebuff("Soul Corruption", 333708);
             CombatRoutine.AddDebuff("Spectral Reach", 319669);
             CombatRoutine.AddDebuff("Death Grasp", 323831);
@@ -371,7 +375,7 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("OOC");
             CombatRoutine.AddToggle("Dispel");
-
+            CombatRoutine.AddToggle("Healing Rain");
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -468,6 +472,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(VesperTotem, VesperTotem + " Life Percent", numbList, "Life percent at which " + VesperTotem + " is used when AoE Number of members are at and Cov is Kyrian, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp(FaeTransfusion, FaeTransfusion + " Life Percent", numbList, "Life percent at which " + FaeTransfusion + " is used when AoE Number of members are at and Cov is Kyrian, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp(ChainHeal, ChainHeal + " Life Percent", numbList, "Life percent at which " + ChainHeal + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 65);
+            CombatRoutine.AddProp(ChainHarvest, ChainHarvest + " Life Percent", numbList, "Life percent at which " + ChainHarvest + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 65);
             CombatRoutine.AddProp(HealingRain, HealingRain + " Life Percent", numbList, "Life percent at which " + HealingRain + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", numbList, "Life percent at which " + HealingStreamTotem + " Or Cloudburst Totem is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 92);
          //   CombatRoutine.AddProp(AncestralProtectionTotem, AncestralProtectionTotem + " Life Percent", numbList, "Life percent at which " + AncestralProtectionTotem + " is used when AoE Number of members are at life percent if talented, set to 0 to disable", "Healing", 65);
@@ -579,7 +584,7 @@ namespace HyperElk.Core
                     API.CastSpell(WaterShield);
                     return;
                 }
-              if (API.CanCast(HealingRain) && HealingRainAoE && InRange && API.TargetHealthPercent > 0 && (!QuakingHR || QuakingHR && QuakingHelper))
+              if (API.CanCast(HealingRain) && IsHealingRain && HealingRainAoE && InRange && API.TargetHealthPercent > 0 && (!QuakingHR || QuakingHR && QuakingHelper))
                 {
                     API.CastSpell(HealingRain);
                     return;
@@ -641,16 +646,6 @@ namespace HyperElk.Core
                     API.CastSpell(Downpour + MO);
                     return;
                 }
-                if (API.CanCast(ChainHeal) && API.TargetHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.TargetHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper))
-                {
-                    API.CastSpell(ChainHeal);
-                    return;
-                }
-                if (API.CanCast(ChainHeal) && !API.MacroIsIgnored(ChainHeal + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.MouseoverHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper))
-                {
-                    API.CastSpell(ChainHeal + MO);
-                    return;
-                }
                 if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && (!QuakingChainHarvest || QuakingChainHarvest && QuakingHelper))
                 {
                     API.CastSpell(ChainHarvest);
@@ -659,6 +654,16 @@ namespace HyperElk.Core
                 if (VenthyrMOCheck && !API.MacroIsIgnored(ChainHarvest + MO) && IsMouseover && InRange && API.MouseoverHealthPercent > 0 && (!QuakingChainHarvest || QuakingChainHarvest && QuakingHelper))
                 {
                     API.CastSpell(ChainHarvest + MO);
+                    return;
+                }
+                if (API.CanCast(ChainHeal) && API.TargetHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.TargetHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper))
+                {
+                    API.CastSpell(ChainHeal);
+                    return;
+                }
+                if (API.CanCast(ChainHeal) && !API.MacroIsIgnored(ChainHeal + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.MouseoverHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper))
+                {
+                    API.CastSpell(ChainHeal + MO);
                     return;
                 }
                 if (API.CanCast(Wellspring) && WellspringTalent && WellSpringAoE && (!QuakingWellspring || QuakingWellspring && QuakingHelper))

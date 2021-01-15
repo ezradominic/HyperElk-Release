@@ -49,7 +49,7 @@ namespace HyperElk.Core
         bool LastCastChiWave => API.LastSpellCastInGame == ChiWave;
         bool CurrenCastFistsOfFury => API.CurrentCastSpellID("player") == 113656;
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
-        string[] TouchofDeathList = new string[] {"with Cooldowns" };
+        string[] TouchofDeathList = new string[] {"with Cooldowns", "Manual" };
         //Trinket1
         private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
         string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
@@ -57,7 +57,7 @@ namespace HyperElk.Core
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
-        string[] InvokeXuenList = new string[] {"with Cooldowns" };
+        string[] InvokeXuenList = new string[] {"with Cooldowns", "Manual" };
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] {"with Cooldowns", "AOE" };
@@ -228,6 +228,11 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            if (API.PlayerIsCC(CCList.STUN) && PlayerRaceSettings == "Human" && API.CanCast(RacialSpell1))
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
             if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
             if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
@@ -236,6 +241,11 @@ namespace HyperElk.Core
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18 && NotChanneling)
             {
                 API.CastSpell(SpearHandStrike);
+                return;
+            }
+            if (API.PlayerHealthPercent <= TouchofKarmaPercentProc && API.CanCast(TouchofKarma))
+            {
+                API.CastSpell(TouchofKarma);
                 return;
             }
             if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4 && NotChanneling)
@@ -390,7 +400,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/flying_serpent_kick,if=buff.bok_proc.down,interrupt=1
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) && API.SpellCDDuration(FistsofFury) < 3000 || ChiDeficit <= 1 || EnergyTimeToMax < 3000)
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && NotChanneling && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) && API.SpellCDDuration(FistsofFury) < 3000 || ChiDeficit <= 1 || EnergyTimeToMax < 3000)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -685,37 +695,37 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_serenity+=/blood_fury,if=variable.serenity_burst
-            if (API.CanCast(BloodFury) && PlayerRaceSettings == "Orc")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/berserking,if=variable.serenity_burst
-            if (API.CanCast(Berserking) && PlayerRaceSettings == "Troll")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/arcane_torrent,if=chi.max-chi>=1
-            if (API.CanCast(ArcaneTorrent) && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
+            if (API.CanCast(RacialSpell1) && isRacial && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/fireblood,if=variable.serenity_burst
-            if (API.CanCast(Fireblood) && PlayerRaceSettings == "Dark Iron Dwarf")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/ancestral_call,if=variable.serenity_burst
-            if (API.CanCast(AncestralCall))
+            if (API.CanCast(RacialSpell1) && isRacial)
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/bag_of_tricks,if=variable.serenity_burst
-            if (API.CanCast(BagOfTricks) && PlayerRaceSettings == "Vulpera")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Vulpera")
             {
                 API.CastSpell(RacialSpell1);
                 return;
@@ -758,7 +768,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_serenity+=/bag_of_tricks
-            if (API.CanCast(BagOfTricks) && PlayerRaceSettings == "Vulpera")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Vulpera")
             {
                 API.CastSpell(RacialSpell1);
                 return;
@@ -773,7 +783,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_sef+=/arcane_torrent,if=chi.max-chi>=1
-            if (API.CanCast(ArcaneTorrent) && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
+            if (API.CanCast(RacialSpell1) && isRacial && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
             {
                 API.CastSpell(RacialSpell1);
                 return;
@@ -828,31 +838,31 @@ namespace HyperElk.Core
             }
             //actions.cd_sef+=/touch_of_karma,if=fight_remains>159|pet.xuen_the_white_tiger.active|variable.hold_xuen
             //actions.cd_sef+=/blood_fury,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-            if (API.CanCast(BloodFury) && PlayerRaceSettings == "Orc")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/berserking,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<15
-            if (API.CanCast(Berserking) && PlayerRaceSettings == "Troll" && API.SpellCDDuration(InvokeXuen) > 30000)
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll" && API.SpellCDDuration(InvokeXuen) > 30000)
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/fireblood,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<10
-            if (API.CanCast(Fireblood) && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(InvokeXuen) > 30000)
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(InvokeXuen) > 30000)
             {
                 API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/ancestral_call,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-            if (API.CanCast(AncestralCall) && API.SpellCDDuration(InvokeXuen) > 30000)
+            if (API.CanCast(RacialSpell1) && API.SpellCDDuration(InvokeXuen) > 30000)
             {
-                API.CastSpell(AncestralCall);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/bag_of_tricks,if=buff.storm_earth_and_fire.down
-            if (API.CanCast(BagOfTricks) && !API.PlayerHasBuff(StormEarthAndFire) && PlayerRaceSettings == "Vulpera")
+            if (API.CanCast(RacialSpell1) && isRacial && !API.PlayerHasBuff(StormEarthAndFire) && PlayerRaceSettings == "Vulpera")
             {
                 API.CastSpell(RacialSpell1);
                 return;
