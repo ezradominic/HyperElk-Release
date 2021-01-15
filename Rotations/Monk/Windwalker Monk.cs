@@ -113,18 +113,15 @@ namespace HyperElk.Core
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
         private string StormEarthAndFire = "Storm,  Earth,  and Fire";
-        private string BloodFury = "Blood Fury";
-        private string Berserking = "Berserking";
-        private string ArcaneTorrent = "Arcane Torrent";
-        private string Fireblood = "Fireblood";
         private string CracklingJadeLightning = "Crackling Jade Lightning";
         private string TheEmperorsCapacitor = "The Emperor's Capacitor";
         private string SkyreachExhaustion = "Skyreach Exhaustion";
         private string Stopcast = "Stopcast";
         private string ChiEnergy = "Chi Energy";
         private string CoordinatedOffensive = "Coordinated Offensive";
-        private string AncestralCall = "Ancestral Call";
-        private string BagOfTricks = "Bag of Tricks";
+
+        private string LegSweep = "Leg Sweep";
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Windwalker Monk @Mufflon12";
@@ -183,12 +180,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FortifyingBrew, 243435,"F2");
             CombatRoutine.AddSpell(InvokeXuen, 123904,"F3");
             CombatRoutine.AddSpell(TouchofKarma, 122470, "NumPad3");
-//            CombatRoutine.AddSpell(BloodFury, 20572);
-//            CombatRoutine.AddSpell(Berserking, 26297);
-//            CombatRoutine.AddSpell(ArcaneTorrent, 28730);
-//            CombatRoutine.AddSpell(Fireblood, 265221);
-//            CombatRoutine.AddSpell(AncestralCall, 274738);
-//            CombatRoutine.AddSpell(BagOfTricks, 312411);
+            CombatRoutine.AddSpell(LegSweep, 119381);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -241,6 +233,11 @@ namespace HyperElk.Core
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18 && NotChanneling)
             {
                 API.CastSpell(SpearHandStrike);
+                return;
+            }
+            if (isInterrupt && API.SpellISOnCooldown(SpearHandStrike) && API.CanCast(LegSweep) && IsMelee && PlayerLevel >= 18)
+            {
+                API.CastSpell(LegSweep);
                 return;
             }
             if (API.PlayerHealthPercent <= TouchofKarmaPercentProc && API.CanCast(TouchofKarma))
