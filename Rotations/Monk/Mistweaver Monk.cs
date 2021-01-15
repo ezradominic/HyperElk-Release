@@ -522,6 +522,16 @@ namespace HyperElk.Core
                 {
                     for (int i = 0; i < units.Length; i++)
                     {
+                        if (API.LastSpellCastInGame == EssenceFont)
+                        {
+                            API.CastSpell(PlayerTargetArray[i]);
+                            API.CastSpell("Assist");
+                            if (API.PlayerCanAttackTarget && API.CanCast(RisingSunKick))
+                            {
+                                API.CastSpell(RisingSunKick);
+                                return;
+                            }
+                        }
                         if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                         {
                             API.CastSpell(PlayerTargetArray[i]);
@@ -568,7 +578,17 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                             {
-                                if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (API.LastSpellCastInGame == EssenceFont)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                API.CastSpell("Assist");
+                                if (API.PlayerCanAttackTarget && API.CanCast(RisingSunKick))
+                                {
+                                    API.CastSpell(RisingSunKick);
+                                    return;
+                                }
+                            }
+                            if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
                                     return;
