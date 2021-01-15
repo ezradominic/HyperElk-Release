@@ -57,7 +57,6 @@ namespace HyperElk.Core
         private string AoE = "AOE";
         private string PartySwap = "Target Swap";
         private string TargetChange = "Target Change";
-        private string TargetHostile = "Target Hostile";
         private string Assist = "Assist";
         private string AoEDPS = "AOEDPS";
         private string AoEDPSH = "AOEDPS Health";
@@ -172,7 +171,7 @@ namespace HyperElk.Core
 
             //Combat
             CombatRoutine.AddSpell(TigerPalm, 100780, "D1");
-            CombatRoutine.AddSpell(BlackoutKick, 205523, "D2");
+            CombatRoutine.AddSpell(BlackoutKick, 100784, "D2");
             CombatRoutine.AddSpell(SpinningCraneKick, 101546, "D3");
             CombatRoutine.AddSpell(ExpelHarm, 322101, "D4");
             CombatRoutine.AddSpell(RisingSunKick, 107428, "D5");
@@ -203,7 +202,6 @@ namespace HyperElk.Core
 
 
             //Macros
-            CombatRoutine.AddMacro(TargetHostile);
             CombatRoutine.AddMacro(Assist);
 
             CombatRoutine.AddMacro(trinket1);
