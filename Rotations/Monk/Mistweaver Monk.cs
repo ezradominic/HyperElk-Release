@@ -102,7 +102,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch JadeSerpentStatueWatch = new Stopwatch();
 
         int ViVifyCounter = 0;
-        string[] ThunderFocusTeaList = new string[] { "always", "Cooldowns", "Manual", };
+        string[] ThunderFocusTeaList = new string[] { "always", "Cooldowns", "Rising Sun Kick Cooldown", "Manual", };
         private string UseThunderFocusTea => ThunderFocusTeaList[CombatRoutine.GetPropertyInt(ThunderFocusTea)];
         private bool NotChanneling => API.PlayerCurrentCastTimeRemaining == 0;
         private bool NotCasting => !API.PlayerIsCasting(false);
@@ -658,6 +658,11 @@ namespace HyperElk.Core
             if (API.CanCast(BlackoutKick))
             {
                 API.CastSpell(BlackoutKick);
+                return;
+            }
+            if (API.CanCast(RisingSunKick) && API.SpellISOnCooldown(RisingSunKick) && !API.SpellISOnCooldown(ThunderFocusTea) && UseThunderFocusTea == "Rising Sun Kick Cooldown")
+            {
+                API.CastSpell(ThunderFocusTea);
                 return;
             }
             if (API.CanCast(RisingSunKick))
