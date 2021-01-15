@@ -18,6 +18,7 @@
 // v2.6 Rallying Cry added
 // v2.7 Ignore Pain added
 // v2.8 Racials and a few other things
+// v2.9 some small adjustments
 
 using System.Linq;
 
@@ -82,11 +83,12 @@ namespace HyperElk.Core
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
 
+        bool WWup => (API.PlayerHasBuff(Whirlwind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber && IsAOE || !IsAOE);
         bool IsRecklessness => UseRecklessness == "with Cooldowns" && IsCooldowns || UseRecklessness == "always";
         bool IsSiegebreaker => UseSiegebreaker == "with Cooldowns" && IsCooldowns || UseSiegebreaker == "always";
-        bool IsCovenant => UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
-        bool IsDragonRoar => UseDragonRoar == "with Cooldowns" && IsCooldowns || UseDragonRoar == "always" || UseDragonRoar == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
-        bool IsBladestorm => UseBladestorm == "with Cooldowns" && IsCooldowns || UseBladestorm == "always" || UseBladestorm == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsDragonRoar => (UseDragonRoar == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE") && IsCooldowns || UseDragonRoar == "always" || (UseDragonRoar == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsBladestorm => (UseBladestorm == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE") && IsCooldowns || UseBladestorm == "always" || (UseBladestorm == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
         bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
         bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
 
@@ -117,7 +119,7 @@ namespace HyperElk.Core
         private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoERaid)];
         private int RallyLifePercent => numbList[CombatRoutine.GetPropertyInt(RallyingCry)];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
-        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns and AoE", "always" };
         string[] heroiclist = new string[] { "Not Used", "when out of melee", "only Mouseover", "both" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseRecklessness => CDUsage[CombatRoutine.GetPropertyInt(Recklessness)];
@@ -129,7 +131,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.8");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v2.9");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, 23881, "D1");
@@ -308,7 +310,7 @@ namespace HyperElk.Core
             if (IsMelee)
             {
                 //actions+=/rampage,if=cooldown.recklessness.remains<3&talent.reckless_abandon.enabled
-                if (API.CanCast(Rampage) && PlayerLevel >= 19 && IsRecklessness && API.SpellCDDuration(Recklessness) < 300 && TalentRecklessAbandon && API.PlayerRage >= 80)
+                if (API.CanCast(Rampage) && PlayerLevel >= 19 && WWup && IsRecklessness && API.SpellCDDuration(Recklessness) < 300 && TalentRecklessAbandon && API.PlayerRage >= 80)
                 {
                     API.CastSpell(Rampage);
                     return;
@@ -371,25 +373,25 @@ namespace HyperElk.Core
                 }
                 //Single Target Rota
                 //actions.single_target=raging_blow,if=runeforge.will_of_the_berserker.equipped&buff.will_of_the_berserker.remains<gcd
-                if (API.CanCast(RagingBlow) && PlayerLevel >= 12 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)) && API.PlayerHasBuff(WilloftheBerserker) && API.PlayerBuffTimeRemaining(WilloftheBerserker) < gcd)
+                if (API.CanCast(RagingBlow) && WWup && PlayerLevel >= 12 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)) && API.PlayerHasBuff(WilloftheBerserker) && API.PlayerBuffTimeRemaining(WilloftheBerserker) < gcd)
                 {
                     API.CastSpell(RagingBlow);
                     return;
                 }
                 //actions.single_target+=/crushing_blow,if=runeforge.will_of_the_berserker.equipped&buff.will_of_the_berserker.remains<gcd
-                if (API.CanCast(CrushingBlow) && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)) && API.PlayerHasBuff(WilloftheBerserker) && API.PlayerBuffTimeRemaining(WilloftheBerserker) < gcd)
+                if (API.CanCast(CrushingBlow) && WWup && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)) && API.PlayerHasBuff(WilloftheBerserker) && API.PlayerBuffTimeRemaining(WilloftheBerserker) < gcd)
                 {
                     API.CastSpell(CrushingBlow);
                     return;
                 }
                 //actions.single_target+=/siegebreaker,if=spell_targets.whirlwind>1|raid_event.adds.in>15
-                if (API.CanCast(Siegebreaker) && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
+                if (API.CanCast(Siegebreaker) && WWup && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
                 {
                     API.CastSpell(Siegebreaker);
                     return;
                 }
                 //actions.single_target+=/rampage,if=buff.recklessness.up|(buff.enrage.remains<gcd|rage>90)|buff.frenzy.remains<1.5
-                if (API.CanCast(Rampage) && PlayerLevel >= 19 && API.PlayerRage >= 80 && ((API.PlayerHasBuff(Recklessness) || API.PlayerBuffTimeRemaining(Enrage) < gcd || API.PlayerRage > 90) || API.PlayerHasBuff(Frenzy) && API.PlayerBuffTimeRemaining(Frenzy) < 150))
+                if (API.CanCast(Rampage) && WWup && PlayerLevel >= 19 && API.PlayerRage >= 80 && ((API.PlayerHasBuff(Recklessness) || API.PlayerBuffTimeRemaining(Enrage) < gcd || API.PlayerRage > 90) || API.PlayerHasBuff(Frenzy) && API.PlayerBuffTimeRemaining(Frenzy) < 150))
                 {
                     API.CastSpell(Rampage);
                     return;
@@ -400,31 +402,31 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single_target+=/condemn
-                if (API.CanCast(Condemn) && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Condemn) && WWup && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Condemn);
                     return;
                 }
                 //actions.single_target+=/condemn
-                if (API.CanCast(MassacreCondemn) && PlayerCovenantSettings == "Venthyr" && TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(MassacreCondemn) && WWup && PlayerCovenantSettings == "Venthyr" && TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(MassacreCondemn);
                     return;
                 }
                 //actions.single_target+=/execute
-                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && !TalentMassacre && (API.TargetHealthPercent < 20 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Execute) && WWup && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && !TalentMassacre && (API.TargetHealthPercent < 20 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(Execute);
                     return;
                 }
                 //actions.single_target+=/execute
-                if (API.CanCast(MassacreExecute) && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && TalentMassacre && (API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(MassacreExecute) && WWup && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && TalentMassacre && (API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
                 {
                     API.CastSpell(MassacreExecute);
                     return;
                 }
                 //Mouseover stuff
-                if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                if (IsMouseover && WWup && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                 {
                     if (API.CanCast(Execute) && !API.MacroIsIgnored(Execute + "MO") && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && !TalentMassacre && (API.MouseoverHealthPercent < 20 || API.PlayerHasBuff(SuddenDeath)))
                     {
@@ -464,13 +466,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single_target +=/ bloodthirst,if= buff.enrage.down | conduit.vicious_contempt.rank > 5 & target.health.pct < 35 & !talent.cruelty.enabled
-                if (API.CanCast(Bloodthirst) && PlayerLevel >= 10 && !API.PlayerHasBuff(Enrage,false, false) && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(Bloodthirst) && WWup && PlayerLevel >= 10 && !API.PlayerHasBuff(Enrage,false, false) && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(Bloodthirst);
                     return;
                 }
                 //actions.single_target +=/ bloodbath,if= buff.enrage.down | conduit.vicious_contempt.rank > 5 & target.health.pct < 35 & !talent.cruelty.enabled
-                if (API.CanCast(Bloodbath) && !API.PlayerHasBuff(Enrage, false, false) && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(Bloodbath) && WWup && !API.PlayerHasBuff(Enrage, false, false) && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(Bloodbath);
                     return;
@@ -482,43 +484,43 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single_target+=/onslaught
-                if (API.CanCast(Onslaught) && API.PlayerHasBuff(Enrage) && TalentOnslaught)
+                if (API.CanCast(Onslaught) && WWup && API.PlayerHasBuff(Enrage) && TalentOnslaught)
                 {
                     API.CastSpell(Onslaught);
                     return;
                 }
                 //actions.single_target+=/raging_blow,if=charges=2
-                if (API.CanCast(RagingBlow) && PlayerLevel >= 12 && API.SpellCharges(RagingBlow) == 2 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(RagingBlow) && WWup && PlayerLevel >= 12 && API.SpellCharges(RagingBlow) == 2 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(RagingBlow);
                     return;
                 }
                 //actions.single_target+=/crushing_blow,if=charges=2
-                if (API.CanCast(CrushingBlow) && API.SpellCharges(RagingBlow) == 2 && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(CrushingBlow) && WWup && API.SpellCharges(RagingBlow) == 2 && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(CrushingBlow);
                     return;
                 }
                 //actions.single_target+=/bloodthirst
-                if (API.CanCast(Bloodthirst) && PlayerLevel >= 10 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(Bloodthirst) && WWup && PlayerLevel >= 10 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(Bloodthirst);
                     return;
                 }
                 //actions.single_target+=/bloodbath
-                if (API.CanCast(Bloodbath) && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(Bloodbath) && WWup && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(Bloodbath);
                     return;
                 }
                 //actions.single_target+=/raging_blow
-                if (API.CanCast(RagingBlow) && PlayerLevel >= 12 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(RagingBlow) && WWup && PlayerLevel >= 12 && !(TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(RagingBlow);
                     return;
                 }
                 //actions.single_target+=/crushing_blow
-                if (API.CanCast(CrushingBlow) && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
+                if (API.CanCast(CrushingBlow) && WWup && (TalentRecklessAbandon && API.PlayerHasBuff(Recklessness)))
                 {
                     API.CastSpell(CrushingBlow);
                     return;
