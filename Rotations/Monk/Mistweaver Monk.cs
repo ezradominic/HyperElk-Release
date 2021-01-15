@@ -39,7 +39,7 @@ namespace HyperElk.Core
         private string SpiritualManaPotion = "Spiritual Mana Potion";
         private string WeaponsofOrder = "Weapons of Order";
         private string WeaponsofOrderAOE = "Weapons of Order AOE";
-        private string LifeCocoonRaid = "Life Cocoon Raid";
+        private string LCT = "Life Cocoon on Tank Only";
 
 
         private string Fleshcraft = "Fleshcraft";
@@ -129,8 +129,7 @@ namespace HyperElk.Core
         private int HealingElixirPercent => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int RefreshingJadeWindPercent => numbList[CombatRoutine.GetPropertyInt(RefreshingJadeWind)];
         private int SpiritualManaPotionManaPercent => numbList[CombatRoutine.GetPropertyInt(SpiritualManaPotion)];
-        private string UseLifeCocoonRaid => LifeCocoonRaidList[CombatRoutine.GetPropertyInt(LifeCocoon)];
-        string[] LifeCocoonRaidList = new string[] { "yes", "no" };
+        private bool LCTank => CombatRoutine.GetPropertyBool(LCT);
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE", };
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
@@ -335,7 +334,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Vivify, Vivify + " Life Percent", numbList, "Life percent at which" + Vivify + "is used, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(SoothingMist, SoothingMist + " Life Percent", numbList, "Life percent at which" + SoothingMist + "is, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(LifeCocoon, LifeCocoon + " Life Percent", numbList, "Life percent at which" + LifeCocoon + "is, set to 0 to disable", "Healing", 50);
-            CombatRoutine.AddProp(LifeCocoonRaid, LifeCocoon + " in Raid", LifeCocoonRaidList, "Use " + LifeCocoon + "in Raid only on Tank ?");
+            CombatRoutine.AddProp(LCT, "Life Cocoon Tank", true, "Use Life Cocoon only on Tank ? change to false, set to true by default", "Healing");
 
             CombatRoutine.AddProp(RenewingMist, RenewingMist + " Life Percent", numbList, "Life percent at which" + RenewingMist + "is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(Revival, Revival + " Life Percent", numbList, "Life percent at which" + Revival + "is used, set to 0 to disable", "Healing", 10);
@@ -483,16 +482,16 @@ namespace HyperElk.Core
                 API.CastSpell(Yulon);
                 return;
             }
- //           if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && API.TargetRoleSpec == API.TankRole && UseLifeCocoonRaid == "yes" && API.PlayerIsInRaid)
- //           {
- //               API.CastSpell(LifeCocoon);
- //               return;
- //           }
- //           if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && UseLifeCocoonRaid == "no" && API.PlayerIsInRaid)
- //           {
- //               API.CastSpell(LifeCocoon);
- //               return;
- //           }
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && API.TargetRoleSpec == API.TankRole && LCTank && API.PlayerIsInRaid)
+            {
+                API.CastSpell(LifeCocoon);
+                return;
+            }
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && !LCTank && API.PlayerIsInRaid)
+            {
+                API.CastSpell(LifeCocoon);
+                return;
+            }
             if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && API.PlayerIsInGroup && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(LifeCocoon);
