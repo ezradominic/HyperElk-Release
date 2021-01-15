@@ -8,6 +8,7 @@
 // v1.6 updated to latest simc apl
 // v1.7 spell ids and alot of other stuff
 // v1.8 Racials and other small fixes
+// v1.9 DoomWinds legendary fix
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -114,7 +115,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.8");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.9");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, 60103, "D3");
@@ -165,7 +166,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(WindfuryTotem, 327942);
             CombatRoutine.AddBuff(PrimordialWave, 326059);
             CombatRoutine.AddBuff(VesperTotem, 324386);
-            CombatRoutine.AddBuff(DoomWinds,235903);
+            CombatRoutine.AddBuff(DoomWinds,335903);
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock, 188389);
@@ -373,19 +374,19 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/stormstrike,if=runeforge.doom_winds.equipped&buff.doom_winds.up
-                if (API.CanCast(Stormstrike) && PlayerLevel >= 20 && API.PlayerMana >= 2 && isMelee && API.PlayerHasBuff(DoomWinds, false, false))
+                if (API.CanCast(Stormstrike) && PlayerLevel >= 20 && API.PlayerMana >= 2 && isMelee && API.PlayerBuffTimeRemaining(DoomWinds) > 0)
                 {
                     API.CastSpell(Stormstrike);
                     return;
                 }
                 //actions.single +=/ crash_lightning,if= runeforge.doom_winds.equipped & buff.doom_winds.up
-                if (API.CanCast(CrashLightning) && PlayerLevel >= 38 && API.PlayerMana >= 6 && isMelee && API.PlayerHasBuff(DoomWinds, false, false))
+                if (API.CanCast(CrashLightning) && PlayerLevel >= 38 && API.PlayerMana >= 6 && isMelee && API.PlayerBuffTimeRemaining(DoomWinds) > 0)
                 {
                     API.CastSpell(CrashLightning);
                     return;
                 }
                 //actions.single +=/ ice_strike,if= runeforge.doom_winds.equipped & buff.doom_winds.up
-                if (API.CanCast(IceStrike) && isMelee && API.PlayerMana >= 4 && TalentIceStrike && API.PlayerHasBuff(DoomWinds, false, false))
+                if (API.CanCast(IceStrike) && isMelee && API.PlayerMana >= 4 && TalentIceStrike && API.PlayerBuffTimeRemaining(DoomWinds) > 0)
                 {
                     API.CastSpell(IceStrike);
                     return;
