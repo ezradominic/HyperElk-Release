@@ -62,6 +62,7 @@ namespace HyperElk.Core
         private string Player = "player";
         private string PartySwap = "Target Swap";
         private string Quake = "Quake";
+        private string Purify = "Purify";
 
 
 
@@ -99,7 +100,8 @@ namespace HyperElk.Core
 
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
-        string[] DispellList = {"Chilled" ,"Frozen Binds" ,"Clinging Darkness" ,"Rasping Scream" ,"Heaving Retch" ,"Goresplatter" ,"Slime Injection" ,"Gripping Infection" ,"Repulsive Visage" ,"Soul Split" ,"Anima Injection" ,"Bewildering Pollen" ,"Bramblethorn Entanglement" ,"Sinlight Visions" ,"Siphon Life" ,"Turn to Stone" ,"Stony Veins" ,"Cosmic Artifice" ,"Wailing Grief" ,"Shadow Word:  Pain" ,"Anguished Cries" ,"Wrack Soul" ,"Dark Lance" ,"Insidious Venom" ,"Charged Anima" ,"Lost Confidence" ,"Burden of Knowledge" ,"Internal Strife" ,"Forced Confession" ,"Insidious Venom 2","Soul Corruption" };
+        string[] DispellList = {"Chilled" ,"Frozen Binds" ,"Clinging Darkness" ,"Rasping Scream" ,"Heaving Retch" ,"Goresplatter" ,"Slime Injection" ,"Gripping Infection" ,"Repulsive Visage" ,"Soul Split" ,"Anima Injection" ,"Bewildering Pollen" ,"Bramblethorn Entanglement" ,"Sinlight Visions" ,"Siphon Life" ,"Turn to Stone" ,"Stony Veins" ,"Cosmic Artifice" ,"Wailing Grief" ,"Shadow Word:  Pain" ,"Anguished Cries" ,"Wrack Soul" ,"Dark Lance" ,"Insidious Venom" ,"Charged Anima" ,"Lost Confidence" ,"Burden of Knowledge" ,"Internal Strife" ,"Forced Confession" ,"Insidious Venom 2","Soul Corruption",
+        "Debilitating Plague", "Burning Strain", "Blightbeak", "Corroded Claws", "Wasting Blight", "Hurl Spores", "Corrosive Gunk", "Genetic Alteration" , "Withering Blight" , "Decaying Blight"};
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
@@ -286,6 +288,17 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Forced Confession", 328331);
             CombatRoutine.AddDebuff("Insidious Venom 2", 317661);
             CombatRoutine.AddDebuff("Soul Corruption", 333708);
+            CombatRoutine.AddDebuff("Debilitating Plague", 324652);
+            CombatRoutine.AddDebuff("Burning Strain", 322358);
+            CombatRoutine.AddDebuff("Blightbeak", 327882);
+            CombatRoutine.AddDebuff("Corroded Claws", 320512);
+            CombatRoutine.AddDebuff("Wasting Blight", 320542);
+            CombatRoutine.AddDebuff("Hurl Spores", 328002);
+            CombatRoutine.AddDebuff("Corrosive Gunk", 319070);
+            CombatRoutine.AddDebuff("Genetic Alteration", 320248);
+            CombatRoutine.AddDebuff("Withering Blight", 341949);
+            CombatRoutine.AddDebuff("Decaying Blight", 330700);
+
 
 
             //Spell
@@ -326,6 +339,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DivineHymn, 64843);
             CombatRoutine.AddSpell(ShadowWordPain, 589);
             CombatRoutine.AddSpell(PowerWordFortitude, 21562);
+            CombatRoutine.AddSpell(Purify, 527);
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -338,7 +352,7 @@ namespace HyperElk.Core
             //Macro
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
-            CombatRoutine.AddMacro(DispelMagic + "MO");
+            CombatRoutine.AddMacro(Purify + "MO");
             CombatRoutine.AddMacro("Stopcast", "F10");
             CombatRoutine.AddMacro(Player);
             CombatRoutine.AddMacro(Party1);
@@ -431,24 +445,24 @@ namespace HyperElk.Core
                 #region Dispell
                 if (IsDispell)
                 {
-                    if (API.CanCast(DispelMagic) && !ChannelingDivine && NotChanneling)
+                    if (API.CanCast(Purify) && !ChannelingDivine && NotChanneling)
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
                             if (TargetHasDispellAble(DispellList[i]))
                             {
-                                API.CastSpell(DispelMagic);
+                                API.CastSpell(Purify);
                                 return;
                             }
                         }
                     }
-                    if (API.CanCast(DispelMagic) && IsMouseover && !ChannelingDivine && NotChanneling)
+                    if (API.CanCast(Purify) && IsMouseover && !ChannelingDivine && NotChanneling)
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
                             if (MouseouverHasDispellAble(DispellList[i]))
                             {
-                                API.CastSpell(DispelMagic + "MO");
+                                API.CastSpell(Purify + "MO");
                                 return;
                             }
                         }

@@ -282,7 +282,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Holy Pally by Ryu";
-            API.WriteLog("Welcome to Holy Pally v1.1 by Ryu");
+            API.WriteLog("Welcome to Holy Pally v1.3 by Ryu");
             API.WriteLog("Be advised this a Beta Rotation");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
             API.WriteLog("All Talents expect PVP Talents and Row 3 talents are supported. All Cooldowns are associated with Cooldown toggle.");
@@ -927,7 +927,7 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber))
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
@@ -979,7 +979,7 @@ namespace HyperElk.Core
                             //     API.CastSpell(RaidTargetArray[i]);
                             //    return;
                             // }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber))
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 API.CastSpell("Assist");
