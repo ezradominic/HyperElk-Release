@@ -25,6 +25,7 @@
 // v3.1 Quaking channeling fix
 // v3.2 Night Fae simp update
 // v3.3 small adjustment
+// v3.4 small adjustment
 
 using System.Diagnostics;
 
@@ -106,7 +107,6 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool isinRange => API.TargetRange < 45;
         private bool isMOinRange => API.MouseoverRange < 45;
-        bool IncarRdy => (API.PlayerAstral >= 90 && (TalentIncarnation && IsIncarnation && API.CanCast(Incarnation) || !TalentIncarnation && IsCelestialAlignment && API.CanCast(CelestialAlignment)));
         private bool UseStarlord => (TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) == 0 || TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) > 400 && API.PlayerBuffTimeRemaining(Starlord) != 5000000 || !TalentStarlord);
         bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
         bool IsIncarnation => (UseIncarnation == "with Cooldowns" && IsCooldowns || UseIncarnation == "always");
@@ -165,7 +165,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v3.3");
+            API.WriteLog("Welcome to smartie`s Balance Druid v3.4");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -439,7 +439,7 @@ namespace HyperElk.Core
                     API.CastSpell("Trinket2");
                     return;
                 }
-                if (API.CanCast(WarriorofElune) && !PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune)
+                if (API.CanCast(WarriorofElune) && !PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune && API.PlayerAstral <= 30 && PlayerHasBuff(EclipseLunar))
                 {
                     API.CastSpell(WarriorofElune);
                     return;
@@ -598,42 +598,42 @@ namespace HyperElk.Core
                         API.CastSpell(Starsurge);
                         return;
                     }
-                    if (API.CanCast(NewMoon) && TalentNewMoon && SaveQuake && !IncarRdy && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentNewMoon) && API.PlayerAstral <= 90)
+                    if (API.CanCast(NewMoon) && TalentNewMoon && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentNewMoon) && API.PlayerAstral <= 90)
                     {
                         API.CastSpell(NewMoon);
                         return;
                     }
-                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && !IncarRdy && PlayerHasBuff(WarriorofElune))
+                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && PlayerHasBuff(WarriorofElune))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Wrath) && !IncarRdy && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && SaveQuake && TalentStellarDrift) && IncaCelestial && API.PlayerBuffTimeRemaining(EclipseSolar) >= 200 && API.PlayerBuffTimeRemaining(EclipseLunar) >= 200)
+                    if (API.CanCast(Wrath) && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && SaveQuake && TalentStellarDrift) && IncaCelestial && API.PlayerBuffTimeRemaining(EclipseSolar) >= 200 && API.PlayerBuffTimeRemaining(EclipseLunar) >= 200)
                     {
                         API.CastSpell(Wrath);
                         return;
                     }
-                    if (API.CanCast(Starfire) && !IncarRdy && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)
+                    if (API.CanCast(Starfire) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Starfire) && !IncarRdy && PlayerLevel >= 10 && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
+                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Wrath) && !IncarRdy && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
+                    if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
                     {
                         API.CastSpell(Wrath);
                         return;
                     }
-                    if (API.CanCast(Starfire) && !IncarRdy && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && PlayerHasBuff(EclipseLunar))
+                    if (API.CanCast(Starfire) && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && PlayerHasBuff(EclipseLunar))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Wrath) && !IncarRdy && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift))
+                    if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift))
                     {
                         API.CastSpell(Wrath);
                         return;
@@ -709,37 +709,37 @@ namespace HyperElk.Core
                         API.CastSpell(NewMoon);
                         return;
                     }
-                    if (API.CanCast(Starfire) && !IncarRdy && PlayerLevel >= 10 && PlayerHasBuff(WarriorofElune))
+                    if (API.CanCast(Starfire) && PlayerLevel >= 10 && PlayerHasBuff(WarriorofElune))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Starfire) && !IncarRdy && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && SaveQuake && TalentStellarDrift) && IncaCelestial && API.PlayerBuffTimeRemaining(EclipseSolar) >= 200 && API.PlayerBuffTimeRemaining(EclipseLunar) >= 200)
+                    if (API.CanCast(Starfire) && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && SaveQuake && TalentStellarDrift) && IncaCelestial && API.PlayerBuffTimeRemaining(EclipseSolar) >= 200 && API.PlayerBuffTimeRemaining(EclipseLunar) >= 200)
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Wrath) && !IncarRdy && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)
+                    if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)
                     {
                         API.CastSpell(Wrath);
                         return;
                     }
-                    if (API.CanCast(Wrath) && !IncarRdy && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
+                    if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
                     {
                         API.CastSpell(Wrath);
                         return;
                     }
-                    if (API.CanCast(Starfire) && !IncarRdy && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
+                    if (API.CanCast(Starfire) && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Wrath) && !IncarRdy && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && PlayerHasBuff(EclipseSolar))
+                    if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && PlayerHasBuff(EclipseSolar))
                     {
                         API.CastSpell(Wrath);
                         return;
                     }
-                    if (API.CanCast(Starfire) && !IncarRdy && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift))
+                    if (API.CanCast(Starfire) && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift))
                     {
                         API.CastSpell(Starfire);
                         return;
