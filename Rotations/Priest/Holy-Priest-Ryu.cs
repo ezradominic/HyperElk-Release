@@ -349,6 +349,7 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("Auto Target");
             CombatRoutine.AddToggle("OOC");
             CombatRoutine.AddToggle("Dispel");
+            CombatRoutine.AddToggle("Mouseover");
             //Macro
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
