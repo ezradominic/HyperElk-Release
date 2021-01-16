@@ -522,18 +522,23 @@ namespace HyperElk.Core
                     API.WriteLog("Dragon's Breath Targets :" + API.TargetUnitInRangeCount);
                     return;
                 }
-                if (API.CanCast("Scorch") && Level >= 19 && InRange  && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) && API.PlayerHasBuff("Combustion") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 && (!QuakingScorch || QuakingScorch && QuakingHelper))
+                if (API.CanCast("Scorch") && Level >= 19 && InRange && !API.PlayerIsCasting(true) && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) && ((!API.PlayerHasBuff("Combustion") || API.PlayerHasBuff("Combustion") && API.SpellCharges("Fire Blast") < 0 && API.SpellCharges("Phoenix Flames") < 0) && SearingTouch && API.TargetHealthPercent <= 30 && API.TargetHealthPercent > 0 || !SearingTouch && API.PlayerHasBuff("Combustion") || SearingTouch && API.PlayerHasBuff("Combustion")) && (!QuakingScorch || QuakingScorch && QuakingHelper))
                 {
                     API.CastSpell("Scorch");
-                    API.WriteLog("Sorch on Combustion");
                     return;
                 }
-                if (API.CanCast("Scorch") && Level >= 19 && InRange  && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) && !API.PlayerHasBuff("Combustion") && API.SpellCharges("Fire Blast") == 0 && SearingTouch && API.TargetHealthPercent <= 30 && API.TargetHealthPercent > 0 && (!QuakingScorch || QuakingScorch && QuakingHelper))
-                {
-                    API.CastSpell("Scorch");
-                    API.WriteLog("Sorch No FB Charges outside of Combustion with Searing Touch");
-                    return;
-                }
+           //     if (API.CanCast("Scorch") && Level >= 19 && InRange  && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) && API.PlayerHasBuff("Combustion") && API.SpellCharges("Fire Blast") == 0 && API.SpellCharges("Phoenix Flames") == 0 && (!QuakingScorch || QuakingScorch && QuakingHelper))
+             //   {
+               //     API.CastSpell("Scorch");
+                 //   API.WriteLog("Sorch on Combustion");
+                   // return;
+                //}
+           //     if (API.CanCast("Scorch") && Level >= 19 && InRange  && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) && !API.PlayerHasBuff("Combustion") && API.SpellCharges("Fire Blast") == 0 && SearingTouch && API.TargetHealthPercent <= 30 && API.TargetHealthPercent > 0 && (!QuakingScorch || QuakingScorch && QuakingHelper))
+              //  {
+                //    API.CastSpell("Scorch");
+                  //  API.WriteLog("Sorch No FB Charges outside of Combustion with Searing Touch");
+                    //return;
+                //}
                 if (API.CanCast("Flamestrike") && !API.PlayerIsCasting(true) && InRange && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm) || !API.PlayerHasBuff("Hot Streak!")) && (FlamePatchTalent && (IsForceAOE || API.TargetUnitInRangeCount >= 3) || !FlamePatchTalent && (IsForceAOE || API.TargetUnitInRangeCount >= 3)) && Level >= 17 && (IsAOE || IsForceAOE) && (!QuakingFlamestrike || QuakingFlamestrike && QuakingHelper))
                 {
                     API.CastSpell("Flamestrike");
