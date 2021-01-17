@@ -26,6 +26,7 @@
 // v3.2 Night Fae simp update
 // v3.3 small adjustment
 // v3.4 small adjustment
+// v3.5 no leggy fix
 
 using System.Diagnostics;
 
@@ -165,7 +166,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v3.4");
+            API.WriteLog("Welcome to smartie`s Balance Druid v3.5");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -444,20 +445,20 @@ namespace HyperElk.Core
                     API.CastSpell(WarriorofElune);
                     return;
                 }
-                if (PlayerCovenantSettings == "Night Fae")
+                if (PlayerCovenantSettings == "Night Fae" && IsLegendary == "Balance of all things")
                 {
                     if (API.CanCast(Incarnation) && API.PlayerAstral < 30 && !IncaCelestial && IsIncarnation && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && TalentIncarnation)
                     {
                         API.CastSpell(Incarnation);
                         return;
                     }
-                    if (API.CanCast(CelestialAlignment) && PlayerLevel >= 39 && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral < 30 && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && !TalentIncarnation)
+                    if (API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral < 30 && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && !TalentIncarnation)
                     {
                         API.CastSpell(CelestialAlignment);
                         return;
                     }
                 }
-                if (PlayerCovenantSettings != "Night Fae")
+                if (PlayerCovenantSettings != "Night Fae" || IsLegendary != "Balance of all things")
                 {
                     if (API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && IsIncarnation && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && TalentIncarnation)
                     {
