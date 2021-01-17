@@ -38,6 +38,7 @@ namespace HyperElk.Core
         private string Trincket1 = "Trincket 1";
         private string Trincket2 = "Trincket 2";
         private string BoonOfTheAscended = "Boon of the Ascended";
+        private string DissonantEchoes = "Dissonant Echoes";
 
         //Talents
         bool TalentTwistOfFate => API.PlayerIsTalentSelected(3, 1);
@@ -96,6 +97,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(UnfurlingDarkness, 341273);
             CombatRoutine.AddBuff(BoonOfTheAscended, 325013);
             CombatRoutine.AddBuff(PowerInfusion, 10060);
+            CombatRoutine.AddBuff(DissonantEchoes, 343144);
             //Debuff
             CombatRoutine.AddDebuff(DevouringPlague, 335467);
             CombatRoutine.AddDebuff(SWPain, 589);
@@ -346,7 +348,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_bolt,if=insanity<=85&((talent.hungering_void.enabled&spell_targets.mind_sear<5)|spell_targets.mind_sear=1)
-            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(Voidform))
+            if (API.CanCast(VoidBolt) && (API.PlayerHasBuff(Voidform)|| API.PlayerHasBuff(DissonantEchoes)))
             {
                 if (API.PlayerInsanity <= 85 && ((TalentHungeringVoid && API.TargetUnitInRangeCount < 5) || API.TargetUnitInRangeCount == 1))
                 {
