@@ -43,6 +43,8 @@ namespace HyperElk.Core
         private string FlayersMark = "Flayer's Mark";
         private string WildMark = "Wild Mark";
         private string HuntersMark = "Hunter's Mark";
+
+        private string TranquilizingShot = "Tranquilizing Shot";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool isMOinRange => API.MouseoverRange <= 40;
@@ -91,6 +93,9 @@ namespace HyperElk.Core
             return API.PetHasBuff(buff, false, false);
         }
 
+        public bool DispellList => API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
+
+
         //CBProperties
 
 
@@ -121,7 +126,7 @@ namespace HyperElk.Core
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private bool Use_HuntersMark => CombatRoutine.GetPropertyBool("huntersmark");
-
+        private bool UseTranqShot => CombatRoutine.GetPropertyBool("TranquilizingShot");
         public override void Initialize()
         {
             CombatRoutine.Name = "Beast Mastery Hunter by Vec";
@@ -160,7 +165,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Resonating_Arrow, 308491, "F10");
             CombatRoutine.AddSpell(Flayed_Shot, 324149, "F10");
             CombatRoutine.AddSpell(Death_Chakram, 325028, "F10");
-
+            CombatRoutine.AddSpell(TranquilizingShot, 19801, "C");
             CombatRoutine.AddSpell(HuntersMark, 257284, "F11");
 
 
@@ -183,6 +188,20 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Feign_Death, 5384);
             CombatRoutine.AddBuff(FlayersMark, 324156);
 
+            CombatRoutine.AddBuff("Raging", 132117);
+            CombatRoutine.AddBuff("Unholy Frenzy", 136224);
+            CombatRoutine.AddBuff("Renew", 135953);
+            CombatRoutine.AddBuff("Additional Treads", 965900);
+            CombatRoutine.AddBuff("Slime Coated", 3459153);
+            CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
+            CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
+            CombatRoutine.AddBuff("Unholy Fervor", 2576093);
+            CombatRoutine.AddBuff("Raging Tantrum", 132126);
+            CombatRoutine.AddBuff("Loyal Beasts", 458967);
+            CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
+            CombatRoutine.AddBuff("Seething Rage", 136225);
+            CombatRoutine.AddBuff("Dark Shroud", 2576096);
             //Debuffs
 
             CombatRoutine.AddDebuff(WildMark, 328275);
@@ -200,7 +219,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Stampede, "Use " + Stampede, StampedeList, "Use " + Stampede + "always, with Cooldowns, on AOE", "Cooldowns", 0);
             CombatRoutine.AddProp(Bloodshed, "Use " + Bloodshed, BloodshedList, "Use " + Bloodshed + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Revive_Pet, "Use " + Revive_Pet, combatList, "Use " + "Revive/Call Pet" + "In Combat, Out Of Combat, Everytime", "Pet", 0);
-
+            CombatRoutine.AddProp("TranquilizingShot", "Tranquilizing Shot", false, "Enable if you want to use Tranquilizing Shot", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("huntersmark", "Hunter's Mark", false, "Enable if you want to let the rotation use Hunter's Mark", "Generic");
             CombatRoutine.AddProp("BarbedShot", "Barbed Shot", false, "Use Barbed Shot with pet in range", "Pet");
@@ -268,6 +287,11 @@ namespace HyperElk.Core
             if (API.CanCast(HuntersMark) && Use_HuntersMark && !API.TargetHasDebuff(HuntersMark) && InRange)
             {
                 API.CastSpell(HuntersMark);
+                return;
+            }
+            if (API.CanCast(TranquilizingShot) && DispellList && UseTranqShot && InRange && PlayerLevel >= 18)
+            {
+                API.CastSpell(TranquilizingShot);
                 return;
             }
             if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !Playeriscasting && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
