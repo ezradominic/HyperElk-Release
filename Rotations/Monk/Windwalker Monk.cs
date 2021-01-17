@@ -335,7 +335,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&(buff.dance_of_chiji.up|debuff.bonedust_brew.up)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.PlayerHasBuff(DanceofChiJi) && TalentDanceofChiJi || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.PlayerHasBuff(DanceofChiJi) && TalentDanceofChiJi || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -359,7 +359,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&((cooldown.bonedust_brew.remains>2&(chi>3|cooldown.fists_of_fury.remains>6)&(chi>=5|cooldown.fists_of_fury.remains>2))|energy.time_to_max<=3)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -528,7 +528,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.serenity+=/spinning_crane_kick,if=combo_strike&(active_enemies>=3|active_enemies>1&!cooldown.rising_sun_kick.up)
-            if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1 && API.SpellISOnCooldown(RisingSunKick)) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1 && API.SpellISOnCooldown(RisingSunKick)) && NotChanneling)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
@@ -561,7 +561,7 @@ namespace HyperElk.Core
             //actions.serenity+=/fists_of_fury,interrupt_if=!cooldown.rising_sun_kick.up
 
             //actions.serenity+=/spinning_crane_kick,if=combo_strike&debuff.bonedust_brew.up
-            if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && API.TargetHasDebuff(BonedustBrew) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && API.TargetHasDebuff(BonedustBrew) && NotChanneling)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
@@ -579,7 +579,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.serenity+=/spinning_crane_kick
-            if (API.CanCast(SpinningCraneKick) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && NotChanneling)
             {
                 API.CanCast(SpinningCraneKick);
                 return;
@@ -619,7 +619,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.weapons_of_order+=/spinning_crane_kick,if=combo_strike&active_enemies>=3&buff.weapons_of_order_ww.up
-            if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && API.PlayerUnitInMeleeRangeCount >= 3)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && API.PlayerUnitInMeleeRangeCount >= 3)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
