@@ -300,13 +300,13 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/expel_harm,if=chi.max-chi>=1&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (API.CanCast(ExpelHarm) && ChiDeficit >= 1 && (EnergyTimeToMax < 1000 || API.SpellCDDuration(Serenity) < 2000 || EnergyTimeToMax < 4000 && API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
+            if (API.CanCast(ExpelHarm) && ChiDeficit >= 1 && (EnergyTimeToMax < 1000 || API.SpellCDDuration(Serenity) < 2000 || EnergyTimeToMax < 4000) && (API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
             {
                 API.CastSpell(ExpelHarm);
                 return;
             }
             //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 1000 || API.SpellCDDuration(Serenity) < 2000 || EnergyTimeToMax < 4000 && API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
+            if (API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 1000 || API.SpellCDDuration(Serenity) < 2000 || EnergyTimeToMax < 4000) && (API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -341,7 +341,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&(buff.dance_of_chiji.up|debuff.bonedust_brew.up)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && UseLeg == "none" && (API.PlayerHasBuff(DanceofChiJi) && TalentDanceofChiJi || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.PlayerHasBuff(DanceofChiJi) && TalentDanceofChiJi || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -365,7 +365,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&((cooldown.bonedust_brew.remains>2&(chi>3|cooldown.fists_of_fury.remains>6)&(chi>=5|cooldown.fists_of_fury.remains>2))|energy.time_to_max<=3)
-                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -497,7 +497,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(talent.serenity&cooldown.serenity.remains<3|cooldown.rising_sun_kick.remains>1&cooldown.fists_of_fury.remains>1|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>2|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>3|chi>5|buff.bok_proc.up)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (TalentSerenty && API.SpellCDDuration(Serenity) < 3000 || API.SpellCDDuration(RisingSunKick) > 1000 && API.SpellCDDuration(FistsofFury) > 1000 || API.SpellCDDuration(RisingSunKick) < 3000 && API.SpellCDDuration(FistsofFury) > 3000 && API.PlayerCurrentChi == 2 || API.SpellCDDuration(RisingSunKick) > 3000 && API.SpellCDDuration(FistsofFury) < 3000 && API.PlayerCurrentChi > 3 || API.PlayerCurrentChi > 5) && NotChanneling && !CurrenCastFistsOfFury || API.PlayerHasBuff(BlackOutKickBuff))
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (TalentSerenty && API.SpellCDDuration(Serenity) < 3000 || API.SpellCDDuration(RisingSunKick) > 1000) && (API.SpellCDDuration(FistsofFury) > 1000 || API.SpellCDDuration(RisingSunKick) < 3000) && API.SpellCDDuration(FistsofFury) > 3000 && (API.PlayerCurrentChi == 2 || API.SpellCDDuration(RisingSunKick) > 3000) && API.SpellCDDuration(FistsofFury) < 3000 && (API.PlayerCurrentChi > 3 || API.PlayerCurrentChi > 5) && NotChanneling && (!CurrenCastFistsOfFury || API.PlayerHasBuff(BlackOutKickBuff)))
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -534,7 +534,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.serenity+=/spinning_crane_kick,if=combo_strike&(active_enemies>=3|active_enemies>1&!cooldown.rising_sun_kick.up)
-            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1 && API.SpellISOnCooldown(RisingSunKick)) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1) && API.SpellISOnCooldown(RisingSunKick) && NotChanneling)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
