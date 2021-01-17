@@ -6,9 +6,8 @@ namespace HyperElk.Core
 {
     public class UHDK : CombatRoutine
     {
-        private bool SmallCDs => API.ToggleIsEnabled("Small CDs");
         private bool UseDnD => API.ToggleIsEnabled("Use DnD");
-        private bool PoolWounds => API.ToggleIsEnabled("Pool Wounds");
+        private bool PoolWounds => API.ToggleIsEnabled("Wounds");
         private string ShackletheUnworthy = "Shackle the Unworthy";
         private string SwarmingMist = "Swarming Mist";
         private string DeathsDue = "Death's Due";
@@ -19,15 +18,6 @@ namespace HyperElk.Core
         private string Lichborne = "Lichborne";
         private string UnholyStrength = "Unholy Strength";
         private string DeathCoil = "Death Coil";
-        private string PhialofSerenity = "Phial of Serenity";
-        private string SpiritualHealingPotion = "Spiritual Healing Potion";
-        private string DeathGrip = "Death Grip";
-        private string Fleshcraft = "Fleshcraft";
-        private string UnholyBlight = "Unholy Blight";
-        private string ConvocationoftheDead = "Convocation of the Dead";
-        private string DarkTransformation = "Dark Transformation";
-        private string SacrificialPact = "Sacrificial Pact";
-        private string VirulentPlague = "Virulent Plague";
         //stopwatch
         private readonly Stopwatch Dark_Transformation_Ghoul = new Stopwatch();
         private readonly Stopwatch GargoyleActiveTime = new Stopwatch();
@@ -37,10 +27,8 @@ namespace HyperElk.Core
 
 
         //Misc
-        private bool isMOinRange => API.MouseoverRange <= 40;
-        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
-        private bool MeleeRange => API.TargetRange <= 5;
-        private bool InRange => API.TargetRange <= 40;
+        private bool MeleeRange => API.TargetRange <= 6;
+        private bool InRange => API.TargetRange <= 30;
 
         private bool PoolingForGargoyle
         {
@@ -107,7 +95,6 @@ namespace HyperElk.Core
 
             }
         }
-        private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         private static bool PlayerHasBuff(string buff)
         {
             return API.PlayerHasBuff(buff, false, false);
@@ -126,7 +113,6 @@ namespace HyperElk.Core
         private bool ApocGhoulActive => ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds <= 15000;
         private bool ArmyGhoulActive => ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds <= 30000;
         //CBProperties
-        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
 
 
 
@@ -135,21 +121,16 @@ namespace HyperElk.Core
         private int AntiMagicShellLifePercent => percentListProp[CombatRoutine.GetPropertyInt("Anti-Magic Shell")];
         private int DeathStrikePercent => percentListProp[CombatRoutine.GetPropertyInt("Death Strike")];
         private int DarkSuccorPercent => percentListProp[CombatRoutine.GetPropertyInt("Dark Succor")];
-        private int SacrificialPactPercent => percentListProp[CombatRoutine.GetPropertyInt(SacrificialPact)];
         private int LichborneLifePercent => API.getFromArray(percentListProp, CombatRoutine.GetPropertyInt(Lichborne));
 
         private string WhenDarkTransformation => CDUsage[CombatRoutine.GetPropertyInt("DarkTransformation")];
         private string UseRaiseAbomination => CDUsage[CombatRoutine.GetPropertyInt("RaiseAbomination")];
         private string UseApocalypse => CDUsage[CombatRoutine.GetPropertyInt("Apocalypse")];
-        private int FleshcraftPercent => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
+
         private bool UseRaiseDead => CombatRoutine.GetPropertyBool("RaiseDead");
-        private bool DeadliestCoil_equipped => CombatRoutine.GetPropertyBool("Deadliest Coil");
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
-        private string UseUnholyBlight => CDUsageWithAOE[CombatRoutine.GetPropertyInt(UnholyBlight)];
-        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
-        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         public override void Initialize()
         {
@@ -157,7 +138,6 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Unholy DK Rotation");
 
             //Spells
-
 
             CombatRoutine.AddSpell("Outbreak", 77575, "D1");
             CombatRoutine.AddSpell("Soul Reaper", 343294, "D2");
@@ -178,7 +158,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Death Pact", 48743, "NumPad4");
             CombatRoutine.AddSpell("Defile", 152280, "D6");
             CombatRoutine.AddSpell("Army of the Dead", 42650, "F8");
-            CombatRoutine.AddSpell(UnholyBlight, 115989, "NumPad5");
+            CombatRoutine.AddSpell("Unholy Blight", 115989, "Oemplus");
             CombatRoutine.AddSpell("Summon Gargoyle", 49206, "F7");
             CombatRoutine.AddSpell("Raise Dead", 46584, "D0");
             CombatRoutine.AddSpell("Raise Abomination", 288853, "F7");
@@ -189,12 +169,6 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DeathsDue, 324128, "F11");
             CombatRoutine.AddSpell(AbominationLimb, 315443, "F11");
             CombatRoutine.AddSpell(Lichborne, 49039, "F12");
-            CombatRoutine.AddSpell(DeathGrip, 49576, "NumPad1");
-            CombatRoutine.AddSpell(Fleshcraft, 324631, "NumPad9");
-
-            //Items
-            CombatRoutine.AddItem(PhialofSerenity, 177278);
-            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             CombatRoutine.AddBuff("Dark Succor", 101568);
             CombatRoutine.AddBuff("Sudden Doom", 81340);
@@ -202,47 +176,34 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Master of Ghouls", 246995);
             CombatRoutine.AddBuff(UnholyStrength, 53365);
             CombatRoutine.AddBuff(UnholyAssault, 207289);
-            CombatRoutine.AddBuff(UnholyBlight, 115989);
+            CombatRoutine.AddBuff("Unholy Blight", 115989);
 
             CombatRoutine.AddDebuff("Virulent Plague", 191587);
             CombatRoutine.AddDebuff("Festering Wound", 194310);
             CombatRoutine.AddDebuff("Necrotic Wound", 209858);
-            CombatRoutine.AddDebuff(UnholyBlight, 115994);
-
-            CombatRoutine.AddConduit("Convocation of the Dead");
-
-            CombatRoutine.AddMacro("Trinket1", "F9");
-            CombatRoutine.AddMacro("Trinket2", "F10");
-            CombatRoutine.AddMacro(DeathGrip + "MO", "NumPad1");
 
             //Toggle
-            CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Use DnD");
-            CombatRoutine.AddToggle("Pool Wounds");
+            CombatRoutine.AddToggle("Wounds");
 
-
+            CombatRoutine.AddMacro("Trinket1");
+            CombatRoutine.AddMacro("Trinket2");
             //Settings
             CombatRoutine.AddProp("RaiseDead", "Raise Dead", true, "Should the rotation try to Raise Dead", "Pet");
-            CombatRoutine.AddProp("Deadliest Coil", "Deadliest Coil", false, "Do you have the Deadliest Coil Legendary?", "Legendary");
             CombatRoutine.AddProp("DarkTransformation", "Use " + "Dark Transformation", CDUsage, "Use " + "Dark Transformation" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("RaiseAbomination", "Use " + "Raise Abomination", CDUsage, "Use " + "Raise Abomination" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("Apocalypse", "Use " + "Apocalypse", CDUsage, "Use " + "Apocalypse" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(UnholyBlight, "Use " + UnholyBlight, CDUsageWithAOE, "Use " + UnholyBlight + " On Cooldown, with Cooldowns", "Cooldowns", 0);
 
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " On Cooldown, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " On Cooldown, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " On Cooldown, with Cooldowns", "Trinkets", 0);
 
             CombatRoutine.AddProp(Lichborne, Lichborne + " Life Percent", percentListProp, "Life percent at which" + Lichborne + "is used, set to 0 to disable", "Defense", 5);
-            CombatRoutine.AddProp(SacrificialPact, SacrificialPact + " Life Percent", percentListProp, "Life percent at which" + SacrificialPact + "is used, set to 0 to disable", "Defense", 5);
             CombatRoutine.AddProp("Icebound", "Use " + "Icebound Fortitude" + " below:", percentListProp, "Life percent at which " + "Icebound Fortitude" + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp("Death Pact", "Use " + "Death Pact" + " below:", percentListProp, "Life percent at which " + "Death Pact" + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp("Anti-Magic Shell", "Use " + "Anti-Magic Shell" + " below:", percentListProp, "Life percent at which " + "Anti-Magic Shell" + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp("Death Strike", "Use " + "Death Strike High Priority" + " below:", percentListProp, "Life percent at which " + "Death Strike" + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp("Dark Succor", "Use " + "Death Strike Dark Succor" + " below:", percentListProp, "Life percent at which " + "Death Strike" + " is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 8);
-            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
-            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
         }
 
         public override void Pulse()
@@ -308,16 +269,6 @@ namespace HyperElk.Core
                 if (API.CanCast("Mind Freeze") && isInterrupt && MeleeRange)
                 {
                     API.CastSpell("Mind Freeze");
-                    return;
-                }
-                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && !API.MacroIsIgnored(PhialofSerenity) && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
-                {
-                    API.CastSpell(PhialofSerenity);
-                    return;
-                }
-                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
-                {
-                    API.CastSpell(SpiritualHealingPotion);
                     return;
                 }
                 if (isRacial && IsCooldowns)
@@ -390,11 +341,7 @@ namespace HyperElk.Core
                     API.CastSpell(ShackletheUnworthy);
                     return;
                 }
-                if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercent)
-                {
-                    API.CastSpell(Fleshcraft);
-                    return;
-                }
+
                 if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && InRange)
                 {
                     API.CastSpell("Trinket1");
@@ -409,7 +356,7 @@ namespace HyperElk.Core
                     API.CastSpell("Unholy Blight");
                     return;
                 }
-                if (API.CanCast("Dark Transformation") && (!Talent_UnholyBlight || API.PlayerHasBuff("Unholy Blight")) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
+                if (API.CanCast("Dark Transformation")&& (!Talent_UnholyBlight || API.PlayerHasBuff("Unholy Blight")) && (WhenDarkTransformation == "On Cooldown" || IsCooldowns && WhenDarkTransformation == "With Cooldowns") && MeleeRange)
                 {
                     API.CastSpell("Dark Transformation");
                     return;
@@ -434,7 +381,7 @@ namespace HyperElk.Core
                     API.CastSpell("Sacrificial Pact");
                     return;
                 }
-                if (API.CanCast("Unholy Assault") && API.SpellISOnCooldown("Apocalypse") && Festering_Wound_Stacks <= 3 && IsCooldowns && Talent_UnholyAssault && MeleeRange)
+                if (API.CanCast("Unholy Assault")&& API.SpellISOnCooldown("Apocalypse") && Festering_Wound_Stacks <= 3 && IsCooldowns && Talent_UnholyAssault && MeleeRange)
                 {
                     API.CastSpell("Unholy Assault");
                     return;
@@ -452,7 +399,7 @@ namespace HyperElk.Core
                     #region Gargoyle active ST
                     if (GargoyleActive)
                     {
-                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && ((API.PlayerRunicPower >= 40 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -462,7 +409,7 @@ namespace HyperElk.Core
                             API.CastSpell("Death Strike");
                             return;
                         }
-                        if (API.CanCast("Outbreak") && (!Talent_UnholyBlight || !IsCooldowns) && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
+                        if (API.CanCast("Outbreak") && (!Talent_UnholyBlight|| !IsCooldowns) && API.PlayerLevel >= 17 && API.TargetDebuffRemainingTime("Virulent Plague") < 810 && API.TargetRange <= 30)
                         {
                             API.CastSpell("Outbreak");
                             return;
@@ -505,7 +452,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //death_coil,if=runic_power.deficit<14&rune.time_to_4>gcd&!variable.pooling_for_gargoyle
-                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && API.PlayerRunicPower > 80 && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || !IsCooldowns) && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && API.PlayerRunicPower > 80 && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || !IsCooldowns) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -526,7 +473,7 @@ namespace HyperElk.Core
                             API.CastSpell("Festering Strike");
                             return;
                         }
-                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -548,18 +495,13 @@ namespace HyperElk.Core
                         API.CastSpell("Soul Reaper");
                         return;
                     }
-                    if (API.CanCast(DeathCoil) && DeadliestCoil_equipped && API.SpellISOnCooldown(DarkTransformation) && API.PlayerUnitInMeleeRangeCount <= 3 && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
-                    {
-                        API.CastSpell(DeathCoil);
-                        return;
-                    }
                     //death_coil,if=CombatRoutine.sudden_doom.react&rune.time_to_4>gcd&!variable.pooling_for_gargoyle|pet.gargoyle.active
-                    if (API.CanCast("Epidemic") && (DeadliestCoil_equipped && API.PlayerUnitInMeleeRangeCount > 3 || !DeadliestCoil_equipped || !API.SpellISOnCooldown(DarkTransformation)) && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;
                     }
-                    if (!PoolWounds && API.CanCast("Death and Decay") && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && UseDnD && !API.PlayerIsMoving && !Talent_Defile)
+                    if (!PoolWounds && API.CanCast("Death and Decay")&& IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && UseDnD && !API.PlayerIsMoving && !Talent_Defile)
                     {
                         API.CastSpell("Death and Decay");
                         return;
@@ -580,12 +522,7 @@ namespace HyperElk.Core
                         API.CastSpell("Clawing Shadows");
                         return;
                     }
-                    if (API.CanCast(DeathCoil) && DeadliestCoil_equipped && API.SpellISOnCooldown(DarkTransformation) && API.PlayerUnitInMeleeRangeCount <= 3 && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
-                    {
-                        API.CastSpell(DeathCoil);
-                        return;
-                    }
-                    if (API.CanCast("Epidemic") && (DeadliestCoil_equipped && API.PlayerUnitInMeleeRangeCount > 3 || !DeadliestCoil_equipped || !API.SpellISOnCooldown(DarkTransformation)) && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;
@@ -619,3 +556,7 @@ namespace HyperElk.Core
         }
     }
 }
+
+
+
+

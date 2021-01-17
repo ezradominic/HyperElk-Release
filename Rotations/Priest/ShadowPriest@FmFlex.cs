@@ -38,6 +38,7 @@ namespace HyperElk.Core
         private string Trincket1 = "Trincket 1";
         private string Trincket2 = "Trincket 2";
         private string BoonOfTheAscended = "Boon of the Ascended";
+        private string DissonantEchoes = "Dissonant Echoes";
 
         //Talents
         bool TalentTwistOfFate => API.PlayerIsTalentSelected(3, 1);
@@ -55,6 +56,7 @@ namespace HyperElk.Core
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool IsShieldSpeed => CombatRoutine.GetPropertyBool("SHIELDSPEED");
         private bool IsUseVamp => (bool)CombatRoutine.GetProperty("UseVampiric");
+        private bool Sync => (bool)CombatRoutine.GetProperty("sync");
         private bool IsSWDeathMoving => (bool)CombatRoutine.GetProperty(SWDeath);
         private int PWShieldLifePercent => percentListProp[CombatRoutine.GetPropertyInt(PWShield)];
         private int ShadowMendLifePercent => percentListProp[CombatRoutine.GetPropertyInt(ShadowMend)];
@@ -77,7 +79,7 @@ namespace HyperElk.Core
         //actions+=/variable,name=searing_nightmare_cutoff,op=set,value=spell_targets.mind_sear>3
         bool searing_nightmare_cutoff => API.TargetUnitInRangeCount > 3;
         //actions+=/variable,name=pi_or_vf_sync_condition,op=set,value=(priest.self_power_infusion|runeforge.twins_of_the_sun_priestess.equipped)&level>=58&cooldown.power_infusion.up|(level<58|!priest.self_power_infusion&!runeforge.twins_of_the_sun_priestess.equipped)&cooldown.void_eruption.up
-        bool pi_or_vf_sync_condition => (PlayerLevel >= 58 && (API.CanCast(PowerInfusion) || API.PlayerHasBuff(PowerInfusion)) && API.CanCast(VoidEruption)) || (PlayerLevel < 58 && PlayerLevel >= 23 && API.CanCast(VoidEruption));
+        bool pi_or_vf_sync_condition => Sync?((API.CanCast(PowerInfusion) || API.PlayerHasBuff(PowerInfusion)) && API.CanCast(VoidEruption)):API.CanCast(VoidEruption);
 
         public override void Initialize()
         {
@@ -96,6 +98,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(UnfurlingDarkness, 341273);
             CombatRoutine.AddBuff(BoonOfTheAscended, 325013);
             CombatRoutine.AddBuff(PowerInfusion, 10060);
+            CombatRoutine.AddBuff(DissonantEchoes, 343144);
             //Debuff
             CombatRoutine.AddDebuff(DevouringPlague, 335467);
             CombatRoutine.AddDebuff(SWPain, 589);
@@ -150,6 +153,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Trincket1, "Trinket 1 usage", CDUsage, "When should Trinket 1 be used", "Trinket", 0);
             CombatRoutine.AddProp(Trincket2, "Trinket 2 usage", CDUsage, "When should Trinket 2 be used", "Trinket", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsage, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp("sync", "Sync PI/VF", true, "Sync PI/VF", "Generic");
+
         }
 
         public override void Pulse()
@@ -346,7 +351,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_bolt,if=insanity<=85&((talent.hungering_void.enabled&spell_targets.mind_sear<5)|spell_targets.mind_sear=1)
-            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(Voidform))
+            if (API.CanCast(VoidBolt) && (API.PlayerHasBuff(Voidform)|| API.PlayerHasBuff(DissonantEchoes)))
             {
                 if (API.PlayerInsanity <= 85 && ((TalentHungeringVoid && API.TargetUnitInRangeCount < 5) || API.TargetUnitInRangeCount == 1))
                 {

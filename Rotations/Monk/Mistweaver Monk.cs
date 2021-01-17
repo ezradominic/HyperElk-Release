@@ -500,7 +500,7 @@ namespace HyperElk.Core
                 API.CastSpell(Vivify);
                 return;
             }
-            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && API.TargetHealthPercent >= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(SoothingMist);
                 return;
@@ -512,16 +512,6 @@ namespace HyperElk.Core
                 {
                     for (int i = 0; i < units.Length; i++)
                     {
-                        if (API.LastSpellCastInGame == EssenceFont)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            API.CastSpell("Assist");
-                            if (API.PlayerCanAttackTarget && API.CanCast(RisingSunKick))
-                            {
-                                API.CastSpell(RisingSunKick);
-                                return;
-                            }
-                        }
                         if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                         {
                             API.CastSpell(PlayerTargetArray[i]);
@@ -557,27 +547,11 @@ namespace HyperElk.Core
                             API.CastSpell(PlayerTargetArray[i]); ;
                             return;
                         }
-                        if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            API.CastSpell("Assist");
-                            return;
-                        }
                     }
                     if (API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (API.LastSpellCastInGame == EssenceFont)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                API.CastSpell("Assist");
-                                if (API.PlayerCanAttackTarget && API.CanCast(RisingSunKick))
-                                {
-                                    API.CastSpell(RisingSunKick);
-                                    return;
-                                }
-                            }
                             if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
@@ -616,12 +590,6 @@ namespace HyperElk.Core
                             if (API.UnitHealthPercent(raidunits[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
-                                return;
-                            }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                API.CastSpell("Assist");
                                 return;
                             }
                         }
