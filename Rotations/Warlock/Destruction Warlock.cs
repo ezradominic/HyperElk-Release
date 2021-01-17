@@ -46,7 +46,8 @@ namespace HyperElk.Core
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string FelDomination = "Fel Domination";
-
+        private string trinket1 = "trinket1";
+        private string trinket2 = "trinket2";
 
 
         //Talents
@@ -103,6 +104,11 @@ namespace HyperElk.Core
         bool LastCastShadowBurn => API.PlayerLastSpell == ShadowBurn || API.LastSpellCastInGame == ShadowBurn;
         private string UseCovenantAbility => CovenantAbilityList[CombatRoutine.GetPropertyInt(CovenantAbility)];
         string[] CovenantAbilityList = new string[] { "always", "Cooldowns", "AOE" };
+        private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
+        string[] TrinketList1 = new string[] { "always", "Cooldowns", "never" };
+
+        private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
+        string[] TrinketList2 = new string[] { "always", "Cooldowns", "never" };
 
         public override void Initialize()
         {
@@ -125,6 +131,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
 
+            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket");
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket");
 
 
             //Spells
@@ -172,6 +180,11 @@ namespace HyperElk.Core
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+
+
+            CombatRoutine.AddMacro(trinket1);
+            CombatRoutine.AddMacro(trinket2);
+
         }
 
         public override void Pulse()
@@ -213,6 +226,14 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
+            if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
             if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
             {
                 API.CastSpell("Healthstone");

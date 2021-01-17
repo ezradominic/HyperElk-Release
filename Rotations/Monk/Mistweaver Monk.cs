@@ -39,6 +39,8 @@ namespace HyperElk.Core
         private string SpiritualManaPotion = "Spiritual Mana Potion";
         private string WeaponsofOrder = "Weapons of Order";
         private string WeaponsofOrderAOE = "Weapons of Order AOE";
+        private string LCT = "Life Cocoon on Tank Only";
+
 
         private string Fleshcraft = "Fleshcraft";
         private string FaelineStomp = "FaelineStomp";
@@ -55,6 +57,13 @@ namespace HyperElk.Core
         private string AoE = "AOE";
         private string PartySwap = "Target Swap";
         private string TargetChange = "Target Change";
+        private string Assist = "Assist";
+        private string AoEDPS = "AOEDPS";
+        private string AoEDPSH = "AOEDPS Health";
+        private string AoEDPSHRaid = "AOEDPS Health Raid";
+        private string AoEDPSRaid = "AOEDPS Raid";
+
+
         //Talents
         private bool TalentChiWave => API.PlayerIsTalentSelected(1, 2);
         private bool TalentChiBurst => API.PlayerIsTalentSelected(1, 3);
@@ -88,11 +97,12 @@ namespace HyperElk.Core
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
         private bool IsAutoDetox => API.ToggleIsEnabled("Auto Detox");
         private bool AoEHeal => API.ToggleIsEnabled("AOE Heal");
+
         //General
         private static readonly Stopwatch JadeSerpentStatueWatch = new Stopwatch();
 
         int ViVifyCounter = 0;
-        string[] ThunderFocusTeaList = new string[] { "always", "Cooldowns", "Manual", };
+        string[] ThunderFocusTeaList = new string[] { "always", "Cooldowns", "Rising Sun Kick Cooldown", "Manual", };
         private string UseThunderFocusTea => ThunderFocusTeaList[CombatRoutine.GetPropertyInt(ThunderFocusTea)];
         private bool NotChanneling => API.PlayerCurrentCastTimeRemaining == 0;
         private bool NotCasting => !API.PlayerIsCasting(false);
@@ -103,7 +113,7 @@ namespace HyperElk.Core
         private bool RevivalAoE => UnitBelowHealthPercent(RevivalPercent) >= AoENumber;
         private bool EssenceFontAoE => UnitBelowHealthPercent(EssenceFontPercent) >= AoENumber;
         private bool RefreshingJadeWindAoE => UnitBelowHealthPercent(RefreshingJadeWindPercent) >= AoENumber;
-        private int WeaponsofOrderPercent => numbList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
+        private int WeaponsofOrderPercent => numbList[CombatRoutine.GetPropertyInt(WeaponsofOrderAOE)];
         private int EnvelopingMistPercent => numbList[CombatRoutine.GetPropertyInt(EnvelopingMist)];
         private int VivifyPercent => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int SoothingMistPercent => numbList[CombatRoutine.GetPropertyInt(SoothingMist)];
@@ -118,9 +128,9 @@ namespace HyperElk.Core
         private int HealingElixirPercent => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int RefreshingJadeWindPercent => numbList[CombatRoutine.GetPropertyInt(RefreshingJadeWind)];
         private int SpiritualManaPotionManaPercent => numbList[CombatRoutine.GetPropertyInt(SpiritualManaPotion)];
-
+        private bool LCTank => CombatRoutine.GetPropertyBool(LCT);
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
-        string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE%", };
+        string[] WeaponsofOrderList = new string[] { "always", "Cooldowns", "Manual", "AOE", };
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         bool ChannelSoothingMist => API.CurrentCastSpellID("player") == 115175;
 
@@ -133,6 +143,23 @@ namespace HyperElk.Core
 
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "never" };
+        private static bool CanDetoxTarget(string debuff)
+        {
+            return API.TargetHasDebuff(debuff, false, true);
+        }
+        private static bool CanDetoxTarget(string debuff, string unit)
+        {
+            return API.UnitHasDebuff(debuff, unit, false, true);
+        }
+        private int UnitAboveHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) >= HealthPercent && API.UnitHealthPercent(p) > 0);
+        private int UnitAboveHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) >= HealthPercent && API.UnitHealthPercent(p) > 0);
+        private int UnitAboveHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitAboveHealthPercentRaid(HealthPercent) : UnitAboveHealthPercentParty(HealthPercent);
+        private int AoEDPSHLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSH)];
+        private int AoEDPSHRaidLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSHRaid)];
+        private int AoEDPSNumber => numbPartyList[CombatRoutine.GetPropertyInt(AoEDPS)];
+        private int AoEDPSRaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoEDPSRaid)];
+
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Mistweaver Monk by Mufflon12";
@@ -175,6 +202,8 @@ namespace HyperElk.Core
 
 
             //Macros
+            CombatRoutine.AddMacro(Assist);
+
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
 
@@ -300,9 +329,11 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
             CombatRoutine.AddProp(ManaTea, ManaTea + " Life Percent", numbList, "Mana percent at which" + ManaTea + "is used, set to 0 to disable", "Healing", 80);
             CombatRoutine.AddProp(EnvelopingMist, EnvelopingMist + " Life Percent", numbList, "Life percent at which" + EnvelopingMist + "is used, set to 0 to disable", "Healing", 80);
-            CombatRoutine.AddProp(Vivify, Vivify + " Life Percent", numbList, "Life percent at which" + Vivify + "is used, set to 0 to disable", "Healing", 95);
+            CombatRoutine.AddProp(Vivify, Vivify + " Life Percent", numbList, "Life percent at which" + Vivify + "is used, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(SoothingMist, SoothingMist + " Life Percent", numbList, "Life percent at which" + SoothingMist + "is, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(LifeCocoon, LifeCocoon + " Life Percent", numbList, "Life percent at which" + LifeCocoon + "is, set to 0 to disable", "Healing", 50);
+            CombatRoutine.AddProp(LCT, "Life Cocoon Tank", true, "Use Life Cocoon only on Tank ? change to false, set to true by default", "Healing");
+
             CombatRoutine.AddProp(RenewingMist, RenewingMist + " Life Percent", numbList, "Life percent at which" + RenewingMist + "is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(Revival, Revival + " Life Percent", numbList, "Life percent at which" + Revival + "is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(EssenceFont, EssenceFont + " Life Percent", numbList, "Life percent at which" + EssenceFont + "is used when three members are at life percent, set to 0 to disable", "Healing", 85);
@@ -311,7 +342,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(RefreshingJadeWind, RefreshingJadeWind + " Life Percent", numbList, "Life percent at which" + RefreshingJadeWind + "is used when three members are at life percent, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(ThunderFocusTea, "Use " + ThunderFocusTea, ThunderFocusTeaList, "Use " + ThunderFocusTea + "always, Cooldowns, AOE", "Healing", 0);
             CombatRoutine.AddProp(WeaponsofOrder, "Use " + WeaponsofOrder, WeaponsofOrderList, "How to use Weapons of Order", "Covenant Kyrian", 0);
-            CombatRoutine.AddProp(WeaponsofOrderAOE, WeaponsofOrder + " Life Percent", numbList, "Life percent at which" + WeaponsofOrder + "is used when three members are at life percent, set to 0 to disable", "Covenant Kyrian", 85);
+            CombatRoutine.AddProp(WeaponsofOrderAOE, WeaponsofOrderAOE + " Life Percent", numbList, "Life percent at which " + WeaponsofOrderAOE + "is used when three members are at life percent, set to 0 to disable", "Covenant Kyrian", 85);
 
             CombatRoutine.AddProp(Fleshcraft, Fleshcraft, numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Covenant Necrolord", 5);
             CombatRoutine.AddProp(FaelineStomp, "Use " + FaelineStomp, FaelineStompList, "How to use Faeline Stomp", "Covenant Night Fae", 0);
@@ -319,21 +350,21 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket");
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket");
+
+            CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "DPS Heal Group", 2);
+            CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS in party" + "is used,", "DPS Heal Group", 80);
+            CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "DPS Heal Raid", 4);
+            CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "DPS Heal Raid", 70);
         }
         public override void Pulse()
         {
-                        if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-            {
-                API.CastSpell("Healthstone");
-                return;
-            }
             if (IsAutoDetox)
             {
                 if (API.CanCast(Detox))
                 {
                     for (int i = 0; i < DetoxList.Length; i++)
                     {
-                        if (API.TargetHasDebuff(DetoxList[i]))
+                        if (CanDetoxTarget(DetoxList[i]))
                         {
                             API.CastSpell(Detox);
                             return;
@@ -341,7 +372,7 @@ namespace HyperElk.Core
                     }
                 }
             }
-            if (API.CanCast(WeaponsofOrder) && WeaponsofOrderAoE && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "AOE%" && API.PlayerIsInCombat)
+            if (API.CanCast(WeaponsofOrder) && WeaponsofOrderAoE && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "AOE" && API.PlayerIsInCombat)
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
@@ -359,11 +390,6 @@ namespace HyperElk.Core
             if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.TargetHealthPercent <= FleshcraftPercentProc)
             {
                 API.CastSpell(Fleshcraft);
-                return;
-            }
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
-            {
-                API.CastSpell("Healthstone");
                 return;
             }
             if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
@@ -454,7 +480,7 @@ namespace HyperElk.Core
                 API.CastSpell(Yulon);
                 return;
             }
-            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && API.PlayerIsInGroup && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && (LCTank && API.TargetRoleSpec == API.TankRole || !LCTank))
             {
                 API.CastSpell(LifeCocoon);
                 return;
@@ -464,24 +490,19 @@ namespace HyperElk.Core
                 API.CastSpell(RenewingMist);
                 return;
             }
-            if (API.CanCast(EnvelopingMist) && NotCasting && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(EnvelopingMist);
                 return;
             }
-            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && ViVifyCounter <= 2 && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(Vivify);
-                if (API.PlayerCurrentCastTimeRemaining <= 0)
-                {
-                    ViVifyCounter++;
-                }
                 return;
             }
-            if (API.CanCast(SoothingMist) && ViVifyCounter >= 2 && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && API.TargetHealthPercent >= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
             {
                 API.CastSpell(SoothingMist);
-                ViVifyCounter = 0;
                 return;
             }
             // Auto Target
@@ -506,6 +527,11 @@ namespace HyperElk.Core
                             API.CastSpell(PlayerTargetArray[i]);
                             return;
                         }
+                        if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                        {
+                            API.CastSpell(PlayerTargetArray[i]);
+                            return;
+                        }
                         if (API.UnitHealthPercent(units[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                         {
                             API.CastSpell(PlayerTargetArray[i]);
@@ -519,11 +545,6 @@ namespace HyperElk.Core
                         if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
                         {
                             API.CastSpell(PlayerTargetArray[i]); ;
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
                             return;
                         }
                     }
@@ -588,7 +609,7 @@ namespace HyperElk.Core
                 API.CastSpell(FallenOrder);
                 return;
             }
-            if (IsAOE && API.CanCast(FallenOrder) && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "AOE" || UseFallenOrder == "always")
+            if (IsAOE && API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
             {
                 API.CastSpell(FallenOrder);
                 return;
@@ -598,7 +619,6 @@ namespace HyperElk.Core
                 API.CastSpell(FaelineStomp);
                 return;
             }
-            //FaelineStomp
             if (IsAOE && API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
             {
                 API.CastSpell(FaelineStomp);
@@ -624,7 +644,12 @@ namespace HyperElk.Core
                 API.CastSpell(BlackoutKick);
                 return;
             }
-            if (API.CanCast(RisingSunKick) && !API.SpellISOnCooldown(RisingSunKick))
+            if (API.CanCast(RisingSunKick) && API.SpellISOnCooldown(RisingSunKick) && !API.SpellISOnCooldown(ThunderFocusTea) && UseThunderFocusTea == "Rising Sun Kick Cooldown")
+            {
+                API.CastSpell(ThunderFocusTea);
+                return;
+            }
+            if (API.CanCast(RisingSunKick))
             {
                 API.CastSpell(RisingSunKick);
                 return;
@@ -660,21 +685,6 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && API.PlayerMana >= ManaTeaPercent && TalentManaTea && UseThunderFocusTea == "Cooldowns" && IsCooldowns)
-            {
-                API.CastSpell(ThunderFocusTea);
-                return;
-            }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "Cooldowns" && IsCooldowns)
-            {
-                API.CastSpell(ThunderFocusTea);
-                return;
-            }
-            if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && UseThunderFocusTea == "always")
-            {
-                API.CastSpell(ThunderFocusTea);
-                return;
-            }
             if (API.CanCast(ChiWave) && TalentChiWave && API.TargetHealthPercent <= ChiWavePercent && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(ChiWave);
@@ -695,7 +705,7 @@ namespace HyperElk.Core
                 API.CastSpell(EnvelopingMist);
                 return;
             }
-            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && ViVifyCounter <= 2 && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(Vivify);
                 if (API.PlayerCurrentCastTimeRemaining <= 0)
@@ -704,7 +714,7 @@ namespace HyperElk.Core
                 }
                 return;
             }
-            if (API.CanCast(SoothingMist) && ViVifyCounter >= 2 && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+            if (API.CanCast(SoothingMist) && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
             {
                 API.CastSpell(SoothingMist);
                 ViVifyCounter = 0;
@@ -715,43 +725,49 @@ namespace HyperElk.Core
                 if (API.PlayerIsInGroup)
                 {
                     for (int i = 0; i < units.Length; i++)
-                    {
-                        if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                        for (int j = 0; j < DetoxList.Length; j++)
                         {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
+                            if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]); ;
+                                return;
+                            }
+                            if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (CanDetoxTarget(DetoxList[j], units[i]) && IsAutoDetox)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
                         }
-                        if (API.UnitHealthPercent(units[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]); ;
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                    }
                     if (API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < raidunits.Length; i++)

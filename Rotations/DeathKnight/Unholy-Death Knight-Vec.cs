@@ -143,6 +143,7 @@ namespace HyperElk.Core
         private string UseApocalypse => CDUsage[CombatRoutine.GetPropertyInt("Apocalypse")];
         private int FleshcraftPercent => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         private bool UseRaiseDead => CombatRoutine.GetPropertyBool("RaiseDead");
+        private bool DeadliestCoil_equipped => CombatRoutine.GetPropertyBool("Deadliest Coil");
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
@@ -222,6 +223,7 @@ namespace HyperElk.Core
 
             //Settings
             CombatRoutine.AddProp("RaiseDead", "Raise Dead", true, "Should the rotation try to Raise Dead", "Pet");
+            CombatRoutine.AddProp("Deadliest Coil", "Deadliest Coil", false, "Do you have the Deadliest Coil Legendary?", "Legendary");
             CombatRoutine.AddProp("DarkTransformation", "Use " + "Dark Transformation", CDUsage, "Use " + "Dark Transformation" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("RaiseAbomination", "Use " + "Raise Abomination", CDUsage, "Use " + "Raise Abomination" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("Apocalypse", "Use " + "Apocalypse", CDUsage, "Use " + "Apocalypse" + "On Cooldown, with Cooldowns", "Cooldowns", 0);
@@ -450,7 +452,7 @@ namespace HyperElk.Core
                     #region Gargoyle active ST
                     if (GargoyleActive)
                     {
-                        if (API.CanCast(DeathCoil) && ((API.PlayerRunicPower >= 40 && API.PlayerHealthPercent >= DeathStrikePercent) || API.PlayerHasBuff("Sudden Doom")) && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -503,7 +505,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //death_coil,if=runic_power.deficit<14&rune.time_to_4>gcd&!variable.pooling_for_gargoyle
-                        if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && API.PlayerRunicPower > 80 && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || !IsCooldowns) && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && API.PlayerRunicPower > 80 && RuneTimeTo(4) > gcd && (!PoolingForGargoyle || !IsCooldowns) && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -524,7 +526,7 @@ namespace HyperElk.Core
                             API.CastSpell("Festering Strike");
                             return;
                         }
-                        if (API.CanCast(DeathCoil) && API.PlayerHealthPercent >= DeathStrikePercent && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
+                        if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
                         {
                             API.CastSpell(DeathCoil);
                             return;
@@ -546,8 +548,13 @@ namespace HyperElk.Core
                         API.CastSpell("Soul Reaper");
                         return;
                     }
+                    if (API.CanCast(DeathCoil) && DeadliestCoil_equipped && API.SpellISOnCooldown(DarkTransformation) && API.PlayerUnitInMeleeRangeCount <= 3 && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    {
+                        API.CastSpell(DeathCoil);
+                        return;
+                    }
                     //death_coil,if=CombatRoutine.sudden_doom.react&rune.time_to_4>gcd&!variable.pooling_for_gargoyle|pet.gargoyle.active
-                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    if (API.CanCast("Epidemic") && (DeadliestCoil_equipped && API.PlayerUnitInMeleeRangeCount > 3 || !DeadliestCoil_equipped || !API.SpellISOnCooldown(DarkTransformation)) && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHasBuff("Sudden Doom") || (API.PlayerRunicPower > 80 && API.PlayerHealthPercent >= DeathStrikePercent)) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;
@@ -573,7 +580,12 @@ namespace HyperElk.Core
                         API.CastSpell("Clawing Shadows");
                         return;
                     }
-                    if (API.CanCast("Epidemic") && API.TargetHasDebuff("Virulent Plague") && (API.PlayerRunicPower >= 30 && API.PlayerHealthPercent >= DeathStrikePercent) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    if (API.CanCast(DeathCoil) && DeadliestCoil_equipped && API.SpellISOnCooldown(DarkTransformation) && API.PlayerUnitInMeleeRangeCount <= 3 && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
+                    {
+                        API.CastSpell(DeathCoil);
+                        return;
+                    }
+                    if (API.CanCast("Epidemic") && (DeadliestCoil_equipped && API.PlayerUnitInMeleeRangeCount > 3 || !DeadliestCoil_equipped || !API.SpellISOnCooldown(DarkTransformation)) && API.TargetHasDebuff("Virulent Plague") && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || GargoyleActiveTime.IsRunning || !IsCooldowns))
                     {
                         API.CastSpell("Epidemic");
                         return;

@@ -42,14 +42,14 @@ namespace HyperElk.Core
 
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private bool NotCasting => !API.PlayerIsCasting(false);
-        bool LastCastTigerPalm => API.LastSpellCastInGame == TigerPalm;
-        bool LastCastBlackoutkick => API.LastSpellCastInGame == BlackOutKick;
-        bool LastCastSpinningCraneKick => API.LastSpellCastInGame == SpinningCraneKick;
-        bool LastCastRisingSunKick => API.LastSpellCastInGame == RisingSunKick;
-        bool LastCastChiWave => API.LastSpellCastInGame == ChiWave;
+        bool LastCastTigerPalm => API.PlayerLastSpell == TigerPalm;
+        bool LastCastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
+        bool LastCastSpinningCraneKick => API.PlayerLastSpell == SpinningCraneKick;
+        bool LastCastRisingSunKick => API.PlayerLastSpell == RisingSunKick;
+        bool LastCastChiWave => API.PlayerLastSpell == ChiWave;
         bool CurrenCastFistsOfFury => API.CurrentCastSpellID("player") == 113656;
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
-        string[] TouchofDeathList = new string[] {"with Cooldowns" };
+        string[] TouchofDeathList = new string[] {"with Cooldowns", "Manual" };
         //Trinket1
         private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
         string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
@@ -57,10 +57,10 @@ namespace HyperElk.Core
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
-        string[] InvokeXuenList = new string[] {"with Cooldowns" };
+        string[] InvokeXuenList = new string[] {"with Cooldowns", "Manual" };
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
-        string[] WeaponsofOrderList = new string[] {"with Cooldowns" };
+        string[] WeaponsofOrderList = new string[] {"with Cooldowns", "AOE" };
         //Necrolords
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         string[] BonedustBrewList = new string[] {"with Cooldowns" };
@@ -113,18 +113,15 @@ namespace HyperElk.Core
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
         private string StormEarthAndFire = "Storm,  Earth,  and Fire";
-        private string BloodFury = "Blood Fury";
-        private string Berserking = "Berserking";
-        private string ArcaneTorrent = "Arcane Torrent";
-        private string Fireblood = "Fireblood";
         private string CracklingJadeLightning = "Crackling Jade Lightning";
         private string TheEmperorsCapacitor = "The Emperor's Capacitor";
         private string SkyreachExhaustion = "Skyreach Exhaustion";
         private string Stopcast = "Stopcast";
         private string ChiEnergy = "Chi Energy";
         private string CoordinatedOffensive = "Coordinated Offensive";
-        private string AncestralCall = "Ancestral Call";
-        private string BagOfTricks = "Bag of Tricks";
+
+        private string LegSweep = "Leg Sweep";
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Windwalker Monk @Mufflon12";
@@ -183,12 +180,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FortifyingBrew, 243435,"F2");
             CombatRoutine.AddSpell(InvokeXuen, 123904,"F3");
             CombatRoutine.AddSpell(TouchofKarma, 122470, "NumPad3");
-            CombatRoutine.AddSpell(BloodFury, 20572);
-            CombatRoutine.AddSpell(Berserking, 26297);
-            CombatRoutine.AddSpell(ArcaneTorrent, 28730);
-            CombatRoutine.AddSpell(Fireblood, 265221);
-            CombatRoutine.AddSpell(AncestralCall, 274738);
-            CombatRoutine.AddSpell(BagOfTricks, 312411);
+            CombatRoutine.AddSpell(LegSweep, 119381);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -222,12 +214,17 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-//            API.WriteLog("ChiDeficit " + ChiDeficit);
+//            API.WriteLog("Chi Stacks " + API.PlayerBuffStacks(ChiEnergy));
 
         }
 
         public override void CombatPulse()
         {
+            if (API.PlayerIsCC(CCList.STUN) && PlayerRaceSettings == "Human" && API.CanCast(RacialSpell1))
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
             if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
             if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
@@ -236,6 +233,16 @@ namespace HyperElk.Core
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18 && NotChanneling)
             {
                 API.CastSpell(SpearHandStrike);
+                return;
+            }
+            if (isInterrupt && API.SpellISOnCooldown(SpearHandStrike) && API.CanCast(LegSweep) && IsMelee && PlayerLevel >= 18)
+            {
+                API.CastSpell(LegSweep);
+                return;
+            }
+            if (API.PlayerHealthPercent <= TouchofKarmaPercentProc && API.CanCast(TouchofKarma))
+            {
+                API.CastSpell(TouchofKarma);
                 return;
             }
             if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4 && NotChanneling)
@@ -310,6 +317,17 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=aoe,if=active_enemies>=3
             if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
             {
+                if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "AOE")
+                {
+                    API.CastSpell(WeaponsofOrder);
+                    return;
+                }
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy) >= 30)
+                {
+                    API.WriteLog("ChiEnergy " + API.PlayerBuffStacks(ChiEnergy) + " Use Spinning Crane Kick");
+                    API.CastSpell(SpinningCraneKick);
+                    return;
+                }
                 //actions.aoe=whirling_dragon_punch
                 if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && NotChanneling && !CurrenCastFistsOfFury)
                 {
@@ -323,7 +341,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&(buff.dance_of_chiji.up|debuff.bonedust_brew.up)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.PlayerHasBuff(DanceofChiJi) && TalentDanceofChiJi || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && UseLeg == "none" && (API.PlayerHasBuff(DanceofChiJi) && TalentDanceofChiJi || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -347,7 +365,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&((cooldown.bonedust_brew.remains>2&(chi>3|cooldown.fists_of_fury.remains>6)&(chi>=5|cooldown.fists_of_fury.remains>2))|energy.time_to_max<=3)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -385,7 +403,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/flying_serpent_kick,if=buff.bok_proc.down,interrupt=1
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) && API.SpellCDDuration(FistsofFury) < 3000 || ChiDeficit <= 1 || EnergyTimeToMax < 3000)
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && NotChanneling && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) &&  API.PlayerCurrentChi == 2 && (API.SpellCDDuration(FistsofFury) < 3000 || ChiDeficit <= 1 || EnergyTimeToMax < 3000))
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -410,7 +428,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/spinning_crane_kick,if=combo_strike&buff.dance_of_chiji.up&(raid_event.adds.in>buff.dance_of_chiji.remains-2|raid_event.adds.up)
-                if (API.CanCast(SpinningCraneKick) && LastCastSpinningCraneKick && API.PlayerHasBuff(DanceofChiJi) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && LastCastSpinningCraneKick && UseLeg == "none" && API.PlayerHasBuff(DanceofChiJi) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -472,10 +490,10 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/spinning_crane_kick,if=buff.chi_energy.stack>30-5*active_enemies&buff.storm_earth_and_fire.down&(cooldown.rising_sun_kick.remains>2&cooldown.fists_of_fury.remains>2|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>3|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>4|chi.max-chi<=1&energy.time_to_max<2)|buff.chi_energy.stack>10&fight_remains<7
-                if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy)> 30 - 5 * API.PlayerUnitInMeleeRangeCount && !API.PlayerHasBuff(StormEarthandFire) && (API.SpellCDDuration(RisingSunKick) > 2000 && API.SpellCDDuration(FistsofFury) > 2000 || API.SpellCDDuration(RisingSunKick) < 3000 && API.SpellCDDuration(FistsofFury) > 3000 && API.PlayerCurrentChi > 3 || API.SpellCDDuration(RisingSunKick) >3000 && API.SpellCDDuration(FistsofFury) < 3000 && API.PlayerCurrentChi > 4 || ChiDeficit <= 1 && EnergyTimeToMax < 2000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy) >= 30)
                 {
-                    API.WriteLog("Jade Ignition");
-                    API.CanCast(SpinningCraneKick);
+                    API.WriteLog("ChiEnergy " + API.PlayerBuffStacks(ChiEnergy) + " Use Spinning Crane Kick");
+                    API.CastSpell(SpinningCraneKick);
                     return;
                 }
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(talent.serenity&cooldown.serenity.remains<3|cooldown.rising_sun_kick.remains>1&cooldown.fists_of_fury.remains>1|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>2|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>3|chi>5|buff.bok_proc.up)
@@ -516,7 +534,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.serenity+=/spinning_crane_kick,if=combo_strike&(active_enemies>=3|active_enemies>1&!cooldown.rising_sun_kick.up)
-            if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1 && API.SpellISOnCooldown(RisingSunKick)) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1 && API.SpellISOnCooldown(RisingSunKick)) && NotChanneling)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
@@ -535,7 +553,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.serenity+=/spinning_crane_kick,if=combo_strike&buff.dance_of_chiji.up
-            if (API.CanCast(SpinningCraneKick) && API.PlayerHasBuff(DanceofChiJi) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && API.PlayerHasBuff(DanceofChiJi) && NotChanneling)
             {
                 API.CanCast(SpinningCraneKick);
                 return;
@@ -549,7 +567,7 @@ namespace HyperElk.Core
             //actions.serenity+=/fists_of_fury,interrupt_if=!cooldown.rising_sun_kick.up
 
             //actions.serenity+=/spinning_crane_kick,if=combo_strike&debuff.bonedust_brew.up
-            if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && API.TargetHasDebuff(BonedustBrew) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && API.TargetHasDebuff(BonedustBrew) && NotChanneling)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
@@ -567,7 +585,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.serenity+=/spinning_crane_kick
-            if (API.CanCast(SpinningCraneKick) && NotChanneling)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && NotChanneling)
             {
                 API.CanCast(SpinningCraneKick);
                 return;
@@ -589,7 +607,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.weapons_of_order+=/spinning_crane_kick,if=combo_strike&buff.dance_of_chiji.up
-            if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && TalentDanceofChiJi && API.PlayerHasBuff(DanceofChiJi) && NotChanneling && NotCasting)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && TalentDanceofChiJi && API.PlayerHasBuff(DanceofChiJi) && NotChanneling && NotCasting)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
@@ -607,7 +625,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.weapons_of_order+=/spinning_crane_kick,if=combo_strike&active_enemies>=3&buff.weapons_of_order_ww.up
-            if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && API.PlayerUnitInMeleeRangeCount >= 3)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && API.PlayerUnitInMeleeRangeCount >= 3)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
@@ -626,9 +644,9 @@ namespace HyperElk.Core
             }
             //actions.weapons_of_order+=/fists_of_fury,interrupt=1,if=buff.storm_earth_and_fire.up&raid_event.adds.in>cooldown.fists_of_fury.duration*0.6
             //actions.weapons_of_order+=/spinning_crane_kick,if=buff.chi_energy.stack>30-5*active_enemies
-            if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy) > 30 - 5 * API.PlayerUnitInMeleeRangeCount)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy) >= 30)
             {
-                API.WriteLog("Jade Ignition");
+                API.WriteLog("ChiEnergy " + API.PlayerBuffStacks(ChiEnergy) + " Use Spinning Crane Kick");
                 API.CastSpell(SpinningCraneKick);
                 return;
             }
@@ -680,39 +698,39 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_serenity+=/blood_fury,if=variable.serenity_burst
-            if (API.CanCast(BloodFury) && PlayerRaceSettings == "Orc")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
             {
-                API.CanCast(BloodFury);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/berserking,if=variable.serenity_burst
-            if (API.CanCast(Berserking) && PlayerRaceSettings == "Troll")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
             {
-                API.CastSpell(Berserking);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/arcane_torrent,if=chi.max-chi>=1
-            if (API.CanCast(ArcaneTorrent) && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
+            if (API.CanCast(RacialSpell1) && isRacial && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
             {
-                API.CastSpell(ArcaneTorrent);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/fireblood,if=variable.serenity_burst
-            if (API.CanCast(Fireblood) && PlayerRaceSettings == "Dark Iron Dwarf")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
             {
-                API.CastSpell(Fireblood);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/ancestral_call,if=variable.serenity_burst
-            if (API.CanCast(AncestralCall))
+            if (API.CanCast(RacialSpell1) && isRacial)
             {
-                API.CastSpell(AncestralCall);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/bag_of_tricks,if=variable.serenity_burst
-            if (API.CanCast(BagOfTricks) && PlayerRaceSettings == "Vulpera")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Vulpera")
             {
-                API.CastSpell(StormEarthAndFire);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_serenity+=/touch_of_death,if=fight_remains>180|pet.xuen_the_white_tiger.active|fight_remains<10
@@ -723,7 +741,7 @@ namespace HyperElk.Core
             }
             //actions.cd_serenity+=/touch_of_karma,if=fight_remains>90|pet.xuen_the_white_tiger.active|fight_remains<10
             //actions.cd_serenity+=/weapons_of_order,if=cooldown.rising_sun_kick.remains<execute_time
-            if (API.CanCast(WeaponsofOrder) && API.SpellCDDuration(RisingSunKick) < API.TargetTimeToExec)
+            if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "with Cooldowns" && API.SpellCDDuration(RisingSunKick) < API.TargetTimeToExec)
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
@@ -753,9 +771,9 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_serenity+=/bag_of_tricks
-            if (API.CanCast(BagOfTricks) && PlayerRaceSettings == "Vulpera")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Vulpera")
             {
-                API.CastSpell(StormEarthAndFire);
+                API.CastSpell(RacialSpell1);
                 return;
             }
         }
@@ -768,9 +786,9 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_sef+=/arcane_torrent,if=chi.max-chi>=1
-            if (API.CanCast(ArcaneTorrent) && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
+            if (API.CanCast(RacialSpell1) && isRacial && ChiDeficit >= 1 && PlayerRaceSettings == "Blood Elf")
             {
-                API.CastSpell(ArcaneTorrent);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/touch_of_death,if=buff.storm_earth_and_fire.down&pet.xuen_the_white_tiger.active|fight_remains<10|fight_remains>180
@@ -780,7 +798,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.cd_sef+=/weapons_of_order,if=(raid_event.adds.in>45|raid_event.adds.up)&cooldown.rising_sun_kick.remains<execute_time
-            if (API.CanCast(WeaponsofOrder))
+            if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "with Cooldowns")
             {
                 API.CastSpell(WeaponsofOrder);
                 return;
@@ -823,33 +841,33 @@ namespace HyperElk.Core
             }
             //actions.cd_sef+=/touch_of_karma,if=fight_remains>159|pet.xuen_the_white_tiger.active|variable.hold_xuen
             //actions.cd_sef+=/blood_fury,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-            if (API.CanCast(BloodFury) && PlayerRaceSettings == "Orc")
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
             {
-                API.CanCast(BloodFury);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/berserking,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<15
-            if (API.CanCast(Berserking) && PlayerRaceSettings == "Troll" && API.SpellCDDuration(InvokeXuen) > 30000)
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll" && API.SpellCDDuration(InvokeXuen) > 30000)
             {
-                API.CastSpell(Berserking);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/fireblood,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<10
-            if (API.CanCast(Fireblood) && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(InvokeXuen) > 30000)
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(InvokeXuen) > 30000)
             {
-                API.CastSpell(Fireblood);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/ancestral_call,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-            if (API.CanCast(AncestralCall) && API.SpellCDDuration(InvokeXuen) > 30000)
+            if (API.CanCast(RacialSpell1) && API.SpellCDDuration(InvokeXuen) > 30000)
             {
-                API.CastSpell(AncestralCall);
+                API.CastSpell(RacialSpell1);
                 return;
             }
             //actions.cd_sef+=/bag_of_tricks,if=buff.storm_earth_and_fire.down
-            if (API.CanCast(BagOfTricks) && !API.PlayerHasBuff(StormEarthAndFire) && PlayerRaceSettings == "Vulpera")
+            if (API.CanCast(RacialSpell1) && isRacial && !API.PlayerHasBuff(StormEarthAndFire) && PlayerRaceSettings == "Vulpera")
             {
-                API.CastSpell(StormEarthAndFire);
+                API.CastSpell(RacialSpell1);
                 return;
             }
         }

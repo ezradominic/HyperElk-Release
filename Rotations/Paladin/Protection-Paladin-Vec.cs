@@ -516,7 +516,17 @@
                 return;
             }
             //std->add_action("lights_judgment");
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Lightforged Draenei" && IsMelee)
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
             //std->add_action("arcane_torrent");
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Blood Elf" && IsMelee)
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
             //std->add_action(this, "Consecration");
             if (API.CanCast(Consecration) && IsMelee && PlayerLevel >= 14)
             {
