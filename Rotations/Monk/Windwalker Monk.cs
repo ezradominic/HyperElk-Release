@@ -484,10 +484,10 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/spinning_crane_kick,if=buff.chi_energy.stack>30-5*active_enemies&buff.storm_earth_and_fire.down&(cooldown.rising_sun_kick.remains>2&cooldown.fists_of_fury.remains>2|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>3|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>4|chi.max-chi<=1&energy.time_to_max<2)|buff.chi_energy.stack>10&fight_remains<7
-                if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy)> 30 - 5 * API.PlayerUnitInMeleeRangeCount && !API.PlayerHasBuff(StormEarthandFire) && (API.SpellCDDuration(RisingSunKick) > 2000 && API.SpellCDDuration(FistsofFury) > 2000 || API.SpellCDDuration(RisingSunKick) < 3000 && API.SpellCDDuration(FistsofFury) > 3000 && API.PlayerCurrentChi > 3 || API.SpellCDDuration(RisingSunKick) >3000 && API.SpellCDDuration(FistsofFury) < 3000 && API.PlayerCurrentChi > 4 || ChiDeficit <= 1 && EnergyTimeToMax < 2000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy) == 30)
                 {
                     API.WriteLog("Jade Ignition");
-                    API.CanCast(SpinningCraneKick);
+                    API.CastSpell(SpinningCraneKick);
                     return;
                 }
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(talent.serenity&cooldown.serenity.remains<3|cooldown.rising_sun_kick.remains>1&cooldown.fists_of_fury.remains>1|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>2|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>3|chi>5|buff.bok_proc.up)
@@ -638,7 +638,7 @@ namespace HyperElk.Core
             }
             //actions.weapons_of_order+=/fists_of_fury,interrupt=1,if=buff.storm_earth_and_fire.up&raid_event.adds.in>cooldown.fists_of_fury.duration*0.6
             //actions.weapons_of_order+=/spinning_crane_kick,if=buff.chi_energy.stack>30-5*active_enemies
-            if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy) > 30 - 5 * API.PlayerUnitInMeleeRangeCount)
+            if (API.CanCast(SpinningCraneKick) && UseLeg == "Jade Ignition" && API.PlayerBuffStacks(ChiEnergy) == 30)
             {
                 API.WriteLog("Jade Ignition");
                 API.CastSpell(SpinningCraneKick);
