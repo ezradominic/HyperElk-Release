@@ -397,7 +397,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/flying_serpent_kick,if=buff.bok_proc.down,interrupt=1
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && NotChanneling && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) && API.SpellCDDuration(FistsofFury) < 3000 || ChiDeficit <= 1 || EnergyTimeToMax < 3000)
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && NotChanneling && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) &&  API.PlayerCurrentChi == 2 && (API.SpellCDDuration(FistsofFury) < 3000 || ChiDeficit <= 1 || EnergyTimeToMax < 3000))
                 {
                     API.CastSpell(BlackOutKick);
                     return;
