@@ -294,7 +294,7 @@ namespace HyperElk.Core
             //# Executed every time the actor is available.
             //actions=auto_attack
             //actions+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi.max-chi>=3&(energy.time_to_max<1|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3 && (EnergyTimeToMax < 1000 || EnergyTimeToMax < 4000 && API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
+            if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3 && (EnergyTimeToMax < 1000 || EnergyTimeToMax < 4000) && (API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
             {
                 API.CastSpell(FistsoftheWhiteTiger);
                 return;
@@ -353,7 +353,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=(talent.whirling_dragon_punch&cooldown.rising_sun_kick.duration>cooldown.whirling_dragon_punch.remains+4)&(cooldown.fists_of_fury.remains>3|chi>=5)
-                if (API.CanCast(RisingSunKick) && (TalentWhirlingDragonPunch && API.SpellCDDuration(RisingSunKick) > API.SpellCDDuration(WhirlingDragonPunch) + 4000) && (API.SpellCDDuration(FistsofFury) > 3000 || API.PlayerCurrentChi >= 5) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(RisingSunKick) && TalentWhirlingDragonPunch && API.SpellCDDuration(RisingSunKick) > API.SpellCDDuration(WhirlingDragonPunch) + 4000 && (API.SpellCDDuration(FistsofFury) > 3000 || API.PlayerCurrentChi >= 5) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(RisingSunKick);
                     return;
@@ -365,7 +365,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&((cooldown.bonedust_brew.remains>2&(chi>3|cooldown.fists_of_fury.remains>6)&(chi>=5|cooldown.fists_of_fury.remains>2))|energy.time_to_max<=3)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000 || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
