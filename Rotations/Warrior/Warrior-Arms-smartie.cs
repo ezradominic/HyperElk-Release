@@ -18,6 +18,7 @@
 // v2.5 Rallying cry added
 // v2.6 Ignore Pain added
 // v2.7 Racials and a few other fixes
+// v2.8 Torghast updates
 
 using System.Linq;
 
@@ -69,6 +70,8 @@ namespace HyperElk.Core
         private string AoE = "AOE";
         private string AoERaid = "AoERaid";
         private string IgnorePain = "Ignore Pain";
+        private string PiercingHowl = "PiercingHowl";
+        private string NoLImitCondemn = "NoLImitCondemn";
 
         //Talents
         bool TalentSkullsplitter => API.PlayerIsTalentSelected(1, 3);
@@ -98,7 +101,7 @@ namespace HyperElk.Core
         bool IsWarbreaker => UseWarbreaker == "with Cooldowns" && IsCooldowns || UseWarbreaker == "always" || UseWarbreaker == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
         bool IsDeadlyCalm => UseDeadlyCalm == "with Cooldowns" && IsCooldowns || UseDeadlyCalm == "always";
         bool IsCovenant => UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE;
-        bool IsExecute => (TalentMassacre && API.TargetHealthPercent < 35 || !TalentMassacre && API.TargetHealthPercent < 20 || PlayerCovenantSettings == "Venthyr" && API.TargetHealthPercent > 80);
+        bool IsExecute => (TalentMassacre && API.TargetHealthPercent < 35 || IsMassacre && API.TargetHealthPercent < 35 || !TalentMassacre && API.TargetHealthPercent < 20 || API.PlayerHasBuff(NoLImitCondemn) || PlayerCovenantSettings == "Venthyr" && API.TargetHealthPercent > 80);
         bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
         bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
 
@@ -139,11 +142,13 @@ namespace HyperElk.Core
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int IgnorePainLifePercent => numbList[CombatRoutine.GetPropertyInt(IgnorePain)];
+        private bool UsePiercingHowl => CombatRoutine.GetPropertyBool(PiercingHowl);
+        private bool IsMassacre => CombatRoutine.GetPropertyBool("Massacre");
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v2.7");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v2.8");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -180,6 +185,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(AncientAftershock, 325886, "D1");
             CombatRoutine.AddSpell(SpearofBastion, 307865, "D1");
             CombatRoutine.AddSpell(IgnorePain, 190456, "D9");
+            CombatRoutine.AddSpell(PiercingHowl, 12323, "F9");
 
             //Macros
             CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
@@ -196,6 +202,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Avatar, 107574);
             CombatRoutine.AddBuff(Exploiter, 335451);
             CombatRoutine.AddBuff(IgnorePain, 190456);
+            CombatRoutine.AddBuff(NoLImitCondemn, 329214);
 
             //Debuff
             CombatRoutine.AddDebuff(ColossusSmash, 208086);
@@ -233,6 +240,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoE, "Rallying Cry Party Units ", numbPartyList, " in Party", "Rallying", 3);
             CombatRoutine.AddProp(AoERaid, "Rallying Cry Raid Units ", numbRaidList, "  in Raid", "Rallying", 3);
             CombatRoutine.AddProp(RallyingCry, RallyingCry + "Life Percent", numbList, "Life percent at which" + RallyingCry + " is used, set to 0 to disable", "Rallying", 50);
+            CombatRoutine.AddProp(PiercingHowl, "Use PiercingHowl", false, " Good to use when Anima Power for shouts is active", "Torghast");
+            CombatRoutine.AddProp("Massacre", "Got Massacre Anima ?", false, " Activate when you get the Massacre Anima Power", "Torghast");
         }
         public override void Pulse()
         {
@@ -252,6 +261,11 @@ namespace HyperElk.Core
             if (isInterrupt && API.CanCast(Pummel) && IsMelee && PlayerLevel >= 7)
             {
                 API.CastSpell(Pummel);
+                return;
+            }
+            if (API.CanCast(PiercingHowl) && IsMelee && UsePiercingHowl)
+            {
+                API.CastSpell(PiercingHowl);
                 return;
             }
             if (isInterrupt && API.CanCast(StormBolt) && API.TargetRange <= 20 && TalentStormBolt && (API.SpellISOnCooldown(Pummel) || !IsMelee))
