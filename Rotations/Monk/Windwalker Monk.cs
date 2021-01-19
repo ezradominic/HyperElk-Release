@@ -306,7 +306,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2) //&& (EnergyTimeToMax < 1000 || API.SpellCDDuration(Serenity) < 2000 || EnergyTimeToMax < 4000) && (API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
+            if (API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 1000 || API.SpellCDDuration(Serenity) < 2000 || EnergyTimeToMax < 4000) && (API.SpellCDDuration(FistsofFury) < 1500 || API.SpellCDDuration(WeaponsofOrder) < 2000) && NotChanneling)
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -341,7 +341,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&(buff.dance_of_chiji.up|debuff.bonedust_brew.up)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.PlayerHasBuff(DanceofChiJi) && TalentDanceofChiJi || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.PlayerHasBuff(DanceofChiJi) || API.TargetHasDebuff(BonedustBrew)) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -353,7 +353,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=(talent.whirling_dragon_punch&cooldown.rising_sun_kick.duration>cooldown.whirling_dragon_punch.remains+4)&(cooldown.fists_of_fury.remains>3|chi>=5)
-                if (API.CanCast(RisingSunKick) && TalentWhirlingDragonPunch && API.SpellCDDuration(RisingSunKick) > API.SpellCDDuration(WhirlingDragonPunch) + 4000 && (API.SpellCDDuration(FistsofFury) > 3000 || API.PlayerCurrentChi >= 5) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(RisingSunKick) && (TalentWhirlingDragonPunch && API.SpellCDDuration(RisingSunKick) > API.SpellCDDuration(WhirlingDragonPunch) + 4000) && (API.SpellCDDuration(FistsofFury) > 3000 || API.PlayerCurrentChi >= 5) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(RisingSunKick);
                     return;
@@ -365,7 +365,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&((cooldown.bonedust_brew.remains>2&(chi>3|cooldown.fists_of_fury.remains>6)&(chi>=5|cooldown.fists_of_fury.remains>2))|energy.time_to_max<=3)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000 || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 2000 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 6000) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 2000) || EnergyTimeToMax <= 3000) && NotChanneling && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -403,7 +403,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/flying_serpent_kick,if=buff.bok_proc.down,interrupt=1
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && NotChanneling && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) &&  API.PlayerCurrentChi == 2)// && (API.SpellCDDuration(FistsofFury) < 3000 || ChiDeficit <= 1 || EnergyTimeToMax < 3000))
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && NotChanneling && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo) &&  (API.PlayerCurrentChi == 2 || ChiDeficit <= 1) && NotChanneling)// || EnergyTimeToMax < 3000) && (API.SpellCDDuration(FistsofFury) < 3000 )
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -413,7 +413,7 @@ namespace HyperElk.Core
 
 
             //actions+=/call_action_list,name=st,if=active_enemies<3
-            if (API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber || !IsAOE)
+            if (IsAOE || !IsAOE && API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber)
             {
                 //actions.st=whirling_dragon_punch,if=raid_event.adds.in>cooldown.whirling_dragon_punch.duration*0.8|raid_event.adds.up
                 if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && NotChanneling && !CurrenCastFistsOfFury)
