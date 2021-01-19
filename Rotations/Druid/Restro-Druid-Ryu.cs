@@ -317,7 +317,7 @@ namespace HyperElk.Core
             API.WriteLog("For using Dark Titan's Lesson, please BIND LifebloomL in your bindings to YOUR Lifebloom and select in the Legendary select. It changes the ID of the spell and that will mess the rotation if these things aren't done.");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
             API.WriteLog("Please us a /cast [target=player] macro for Innervate to work properly or it will cast on your current target");
-            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self and party, and then match them to the Macro's in the spell book. Enable it in the toggles. You must at least have a target for it swap, friendly or enemy. It will not swap BACK to a enemy. This does work for raid, however, requires the addon Bindpad. See Video in discord.");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Target Last Hostile and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it swap, friendly or enemy. UNDER TESTING : It can swap back to an enemy, but YOU WILL NEED TO ASSIGN YOUR ASSIST TARGET KEY IT WILL NOT WORK IF YOU DONT DO THIS. If you DO NOT want it to do target enemmy swaping, please IGNORE Assist Macro in Spellbook. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
             API.WriteLog("Special Thanks to Ajax and Goose/Zero for testing");
 
             //Buff
@@ -825,7 +825,7 @@ namespace HyperElk.Core
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeedSetting))
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeedSetting))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
@@ -889,7 +889,7 @@ namespace HyperElk.Core
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeedSetting))
+                            if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeedSetting))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Stop();
