@@ -13,6 +13,7 @@
 // v2.1 Spell ids and alot of other stuff
 // v2.2 Rallying cry added
 // v2.3 Racials and a few other things
+// v2.4 Torghast update
 
 using System.Linq;
 
@@ -61,6 +62,7 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string AoE = "AOE";
         private string AoERaid = "AoERaid";
+        private string NoLImitCondemn = "NoLImitCondemn";
 
         //Talents
         bool TalentDevastator => API.PlayerIsTalentSelected(1, 3);
@@ -115,7 +117,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v2.3");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v2.4");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam,23922, "D4");
@@ -164,6 +166,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SpellReflection, 23920);
             CombatRoutine.AddBuff(BattleShout, 6673);
             CombatRoutine.AddBuff(Victorious, 32216);
+            CombatRoutine.AddBuff(NoLImitCondemn, 329214);
 
             //Debuff
             CombatRoutine.AddDebuff(DeepWounds,115767);
@@ -396,6 +399,11 @@ namespace HyperElk.Core
                     API.CastSpell(DragonRoar);
                     return;
                 }
+                if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 &&  API.PlayerHasBuff(NoLImitCondemn))
+                {
+                    API.CastSpell(Condemn);
+                    return;
+                }
                 if (API.CanCast(Revenge) && API.PlayerRage >= 20 && IsDPS && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && PlayerLevel >= 12)
                 {
                     API.CastSpell(Revenge);
@@ -421,22 +429,22 @@ namespace HyperElk.Core
                     API.CastSpell(ThunderClap);
                     return;
                 }
-                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 20 && API.TargetHealthPercent < 20 && IsDPS && PlayerLevel >= 10)
+                if (API.CanCast(Execute, true, false) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.PlayerHasBuff(NoLImitCondemn)) && IsDPS && PlayerLevel >= 10)
                 {
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && IsDPS)
+                if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 20 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(NoLImitCondemn)) && IsDPS)
                 {
                     API.CastSpell(Condemn);
                     return;
                 }
-                if (API.CanCast(Execute) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 70 && API.TargetHealthPercent < 20 && !IsDPS && PlayerLevel >= 10)
+                if (API.CanCast(Execute, true, false) && PlayerCovenantSettings != "Venthyr" && API.PlayerRage > 70 && (API.TargetHealthPercent < 20 || API.PlayerHasBuff(NoLImitCondemn)) && !IsDPS && PlayerLevel >= 10)
                 {
                     API.CastSpell(Execute);
                     return;
                 }
-                if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 70 && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80) && !IsDPS)
+                if (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && API.PlayerRage > 70 && (API.TargetHealthPercent < 20 || API.PlayerHasBuff(NoLImitCondemn) || API.TargetHealthPercent > 80) && !IsDPS)
                 {
                     API.CastSpell(Condemn);
                     return;
