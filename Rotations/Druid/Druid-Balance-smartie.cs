@@ -27,6 +27,7 @@
 // v3.3 small adjustment
 // v3.4 small adjustment
 // v3.5 no leggy fix
+// v3.6 small aoe change
 
 using System.Diagnostics;
 
@@ -94,6 +95,7 @@ namespace HyperElk.Core
         bool TalentForceOfNature => API.PlayerIsTalentSelected(1, 3);
         bool TalentRenewal => API.PlayerIsTalentSelected(2, 2);
         bool TalentGuardianAffinity => API.PlayerIsTalentSelected(3, 2);
+        bool TalentSouldofForest => API.PlayerIsTalentSelected(5, 1);
         bool TalentIncarnation => API.PlayerIsTalentSelected(5, 3);
         bool TalentStarlord => API.PlayerIsTalentSelected(5, 2);
         bool TalentStellarDrift => API.PlayerIsTalentSelected(6, 1);
@@ -166,7 +168,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v3.5");
+            API.WriteLog("Welcome to smartie`s Balance Druid v3.6");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -447,12 +449,12 @@ namespace HyperElk.Core
                 }
                 if (PlayerCovenantSettings == "Night Fae" && IsLegendary == "Balance of all things")
                 {
-                    if (API.CanCast(Incarnation) && API.PlayerAstral < 30 && !IncaCelestial && IsIncarnation && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && TalentIncarnation)
+                    if (API.CanCast(Incarnation) && API.PlayerAstral < 30 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && TalentIncarnation)
                     {
                         API.CastSpell(Incarnation);
                         return;
                     }
-                    if (API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral < 30 && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && !TalentIncarnation)
+                    if (API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral < 30 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && !TalentIncarnation)
                     {
                         API.CastSpell(CelestialAlignment);
                         return;
@@ -460,12 +462,12 @@ namespace HyperElk.Core
                 }
                 if (PlayerCovenantSettings != "Night Fae" || IsLegendary != "Balance of all things")
                 {
-                    if (API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && IsIncarnation && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && TalentIncarnation)
+                    if (API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && TalentIncarnation)
                     {
                         API.CastSpell(Incarnation);
                         return;
                     }
-                    if (API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral >= 90 && API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) && !TalentIncarnation)
+                    if (API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral >= 90 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && !TalentIncarnation)
                     {
                         API.CastSpell(CelestialAlignment);
                         return;
@@ -561,6 +563,11 @@ namespace HyperElk.Core
                         API.CastSpell(Sunfire);
                         return;
                     }
+                    if (API.CanCast(StellarFlare) && TalentStellarFlare && SaveQuake && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
+                    {
+                        API.CastSpell(StellarFlare);
+                        return;
+                    }
                     if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && !DontDOT)
                     {
                         if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
@@ -578,11 +585,6 @@ namespace HyperElk.Core
                             API.CastSpell(StellarFlare + "MO");
                             return;
                         }
-                    }
-                    if (API.CanCast(StellarFlare) && TalentStellarFlare && SaveQuake && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
-                    {
-                        API.CastSpell(StellarFlare);
-                        return;
                     }
                     if (API.CanCast(Starfall) && PlayerHasBuff(OnethsPerception) && UseStarlord)
                     {
@@ -642,29 +644,53 @@ namespace HyperElk.Core
                 }
                 if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
                 {
-                    if (API.CanCast(Starfall) && !SaveAP && API.PlayerBuffTimeRemaining(Starfall) < 100 && PlayerLevel >= 34 && API.PlayerAstral > 50 && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                    if (PlayerCovenantSettings == "Night Fae" && IsLegendary == "Balance of all things")
                     {
-                        API.CastSpell(Starfall);
-                        return;
+                        if (API.CanCast(Starfall) && !SaveAP && API.PlayerBuffTimeRemaining(Starfall) <= 100 && API.PlayerAstral >= 50 && UseStarlord)
+                        {
+                            API.CastSpell(Starfall);
+                            return;
+                        }
+                        if (API.CanCast(Starsurge) && !SaveAP && (API.PlayerAstral >= 80 || API.PlayerAstral > 30 && (IsCelestialAlignment && API.CanCast(CelestialAlignment) && !TalentIncarnation || IsIncarnation && API.CanCast(Incarnation) && TalentIncarnation)) && UseStarlord)
+                        {
+                            API.CastSpell(Starsurge);
+                            return;
+                        }
                     }
-                    if (API.CanCast(Starsurge) && !SaveAP && API.LastSpellCastInGame == Starfall && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 300 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 300) && API.PlayerAstral >= 30 && UseStarlord)
+                    if (PlayerCovenantSettings != "Night Fae" || IsLegendary != "Balance of all things")
                     {
-                        API.CastSpell(Starsurge);
-                        return;
+                        if (API.CanCast(Starfall) && !SaveAP && API.PlayerBuffTimeRemaining(Starfall) < 100 && API.PlayerAstral >= 50 && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                        {
+                            API.CastSpell(Starfall);
+                            return;
+                        }
+                        if (API.CanCast(Starsurge) && !SaveAP && API.PlayerAstral >= 80 && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                        {
+                            API.CastSpell(Starsurge);
+                            return;
+                        }
                     }
-                    if (API.CanCast(Starsurge) && !SaveAP && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 300 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 300) && (API.PlayerBuffTimeRemaining(Starfall) > 100 || PlayerLevel < 34) && PlayerLevel >= 12 && API.PlayerAstral >= 80 && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
+                    if (API.TargetUnitInRangeCount >= 6 && TalentSouldofForest && PlayerHasBuff(EclipseLunar) || API.TargetUnitInRangeCount >= 8 && TalentSouldofForest && PlayerHasBuff(EclipseSolar))
                     {
-                        API.CastSpell(Starsurge);
-                        return;
+                        if (API.CanCast(Starfire))
+                        {
+                            API.CastSpell(Starfire);
+                            return;
+                        }
                     }
                     if (API.CanCast(Sunfire) && PlayerLevel >= 23 && !DontDOT && API.TargetDebuffRemainingTime(Sunfire) < 300)
                     {
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && !DontDOT && API.TargetDebuffRemainingTime(Moonfire) < 300)
+                    if (API.CanCast(Moonfire) && PlayerLevel >= 2 && !DontDOT && PlayerHasBuff(EclipseSolar) && API.TargetDebuffRemainingTime(Moonfire) < 300)
                     {
                         API.CastSpell(Moonfire);
+                        return;
+                    }
+                    if (API.CanCast(StellarFlare) && API.TargetUnitInRangeCount < 4 && TalentStellarFlare && SaveQuake && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
+                    {
+                        API.CastSpell(StellarFlare);
                         return;
                     }
                     if (API.CanCast(Sunfire) && PlayerLevel >= 23 && !DontDOT && API.PlayerIsMoving && API.TargetDebuffRemainingTime(Moonfire) >= 300 && (!PlayerHasBuff(Starfall) && TalentStellarDrift || !TalentStellarDrift) && !PlayerHasBuff(WarriorofElune) && SpamDots)
@@ -672,12 +698,7 @@ namespace HyperElk.Core
                         API.CastSpell(Sunfire);
                         return;
                     }
-                    if (API.CanCast(StellarFlare) && SaveQuake && TalentStellarFlare && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
-                    {
-                        API.CastSpell(StellarFlare);
-                        return;
-                    }
-                    if (API.CanCast(Starfall) && PlayerHasBuff(OnethsPerception) && UseStarlord)
+                    if (API.CanCast(Starfall) && !PlayerHasBuff(Starfall) && PlayerHasBuff(OnethsPerception) && UseStarlord)
                     {
                         API.CastSpell(Starfall);
                         return;
@@ -694,12 +715,12 @@ namespace HyperElk.Core
                             API.CastSpell(Sunfire + "MO");
                             return;
                         }
-                        if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && PlayerHasBuff(EclipseSolar) && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
                         {
                             API.CastSpell(Moonfire + "MO");
                             return;
                         }
-                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && SaveQuake && !API.MacroIsIgnored(StellarFlare + "MO") && API.CanCast(StellarFlare) && TalentStellarFlare && isMOinRange && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
+                        if (API.MouseoverDebuffRemainingTime(StellarFlare) <= 300 && API.TargetUnitInRangeCount < 4 && SaveQuake && !API.MacroIsIgnored(StellarFlare + "MO") && API.CanCast(StellarFlare) && TalentStellarFlare && isMOinRange && (API.LastSpellCastInGame != StellarFlare && API.PlayerCurrentCastSpellID != 202347))
                         {
                             API.CastSpell(StellarFlare + "MO");
                             return;
