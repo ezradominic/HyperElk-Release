@@ -214,8 +214,27 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-//            API.WriteLog("Chi Stacks " + API.PlayerBuffStacks(ChiEnergy));
-
+            //            API.WriteLog("Chi Stacks " + API.PlayerBuffStacks(ChiEnergy));
+            //actions+=/call_action_list,name=cd_sef,if=!talent.serenity
+            if (IsCooldowns && !TalentSerenty)
+            {
+                Cooldowns();
+            }
+            //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
+            if (IsCooldowns && TalentSerenty)
+            {
+                CooldownsSerenty();
+            }
+            //actions+=/call_action_list,name=serenity,if=buff.serenity.up
+            if (API.PlayerHasBuff(Serenity))
+            {
+                SerentyRotation();
+            }
+            //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
+            if (API.PlayerHasBuff(WeaponsofOrder))
+            {
+                WeaponsOfOrderRotation();
+            }
         }
 
         public override void CombatPulse()
@@ -270,26 +289,7 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            //actions+=/call_action_list,name=cd_sef,if=!talent.serenity
-            if (IsCooldowns && !TalentSerenty)
-            {
-                Cooldowns();
-            }
-            //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
-            if (IsCooldowns && TalentSerenty)
-            {
-                CooldownsSerenty();
-            }
-            //actions+=/call_action_list,name=serenity,if=buff.serenity.up
-            if (API.PlayerHasBuff(Serenity))
-            {
-                SerentyRotation();
-            }
-            //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
-            if (API.PlayerHasBuff(WeaponsofOrder))
-            {
-                WeaponsOfOrderRotation();
-            }
+
 
             //# Executed every time the actor is available.
             //actions=auto_attack
@@ -353,7 +353,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=(talent.whirling_dragon_punch&cooldown.rising_sun_kick.duration>cooldown.whirling_dragon_punch.remains+4)&(cooldown.fists_of_fury.remains>3|chi>=5)
-                if (API.CanCast(RisingSunKick) && (TalentWhirlingDragonPunch && API.SpellCDDuration(RisingSunKick) > API.SpellCDDuration(WhirlingDragonPunch) + 4000) && (API.SpellCDDuration(FistsofFury) > 3000 || API.PlayerCurrentChi >= 5) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(RisingSunKick) && (TalentWhirlingDragonPunch && API.SpellCDDuration(RisingSunKick) > API.SpellCDDuration(WhirlingDragonPunch) + 4000) && (API.SpellCDDuration(FistsofFury) > 3000 || API.PlayerCurrentChi >= 5))
                 {
                     API.CastSpell(RisingSunKick);
                     return;
@@ -434,7 +434,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=cooldown.serenity.remains>1|!talent.serenity
-                if (API.CanCast(RisingSunKick) && (!TalentSerenty || TalentSerenty && API.SpellCDDuration(Serenity) > 1000) && NotChanneling && !CurrenCastFistsOfFury)
+                if (API.CanCast(RisingSunKick) && (!TalentSerenty || TalentSerenty && API.SpellCDDuration(Serenity) > 1000))
                 {
                     API.CastSpell(RisingSunKick);
                     return;
@@ -540,7 +540,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.serenity+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike
-            if (API.CanCast(RisingSunKick) && !LastCastRisingSunKick && NotChanneling)
+            if (API.CanCast(RisingSunKick) && !LastCastRisingSunKick)
             {
                 API.WriteLog("Rising Sun Kick Serenty");
                 API.CastSpell(RisingSunKick);
@@ -601,7 +601,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.weapons_of_order+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains
-            if (API.CanCast(RisingSunKick) && NotChanneling && NotCasting)
+            if (API.CanCast(RisingSunKick))
             {
                 API.CastSpell(RisingSunKick);
                 return;
