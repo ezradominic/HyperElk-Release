@@ -19,6 +19,7 @@
 // v2.7 Ignore Pain added
 // v2.8 Racials and a few other things
 // v2.9 some small adjustments
+// v3.0 Torghast tweaks
 
 using System.Linq;
 
@@ -67,6 +68,9 @@ namespace HyperElk.Core
         private string AoE = "AOE";
         private string AoERaid = "AoERaid";
         private string IgnorePain = "Ignore Pain";
+        private string PiercingHowl = "PiercingHowl";
+        private string Slambuff = "Slambuff";
+        private string NoLImitCondemn = "NoLImitCondemn";
 
         //Talents
         bool TalentImpendingVictory => API.PlayerIsTalentSelected(2, 2);
@@ -127,11 +131,16 @@ namespace HyperElk.Core
         private string UseDragonRoar => CDUsageWithAOE[CombatRoutine.GetPropertyInt(DragonRoar)];
         private string UseBladestorm => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Bladestorm)];
         private int IgnorePainLifePercent => numbList[CombatRoutine.GetPropertyInt(IgnorePain)];
+        private bool UsePiercingHowl => CombatRoutine.GetPropertyBool(PiercingHowl);
+        private bool IsMassacre => CombatRoutine.GetPropertyBool("Massacre");
+        private bool SlamBuff => CombatRoutine.GetPropertyBool("Slam Buff");
+
+
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v2.9");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.0");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, 23881, "D1");
@@ -163,11 +172,13 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SpearofBastion,307865, "D1");
             CombatRoutine.AddSpell(Slam,1464, "None");
             CombatRoutine.AddSpell(IgnorePain, 190456, "D9");
+            CombatRoutine.AddSpell(PiercingHowl, 12323, "F9");
 
             //Macros
             CombatRoutine.AddMacro(HeroicThrow + "MO", "D2");
             CombatRoutine.AddMacro(Execute + "MO", "D6");
             CombatRoutine.AddMacro(MassacreExecute + "MO", "D6");
+            CombatRoutine.AddMacro(MassacreCondemn + "MO", "D6");
             CombatRoutine.AddMacro(Condemn + "MO", "D6");
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -182,6 +193,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(WilloftheBerserker, 335597);
             CombatRoutine.AddBuff(Frenzy, 335077);
             CombatRoutine.AddBuff(IgnorePain, 190456);
+            CombatRoutine.AddBuff(Slambuff, 322054);
+            CombatRoutine.AddBuff(NoLImitCondemn, 329214);
 
             //Debuff
             CombatRoutine.AddDebuff(Siegebreaker,280773);
@@ -215,9 +228,13 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoE, "Rallying Cry Party Units ", numbPartyList, " in Party", "Rallying", 3);
             CombatRoutine.AddProp(AoERaid, "Rallying Cry Raid Units ", numbRaidList, "  in Raid", "Rallying", 3);
             CombatRoutine.AddProp(RallyingCry, RallyingCry + "Life Percent", numbList, "Life percent at which" + RallyingCry + " is used, set to 0 to disable", "Rallying", 50);
+            CombatRoutine.AddProp(PiercingHowl, "Use PiercingHowl", false, " Good to use when Anima Power for shouts is active", "Torghast");
+            CombatRoutine.AddProp("Massacre", "Got Massacre Anima ?", false, " Activate when you get the Massacre Anima Power", "Torghast");
+            CombatRoutine.AddProp("Slam Buff", "Use Slam", false, " Use Slam when 40x Anima Power and cds enabled", "Torghast");
         }
         public override void Pulse()
         {
+            //API.WriteLog("Condemn: "+ API.CanCast(MassacreCondemn));
             if (!API.PlayerIsMounted)
             {
                 if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
@@ -234,6 +251,16 @@ namespace HyperElk.Core
             if (isInterrupt && API.CanCast(Pummel) && IsMelee && PlayerLevel >= 7)
             {
                 API.CastSpell(Pummel);
+                return;
+            }
+            if (API.CanCast(PiercingHowl) && IsMelee && UsePiercingHowl)
+            {
+                API.CastSpell(PiercingHowl);
+                return;
+            }
+            if (API.CanCast(Slam) && IsMelee && API.PlayerRage >= 20 && SlamBuff && API.PlayerBuffStacks(Slambuff) >= 40 && IsCooldowns)
+            {
+                API.CastSpell(Slam);
                 return;
             }
             if (isInterrupt && API.CanCast(StormBolt) && API.TargetRange <= 20 && TalentStormBolt && (API.SpellISOnCooldown(Pummel) || !IsMelee))
@@ -402,25 +429,25 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single_target+=/condemn
-                if (API.CanCast(Condemn) && WWup && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Condemn, true, false) && WWup && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && !IsMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)))
                 {
                     API.CastSpell(Condemn);
                     return;
                 }
                 //actions.single_target+=/condemn
-                if (API.CanCast(MassacreCondemn) && WWup && PlayerCovenantSettings == "Venthyr" && TalentMassacre && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(MassacreCondemn, true, false) && WWup && PlayerCovenantSettings == "Venthyr" && (TalentMassacre || IsMassacre) && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)))
                 {
                     API.CastSpell(MassacreCondemn);
                     return;
                 }
                 //actions.single_target+=/execute
-                if (API.CanCast(Execute) && WWup && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && !TalentMassacre && (API.TargetHealthPercent < 20 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(Execute, true, false) && WWup && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && !TalentMassacre && !IsMassacre && (API.TargetHealthPercent < 20 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)))
                 {
                     API.CastSpell(Execute);
                     return;
                 }
                 //actions.single_target+=/execute
-                if (API.CanCast(MassacreExecute) && WWup && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && TalentMassacre && (API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
+                if (API.CanCast(MassacreExecute, true, false) && WWup && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && (TalentMassacre || IsMassacre) && (API.TargetHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)))
                 {
                     API.CastSpell(MassacreExecute);
                     return;
@@ -428,22 +455,22 @@ namespace HyperElk.Core
                 //Mouseover stuff
                 if (IsMouseover && WWup && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                 {
-                    if (API.CanCast(Execute) && !API.MacroIsIgnored(Execute + "MO") && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && !TalentMassacre && (API.MouseoverHealthPercent < 20 || API.PlayerHasBuff(SuddenDeath)))
+                    if (API.CanCast(Execute, true, false) && !API.MacroIsIgnored(Execute + "MO") && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && !TalentMassacre && (API.MouseoverHealthPercent < 20 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(Execute + "MO");
                         return;
                     }
-                    if (API.CanCast(MassacreExecute) && !API.MacroIsIgnored(MassacreExecute + "MO") && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && TalentMassacre && (API.MouseoverHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
+                    if (API.CanCast(MassacreExecute, true, false) && !API.MacroIsIgnored(MassacreExecute + "MO") && PlayerCovenantSettings != "Venthyr" && PlayerLevel >= 9 && TalentMassacre && (API.MouseoverHealthPercent < 35 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(MassacreExecute + "MO");
                         return;
                     }
-                    if (API.CanCast(Condemn) && !API.MacroIsIgnored(Condemn + "MO") && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && (API.MouseoverHealthPercent < 20 || API.MouseoverHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                    if (API.CanCast(Condemn, true, false) && !API.MacroIsIgnored(Condemn + "MO") && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && !IsMassacre && (API.MouseoverHealthPercent < 20 || API.MouseoverHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(Condemn + "MO");
                         return;
                     }
-                    if (API.CanCast(MassacreCondemn) && !API.MacroIsIgnored(MassacreCondemn + "MO") && PlayerCovenantSettings == "Venthyr" && TalentMassacre && (API.MouseoverHealthPercent < 35 || API.MouseoverHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
+                    if (API.CanCast(MassacreCondemn, true, false) && !API.MacroIsIgnored(MassacreCondemn + "MO") && (TalentMassacre || IsMassacre) && PlayerCovenantSettings == "Venthyr" && (API.MouseoverHealthPercent < 35 || API.MouseoverHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath)))
                     {
                         API.CastSpell(MassacreCondemn + "MO");
                         return;
