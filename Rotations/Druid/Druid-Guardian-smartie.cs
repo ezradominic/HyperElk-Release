@@ -9,6 +9,7 @@
 // v1.7 new simc apl
 // v1.8 mouseover moonfire added
 // v1.9 racials and a few other fixes
+// v2.0 Growl added for torghast anima power
 
 namespace HyperElk.Core
 {
@@ -48,6 +49,7 @@ namespace HyperElk.Core
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string SavageCombatant = "Savage Combatant";
+        private string Growl = "Growl";
 
 
         //Talents
@@ -88,6 +90,7 @@ namespace HyperElk.Core
         private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
         private string UseBerserk => CDUsage[CombatRoutine.GetPropertyInt(Berserk)];
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
+        private bool IsGrowl => CombatRoutine.GetPropertyBool("Growl");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
         private int BarkskinLifePercent => numbList[CombatRoutine.GetPropertyInt(Barkskin)];
         private int RenewalLifePercent => numbList[CombatRoutine.GetPropertyInt(Renewal)];
@@ -102,7 +105,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v1.9");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.0");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -129,6 +132,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ConvoketheSpirits, 323764, "D1");
             CombatRoutine.AddSpell(AdaptiveSwarm, 325727, "D1");
             CombatRoutine.AddSpell(LoneProtection, 338018, "D1");
+            CombatRoutine.AddSpell(Growl, 6795, "D1");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -175,6 +179,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsage, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Berserk, "Use " + Berserk, CDUsage, "Use " + Berserk + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
+            CombatRoutine.AddProp("Growl", "Use Growl", false, "Torghast Anima Power :-)", "Torghast");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
@@ -197,6 +202,11 @@ namespace HyperElk.Core
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {
+                if (API.CanCast(Growl) && IsGrowl && API.PlayerHasBuff(BearForm) && isKickRange)
+                {
+                    API.CastSpell(Growl);
+                    return;
+                }
                 if (isInterrupt && API.CanCast(SkullBash) && PlayerLevel >= 26 && isKickRange)
                 {
                     API.CastSpell(SkullBash);
