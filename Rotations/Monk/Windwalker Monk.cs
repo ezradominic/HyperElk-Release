@@ -386,6 +386,7 @@ namespace HyperElk.Core
                 //actions.aoe+=/chi_burst,if=chi.max-chi>=2
                 if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 2 && !CurrenCastFistsOfFury)
                 {
+                    API.WriteLog("1");
                     API.CastSpell(ChiBurst);
                     return;
                 }
@@ -406,8 +407,6 @@ namespace HyperElk.Core
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
                 if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo &&  API.PlayerCurrentChi >= 2 && (API.SpellCDDuration(FistsofFury) < 300 || ChiDeficit <= 1) && EnergyTimeToMax < 300) && !CurrenCastFistsOfFury)
                 {
-                    API.WriteLog("4");
-
                     API.CastSpell(BlackOutKick);
                     return;
                 }
@@ -472,7 +471,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/chi_burst,if=chi.max-chi>=1&active_enemies=1&raid_event.adds.in>20|chi.max-chi>=2&active_enemies>=2
-                if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 1 && API.PlayerUnitInMeleeRangeCount == 1 || ChiDeficit >= 2 && API.PlayerUnitInMeleeRangeCount >= 2 && !CurrenCastFistsOfFury)
+                if (API.CanCast(ChiBurst) && !CurrenCastFistsOfFury && TalentChiBurst && (ChiDeficit >= 1 && API.PlayerUnitInMeleeRangeCount == 1 || ChiDeficit >= 2 && API.PlayerUnitInMeleeRangeCount >= 2))
                 {
                     API.CastSpell(ChiBurst);
                     return;
@@ -500,8 +499,6 @@ namespace HyperElk.Core
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(talent.serenity&cooldown.serenity.remains<3|cooldown.rising_sun_kick.remains>1&cooldown.fists_of_fury.remains>1|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>2|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>3|chi>5|buff.bok_proc.up)
                 if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && !CurrenCastFistsOfFury && (TalentSerenty && API.SpellCDDuration(Serenity) < 300 || API.SpellCDDuration(RisingSunKick) > 100 && API.SpellCDDuration(FistsofFury) > 100 || API.SpellCDDuration(RisingSunKick) < 300 && API.SpellCDDuration(FistsofFury) > 300 && API.PlayerCurrentChi == 2 || API.SpellCDDuration(RisingSunKick) > 300 && API.SpellCDDuration(FistsofFury) < 300 && API.PlayerCurrentChi > 3 || API.PlayerCurrentChi > 5 || API.PlayerHasBuff(BlackOutKickBuff)))
                 {
-                    API.WriteLog("3");
-
                     API.CastSpell(BlackOutKick);
                     return;
                 }
@@ -516,15 +513,12 @@ namespace HyperElk.Core
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&cooldown.fists_of_fury.remains<3&chi=2&prev_gcd.1.tiger_palm&energy.time_to_50<1
                 if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && API.SpellCDDuration(FistsofFury) < 300 && API.PlayerCurrentChi == 2 && !CurrenCastFistsOfFury)
                 {
-                    API.WriteLog("2");
-
                     API.CastSpell(BlackOutKick);
                     return;
                 }
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&energy.time_to_max<2&(chi.max-chi<=1|prev_gcd.1.tiger_palm)
                 if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick  && ChiDeficit <= 1 && !CurrenCastFistsOfFury && EnergyTimeToMax < 200)
                 {
-                    API.WriteLog("1");
                     API.CastSpell(BlackOutKick);
                     return;
                 }
@@ -669,7 +663,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.weapons_of_order+=/chi_burst,if=chi.max-chi>=(1+active_enemies>1)
-            if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 1)
+            if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 1 && !CurrenCastFistsOfFury)
             {
                 API.CastSpell(ChiBurst);
                 return;
