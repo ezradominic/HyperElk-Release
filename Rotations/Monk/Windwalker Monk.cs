@@ -217,22 +217,22 @@ namespace HyperElk.Core
         {
 //            API.WriteLog("test" + EnergyTimeToMax);
             //actions+=/call_action_list,name=cd_sef,if=!talent.serenity
-            if (IsCooldowns && !TalentSerenty)
+            if (IsCooldowns && !TalentSerenty && API.PlayerIsInCombat)
             {
                 Cooldowns();
             }
             //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
-            if (IsCooldowns && TalentSerenty)
+            if (IsCooldowns && TalentSerenty && API.PlayerIsInCombat)
             {
                 CooldownsSerenty();
             }
             //actions+=/call_action_list,name=serenity,if=buff.serenity.up
-            if (API.PlayerHasBuff(Serenity))
+            if (API.PlayerHasBuff(Serenity) && API.PlayerIsInCombat)
             {
                 SerentyRotation();
             }
             //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
-            if (API.PlayerHasBuff(WeaponsofOrder))
+            if (API.PlayerHasBuff(WeaponsofOrder) && API.PlayerIsInCombat)
             {
                 WeaponsOfOrderRotation();
             }
