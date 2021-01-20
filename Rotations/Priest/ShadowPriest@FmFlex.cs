@@ -372,7 +372,16 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_bolt,if=spell_targets.mind_sear<(4+conduit.dissonant_echoes.enabled)&insanity<=85
-            if (API.CanCast(VoidBolt,false,false) && API.PlayerHasBuff(DissonantEchoes))
+            if (API.CanCast(VoidBolt, false, false) && API.PlayerHasBuff(DissonantEchoes))
+            {
+                if (API.TargetUnitInRangeCount < (4) && API.PlayerInsanity <= 85)
+                {
+                    API.CastSpell(VoidBolt);
+                    return;
+                }
+            }
+            //actions.main+=/void_bolt,if=spell_targets.mind_sear<(4+conduit.dissonant_echoes.enabled)&insanity<=85
+            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(Voidform))
             {
                 if (API.TargetUnitInRangeCount < (4) && API.PlayerInsanity <= 85)
                 {
