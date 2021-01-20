@@ -351,7 +351,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_bolt,if=insanity<=85&((talent.hungering_void.enabled&spell_targets.mind_sear<5)|spell_targets.mind_sear=1)
-            if (API.CanCast(VoidBolt) && (API.PlayerHasBuff(Voidform)|| API.PlayerHasBuff(DissonantEchoes)))
+            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(Voidform))
             {
                 if (API.PlayerInsanity <= 85 && ((TalentHungeringVoid && API.TargetUnitInRangeCount < 5) || API.TargetUnitInRangeCount == 1))
                 {
@@ -372,7 +372,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_bolt,if=spell_targets.mind_sear<(4+conduit.dissonant_echoes.enabled)&insanity<=85
-            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(Voidform))
+            if (API.CanCast(VoidBolt) && API.PlayerHasBuff(DissonantEchoes))
             {
                 if (API.TargetUnitInRangeCount < (4) && API.PlayerInsanity <= 85)
                 {
