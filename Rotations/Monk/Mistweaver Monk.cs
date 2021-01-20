@@ -158,7 +158,8 @@ namespace HyperElk.Core
         private int AoEDPSHRaidLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSHRaid)];
         private int AoEDPSNumber => numbPartyList[CombatRoutine.GetPropertyInt(AoEDPS)];
         private int AoEDPSRaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoEDPSRaid)];
-
+        private bool RangeCheck => API.TargetRange <= 40;
+        private static readonly Stopwatch SwapWatch = new Stopwatch();
 
         public override void Initialize()
         {
@@ -426,7 +427,7 @@ namespace HyperElk.Core
                 JadeSerpentStatueWatch.Stop();
                 JadeSerpentStatueWatch.Reset();
             }
-            if (API.CanCast(SummonJadeSerpentStatue) && !JadeSerpentStatueWatch.IsRunning && TalentSummonJadeSerpentStatue && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(SummonJadeSerpentStatue) && !JadeSerpentStatueWatch.IsRunning && TalentSummonJadeSerpentStatue && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 JadeSerpentStatueWatch.Start();
                 API.CastSpell(SummonJadeSerpentStatue);
@@ -465,7 +466,7 @@ namespace HyperElk.Core
                 API.CastSpell(ThunderFocusTea);
                 return;
             }
-            if (API.CanCast(ChiWave) && TalentChiWave && API.TargetHealthPercent <= ChiWavePercent && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(ChiWave) && TalentChiWave && API.TargetHealthPercent <= ChiWavePercent && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 API.CastSpell(ChiWave);
                 return;
@@ -480,27 +481,27 @@ namespace HyperElk.Core
                 API.CastSpell(Yulon);
                 return;
             }
-            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && API.PlayerIsInGroup && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && (LCTank && API.TargetRoleSpec == API.TankRole || !LCTank))
+            if (API.CanCast(LifeCocoon) && API.TargetHealthPercent <= LifeCocoonPercent && API.PlayerIsInGroup && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && (LCTank && API.TargetRoleSpec == API.TankRole || !LCTank) && RangeCheck)
             {
                 API.CastSpell(LifeCocoon);
                 return;
             }
-            if (API.CanCast(RenewingMist) && NotCasting && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(RenewingMist) && NotCasting && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 API.CastSpell(RenewingMist);
                 return;
             }
-            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 API.CastSpell(EnvelopingMist);
                 return;
             }
-            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(Vivify) && NotCasting && API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 API.CastSpell(Vivify);
                 return;
             }
-            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && API.TargetHealthPercent >= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat)
+            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && API.TargetHealthPercent >= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 API.CastSpell(SoothingMist);
                 return;
@@ -508,7 +509,7 @@ namespace HyperElk.Core
             // Auto Target
             if (IsAutoSwap)
             {
-                if (API.PlayerIsInGroup)
+                if (API.PlayerIsInGroup && RangeCheck)
                 {
                     for (int i = 0; i < units.Length; i++)
                     {
