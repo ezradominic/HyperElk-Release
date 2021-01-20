@@ -98,7 +98,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(UnfurlingDarkness, 341273);
             CombatRoutine.AddBuff(BoonOfTheAscended, 325013);
             CombatRoutine.AddBuff(PowerInfusion, 10060);
-            CombatRoutine.AddBuff(DissonantEchoes, 343355);
+            CombatRoutine.AddBuff(DissonantEchoes, 343144);
             //Debuff
             CombatRoutine.AddDebuff(DevouringPlague, 335467);
             CombatRoutine.AddDebuff(SWPain, 589);
