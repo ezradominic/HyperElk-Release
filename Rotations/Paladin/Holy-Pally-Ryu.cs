@@ -141,8 +141,8 @@ namespace HyperElk.Core
         private int RangeRaidTracking(int Range) => raidunits.Count(p => API.UnitRange(p) <= Range);
         private int RangeTracking(int Range) => API.PlayerIsInRaid ? RangeRaidTracking(Range) : RangePartyTracking(Range);
 
-        private bool DTRange => RangeTracking(30) <= AoENumber;
-        private bool LoDRangeCheck => UseLeg == "Shadowbreaker, Dawn of the Sun" ? RangeTracking(40) <= AoENumber : RangeTracking(15) <= AoENumber;
+        private bool DTRange => RangeTracking(30) >= AoENumber;
+        private bool LoDRangeCheck => UseLeg == "Shadowbreaker, Dawn of the Sun" ? RangeTracking(40) >= AoENumber : RangeTracking(15) >= AoENumber;
         private bool TrinketAoE => UnitBelowHealthPercent(TrinketLifePercent) >= AoENumber;
         private bool GlimmerTracking => API.PlayerIsInRaid ? BuffRaidTracking(GlimmerofLight) <= 8 : BuffPartyTracking(GlimmerofLight) <= 5;
         private bool BoLTracking => API.PlayerIsInRaid ? BuffRaidTracking(BoL) < 1 : BuffPartyTracking(BoL) < 1;
@@ -500,7 +500,7 @@ namespace HyperElk.Core
 
 
             //Prop
-            CombatRoutine.AddProp(SwapSpeed, SwapSpeed + "Speed ", SwapSpeedList, "Speed at which to change targets, it is in Milliseconds, to convert to seconds please divide by 1000. If you don't understand, please leave at at default setting", "Targeting", 1250);
+          //  CombatRoutine.AddProp(SwapSpeed, SwapSpeed + "Speed ", SwapSpeedList, "Speed at which to change targets, it is in Milliseconds, to convert to seconds please divide by 1000. If you don't understand, please leave at at default setting", "Targeting", 1250);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(DivineProtection, DivineProtection + " Life Percent", numbList, "Life percent at which" + DivineProtection + "is used, set to 0 to disable", "Defense", 50);
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 0);
