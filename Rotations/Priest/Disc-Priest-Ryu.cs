@@ -139,10 +139,10 @@ namespace HyperElk.Core
         private bool PWSCheck => API.CanCast(PowerWordShield) && PlayerHealth <= PowerWordShieldifePercent && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance && !API.PlayerCanAttackTarget && (API.PlayerHasBuff(Rapture) || !API.TargetHasDebuff(WeakenedSoul));
         private bool PWRCheck => API.CanCast(PowerWordRadiance) && PowerWordRadAoE && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && !API.PlayerCanAttackTarget && RangeTracking(30) >= 3;
         private bool EvagCheck => API.CanCast(Evangelism) && EvangelismTalent && AttonementTracking && EvagAoE && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance;
-        private bool SchismCheck => API.CanCast(Schism) && AttonementTracking && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.PlayerCanAttackTarget;
-        private bool SpiritCheck => API.CanCast(SpiritShell) && SSAoE && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance;
+        private bool SchismCheck => API.CanCast(Schism) && SchismTalent && AttonementTracking && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.PlayerCanAttackTarget;
+        private bool SpiritCheck => API.CanCast(SpiritShell) && SpiritShellTalent && SSAoE && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance;
         private bool RaptureCheck => API.CanCast(Rapture) && RapAoE && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance && !API.PlayerCanAttackTarget;
-        private bool ShadowMendCheck => API.CanCast(Shadowmend) && !API.PlayerIsMoving && PlayerHealth <= ShadowMendLifePercent;
+        private bool ShadowMendCheck => API.CanCast(Shadowmend) && !API.PlayerIsMoving && PlayerHealth <= ShadowMendLifePercent && !API.PlayerCanAttackTarget;
         private bool PowerWordBarrierCheck => API.CanCast(PowerWordBarrier) && PowerWordBarrierAoE && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool PainSupressionCheck => API.CanCast(PainSupression) && PlayerHealth <= PainSupressionLifePercent && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving);
         private bool KyrianCheck => API.CanCast(BoonoftheAscended) && PlayerCovenantSettings == "Kyrian" && BoonAoE && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingPenance;
@@ -272,6 +272,7 @@ namespace HyperElk.Core
           CombatRoutine.AddDebuff(WeakenedSoul, 6788);
             CombatRoutine.AddDebuff(ShadowWordPain, 589);
             CombatRoutine.AddDebuff(Quake, 240447);
+            CombatRoutine.AddDebuff(PurgetheWicked, 204213);
             //Debuff Dispell
             CombatRoutine.AddDebuff("Chilled", 328664);
             CombatRoutine.AddDebuff("Frozen Binds", 320788);
@@ -443,6 +444,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 1);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket2 be used", "Trinket", 1);
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
+            CombatRoutine.AddProp(AtonementParty, "Number of units that have attonement for DPS in party ", numbPartyList, " Units for Attonment", "Healing", 3);
+            CombatRoutine.AddProp(AtonementRaid, "Number of units for that have attonement for DPS in raid ", numbRaidList, " Units for Attonement in raid", "Healing", 7);
             CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Healing", 2);
             CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS in party" + "is used,", "Healing", 80);
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Healing", 4);
@@ -632,7 +635,7 @@ namespace HyperElk.Core
                     API.CastSpell(MindBlast);
                     return;
                 }
-                if (API.CanCast(Smite) && !ChannelingPenance && Mana >= 1 && !ChannelingPenance && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
+                if (API.CanCast(Smite) && !ChannelingPenance && Mana >= 1 && !ChannelingPenance && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
                 {
                     API.CastSpell(Smite);
                     return;
