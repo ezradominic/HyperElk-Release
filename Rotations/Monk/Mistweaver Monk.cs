@@ -561,7 +561,7 @@ namespace HyperElk.Core
                         }
                         if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250))
                         {
-                            API.CastSpell(PlayerTargetArray[i]); ;
+                            API.CastSpell(PlayerTargetArray[i]);
                             SwapWatch.Stop();
                             SwapWatch.Start();
                             return;
@@ -624,7 +624,7 @@ namespace HyperElk.Core
                             }
                             if (API.UnitHealthPercent(raidunits[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250))
                             {
-                                API.CastSpell(RaidTargetArray[i]); ;
+                                API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Stop();
                                 SwapWatch.Start();
                                 return;
