@@ -139,7 +139,7 @@ namespace HyperElk.Core
         private bool PWSCheck => API.CanCast(PowerWordShield) && PlayerHealth <= PowerWordShieldifePercent && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance && !API.PlayerCanAttackTarget && (API.PlayerHasBuff(Rapture) || !API.TargetHasDebuff(WeakenedSoul));
         private bool PWRCheck => API.CanCast(PowerWordRadiance) && PowerWordRadAoE && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && !API.PlayerCanAttackTarget && RangeTracking(30) >= 3;
         private bool EvagCheck => API.CanCast(Evangelism) && EvangelismTalent && AttonementTracking && EvagAoE && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance;
-        private bool SchismCheck => API.CanCast(Schism) && SchismTalent && AttonementTracking && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.PlayerCanAttackTarget;
+        private bool SchismCheck => API.CanCast(Schism) && SchismTalent && AttonementTracking && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0;
         private bool SpiritCheck => API.CanCast(SpiritShell) && SpiritShellTalent && SSAoE && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance;
         private bool RaptureCheck => API.CanCast(Rapture) && RapAoE && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingMindSear && !ChannelingPenance && !API.PlayerCanAttackTarget;
         private bool ShadowMendCheck => API.CanCast(Shadowmend) && !API.PlayerIsMoving && PlayerHealth <= ShadowMendLifePercent && !API.PlayerCanAttackTarget;
@@ -585,12 +585,12 @@ namespace HyperElk.Core
                     API.CastSpell(Mindgames);
                     return;
                 }
-                if (API.CanCast(Shadowfiend) && API.PlayerCanAttackTarget && API.PlayerMana <= 65 && InRange)
+                if (API.CanCast(Shadowfiend) && API.PlayerCanAttackTarget && API.PlayerMana <= 65 && InRange && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(Shadowfiend);
                     return;
                 }
-                if (API.CanCast(Mindbender) && MindbenderTalent && API.PlayerCanAttackTarget && API.PlayerMana <= 80 && InRange)
+                if (API.CanCast(Mindbender) && MindbenderTalent && API.PlayerCanAttackTarget && API.PlayerMana <= 80 && InRange && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(Mindbender);
                     return;
@@ -610,7 +610,7 @@ namespace HyperElk.Core
                     API.CastSpell(Schism);
                     return;
                 }
-                if (API.CanCast(PowerWordSolace) && PowerWordSolaceTalent && AttonementTracking && InRange && API.PlayerCanAttackTarget)
+                if (API.CanCast(PowerWordSolace) && PowerWordSolaceTalent && AttonementTracking && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(PowerWordSolace);
                     return;
