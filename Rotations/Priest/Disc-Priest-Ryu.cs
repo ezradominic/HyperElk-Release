@@ -354,6 +354,7 @@ namespace HyperElk.Core
                 CombatRoutine.AddSpell(Evangelism, 246287);
             CombatRoutine.AddSpell(MindBlast, 8092);
             CombatRoutine.AddSpell(Purify, 527);
+            CombatRoutine.AddSpell(PowerWordShield, 17);
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -431,9 +432,11 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PowerWordShield, PowerWordShield + " Life Percent", numbList, "Life percent at which " + PowerWordShield + " is used, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(PainSupression, PainSupression + " Life Percent", numbList, "Life percent at which " + PainSupression + " is used, set to 0 to disable", "Healing", 25);
             CombatRoutine.AddProp(PowerWordBarrier, PowerWordBarrier + " Life Percent", numbList, "Life percent at which " + PowerWordBarrier + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 45);
+            CombatRoutine.AddProp(UnholyNova, UnholyNova + " Life Percent", numbList, "Life percent at which " + UnholyNova + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 45);
             CombatRoutine.AddProp(PowerWordRadiance, PowerWordRadiance + " Life Percent", numbList, "Life percent at which " + PowerWordRadiance + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 65);
             CombatRoutine.AddProp(Rapture, Rapture + " Life Percent", numbList, "Life percent at which " + Rapture + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(SpiritShell, SpiritShell + " Life Percent", numbList, "Life percent at which " + SpiritShell + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 50);
+          //  CombatRoutine.AddProp(ShadowCovenant, ShadowCovenant + " Life Percent", numbList, "Life percent at which " + ShadowCovenant + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(Evangelism, Evangelism + " Life Percent", numbList, "Life percent at which " + Evangelism + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(Halo, Halo + " Life Percent", numbList, "Life percent at which " + Halo + " is used when AoE Number of members are at, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(BoonoftheAscended, BoonoftheAscended + " Life Percent", numbList, "Life percent at which " + BoonoftheAscended + " is used when AoE Number of members are at life percent, if is your Cov, set to 0 to disable", "Healing", 10);
