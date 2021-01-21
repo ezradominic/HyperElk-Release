@@ -353,7 +353,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SpiritShell, 109964);
                 CombatRoutine.AddSpell(Evangelism, 246287);
             CombatRoutine.AddSpell(MindBlast, 8092);
-
+            CombatRoutine.AddSpell(Purify, 527);
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
