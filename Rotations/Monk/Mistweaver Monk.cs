@@ -414,7 +414,7 @@ namespace HyperElk.Core
             {
                 for (int i = 0; i < units.Length; i++)
                 {
-                    if (API.PlayerLastSpell == (units[i]) && ChannelSoothingMist)
+                    if (API.PlayerLastSpell == units[i] && ChannelSoothingMist)
                     {
                         API.CastSpell("stopcasting");
                         return;
@@ -637,9 +637,9 @@ namespace HyperElk.Core
                                 SwapWatch.Start();
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
+                            if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
                             {
-                                API.CastSpell(PlayerTargetArray[i]);
+                                API.CastSpell(RaidTargetArray[i]);
                                 API.CastSpell("Assist");
                                 SwapWatch.Stop();
                                 SwapWatch.Start();
