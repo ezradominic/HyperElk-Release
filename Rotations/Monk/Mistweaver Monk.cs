@@ -159,7 +159,10 @@ namespace HyperElk.Core
         private int RangePartyTracking(int Range) => units.Count(p => API.UnitRange(p) <= Range);
         private int RangeRaidTracking(int Range) => raidunits.Count(p => API.UnitRange(p) <= Range);
         private int RangeTracking(int Range) => API.PlayerIsInRaid ? RangeRaidTracking(Range) : RangePartyTracking(Range);
-        bool LastCastSop => API.PlayerLastSpell == "stopcasting";
+        bool LastCastTargetChangeParty => API.PlayerLastSpell == "player" || API.PlayerLastSpell == "party1" || API.PlayerLastSpell == "party2" || API.PlayerLastSpell == "party3" || API.PlayerLastSpell == "party4";
+        bool LastCastTargetChangeRaid => API.PlayerLastSpell == "raid1" || API.PlayerLastSpell == "raid2" || API.PlayerLastSpell == "raid3" || API.PlayerLastSpell == "raid4" || API.PlayerLastSpell == "raid5" || API.PlayerLastSpell == "raid6" || API.PlayerLastSpell == "raid7" || API.PlayerLastSpell == "raid8" || API.PlayerLastSpell == "raid9" || API.PlayerLastSpell == "raid8" || API.PlayerLastSpell == "raid9" || API.PlayerLastSpell == "raid10" || API.PlayerLastSpell == "raid11" || API.PlayerLastSpell == "raid12" || API.PlayerLastSpell == "raid13" || API.PlayerLastSpell == "raid14" || API.PlayerLastSpell == "raid16" || API.PlayerLastSpell == "raid17" || API.PlayerLastSpell == "raid18" || API.PlayerLastSpell == "raid19" || API.PlayerLastSpell == "raid20" || API.PlayerLastSpell == "raid21" || API.PlayerLastSpell == "raid22" || API.PlayerLastSpell == "raid23" || API.PlayerLastSpell == "raid24" || API.PlayerLastSpell == "raid25" || API.PlayerLastSpell == "raid26" || API.PlayerLastSpell == "raid27" || API.PlayerLastSpell == "raid28" || API.PlayerLastSpell == "raid29" || API.PlayerLastSpell == "raid30" || API.PlayerLastSpell == "raid31" || API.PlayerLastSpell == "raid32" || API.PlayerLastSpell == "raid33" || API.PlayerLastSpell == "raid34" || API.PlayerLastSpell == "raid35" || API.PlayerLastSpell == "raid36" || API.PlayerLastSpell == "raid37" || API.PlayerLastSpell == "raid38" || API.PlayerLastSpell == "raid39" || API.PlayerLastSpell == "raid40";
+        bool LastCastTargetChange => API.PlayerIsInRaid ? LastCastTargetChangeRaid : LastCastTargetChangeParty;
+        bool LastCastStopCast => API.PlayerLastSpell == "stopcasting";
         public override void Initialize()
         {
             CombatRoutine.Name = "Mistweaver Monk by Mufflon12";
@@ -495,13 +498,11 @@ namespace HyperElk.Core
                 API.CastSpell(RenewingMist);
                 return;
             }
-            for (int i = 0; i < units.Length; i++)
-                for (int j = 0; i < raidunits.Length; i++)
-                    if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !LastCastSop && (API.PlayerIsInGroup && API.PlayerLastSpell != units[i] || API.PlayerIsInRaid && API.PlayerLastSpell != raidunits[j]) && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
-                    {
-                    API.CastSpell(EnvelopingMist);
-                    return;
-                    }
+            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !LastCastStopCast && !LastCastTargetChange && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
+            {
+                API.CastSpell(EnvelopingMist);
+                return;
+            }
             if (API.CanCast(Vivify) && NotCasting && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 API.CastSpell(Vivify);
