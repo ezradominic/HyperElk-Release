@@ -159,7 +159,7 @@ namespace HyperElk.Core
         private int RangePartyTracking(int Range) => units.Count(p => API.UnitRange(p) <= Range);
         private int RangeRaidTracking(int Range) => raidunits.Count(p => API.UnitRange(p) <= Range);
         private int RangeTracking(int Range) => API.PlayerIsInRaid ? RangeRaidTracking(Range) : RangePartyTracking(Range);
-
+        bool LastCastSop => API.PlayerLastSpell == "stopcasting";
         public override void Initialize()
         {
             CombatRoutine.Name = "Mistweaver Monk by Mufflon12";
@@ -495,11 +495,13 @@ namespace HyperElk.Core
                 API.CastSpell(RenewingMist);
                 return;
             }
-            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
-            {
-                API.CastSpell(EnvelopingMist);
-                return;
-            }
+            for (int i = 0; i < units.Length; i++)
+                for (int j = 0; i < raidunits.Length; i++)
+                    if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !LastCastSop && (API.PlayerIsInGroup && API.PlayerLastSpell != units[i] || API.PlayerIsInRaid && API.PlayerLastSpell != raidunits[j]) && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
+                    {
+                    API.CastSpell(EnvelopingMist);
+                    return;
+                    }
             if (API.CanCast(Vivify) && NotCasting && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 API.CastSpell(Vivify);
