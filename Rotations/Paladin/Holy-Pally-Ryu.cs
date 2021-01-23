@@ -77,6 +77,7 @@ namespace HyperElk.Core
         private string Quake = "Quake";
         private string Cleanse = "Cleanse";
         private string WoGTank = "Word of Glory on Tank";
+        private string SwapSpeed = "Target Swap Speed";
 
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
@@ -113,6 +114,7 @@ namespace HyperElk.Core
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
+        int[] SwapSpeedList = new int[] { 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000 };
         int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40 };
         string[] units = { "player", "party1", "party2", "party3", "party4" };
         string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
@@ -139,8 +141,8 @@ namespace HyperElk.Core
         private int RangeRaidTracking(int Range) => raidunits.Count(p => API.UnitRange(p) <= Range);
         private int RangeTracking(int Range) => API.PlayerIsInRaid ? RangeRaidTracking(Range) : RangePartyTracking(Range);
 
-        private bool DTRange => RangeTracking(30) <= AoENumber;
-        private bool LoDRangeCheck => UseLeg == "Shadowbreaker, Dawn of the Sun" ? RangeTracking(40) <= AoENumber : RangeTracking(15) <= AoENumber;
+        private bool DTRange => RangeTracking(30) >= AoENumber;
+        private bool LoDRangeCheck => UseLeg == "Shadowbreaker, Dawn of the Sun" ? RangeTracking(40) >= AoENumber : RangeTracking(15) >= AoENumber;
         private bool TrinketAoE => UnitBelowHealthPercent(TrinketLifePercent) >= AoENumber;
         private bool GlimmerTracking => API.PlayerIsInRaid ? BuffRaidTracking(GlimmerofLight) <= 8 : BuffPartyTracking(GlimmerofLight) <= 5;
         private bool BoLTracking => API.PlayerIsInRaid ? BuffRaidTracking(BoL) < 1 : BuffPartyTracking(BoL) < 1;
@@ -154,6 +156,7 @@ namespace HyperElk.Core
         private bool DTAoE => UnitBelowHealthPercent(DTLifePercent) >= AoENumber && DTRange;
         private bool AHAoE => UnitBelowHealthPercent(AHLifePercent) >= AoENumber;
         private bool AMAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AMLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(AMLifePercent) >= AoENumber;
+        private bool AVAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AvengingWrathLifePrecent) >= AoERaidNumber : UnitBelowHealthPercentParty(AvengingWrathLifePrecent) >= AoENumber;
         private bool LHAoE => UnitBelowHealthPercent(LightsHammerLifePercent) >= AoENumber;
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
         private bool PlayerSwap => API.UnitHealthPercent(Player) <= PartySwapPercent;
@@ -167,6 +170,7 @@ namespace HyperElk.Core
         private int HolyShockLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyShock)];
         private int LightsHammerLifePercent => numbList[CombatRoutine.GetPropertyInt(LightsHammer)];
         private int HolyLightLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyLight)];
+        private int AvengingWrathLifePrecent => numbList[CombatRoutine.GetPropertyInt(AvengingWrath)];
         private int HolyLightBeaconLifePercent => numbList[CombatRoutine.GetPropertyInt(HolyLightBeacon)];
         private int FoLLifePercent => numbList[CombatRoutine.GetPropertyInt(FoL)];
         private int FoLBeaconLifePercent => numbList[CombatRoutine.GetPropertyInt(FoLBeacon)];
@@ -199,7 +203,9 @@ namespace HyperElk.Core
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int TrinketLifePercent => numbList[CombatRoutine.GetPropertyInt(Trinket)];
+        private int SwapSpeedSetting => SwapSpeedList[CombatRoutine.GetPropertyInt(SwapSpeed)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
+        private string UseAV => CDUsage[CombatRoutine.GetPropertyInt("Avenging Wrath Usage")];
         //General
         private int Level => API.PlayerLevel;
         private bool InRange => API.PlayerHasBuff(RuleofLaw) ? API.TargetRange <= 60 : API.TargetRange <= 40;
@@ -494,6 +500,7 @@ namespace HyperElk.Core
 
 
             //Prop
+          //  CombatRoutine.AddProp(SwapSpeed, SwapSpeed + "Speed ", SwapSpeedList, "Speed at which to change targets, it is in Milliseconds, to convert to seconds please divide by 1000. If you don't understand, please leave at at default setting", "Targeting", 1250);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(DivineProtection, DivineProtection + " Life Percent", numbList, "Life percent at which" + DivineProtection + "is used, set to 0 to disable", "Defense", 50);
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 0);
@@ -505,6 +512,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
 
+
+            CombatRoutine.AddProp(AvengingWrath, AvengingWrath + " Life Percent", numbList, "Life percent at which" + AvengingWrath + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Cooldowns", 45);
+            CombatRoutine.AddProp("Avenging Wrath Usage", AvengingWrath + "Usage ", CDUsage, "Use " + AvengingWrath + "On Cooldown with AOE Logic for Healing, With Cooldowns only( you contorl) or not used at all", "Cooldowns", 1);
             CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(HolyShockHealing, HolyShock, true, "If Holy Shock should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
             CombatRoutine.AddProp(BoST, BoS, true, "If BoS should be on tank only, if for everyone, change to false, set to true by default", "Healing");
@@ -547,9 +557,15 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (IsCooldowns && (IsOOC || API.PlayerIsInCombat))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat))
             {
-                if (API.CanCast(AvengingWrath) && !API.PlayerHasBuff(AvengingWrath) && InRange && IsCooldowns)
+                if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
+                {
+                    API.CastSpell("Stopcast");
+                    API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
+                    return;
+                }
+                if (API.CanCast(AvengingWrath) && !API.PlayerHasBuff(AvengingWrath) && InRange && (IsCooldowns && UseAV == "With Cooldowns" || UseAV == "On Cooldown" && AVAoE))
                 {
                     API.CastSpell(AvengingWrath);
                     return;
@@ -567,15 +583,6 @@ namespace HyperElk.Core
                 if (API.CanCast(Seraphim) && SeraphimT && InRange && IsCooldowns && API.PlayerCurrentHolyPower >= 3)
                 {
                     API.CastSpell(Seraphim);
-                    return;
-                }
-            }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (IsCooldowns || !IsCooldowns))
-            {
-                if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
-                {
-                    API.CastSpell("Stopcast");
-                    API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                     return;
                 }
                 #region Dispell
@@ -624,12 +631,12 @@ namespace HyperElk.Core
                     return;
                 }
                 //Healing
-                if (API.CanCast(BoL) && BoLTracking && !API.TargetHasBuff(BoL) && !API.TargetHasBuff(BoF) && API.TargetRoleSpec == API.TankRole)
+                if (API.CanCast(BoL) && BoLTracking && !API.TargetHasBuff(BoL) && !API.TargetHasBuff(BoF) && API.TargetRoleSpec == API.TankRole && !BeaconofVirtue)
                 {
                     API.CastSpell(BoL);
                     return;
                 }
-                if (API.CanCast(BoL) && BoLTracking && !API.MouseoverHasBuff(BoL) && !API.MouseoverHasBuff(BoF) && API.MouseoverRoleSpec == API.TankRole)
+                if (API.CanCast(BoL) && BoLTracking && !API.MouseoverHasBuff(BoL) && !API.MouseoverHasBuff(BoF) && API.MouseoverRoleSpec == API.TankRole && !BeaconofVirtue)
                 {
                     API.CastSpell(BoL + "MO");
                     return;
