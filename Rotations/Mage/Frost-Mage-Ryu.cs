@@ -72,10 +72,10 @@ namespace HyperElk.Core
         //Spell Steal & Curse Removal
         string[] SpellSpealBuffList = { "Bless Weapon", "Death's Embrace", "Turn to Stone", "Wonder Grow", "Stoneskin" };
         string[] CurseList = { "Sintouched Anima", "Curse of Stone" };
-
         //CBProperties
         public string[] LegendaryList = new string[] { "None", "Temporal Warp" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+        private static readonly Stopwatch IceWatch = new Stopwatch();
         private int IceBarrierPercentProc => numbList[CombatRoutine.GetPropertyInt(IceBarrier)];
         private int IBPercentProc => numbList[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => numbList[CombatRoutine.GetPropertyInt(MI)];
@@ -93,6 +93,7 @@ namespace HyperElk.Core
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool IsFO => API.ToggleIsEnabled("Frozen Orb");
         private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         bool CastShifting => API.PlayerLastSpell == ShiftingPower;
@@ -150,6 +151,7 @@ namespace HyperElk.Core
             API.WriteLog("Welcome to Frost Mage by Ryu");
             API.WriteLog("Create the following cursor macro for Blizzard");
             API.WriteLog("Blizzard -- /cast [@cursor] Blizzard -- Or you may go ahead and not use @cursor, the program will pause until you place it yourself");
+            API.WriteLog("Please use the Frozen Orb toggle if you wish for it be used on CD. Otherwise, toggle it on/off when you would like to hold it for AoE Pulls and such.");
             API.WriteLog("Create Macro /cast [@Player] Arcane Intellect to buff Arcane Intellect so you don't require a target");
             API.WriteLog("All Talents expect Ring of Frost supported. All Cooldowns are associated with Cooldown toggle.");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
@@ -234,6 +236,7 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("TimeWarp");
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Frozen Orb");
 
             //Prop
             CombatRoutine.AddProp(IceBarrier, IceBarrier, numbList, "Life percent at which " + IceBarrier + " is used, set to 0 to disable", "Defense", 5);
@@ -394,26 +397,10 @@ namespace HyperElk.Core
         }
         public void BrainFreezeRota()
         {
-            if (!ChannelingShift && NotChanneling && !ChannelingRoF)
-            {
-
-            }
-        }
-
-        private void rotation()
-        {
-            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor)
-            {
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40)
-                {
-                    API.CastSpell(IL);
-                    return;
-                }
-            }
-            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze) && !API.PlayerSpellonCursor)
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze))
             {
                 //actions.st=flurry,if=(remaining_winters_chill=0|debuff.winters_chill.down)&(prev_gcd.1.ebonbolt|buff.brain_freeze.react&(prev_gcd.1.glacial_spike|prev_gcd.1.frostbolt&(!conduit.ire_of_the_ascended|cooldown.radiant_spark.remains|runeforge.freezing_winds)|prev_gcd.1.radiant_spark|buff.fingers_of_frost.react=0&(debuff.mirrors_of_torment.up|buff.freezing_winds.up|buff.expanded_potential.react)))
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && !API.TargetHasDebuff(WC) && (CastFB || API.LastSpellCastInGame == Frostbolt))
+                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && !API.TargetHasDebuff(WC))
                 {
                     API.CastSpell(Flurry);
                     return;
@@ -443,9 +430,30 @@ namespace HyperElk.Core
                     API.CastSpell(IL);
                     return;
                 }
-                if (API.CanCast(Frostbolt) && !API.PlayerIsCasting(false) && Level >= 1 && API.TargetRange <= 40 && !API.TargetHasDebuff(WC) && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingFB || QuakingFB && QuakingHelper))
+            }
+        }
+
+        private void rotation()
+        {
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor && (!PlayerHasBuff(BrainFreeze) || API.PlayerBuffTimeRemaining(BrainFreeze) > 800))
+            {
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40)
+                {
+                    API.CastSpell(IL);
+                    IceWatch.Start();
+                    return;
+                }
+            }
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze) && !API.PlayerSpellonCursor)
+            {
+                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && !API.TargetHasDebuff(WC) && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingFB || QuakingFB && QuakingHelper) && !CastFB && API.PlayerLastSpell != Flurry && API.PlayerLastSpell != Frostbolt)
                 {
                     API.CastSpell(Frostbolt);
+                    return;
+                }
+                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && !API.TargetHasDebuff(WC) && API.LastSpellCastInGame != Flurry)
+                {
+                    API.CastSpell(Flurry);
                     return;
                 }
             }
@@ -475,12 +483,14 @@ namespace HyperElk.Core
                 if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && PlayerHasBuff(FoF))
                 {
                     API.CastSpell(IL);
+                    IceWatch.Start();
                     return;
                 }
                 // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
                 if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 2 && API.TargetDebuffPlayerSrc(WC))
                 {
                     API.CastSpell(IL);
+                    IceWatch.Start();
                     return;
                 }
                 //actions.st+=/ray_of_frost,if=remaining_winters_chill=1&debuff.winters_chill.remains
@@ -495,13 +505,14 @@ namespace HyperElk.Core
                     API.CastSpell(GS);
                     return;
                 }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 1 && API.TargetDebuffPlayerSrc(WC))
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 1 && API.TargetDebuffPlayerSrc(WC) && (IceWatch.IsRunning || API.TargetDebuffRemainingTime(WC) > 350))
                 {
                     API.CastSpell(IL);
+                    IceWatch.Stop();
                     return;
                 }
                 //actions.st +=/ frozen_orb
-                if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40 )
+                if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40 && IsFO)
                 {
                     API.CastSpell(FO);
                     return;
@@ -566,7 +577,7 @@ namespace HyperElk.Core
                     API.CastSpell(CoC);
                     return;
                 }
-                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && !PlayerHasBuff(FoF) && !PlayerHasBuff(BrainFreeze) && !API.TargetHasDebuff(WC) && (!QuakingFB || QuakingFB && QuakingHelper))
+                if (API.CanCast(Frostbolt)  && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && !PlayerHasBuff(FoF) && !PlayerHasBuff(BrainFreeze) && !API.TargetHasDebuff(WC) && (!QuakingFB || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry)
                 {
                     API.CastSpell(Frostbolt);
                     return;
