@@ -205,7 +205,7 @@ namespace HyperElk.Core
 
 
             //Macros
-            CombatRoutine.AddMacro(TAB);
+            CombatRoutine.AddMacro(TAB, "Tab");
 
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
