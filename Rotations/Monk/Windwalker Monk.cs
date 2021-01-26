@@ -336,7 +336,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/energizing_elixir,if=chi.max-chi>=2&energy.time_to_max>2|chi.max-chi>=4
-                if (API.CanCast(EnergizingElixir) && TalentEnergizingElixir && ChiDeficit >= 2 && EnergyTimeToMax > 200 || ChiDeficit >= 4 && !CurrenCastFistsOfFury)
+                if (API.CanCast(EnergizingElixir) && TalentEnergizingElixir && (ChiDeficit >= 2 && EnergyTimeToMax > 200 || ChiDeficit >= 4) && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(EnergizingElixir);
                     return;
@@ -386,7 +386,6 @@ namespace HyperElk.Core
                 //actions.aoe+=/chi_burst,if=chi.max-chi>=2
                 if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 2 && !CurrenCastFistsOfFury)
                 {
-                    API.WriteLog("1");
                     API.CastSpell(ChiBurst);
                     return;
                 }
@@ -428,7 +427,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/spinning_crane_kick,if=combo_strike&buff.dance_of_chiji.up&(raid_event.adds.in>buff.dance_of_chiji.remains-2|raid_event.adds.up)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && UseLeg == "none" && API.PlayerHasBuff(DanceofChiJi) && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && API.PlayerHasBuff(DanceofChiJi) && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -542,7 +541,6 @@ namespace HyperElk.Core
             //actions.serenity+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike
             if (API.CanCast(RisingSunKick) && !LastCastRisingSunKick)
             {
-                API.WriteLog("Rising Sun Kick Serenty");
                 API.CastSpell(RisingSunKick);
                 return;
             }
