@@ -78,6 +78,7 @@ namespace HyperElk.Core
         private string Cleanse = "Cleanse";
         private string WoGTank = "Word of Glory on Tank";
         private string SwapSpeed = "Target Swap Speed";
+        private string DivinePurpose = "Divine Purpose";
 
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
@@ -99,7 +100,7 @@ namespace HyperElk.Core
         bool UnbreakableSpirit => API.PlayerIsTalentSelected(4, 1);
         bool Calvalier => API.PlayerIsTalentSelected(4, 2);
         bool RuleofLawTalent => API.PlayerIsTalentSelected(4, 3);
-        bool DivinePurpose => API.PlayerIsTalentSelected(5, 1);
+        bool DivinePurposeTalent => API.PlayerIsTalentSelected(5, 1);
         bool HolyAvengerT => API.PlayerIsTalentSelected(5, 2);
         bool SeraphimT => API.PlayerIsTalentSelected(5, 3);
         bool SancifiedWrath => API.PlayerIsTalentSelected(6, 1);
@@ -277,13 +278,13 @@ namespace HyperElk.Core
         private bool FlashofLightCheckMO => API.CanCast(FoL) && InMoRange && IsMouseover && ((API.MouseoverHasBuff(BoF) || API.MouseoverHasBuff(BoL)) && API.MouseoverHealthPercent <= FoLBeaconLifePercent || API.MouseoverHealthPercent <= FoLLifePercent) && API.MouseoverHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackMouseover;
         private bool FlashofLightInfusionCheck => API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && InRange && ((API.TargetHasBuff(BoF) || API.TargetHasBuff(BoL)) && API.TargetHealthPercent <= FoLBeaconLifePercent || API.TargetHealthPercent <= FolILifePercent) && API.TargetHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget;
         private bool FlashofLightInfusionCheckMO => API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && IsMouseover && InMoRange && ((API.MouseoverHasBuff(BoF) || API.MouseoverHasBuff(BoL)) && API.MouseoverHealthPercent <= FoLBeaconLifePercent || API.MouseoverHealthPercent <= FolILifePercent) && API.MouseoverHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackMouseover;
-        private bool WoGCheck => API.CanCast(WoG) && InRange && API.PlayerCurrentHolyPower >= 3 && (API.TargetHealthPercent <= WoGLifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
-        private bool WoGCheckMO => API.CanCast(WoG) && InMoRange && IsMouseover && API.PlayerCurrentHolyPower >= 3 && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
+        private bool WoGCheck => API.CanCast(WoG) && InRange && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.TargetHealthPercent <= WoGLifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
+        private bool WoGCheckMO => API.CanCast(WoG) && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
         private bool WoGTankCheck => WoGTanking && API.CanCast(WoG) && API.TargetRoleSpec == API.TankRole && InRange && API.PlayerCurrentHolyPower >= 3 && (API.TargetHealthPercent <= WoGLifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
-        private bool WoGTankCheckMO => WoGTanking && API.CanCast(WoG) && API.MouseoverRoleSpec == API.TankRole && InMoRange && IsMouseover && API.PlayerCurrentHolyPower >= 3 && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
+        private bool WoGTankCheckMO => WoGTanking && API.CanCast(WoG) && API.MouseoverRoleSpec == API.TankRole && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
         private bool BFCheck => API.CanCast(BF) && BestowFaith && InRange && API.TargetHealthPercent <= BFLifePercent && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
         private bool BFCheckMO => API.CanCast(BF) && BestowFaith && InMoRange && IsMouseover && API.MouseoverHealthPercent <= BFLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
-        private bool LoDCheck => IsAoEHealing && API.CanCast(LoD) && (IsMouseover || !IsMouseover) && API.PlayerCurrentHolyPower >= 3 && (LoDAoE || LoDMaxAoE && API.PlayerCurrentHolyPower == 5) && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover);
+        private bool LoDCheck => IsAoEHealing && API.CanCast(LoD) && (IsMouseover || !IsMouseover) && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (LoDAoE || LoDMaxAoE && API.PlayerCurrentHolyPower == 5) && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover);
         private bool BoVCheck => API.CanCast(BoV) && BeaconofVirtue && InRange && BoVAoE && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget;
         private bool BoVCheckMO => API.CanCast(BoV) && BeaconofVirtue && InMoRange && IsMouseover && BoVAoE && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover;
         private bool DTCheck => API.CanCast(DivineToll) && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && InRange;
@@ -310,7 +311,7 @@ namespace HyperElk.Core
             API.WriteLog("Light of Dawn will not work unless you have AoE Healing Toggled on.");
             API.WriteLog("Maunual targeting, Auto Tareting, or Mouseover Supported. You need to create /cast [@mouseover] xxxx where xxx is each of the spells that have MO in the bindings in order for Mouseover to work");
             API.WriteLog("Night Fae Cov is not supported. You can create a /xxx break marco to use those abilties when you would like at this time.");
-            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Target Last Hostile and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it swap, friendly or enemy. UNDER TESTING : It can swap back to an enemy, but YOU WILL NEED TO ASSIGN YOUR ASSIST TARGET KEY IT WILL NOT WORK IF YOU DONT DO THIS. If you DO NOT want it to do target enemmy swaping, please IGNORE Assist Macro in Spellbook. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Assist Target and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it to swap, friendly or enemy. UNDER TESTING : It can swap back to an enemy, but YOU WILL NEED TO ASSIGN YOUR ASSIST TARGET KEY IT WILL NOT WORK IF YOU DONT DO THIS. If you DO NOT want it to do target enemy swapping, please IGNORE Assist Macro in the Spellbook. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
             //Buff
             CombatRoutine.AddBuff(Infusion, 54149);
             CombatRoutine.AddBuff(AvengingWrath, 31884);
@@ -324,6 +325,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(BoL, 53563);
             CombatRoutine.AddBuff(BoF, 156910);
             CombatRoutine.AddBuff(Quake, 240447);
+            CombatRoutine.AddBuff(DivinePurpose, 223819);
 
             //Debuff
             CombatRoutine.AddDebuff(Forbearance, 25771);
