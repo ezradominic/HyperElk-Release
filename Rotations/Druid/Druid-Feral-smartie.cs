@@ -19,6 +19,7 @@
 // v2.7 roots for Torghast
 // v2.8 regrowth fix
 // v2.9 new Bloodtalons logic
+// v3.0 aoe disabled finisher fix
 
 using System.Diagnostics;
 
@@ -184,7 +185,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v2.9");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.0");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -700,21 +701,21 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.finisher+=/rip,target_if=refreshable&druid.rip.ticks_gained_on_refresh>variable.rip_ticks&((buff.tigers_fury.up|cooldown.tigers_fury.remains>5)&(buff.bloodtalons.up|!talent.bloodtalons.enabled)&dot.rip.pmultiplier<=persistent_multiplier|!talent.sabertooth.enabled)
-                    if (isMelee && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber) && API.CanCast(Rip) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!TargetHasDebuff(Rip) || (API.TargetDebuffRemainingTime(Rip) + API.PlayerComboPoints * (TalentSabertooth ? 100 : 0)) < 600))
+                    if (isMelee && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && API.CanCast(Rip) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!TargetHasDebuff(Rip) || (API.TargetDebuffRemainingTime(Rip) + API.PlayerComboPoints * (TalentSabertooth ? 100 : 0)) < 600))
                     {
                         API.CastSpell(Rip);
                         return;
                     }
                     if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                     {
-                        if (!API.MacroIsIgnored(Rip + "MO") && isMOMelee && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber) && API.CanCast(Rip) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && API.MouseoverDebuffRemainingTime(Rip) < 600)
+                        if (!API.MacroIsIgnored(Rip + "MO") && isMOMelee && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && API.CanCast(Rip) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && API.MouseoverDebuffRemainingTime(Rip) < 600)
                         {
                             API.CastSpell(Rip + "MO");
                             return;
                         }
                     }
                     //actions.finisher+=/ferocious_bite,max_energy=1,target_if=max:time_to_die
-                    if (isMelee && API.CanCast(FerociousBite) && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber) && (API.PlayerEnergy >= 50 || PlayerHasBuff(ApexPredatorsCraving)))
+                    if (isMelee && API.CanCast(FerociousBite) && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.PlayerEnergy >= 50 || PlayerHasBuff(ApexPredatorsCraving)))
                     {
                         API.CastSpell(FerociousBite);
                         return;
