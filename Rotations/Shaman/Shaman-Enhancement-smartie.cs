@@ -9,6 +9,7 @@
 // v1.7 spell ids and alot of other stuff
 // v1.8 Racials and other small fixes
 // v1.9 DoomWinds legendary fix
+// v2.0 Windfury Totem adjustments
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -77,20 +78,20 @@ namespace HyperElk.Core
         bool IsAscendance => (UseAscendance == "with Cooldowns" && IsCooldowns || UseAscendance == "always");
         bool IsFeralSpirit => (UseFeralSpirit == "with Cooldowns" && IsCooldowns || UseFeralSpirit == "always");
         bool IsEarthElemental => (UseEarthElemental == "with Cooldowns" && IsCooldowns || UseEarthElemental == "always");
-        bool IsSundering => (UseSundering == "with Cooldowns" && IsCooldowns || UseSundering == "always" || UseSundering == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsFireNova => (UseFireNova == "with Cooldowns" && IsCooldowns || UseFireNova == "always" || UseFireNova == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsStormKeeper => (UseStormKeeper == "with Cooldowns" && IsCooldowns || UseStormKeeper == "always" || UseStormKeeper == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsSundering => ((UseSundering == "with Cooldowns" || UseSundering == "with CDS and AOE") && IsCooldowns || UseSundering == "always" || (UseSundering == "on AOE" || UseSundering == "with CDS and AOE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsFireNova => ((UseFireNova == "with Cooldowns" || UseFireNova == "with CDS and AOE") && IsCooldowns || UseFireNova == "always" || (UseFireNova == "on AOE" || UseFireNova == "with CDS and AOE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsStormKeeper => ((UseStormKeeper == "with Cooldowns" || UseStormKeeper == "with CDS and AOE") && IsCooldowns || UseStormKeeper == "always" || (UseStormKeeper == "on AOE" || UseStormKeeper == "with CDS and AOE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
 
-        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isMelee;
-        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isMelee;
+        bool IsCovenant => ((UseCovenant == "with Cooldowns" || UseCovenant == "with CDS and AOE") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with CDS and AOE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with CDS and AOE") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with CDS and AOE") && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isMelee;
+        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with CDS and AOE") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with CDS and AOE") && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isMelee;
 
 
         //CBProperties
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
-        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with CDS and AOE", "always" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseAscendance => CDUsage[CombatRoutine.GetPropertyInt(Ascendance)];
@@ -115,7 +116,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v1.9");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.0");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, 60103, "D3");
@@ -336,12 +337,12 @@ namespace HyperElk.Core
                 API.CastSpell("Trinket2");
                 return;
             }
-            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && !API.PlayerHasBuff(WindfuryTotem, false, false) && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.LastSpellCastInGame != (WindfuryTotem) && API.PlayerBuffTimeRemaining(WindfuryTotem) < 100 && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
             }
-            if (API.CanCast(WindfuryTotem) && WindfuryToggle && DoomWindLeggy && (API.PlayerDebuffRemainingTime(DoomWinds) == 0 || !API.PlayerHasBuff(WindfuryTotem, false, false)) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && WindfuryToggle && DoomWindLeggy && API.LastSpellCastInGame != (WindfuryTotem) && (API.PlayerDebuffRemainingTime(DoomWinds) == 0 || API.PlayerBuffTimeRemaining(WindfuryTotem) < 100) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
             {
                 API.CastSpell(WindfuryTotem);
                 return;
