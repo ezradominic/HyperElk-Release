@@ -342,6 +342,26 @@ namespace HyperElk.Core
             //ROTATION AOE
             if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
+                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "AOE")
+                {
+                    API.CastSpell(SoulRot);
+                    return;
+                }
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "AOE")
+                {
+                    API.CastSpell(DecimatingBolt);
+                    return;
+                }
+                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "AOE")
+                {
+                    API.CastSpell(ImpendingCatastrophe);
+                    return;
+                }
+                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "AOE")
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
                 //actions.aoe+=/haunt
                 //Haunt 
                 if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && !API.PlayerIsCasting(true) && TalentHaunt && NotMoving && IsRange && NotChanneling && PlayerLevel >= 45)
@@ -364,7 +384,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //SoulRot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
+                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "always")
                 {
                     API.CastSpell(SoulRot);
                     return;
@@ -490,7 +510,7 @@ namespace HyperElk.Core
                 }
 
                 //DecimatingBolt
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always")
                 {
                     API.CastSpell(DecimatingBolt);
                     return;
@@ -502,13 +522,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //ImpendingCatastrophe
-                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
+                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "always")
                 {
                     API.CastSpell(ImpendingCatastrophe);
                     return;
                 }
                 //ScouringTithe
-                if (API.CanCast(ScouringTithe) && !LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
+                if (API.CanCast(ScouringTithe) && !LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
                 {
                     API.CastSpell(ScouringTithe);
                     return;
@@ -537,7 +557,7 @@ namespace HyperElk.Core
                 }
                 //actions.covenant+=/scouring_tithe
                 //ScouringTithe
-                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && !LastCastScouringTithe && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
+                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && !LastCastScouringTithe && UseCovenantAbility == "always")
                 {
                     API.CastSpell(ScouringTithe);
                     return;
