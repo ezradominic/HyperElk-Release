@@ -129,7 +129,7 @@ namespace HyperElk.Core
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
         bool ChannelSoothingMist => API.CurrentCastSpellID("player") == 115175;
 
-        string[] FaelineStompList = new string[] { "always", "Cooldowns", "AOE" };
+        string[] FaelineStompList = new string[] { "always", "Cooldowns", "AOE", "AOEHeal" };
         private string UseFaelineStomp => FaelineStompList[CombatRoutine.GetPropertyInt(FaelineStomp)];
         string[] FallenOrderList = new string[] { "always", "Cooldowns", "AOE" };
         private string UseFallenOrder => FallenOrderList[CombatRoutine.GetPropertyInt(FallenOrder)];
@@ -455,6 +455,11 @@ namespace HyperElk.Core
                 if (API.CanCast(EssenceFont) && EssenceFontAoE && !API.PlayerCanAttackTarget)
                 {
                     API.CastSpell(EssenceFont);
+                    return;
+                }
+                if ( API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "AOEHeal")
+                {
+                    API.CastSpell(FaelineStomp);
                     return;
                 }
             }
