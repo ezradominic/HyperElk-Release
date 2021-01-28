@@ -155,23 +155,23 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "ITEMS", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "ITEMS", 40);
             //Spells
-            CombatRoutine.AddSpell(ShadowBolt, 686,"D1");
-            CombatRoutine.AddSpell(DrainSoul, 198590,"D1");
-            CombatRoutine.AddSpell(Corruption, 172,"D2");
-            CombatRoutine.AddSpell(Agony, 980,"D3");
-            CombatRoutine.AddSpell(MaleficRapture, 324536,"D4");
-            CombatRoutine.AddSpell(UnstableAffliction, 316099,"D5");
-            CombatRoutine.AddSpell(SeedofCorruption, 27243,"D6");
-            CombatRoutine.AddSpell(SiphonLife, 63106,"D7");
-            CombatRoutine.AddSpell(PhantomSingularity, 205179,"D8");
-            CombatRoutine.AddSpell(Haunt, 48181,"D8");
-            CombatRoutine.AddSpell(DarkSoulMisery, 113860,"D8");
-            CombatRoutine.AddSpell(MortalCoil, 6789,"D9");
-            CombatRoutine.AddSpell(VileTaint, 278350,"D8");
-            CombatRoutine.AddSpell(ScouringTithe, 312321,"F1");
-            CombatRoutine.AddSpell(SoulRot, 325640,"F1");
-            CombatRoutine.AddSpell(ImpendingCatastrophe, 321792,"F1");
-            CombatRoutine.AddSpell(DecimatingBolt, 325289,"F1");
+            CombatRoutine.AddSpell(ShadowBolt, 686, "D1");
+            CombatRoutine.AddSpell(DrainSoul, 198590, "D1");
+            CombatRoutine.AddSpell(Corruption, 172, "D2");
+            CombatRoutine.AddSpell(Agony, 980, "D3");
+            CombatRoutine.AddSpell(MaleficRapture, 324536, "D4");
+            CombatRoutine.AddSpell(UnstableAffliction, 316099, "D5");
+            CombatRoutine.AddSpell(SeedofCorruption, 27243, "D6");
+            CombatRoutine.AddSpell(SiphonLife, 63106, "D7");
+            CombatRoutine.AddSpell(PhantomSingularity, 205179, "D8");
+            CombatRoutine.AddSpell(Haunt, 48181, "D8");
+            CombatRoutine.AddSpell(DarkSoulMisery, 113860, "D8");
+            CombatRoutine.AddSpell(MortalCoil, 6789, "D9");
+            CombatRoutine.AddSpell(VileTaint, 278350, "D8");
+            CombatRoutine.AddSpell(ScouringTithe, 312321, "F1");
+            CombatRoutine.AddSpell(SoulRot, 325640, "F1");
+            CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
+            CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
             CombatRoutine.AddSpell(FelDomination, 333889);
 
             //Macro
@@ -183,15 +183,15 @@ namespace HyperElk.Core
 
 
 
-            CombatRoutine.AddSpell("Drain Life", 234153,"NumPad1");
-            CombatRoutine.AddSpell("Health Funnel", 755,"NumPad2");
-            CombatRoutine.AddSpell("Dark Pact", 108416,"NumPad3");
-            CombatRoutine.AddSpell("Grimoire Of Sacrifice", 108503,"NumPad4");
-            CombatRoutine.AddSpell("Summon Darkglare", 205180,"NumPad5");
-            CombatRoutine.AddSpell("Summon Felhunter", 691,"NumPad6");
-            CombatRoutine.AddSpell("Summon Succubus", 712,"NumPad7");
-            CombatRoutine.AddSpell("Summon Voidwalker", 697,"NumPad8");
-            CombatRoutine.AddSpell("Summon Imp", 688,"NumPad9");
+            CombatRoutine.AddSpell("Drain Life", 234153, "NumPad1");
+            CombatRoutine.AddSpell("Health Funnel", 755, "NumPad2");
+            CombatRoutine.AddSpell("Dark Pact", 108416, "NumPad3");
+            CombatRoutine.AddSpell("Grimoire Of Sacrifice", 108503, "NumPad4");
+            CombatRoutine.AddSpell("Summon Darkglare", 205180, "NumPad5");
+            CombatRoutine.AddSpell("Summon Felhunter", 691, "NumPad6");
+            CombatRoutine.AddSpell("Summon Succubus", 712, "NumPad7");
+            CombatRoutine.AddSpell("Summon Voidwalker", 697, "NumPad8");
+            CombatRoutine.AddSpell("Summon Imp", 688, "NumPad9");
 
 
             //Buffs
@@ -221,14 +221,14 @@ namespace HyperElk.Core
         public override void Pulse()
         {
             //Summon Imp
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp)  && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker)  && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonVoidwalker);
@@ -364,7 +364,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //SoulRot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
                 {
                     API.CastSpell(SoulRot);
                     return;
@@ -490,7 +490,7 @@ namespace HyperElk.Core
                 }
 
                 //DecimatingBolt
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
                 {
                     API.CastSpell(DecimatingBolt);
                     return;
@@ -502,13 +502,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //ImpendingCatastrophe
-                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
                 {
                     API.CastSpell(ImpendingCatastrophe);
                     return;
                 }
                 //ScouringTithe
-                if (API.CanCast(ScouringTithe) && !LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(ScouringTithe) && !LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
                 {
                     API.CastSpell(ScouringTithe);
                     return;
@@ -537,7 +537,7 @@ namespace HyperElk.Core
                 }
                 //actions.covenant+=/scouring_tithe
                 //ScouringTithe
-                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && !LastCastScouringTithe && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && !LastCastScouringTithe && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
                 {
                     API.CastSpell(ScouringTithe);
                     return;
