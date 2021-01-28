@@ -351,7 +351,7 @@ namespace HyperElk.Core
                     return;
                 }
 
-                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc))
+                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount == 2)
                 {
                     API.CastSpell(Havoc);
                     HavocWatch.Start();
