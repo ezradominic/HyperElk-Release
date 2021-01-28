@@ -519,7 +519,14 @@ namespace HyperElk.Core
                         API.CastSpell(EnvelopingMist);
                     }
                 }
-                API.CastSpell(Vivify);
+                if (!ChannelSoothingMist && NotCasting)
+                {
+                    API.CastSpell(SoothingMist);
+                    if (ChannelSoothingMist)
+                    {
+                        API.CastSpell(Vivify);
+                    }
+                }
                 return;
             }
             // Auto Target
