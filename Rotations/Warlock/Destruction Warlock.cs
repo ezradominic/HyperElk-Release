@@ -363,7 +363,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/rain_of_fire
-                if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3)
+                if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && API.TargetUnitInRangeCount >= 3)
                 {
                     API.CastSpell(RainOfFire);
                     return;
