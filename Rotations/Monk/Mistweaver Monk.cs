@@ -509,23 +509,15 @@ namespace HyperElk.Core
                 API.CastSpell(EnvelopingMist);
                 return;
             }
-            if (API.CanCast(Vivify) && NotCasting && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.CanCast(Vivify) && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
             {
-                if (!API.TargetHasBuff(EnvelopingMist))
-                {
-                    API.CastSpell(SoothingMist);
-                    if (ChannelSoothingMist)
-                    {
-                        API.CastSpell(EnvelopingMist);
-                    }
-                }
                 if (!ChannelSoothingMist && NotCasting)
                 {
                     API.CastSpell(SoothingMist);
-                    if (ChannelSoothingMist)
-                    {
-                        API.CastSpell(Vivify);
-                    }
+                }
+                if (ChannelSoothingMist)
+                {
+                    API.CastSpell(Vivify);
                 }
                 return;
             }
