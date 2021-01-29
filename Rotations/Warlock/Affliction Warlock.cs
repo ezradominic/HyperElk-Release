@@ -440,7 +440,7 @@ namespace HyperElk.Core
                         DarkGlarePrep();
                     }
                     //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
-                    if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
+                    if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && IsCooldowns) // (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
                     {
                         API.CastSpell(DarkSoulMisery);
                         return;
@@ -654,7 +654,7 @@ namespace HyperElk.Core
                     DarkGlarePrep();
                 }
                 //actions+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
-                if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
+                if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && IsCooldowns) // (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
                 {
                     API.CastSpell(DarkSoulMisery);
                     return;
