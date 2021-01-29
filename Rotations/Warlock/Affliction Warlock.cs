@@ -369,6 +369,10 @@ namespace HyperElk.Core
                         DarkGlarePrep();
                     }
                     //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
+                    if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity))
+                    {
+                        DarkGlarePrep();
+                    }
                     //actions.aoe+=/seed_of_corruption,if=talent.sow_the_seeds.enabled&can_seed
                     if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !API.TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000))
                     {
@@ -426,6 +430,10 @@ namespace HyperElk.Core
                         DarkGlarePrep();
                     }
                     //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                    if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.SpellCDDuration(SummonDarkglare) < 200 && ( API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                    {
+                        DarkGlarePrep();
+                    }
                     //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
                     if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                     {
@@ -521,6 +529,10 @@ namespace HyperElk.Core
                     DarkGlarePrep();
                 }
                 //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
+                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity))
+                {
+                    DarkGlarePrep();
+                }
                 //actions+=/agony,if=dot.agony.remains<4
                 if (API.CanCast(Agony) && !LastCastAgony && API.TargetDebuffRemainingTime(Agony) <= 400)
                 {
