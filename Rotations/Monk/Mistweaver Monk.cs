@@ -162,6 +162,7 @@ namespace HyperElk.Core
         bool LastCastTargetChangeRaid => API.PlayerLastSpell == "raid1" || API.PlayerLastSpell == "raid2" || API.PlayerLastSpell == "raid3" || API.PlayerLastSpell == "raid4" || API.PlayerLastSpell == "raid5" || API.PlayerLastSpell == "raid6" || API.PlayerLastSpell == "raid7" || API.PlayerLastSpell == "raid8" || API.PlayerLastSpell == "raid9" || API.PlayerLastSpell == "raid8" || API.PlayerLastSpell == "raid9" || API.PlayerLastSpell == "raid10" || API.PlayerLastSpell == "raid11" || API.PlayerLastSpell == "raid12" || API.PlayerLastSpell == "raid13" || API.PlayerLastSpell == "raid14" || API.PlayerLastSpell == "raid16" || API.PlayerLastSpell == "raid17" || API.PlayerLastSpell == "raid18" || API.PlayerLastSpell == "raid19" || API.PlayerLastSpell == "raid20" || API.PlayerLastSpell == "raid21" || API.PlayerLastSpell == "raid22" || API.PlayerLastSpell == "raid23" || API.PlayerLastSpell == "raid24" || API.PlayerLastSpell == "raid25" || API.PlayerLastSpell == "raid26" || API.PlayerLastSpell == "raid27" || API.PlayerLastSpell == "raid28" || API.PlayerLastSpell == "raid29" || API.PlayerLastSpell == "raid30" || API.PlayerLastSpell == "raid31" || API.PlayerLastSpell == "raid32" || API.PlayerLastSpell == "raid33" || API.PlayerLastSpell == "raid34" || API.PlayerLastSpell == "raid35" || API.PlayerLastSpell == "raid36" || API.PlayerLastSpell == "raid37" || API.PlayerLastSpell == "raid38" || API.PlayerLastSpell == "raid39" || API.PlayerLastSpell == "raid40";
         bool LastCastTargetChange => API.PlayerIsInRaid ? LastCastTargetChangeRaid : LastCastTargetChangeParty;
         bool LastCastStopCast => API.PlayerLastSpell == "stopcasting";
+        private int JadeSerpentStatue => API.PlayerTotemPetDuration();
         public override void Initialize()
         {
             CombatRoutine.Name = "Mistweaver Monk by Mufflon12";
@@ -365,7 +366,6 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-
             if (IsAutoDetox)
             {
                 if (API.CanCast(Detox))
@@ -424,17 +424,7 @@ namespace HyperElk.Core
                     }
                 }
             }
-            if (!API.PlayerIsInCombat || !API.TargetIsIncombat)
-            {
-                JadeSerpentStatueWatch.Stop();
-                JadeSerpentStatueWatch.Reset();
-            }
-            if (JadeSerpentStatueWatch.IsRunning && JadeSerpentStatueWatch.ElapsedMilliseconds >= 900000)
-            {
-                JadeSerpentStatueWatch.Stop();
-                JadeSerpentStatueWatch.Reset();
-            }
-            if (API.CanCast(SummonJadeSerpentStatue) && !JadeSerpentStatueWatch.IsRunning && TalentSummonJadeSerpentStatue && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
+            if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && JadeSerpentStatue <= 0 && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
                 JadeSerpentStatueWatch.Start();
                 API.CastSpell(SummonJadeSerpentStatue);
