@@ -303,12 +303,12 @@ namespace HyperElk.Core
                 API.CastSpell(EarthShield);
                 return;
             }
-            if (API.CanCast(WindfuryWeapon) && WeaponEnchant && API.LastSpellCastInGame != (WindfuryWeapon) && API.PlayerWeaponBuffDuration(true) < 300)
+            if (API.CanCast(WindfuryWeapon) && WeaponEnchant && API.LastSpellCastInGame != (WindfuryWeapon) && API.PlayerWeaponBuffDuration(true) < 30000)
             {
                 API.CastSpell(WindfuryWeapon);
                 return;
             }
-            if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(false) < 300)
+            if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(false) < 30000)
             {
                 API.CastSpell(FlametongueWeapon);
                 return;
@@ -317,12 +317,12 @@ namespace HyperElk.Core
         private void rotation()
         {
             //Weapon Buffs
-            if (API.CanCast(WindfuryWeapon) && WeaponEnchant && API.LastSpellCastInGame != (WindfuryWeapon) && API.PlayerWeaponBuffDuration(true) < 300)
+            if (API.CanCast(WindfuryWeapon) && WeaponEnchant && API.LastSpellCastInGame != (WindfuryWeapon) && API.PlayerWeaponBuffDuration(true) < 3000)
             {
                 API.CastSpell(WindfuryWeapon);
                 return;
             }
-            if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(false) < 300)
+            if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(false) < 3000)
             {
                 API.CastSpell(FlametongueWeapon);
                 return;
