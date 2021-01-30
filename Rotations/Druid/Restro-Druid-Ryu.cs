@@ -356,7 +356,7 @@ namespace HyperElk.Core
             API.WriteLog("For using Dark Titan's Lesson, please BIND LifebloomL in your bindings to YOUR Lifebloom and select in the Legendary select. It changes the ID of the spell and that will mess the rotation if these things aren't done.");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
             API.WriteLog("Please us a /cast [target=player] macro for Innervate to work properly or it will cast on your current target");
-            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Target Last Hostile and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it swap, friendly or enemy. UNDER TESTING : It can swap back to an enemy, but YOU WILL NEED TO ASSIGN YOUR ASSIST TARGET KEY IT WILL NOT WORK IF YOU DONT DO THIS. If you DO NOT want it to do target enemmy swaping, please IGNORE Assist Macro in Spellbook. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Assist Target and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it to swap, friendly or enemy. UNDER TESTING : It can swap back to an enemy, but YOU WILL NEED TO ASSIGN YOUR ASSIST TARGET KEY IT WILL NOT WORK IF YOU DONT DO THIS. If you DO NOT want it to do target enemy swapping, please IGNORE Assist Macro in the Spellbook. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
             API.WriteLog("Special Thanks to Ajax and Goose/Zero for testing");
 
             //Buff
@@ -972,22 +972,22 @@ namespace HyperElk.Core
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (API.UnitRoleSpec(units[i]) == RoleSpec && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40)
+                            if (API.UnitRoleSpec(units[i]) == RoleSpec && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0) 
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitRoleSpec(units[i]) == RoleSpec && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, units[i]) && API.UnitRange(units[i]) <= 40)
+                            if (API.UnitRoleSpec(units[i]) == RoleSpec && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, units[i]) && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40)
+                            if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250))
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250) && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
@@ -1029,23 +1029,23 @@ namespace HyperElk.Core
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.UnitHasBuff(Lifebloom, raidunits[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(raidunits[i]) <= 40)
+                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.UnitHasBuff(Lifebloom, raidunits[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, raidunits[i]) && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40)
+                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, raidunits[i]) && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
                             }
-                            if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40)
+                            if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250))
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250) && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
