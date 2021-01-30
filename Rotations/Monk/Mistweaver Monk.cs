@@ -365,7 +365,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            
+
             if (IsAutoDetox)
             {
                 if (API.CanCast(Detox))
@@ -457,7 +457,7 @@ namespace HyperElk.Core
                     API.CastSpell(EssenceFont);
                     return;
                 }
-                if ( API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "AOEHeal")
+                if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "AOEHeal")
                 {
                     API.CastSpell(FaelineStomp);
                     return;
@@ -504,7 +504,7 @@ namespace HyperElk.Core
                 API.CastSpell(RenewingMist);
                 return;
             }
-            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && API.TargetHealthPercent >= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
             {
                 API.CastSpell(SoothingMist);
                 return;
@@ -514,16 +514,9 @@ namespace HyperElk.Core
                 API.CastSpell(EnvelopingMist);
                 return;
             }
-            if (API.CanCast(Vivify) && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.CanCast(Vivify) && ChannelSoothingMist && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
             {
-                if (!ChannelSoothingMist && NotCasting)
-                {
-                    API.CastSpell(SoothingMist);
-                }
-                if (ChannelSoothingMist)
-                {
-                    API.CastSpell(Vivify);
-                }
+                API.CastSpell(Vivify);
                 return;
             }
             // Auto Target
