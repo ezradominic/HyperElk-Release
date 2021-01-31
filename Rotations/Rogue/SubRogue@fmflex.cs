@@ -259,7 +259,7 @@ namespace HyperElk.Core
                     return;
                 }
                     //cds->add_action("sepsis,if=variable.snd_condition&combo_points.deficit>=1");
-                if (IsAOE && PlayerCovenantSettings == "Night Fae" && IsMelee && API.CanCast(Sepsis) && SnDCondition && ComboPointDeficit >=1 && IsMelee)
+                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && IsMelee && API.CanCast(Sepsis) && SnDCondition && ComboPointDeficit >=1 && IsMelee)
                 {
                     API.CastSpell(Sepsis);
                     return;
