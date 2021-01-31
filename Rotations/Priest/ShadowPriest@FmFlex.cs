@@ -311,7 +311,7 @@ namespace HyperElk.Core
             }
 
             //actions.main+=/void_torrent,target_if=variable.dots_up&target.time_to_die>4&buff.voidform.down&spell_targets.mind_sear<(5+(6*talent.twist_of_fate.enabled))
-            if (!IsAOE && TalentVoidTorrent && API.CanCast(VoidTorrent) && !API.PlayerIsMoving)
+            if (API.TargetUnitInRangeCount == 1 && TalentVoidTorrent && API.CanCast(VoidTorrent) && !API.PlayerIsMoving)
             {
                 if (dots_up && API.TargetTimeToDie > 400 && !API.PlayerHasBuff(Voidform) && (!IsAOE || API.TargetUnitInRangeCount < (5 + (6 * (TalentTwistOfFate ? 1 : 0)))))
                 {
@@ -342,7 +342,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (IsAOE && !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Necrolord" && API.CanCast(UnholyNova))
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Necrolord" && API.CanCast(UnholyNova))
             {
                 API.CastSpell(UnholyNova);
                 return;
