@@ -10,6 +10,7 @@
 // v1.8 Racials and other small fixes
 // v1.9 DoomWinds legendary fix
 // v2.0 Windfury Totem adjustments
+// v2.1 Auto weapon Enchantments
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -57,6 +58,8 @@ namespace HyperElk.Core
         private string DoomWinds = "Doom Winds";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string WindfuryWeapon = "Windfury Weapon";
+        private string FlametongueWeapon = "Flametongue Weapon";
 
         //Talents
         bool TalentLashingFlames => API.PlayerIsTalentSelected(1, 1);
@@ -101,6 +104,7 @@ namespace HyperElk.Core
         private string UseFireNova => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FireNova)];
         private string UseStormKeeper => CDUsageWithAOE[CombatRoutine.GetPropertyInt(StormKeeper)];
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
+        private bool WeaponEnchant => CombatRoutine.GetPropertyBool("WeaponEnchant");
         private bool DoomWindLeggy => CombatRoutine.GetPropertyBool("Doom Winds");
         private bool SelfLightningShield => CombatRoutine.GetPropertyBool("LightningShield");
         private bool SelfEarthShield => CombatRoutine.GetPropertyBool("EarthShield");
@@ -116,7 +120,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.0");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.1");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, 60103, "D3");
@@ -148,7 +152,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(PrimordialWave,326059, "D1");
             CombatRoutine.AddSpell(VesperTotem,324386, "D1");
             CombatRoutine.AddSpell(FaeTransfusion,328923, "D1");
-            CombatRoutine.AddSpell(ChainHarvest,320674, "D1");
+            CombatRoutine.AddSpell(ChainHarvest, 320674, "D1");
+            CombatRoutine.AddSpell(WindfuryWeapon, 33757);
+            CombatRoutine.AddSpell(FlametongueWeapon, 318038);
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -167,7 +173,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(WindfuryTotem, 327942);
             CombatRoutine.AddBuff(PrimordialWave, 326059);
             CombatRoutine.AddBuff(VesperTotem, 324386);
-            CombatRoutine.AddBuff(DoomWinds,335903);
+            CombatRoutine.AddBuff(DoomWinds, 335903);
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock, 188389);
@@ -195,6 +201,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
+            CombatRoutine.AddProp("WeaponEnchant", "WeaponEnchant", true, "Will auto enchant your Weapons", "Generic");
             CombatRoutine.AddProp("Doom Winds", "Doom Winds Legendary", false, "Pls enable if you have that Legendary", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
@@ -205,6 +212,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            //API.WriteLog("Weapons: "+ "Main" +API.PlayerWeaponBuffDuration(true) + "Offhand"+ API.PlayerWeaponBuffDuration(false));
             if (!vesperwatch.IsRunning && API.LastSpellCastInGame == VesperTotem)
             {
                 vesperwatch.Restart();
@@ -295,9 +303,31 @@ namespace HyperElk.Core
                 API.CastSpell(EarthShield);
                 return;
             }
+            if (API.CanCast(WindfuryWeapon) && WeaponEnchant && API.LastSpellCastInGame != (WindfuryWeapon) && API.PlayerWeaponBuffDuration(true) < 30000)
+            {
+                API.CastSpell(WindfuryWeapon);
+                return;
+            }
+            if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(false) < 30000)
+            {
+                API.CastSpell(FlametongueWeapon);
+                return;
+            }
         }
         private void rotation()
-        {   //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
+        {
+            //Weapon Buffs
+            if (API.CanCast(WindfuryWeapon) && WeaponEnchant && API.LastSpellCastInGame != (WindfuryWeapon) && API.PlayerWeaponBuffDuration(true) < 3000)
+            {
+                API.CastSpell(WindfuryWeapon);
+                return;
+            }
+            if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(false) < 3000)
+            {
+                API.CastSpell(FlametongueWeapon);
+                return;
+            }
+            //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
             if (PlayerRaceSettings == "Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && isMelee && (!TalentAscendance || API.PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
             {
                 API.CastSpell(RacialSpell1);

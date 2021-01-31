@@ -47,6 +47,7 @@ namespace HyperElk.Core
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string FelDomination = "Fel Domination";
+        private string InevitableDemise = "Inevitable Demise";
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -56,8 +57,7 @@ namespace HyperElk.Core
         private bool TalentHaunt => API.PlayerIsTalentSelected(6, 2);
         private bool TalentGrimoireOfSacrifice => API.PlayerIsTalentSelected(6, 3);
         private bool TalentDarkSoulMisery => API.PlayerIsTalentSelected(7, 3);
-        private bool TalentMortalCoil => API.PlayerIsTalentSelected(5, 2);
-
+        private bool TalentSowTheSeeds => API.PlayerIsTalentSelected(4, 1);
 
         //Misc
         private static readonly Stopwatch DumpWatchLow = new Stopwatch();
@@ -70,26 +70,18 @@ namespace HyperElk.Core
         //        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
-        private int ShoulShardNumberMaleficRapture => CombatRoutine.GetPropertyInt("SoulShardNumberMaleficRapture");
-        private int ShoulShardNumberDrainSoul => CombatRoutine.GetPropertyInt("SoulShardNumberDrainSoul");
-        private int Trinket1Usage => CombatRoutine.GetPropertyInt("Trinket1");
-        private int Trinket2Usage => CombatRoutine.GetPropertyInt("Trinket2");
 
 
 
         //CBProperties      
         bool DotCheck => API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && API.TargetHasDebuff(UnstableAffliction) && (API.TargetHasDebuff(SoulRot) || !API.TargetHasDebuff(SoulRot));
-        bool CastingSOC => API.PlayerLastSpell == SeedofCorruption;
-        bool CastingSOC1 => API.LastSpellCastInGame == SeedofCorruption;
-        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction || API.LastSpellCastInGame == UnstableAffliction;
-        bool CurrenCastUnstableAffliction => API.CurrentCastSpellID("player") == 316099;
-        bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe || API.LastSpellCastInGame == ScouringTithe;
-        bool CastingAgony => API.PlayerLastSpell == Agony || API.LastSpellCastInGame == Agony;
-        bool CastingCorruption => API.PlayerLastSpell == Corruption || API.LastSpellCastInGame == Corruption;
-        bool CastingSL => API.PlayerLastSpell == SiphonLife || API.LastSpellCastInGame == SiphonLife;
-        bool LastSeed => API.CurrentCastSpellID("player") == 27243;
+        bool LastCastUnstableAffliction => API.PlayerLastSpell == UnstableAffliction;
+        bool LastCastScouringTithe => API.PlayerLastSpell == ScouringTithe;
+        bool LastCastAgony => API.PlayerLastSpell == Agony;
+        bool LastCastCorruption => API.PlayerLastSpell == Corruption;
+        bool LastCastSiphonLife => API.PlayerLastSpell == SiphonLife;
+        bool LastCastSeedOfCorruption => API.CurrentCastSpellID("player") == 27243 || API.PlayerLastSpell == SeedofCorruption;
 
-        bool LastUnstableAffliction => API.PlayerLastSpell == UnstableAffliction;
         //Trinket1
         private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
         string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
@@ -100,14 +92,10 @@ namespace HyperElk.Core
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int DrainLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
-        private int MortalCoilPercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
-
-
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
 
         string[] MisdirectionList = new string[] { "None", "Imp", "Voidwalker", "Succubus", "Felhunter", };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
-        private bool UseUA => (bool)CombatRoutine.GetProperty("UseUA");
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
         private bool UseCO => (bool)CombatRoutine.GetProperty("UseCO");
         private bool UseSL => (bool)CombatRoutine.GetProperty("UseSL");
@@ -131,7 +119,6 @@ namespace HyperElk.Core
             API.WriteLog("/cast [@mouseover] Corruption");
             API.WriteLog("/cast [@cursor] Vile Taint");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-            API.WriteLog("Put a Meele Pet Ability on your Action Bar for the AOE Detection");
 
 
             CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 5);
@@ -139,12 +126,9 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp(HealthFunnel, "Health Funnel", numbList, "Life percent at which " + HealthFunnel + " is used, set to 0 to disable", "PETS", 0);
             CombatRoutine.AddProp(Misdirection, "Wich Pet", MisdirectionList, "Chose your Pet", "PETS", 0);
-            CombatRoutine.AddProp("UseUA", "Use Unstable Affliction", true, "Should the rotation use Unstable Affliction", "Class specific");
             CombatRoutine.AddProp(DarkPact, "Dark Pact", numbList, "Life percent at which " + DarkPact + " is used, set to 0 to disable", "Healing", 2);
             CombatRoutine.AddToggle("Mouseover");
-            CombatRoutine.AddProp("SoulShardNumberMaleficRapture", "Soul Shards Malefic Rapture", 2, "How many Soul Shards to use Malefic Rapture", "Class specific");
-            CombatRoutine.AddProp("SoulShardNumberDrainSoul", "Soul Shards Drain Shoul", 1, "How many Soul Shards to use Drain Shoul", "Class specific");
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("UseAG", "Use Agony", true, "Use Agony for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseCO", "Use Corruption", true, "Use Corruption for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
@@ -197,7 +181,7 @@ namespace HyperElk.Core
             //Buffs
             CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
             CombatRoutine.AddBuff(FelDomination, 333889);
-
+            CombatRoutine.AddBuff(InevitableDemise, 334320);
 
             //Debuffs
             CombatRoutine.AddDebuff(ImpendingCatastrophe, 321792);
@@ -220,92 +204,56 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            //          API.WriteLog("Boss? " + API.TargetIsBoss);
+        }
+        public override void CombatPulse()
+        {
             //Summon Imp
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && PlayerLevel >= 23)
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && PlayerLevel >= 23)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonFelhunter);
                 return;
             }
-            if (!API.PlayerHasPet && API.PlayerIsInCombat && API.CanCast(FelDomination))
+            if (!API.PlayerHasPet && (isMisdirection == "Felhunter" || isMisdirection == "Succubus" || isMisdirection == "Voidwalker" || isMisdirection == "Imp") && API.CanCast(FelDomination))
             {
                 API.CastSpell(FelDomination);
                 return;
             }
-        }
-        public override void CombatPulse()
-        {
-            if (IsMouseover)
+            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange)
             {
-                if (UseCO)
-                {
-                    if (!CastingCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
-                    {
-                        API.CastSpell(Corruption + "MO");
-                        return;
-                    }
-                }
-                if (UseAG)
-                {
-                    if (!CastingAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(Agony + "MO");
-                        return;
-                    }
-                }
-                if (UseSL)
-                {
-                    if (!CastingSL && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(SiphonLife + "MO");
-                        return;
-                    }
-                }
-            }
-            rotation();
-            return;
-        }
-
-
-        private void rotation()
-        {
-            if (DumpShards && API.PlayerCurrentSoulShards == 0)
-            {
-                API.WriteLog("No More Shards left.");
-                DumpWatchLow.Stop();
-                DumpWatchHigh.Stop();
-                DumpWatchLow.Reset();
-                DumpWatchHigh.Reset();
-            }
-            if (DumpShards && DumpWatchHigh.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
-            {
-                API.CastSpell(MaleficRapture);
+                API.CastSpell(Corruption + "MO");
                 return;
             }
-            if (DumpShards && DumpWatchLow.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 1)
+            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
             {
-                API.CastSpell(MaleficRapture);
+                API.CastSpell(Agony + "MO");
+                return;
+            }
+            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
+            {
+                API.CastSpell(SiphonLife + "MO");
                 return;
             }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
@@ -324,12 +272,12 @@ namespace HyperElk.Core
                 API.CastSpell(DarkPact);
                 return;
             }
-            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
             {
                 API.CastSpell(DrainLife);
                 return;
             }
-            if (API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 9 && NotChanneling)
+            if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel))
             {
                 API.CastSpell(HealthFunnel);
                 return;
@@ -339,464 +287,518 @@ namespace HyperElk.Core
                 API.CastSpell(trinket1);
             if (UseTrinket2 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
                 API.CastSpell(trinket2);
-            //ROTATION AOE
-            if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
+            rotation();
+            return;
+        }
+        private void DarkGlarePrep()
+        {
+            //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+            if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200)
             {
-                //actions.aoe+=/haunt
-                //Haunt 
-                if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && !API.PlayerIsCasting(true) && TalentHaunt && NotMoving && IsRange && NotChanneling && PlayerLevel >= 45)
+                API.CastSpell(VileTaint);
+                return;
+            }
+            //actions.darkglare_prep+=/dark_soul
+            //actions.darkglare_prep+=/potion
+            //actions.darkglare_prep+=/fireblood
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
+            //actions.darkglare_prep+=/blood_fury
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
+            //actions.darkglare_prep+=/berserking
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
+            //            //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+            //            if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr")
+            //            {
+            //                API.WriteLog("!covenant.necrolor go to Covenant Section");
+            //                Covenant();
+            //            }
+            //actions.darkglare_prep+=/summon_darkglare
+            if (API.CanCast(SummonDarkglare) && DotCheck)
+            {
+                API.CastSpell(SummonDarkglare);
+                return;
+            }
+        }
+        private void rotation()
+        {
+            if (DumpShards && DumpWatchHigh.IsRunning && API.PlayerCurrentSoulShards <= 0)
+            {
+                DumpWatchHigh.Reset();
+            }
+            if (DumpShards && DumpWatchHigh.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange)
+            {
+                if (!API.SpellISOnCooldown(PhantomSingularity) && TalentPhantomSingularity)
                 {
-                    API.CastSpell(Haunt);
+                    API.CastSpell(PhantomSingularity);
+                }
+                if (!API.SpellISOnCooldown(VileTaint) && TalentVileTaint)
+                {
+                    API.CastSpell(VileTaint);
+                }
+                if (TalentPhantomSingularity && (API.TargetHasDebuff(PhantomSingularity) || API.SpellISOnCooldown(PhantomSingularity)) || TalentVileTaint && (API.TargetHasDebuff(VileTaint) || API.SpellISOnCooldown(VileTaint)))
+                {
+                    API.CastSpell(MaleficRapture);
                     return;
                 }
-                //actions+=/seed_of_corruption,if=active_enemies>2
-                //Seed of Corruption
-                if (!CastingSOC && !CastingSOC1 && !LastSeed && !API.TargetHasDebuff(SeedofCorruption) && API.CanCast(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && IsRange && API.PlayerCurrentSoulShards >= 1 && API.PlayerLevel >= 27)
+
+            }
+
+            if (API.CanCast(MaleficRapture) && API.TargetDebuffStacks(ShadowEmbrace) == 3 && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 5)
+            {
+                DumpWatchHigh.Start();
+                return;
+            }
+
+            if (!API.PlayerIsCasting(true))
+            {
+                //# Executed every time the actor is available.
+                //actions=call_action_list,name=aoe,if=active_enemies>3
+                if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
                 {
-                    API.CastSpell(SeedofCorruption);
-                    return;
-                }
-                //actions+=/agony,if=dot.agony.remains<4
-                //Agony
-                if (!CastingAgony && !CastingSOC && !LastSeed && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
-                {
-                    API.CastSpell(Agony);
-                    return;
-                }
-                //SoulRot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
-                {
-                    API.CastSpell(SoulRot);
-                    return;
-                }
-                //actions+=/unstable_affliction,if=dot.unstable_affliction.remains<4
-                //Unstable Affliction
-                if (UseUA)
-                {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && !CurrenCastUnstableAffliction && !API.PlayerIsCasting(true) && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && NotMoving && IsRange && NotChanneling && PlayerLevel >= 13)
+                    //actions.aoe=phantom_singularity
+                    if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity)
+                    {
+                        API.CastSpell(PhantomSingularity);
+                        return;
+                    }
+                    //actions.aoe+=/haunt
+                    if (API.CanCast(Haunt) && TalentHaunt)
+                    {
+                        API.CastSpell(Haunt);
+                        return;
+                    }
+                    //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&dot.impending_catastrophe_dot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                    if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && API.TargetHasDebuff(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetDebuffRemainingTime(PhantomSingularity) > 200 || !TalentPhantomSingularity))
+                    {
+                        DarkGlarePrep();
+
+                    }
+                    //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&dot.soul_rot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                    if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && API.TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
+                    {
+                        DarkGlarePrep();
+                    }
+                    //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
+                    if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity))
+                    {
+                        DarkGlarePrep();
+                    }
+                    //actions.aoe+=/seed_of_corruption,if=talent.sow_the_seeds.enabled&can_seed
+                    if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !API.TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000))
+                    {
+                        API.CastSpell(SeedofCorruption);
+                        return;
+                    }
+                    //actions.aoe+=/seed_of_corruption,if=!talent.sow_the_seeds.enabled&!dot.seed_of_corruption.ticking&!in_flight&dot.corruption.refreshable
+                    if (!LastCastSeedOfCorruption && !API.TargetHasDebuff(SeedofCorruption) && !API.TargetHasDebuff(Corruption) && API.CanCast(SeedofCorruption) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                    {
+                        API.CastSpell(SeedofCorruption);
+                        return;
+                    }
+                    //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony<4,target_if=!dot.agony.ticking
+                    //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony>=4,target_if=refreshable&dot.agony.ticking
+                    //actions.aoe+=/unstable_affliction,if=dot.unstable_affliction.refreshable
+                    if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 400)
                     {
                         API.CastSpell(UnstableAffliction);
                         return;
                     }
+                    //actions.aoe+=/vile_taint,if=soul_shard>1
+                    if (API.CanCast(VileTaint) && TalentVileTaint && API.PlayerCurrentSoulShards > 1)
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //actions.aoe+=/call_action_list,name=covenant,if=!covenant.necrolord
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "AOE" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "AOE" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "AOE" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "AOE")
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                    //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                    if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                    {
+                        DarkGlarePrep();
+                    }
+                    //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                    if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                    {
+                        DarkGlarePrep();
+                    }
+                    //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                    if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                    {
+                        DarkGlarePrep();
+                    }
+                    //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
+                    if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && IsCooldowns) // (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
+                    {
+                        API.CastSpell(DarkSoulMisery);
+                        return;
+                    }
+                    //actions.aoe+=/call_action_list,name=item
+                    //actions.aoe+=/malefic_rapture,if=dot.vile_taint.ticking
+                    if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint)
+                    {
+                        API.CastSpell(MaleficRapture);
+                        return;
+                    }
+                    //actions.aoe+=/malefic_rapture,if=dot.soul_rot.ticking&!talent.sow_the_seeds.enabled
+                    if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot))
+                    {
+                        API.CastSpell(MaleficRapture);
+                        return;
+                    }
+                    //actions.aoe+=/malefic_rapture,if=!talent.vile_taint.enabled
+                    //actions.aoe+=/malefic_rapture,if=soul_shard>4
+                    if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4)
+                    {
+                        API.CastSpell(MaleficRapture);
+                        return;
+                    }
+                    //actions.aoe+=/siphon_life,cycle_targets=1,if=active_dot.siphon_life<=3,target_if=!dot.siphon_life.ticking
+                    //actions.aoe+=/call_action_list,name=covenant
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "AOE" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "AOE" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "AOE" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "AOE")
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                    //actions.aoe+=/drain_life,if=buff.inevitable_demise.stack>=50|buff.inevitable_demise.up&time_to_die<5|buff.inevitable_demise.stack>=35&dot.soul_rot.ticking
+                    if (API.CanCast(DrainLife) && NotChanneling && API.PlayerBuffStacks(InevitableDemise) > 50 || (API.PlayerBuffStacks(InevitableDemise) >= 1 && API.TargetTimeToDie < 500))
+                    {
+                        API.CastSpell(DrainLife);
+                        return;
+                    }
+                    //actions.aoe+=/drain_soul,interrupt=1
+                    //actions.aoe+=/shadow_bolt
+                    if (API.CanCast(ShadowBolt))
+                    {
+                        API.CastSpell(ShadowBolt);
+                        return;
+                    }
                 }
 
-                //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
-                //DarkSoulMisery
-                if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
+                if (API.CanCast(DrainLife) && NotChanneling && API.PlayerBuffStacks(InevitableDemise) >= 40)
                 {
-                    API.CastSpell(DarkSoulMisery);
-                    return;
-                }
-                //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
-                //VileTaint
-                if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
-                {
-                    API.CastSpell(VileTaint);
+                    API.CastSpell(DrainLife);
                     return;
                 }
                 //actions+=/phantom_singularity,if=time>30
-                //PhantomSingularity
-                if (!DumpShards && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
+                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && !DumpShards && API.PlayerTimeInCombat > 30000)
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
                 }
-                //Malefic Rapture Check Low Level
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11 && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel <= 58)
+                //actions+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&dot.impending_catastrophe_dot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
-                    API.CastSpell(MaleficRapture);
+                    DarkGlarePrep();
+                }
+                //actions+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&dot.soul_rot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && API.TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
+                {
+                    API.WriteLog("1");
+                    DarkGlarePrep();
+                }
+                //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
+                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                {
+                    DarkGlarePrep();
+                }
+                //actions+=/agony,if=dot.agony.remains<4
+                if (API.CanCast(Agony) && !LastCastAgony && API.TargetDebuffRemainingTime(Agony) <= 400)
+                {
+                    API.CastSpell(Agony);
                     return;
                 }
-                //Malefic Rapture PhantomSingularity
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck & TalentPhantomSingularity && PlayerLevel <= 58)
+                //actions+=/agony,cycle_targets=1,if=active_enemies>1,target_if=dot.agony.remains<4
+                //actions+=/haunt
+                if (API.CanCast(Haunt) && TalentHaunt)
                 {
-                    API.CastSpell(MaleficRapture);
+                    API.CastSpell(Haunt);
                     return;
                 }
-                //Malefic Rapture TalentVileTaint
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetHasDebuff(VileTaint) && TalentVileTaint && PlayerLevel <= 58)
+                //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
+                if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
-                    API.CastSpell(MaleficRapture);
+                    API.WriteLog("Darkglare Prep");
+                    DarkGlarePrep();
+                }
+                //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&(covenant.necrolord|covenant.kyrian|covenant.none)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
+                //                if (IsCooldowns && API.TargetUnitInRangeCount > 2 && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity)
+                //                {
+                //                    API.WriteLog("3");
+                //                    DarkGlarePrep();
+                //                }
+                //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
+                if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                {
+                    API.WriteLog("Darkglare Prep");
+                    DarkGlarePrep();
+                }
+                //actions+=/seed_of_corruption,if=active_enemies>2&talent.sow_the_seeds.enabled&!dot.seed_of_corruption.ticking&!in_flight
+                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSowTheSeeds && !API.TargetHasDebuff(Corruption))
+                {
+                    API.CastSpell(SeedofCorruption);
                     return;
                 }
-
-                //Malefic Rapture Check High Level ShadowEmbrande
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58)
+                //actions+=/seed_of_corruption,if=active_enemies>2&talent.siphon_life.enabled&!dot.seed_of_corruption.ticking&!in_flight&dot.corruption.remains<4
+                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSiphonLife && !API.TargetHasDebuff(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) < 400)
                 {
-                    API.CastSpell(MaleficRapture);
+                    API.CastSpell(SeedofCorruption);
                     return;
                 }
-                //Malefic Rapture PhantomSingularity
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && TalentPhantomSingularity && PlayerLevel >= 58)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
-                //Malefic Rapture TalentVileTaint
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && DotCheck && TalentVileTaint && PlayerLevel >= 58)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
-                {
-                    DumpWatchHigh.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
+                //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)&cooldown.summon_darkglare.remains>12
+                if (API.CanCast(VileTaint) && TalentVileTaint && (API.PlayerCurrentSoulShards > 1 || API.TargetUnitInRangeCount > 2))
                 {
                     API.CastSpell(VileTaint);
-                    DumpWatchHigh.Start();
-                    API.WriteLog("Starting Dump Shards.");
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
+                //actions+=/unstable_affliction,if=dot.unstable_affliction.remains<4
+                if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 400)
                 {
-                    API.CastSpell(PhantomSingularity);
-                    DumpWatchHigh.Start();
-                    API.WriteLog("Starting Dump Shards.");
+                    API.CastSpell(UnstableAffliction);
                     return;
                 }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
-                {
-                    DumpWatchLow.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
-                {
-                    API.CastSpell(VileTaint);
-                    DumpWatchLow.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
-                {
-                    API.CastSpell(PhantomSingularity);
-                    DumpWatchLow.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (!DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
-                {
-                    API.CastSpell(DrainSoul);
-                    return;
-                }
-                if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
-                {
-                    API.CastSpell(DrainSoul);
-                    return;
-                }
-
-                //DecimatingBolt
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
-                {
-                    API.CastSpell(DecimatingBolt);
-                    return;
-                }
-                //actions.aoe+=/siphon_life,cycle_targets=1,if=active_dot.siphon_life<=3,target_if=!dot.siphon_life.ticking
-                if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
+                //actions+=/siphon_life,if=dot.siphon_life.remains<4
+                if (API.CanCast(SiphonLife) && !LastCastSiphonLife && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) < 400)
                 {
                     API.CastSpell(SiphonLife);
                     return;
                 }
-                //ImpendingCatastrophe
-                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
-                {
-                    API.CastSpell(ImpendingCatastrophe);
-                    return;
-                }
-                //ScouringTithe
-                if (API.CanCast(ScouringTithe) && !LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
-                {
-                    API.CastSpell(ScouringTithe);
-                    return;
-                }
+                //actions+=/siphon_life,cycle_targets=1,if=active_enemies>1,target_if=dot.siphon_life.remains<4
+
+                //actions+=/call_action_list,name=covenant,if=!covenant.necrolord
+
                 //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
-                //ImpendingCatastrophe
-                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && API.SpellCDDuration(SummonDarkglare) <= 1000 || API.SpellCDDuration(SummonDarkglare) >= 5000 && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "always" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000))
                 {
                     API.CastSpell(ImpendingCatastrophe);
                     return;
                 }
                 //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                //DecimatingBolt
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) >= 500 && API.TargetDebuffRemainingTime(Haunt) >= 400 && TalentHaunt && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt))
                 {
                     API.CastSpell(DecimatingBolt);
                     return;
                 }
                 //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
-                //SoulRot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && API.SpellCDDuration(SummonDarkglare) <= 500 || API.SpellCDDuration(SummonDarkglare) >= 50000 || API.SpellCDDuration(SummonDarkglare) >= 25 && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "always" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000))
                 {
                     API.CastSpell(SoulRot);
                     return;
-
                 }
                 //actions.covenant+=/scouring_tithe
-                //ScouringTithe
-                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && !LastCastScouringTithe && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE))
+                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
                 {
                     API.CastSpell(ScouringTithe);
                     return;
                 }
-                //actions.darkglare_prep+=/summon_darkglare
-                if (IsCooldowns && API.CanCast(SummonDarkglare) && !API.SpellISOnCooldown(SummonDarkglare) && PlayerLevel >= 42)
-                {
-                    API.CastSpell(SummonDarkglare);
-                    return;
-                }
-                //actions+=/drain_soul,interrupt=1
-                if (DumpShards && !DumpWatchHigh.IsRunning && !DumpWatchLow.IsRunning && API.CanCast(DrainSoul) && NotChanneling && TalentDrainSoul && API.PlayerCurrentSoulShards <= 4 && NotChanneling)
-                {
-                    API.CastSpell(DrainSoul);
-                    return;
-                }
-                //actions+=/drain_soul,interrupt=1
-                if (!DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && NotChanneling)
-                {
-                    API.CastSpell(DrainSoul);
-                    return;
-                }
-                //actions.aoe+=/shadow_bolt
-                //ShadowBolt
-                if (API.CanCast(ShadowBolt) && !TalentDrainSoul && NotChanneling && !API.PlayerIsCasting(true) && PlayerLevel >= 1)
-                {
-                    API.CastSpell(ShadowBolt);
-                    return;
-                }
-            }
-            //ROTATION SINGLE TARGET
-            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
-            {
-                //actions+=/agony,if=dot.agony.remains<4
-                //Agony
-                if (!CastingAgony && !CastingSOC && !LastSeed && API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
-                {
-                    API.CastSpell(Agony);
-                    return;
-                }
-                //actions+=/Corruption,if=dot.Corruption.remains<4
-                //Corruption
-                if (!CastingCorruption && !CastingSOC && !LastSeed && API.CanCast(Corruption) && API.TargetDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
+
+                //actions+=/corruption,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)&dot.corruption.remains<2
+                if (API.CanCast(Corruption) && !LastCastCorruption && API.TargetDebuffRemainingTime(Corruption) <= 200)
                 {
                     API.CastSpell(Corruption);
                     return;
                 }
-                //actions+=/phantom_singularity,if=time>30
-                //PhantomSingularity
-                if (!DumpShards && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity))
+                //actions+=/corruption,cycle_targets=1,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled),target_if=dot.corruption.remains<2
+                //actions+=/phantom_singularity,if=covenant.necrolord|covenant.night_fae|covenant.kyrian|covenant.none
+                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None"))
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
                 }
-                //VileTaint
-                if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                //actions+=/malefic_rapture,if=soul_shard>4
+                if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4)
                 {
-                    API.CastSpell(VileTaint);
+                    API.CastSpell(MaleficRapture);
                     return;
                 }
-                //actions+=/haunt
-                //Haunt 
-                if (API.CanCast(Haunt) && !API.SpellISOnCooldown(Haunt) && TalentHaunt && PlayerLevel >= 45)
+                //actions+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
-                    API.CastSpell(Haunt);
-                    return;
+                    DarkGlarePrep();
                 }
-                //actions+=/unstable_affliction,if=dot.unstable_affliction.remains<4
-                //Unstable Affliction
-                if (UseUA)
+                //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                //actions+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
+                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
-                    if (!LastUnstableAffliction && API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && !CurrenCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) <= 400 && PlayerLevel >= 13)
-                    {
-                        API.CastSpell(UnstableAffliction);
-                        return;
-                    }
-                }
-                //ImpendingCatastrophe
-                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "always")
-                {
-                    API.CastSpell(ImpendingCatastrophe);
-                    return;
-                }
-                //SoulRot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "always")
-                {
-                    API.CastSpell(SoulRot);
-                    return;
-                }
-                //ScouringTithe
-                if (API.CanCast(ScouringTithe) && !LastCastScouringTithe && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
-                {
-                    API.CastSpell(ScouringTithe);
-                    return;
-                }
-                //actions+=/siphon_life,if=dot.siphon_life.remains<4
-                if (!CastingSL && API.CanCast(SiphonLife) && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
-                {
-                    API.CastSpell(SiphonLife);
-                    return;
-                }
-                //SoulRot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "with Cooldowns" && IsCooldowns)
-                {
-                    API.CastSpell(SoulRot);
-                    return;
-                }
-                //actions.darkglare_prep+=/summon_darkglare
-                if (IsCooldowns && API.CanCast(SummonDarkglare) && !API.SpellISOnCooldown(SummonDarkglare) && PlayerLevel >= 42)
-                {
-                    API.CastSpell(SummonDarkglare);
-                    return;
-                }
-                //SoulRot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "with Cooldowns" && IsCooldowns)
-                {
-                    API.CastSpell(SoulRot);
-                    return;
+                    DarkGlarePrep();
                 }
                 //actions+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
-                //DarkSoulMisery
-                if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
+                if (API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && IsCooldowns) // (API.TargetIsBoss && API.TargetHealthPercent >= 10 || API.TargetHealthPercent > 30))
                 {
                     API.CastSpell(DarkSoulMisery);
                     return;
                 }
-                //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)
-                //VileTaint
-                if (!DumpShards && TalentVileTaint && !API.TargetHasDebuff(VileTaint) && API.CanCast(VileTaint) && IsRange && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
+                //actions+=/call_action_list,name=item
+                //actions+=/call_action_list,name=se,if=debuff.shadow_embrace.stack<(2-action.shadow_bolt.in_flight)|debuff.shadow_embrace.remains<3
+                if (API.TargetDebuffStacks(ShadowEmbrace) <= 3)
                 {
-                    API.CastSpell(VileTaint);
-                    return;
+                    //actions.se = haunt
+                    if (API.CanCast(Haunt) && TalentHaunt)
+                    {
+                        API.CastSpell(Haunt);
+                        return;
+                    }
+                    //actions.se +=/ drain_soul,interrupt_global = 1,interrupt_if = debuff.shadow_embrace.stack >= 3
+                    if (API.CanCast(DrainSoul) && TalentDrainSoul)
+                    {
+                        API.CastSpell(DrainSoul);
+                        return;
+                    }
+                    //actions.se +=/ shadow_bolt
+                    if (API.CanCast(ShadowBolt) && !TalentDrainSoul)
+                    {
+                        API.CastSpell(ShadowBolt);
+                        return;
+                    }
                 }
-                //actions+=/phantom_singularity,if=time>30
-                //PhantomSingularity
-                if (!DumpShards && TalentPhantomSingularity && API.CanCast(PhantomSingularity) && !API.TargetHasDebuff(PhantomSingularity) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture)
-                {
-                    API.CastSpell(PhantomSingularity);
-                    return;
-                }
-                //Malefic Rapture Check Low Level
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && PlayerLevel >= 11 && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel <= 58)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
-                //Malefic Rapture PhantomSingularity
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && TalentPhantomSingularity && PlayerLevel <= 58)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
-                //Malefic Rapture TalentVileTaint
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && TalentVileTaint && PlayerLevel <= 58)
+                //actions+=/malefic_rapture,if=dot.vile_taint.ticking
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint)
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
+                //actions+=/malefic_rapture,if=dot.impending_catastrophe_dot.ticking
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(ImpendingCatastrophe))
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //actions+=/malefic_rapture,if=dot.soul_rot.ticking
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot))
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //actions+=/malefic_rapture,if=talent.phantom_singularity.enabled&(dot.phantom_singularity.ticking|soul_shard>3|time_to_die<cooldown.phantom_singularity.remains)
+                if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (API.TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)))
+                {
+                    API.CastSpell(MaleficRapture);
+                    return;
+                }
+                //actions+=/malefic_rapture,if=talent.sow_the_seeds.enabled
+                //actions+=/drain_life,if=buff.inevitable_demise.stack>40|buff.inevitable_demise.up&time_to_die<4
 
-                //Malefic Rapture Check High Level ShadowEmbrande
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && !TalentPhantomSingularity && !TalentVileTaint && PlayerLevel >= 58)
+                //actions+=/call_action_list,name=covenant
+                //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && UseCovenantAbility == "always" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000))
                 {
-                    API.CastSpell(MaleficRapture);
+                    API.CastSpell(ImpendingCatastrophe);
                     return;
                 }
-                //Malefic Rapture PhantomSingularity
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && TalentPhantomSingularity && PlayerLevel >= 58)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
-                //Malefic Rapture TalentVileTaint
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards >= ShoulShardNumberMaleficRapture && DotCheck && TalentVileTaint && PlayerLevel >= 58)
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && !TalentVileTaint && !TalentPhantomSingularity)
-                {
-                    DumpWatchHigh.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentVileTaint)
-                {
-                    API.CastSpell(VileTaint);
-                    DumpWatchHigh.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) >= 3 && PlayerLevel >= 58 && TalentPhantomSingularity)
-                {
-                    API.CastSpell(PhantomSingularity);
-                    DumpWatchHigh.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && !TalentVileTaint && !TalentPhantomSingularity)
-                {
-                    DumpWatchLow.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentVileTaint)
-                {
-                    API.CastSpell(VileTaint);
-                    DumpWatchLow.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(MaleficRapture) && API.PlayerCurrentSoulShards == 5 && DotCheck && PlayerLevel <= 58 && TalentPhantomSingularity)
-                {
-                    API.CastSpell(PhantomSingularity);
-                    DumpWatchLow.Start();
-                    API.WriteLog("Starting Dump Shards.");
-                    return;
-                }
-                if (DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards == 5 && DotCheck && API.TargetDebuffStacks(ShadowEmbrace) <= 3 && PlayerLevel >= 58)
-                {
-                    API.CastSpell(DrainSoul);
-                    return;
-                }
-                //DecimatingBolt
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always")
+                //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && UseCovenantAbility == "always" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt))
                 {
                     API.CastSpell(DecimatingBolt);
                     return;
                 }
-                //actions+=/drain_soul,interrupt=1
-
-                if (DumpShards && !DumpWatchHigh.IsRunning && !DumpWatchLow.IsRunning && API.CanCast(DrainSoul) && NotChanneling && TalentDrainSoul && API.PlayerCurrentSoulShards <= 4 && NotChanneling)
+                //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && UseCovenantAbility == "always" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000))
                 {
-                    API.CastSpell(DrainSoul);
+                    API.CastSpell(SoulRot);
                     return;
                 }
-                //actions+=/drain_soul,interrupt=1
+                //actions.covenant+=/scouring_tithe
+                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && UseCovenantAbility == "always")
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
 
-                if (!DumpShards && API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling && API.PlayerCurrentSoulShards <= ShoulShardNumberDrainSoul && NotChanneling)
+                //actions+=/agony,if=refreshable
+                if (API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) < 200)
+                {
+                    API.CastSpell(Agony);
+                    return;
+                }
+                //actions+=/agony,cycle_targets=1,if=active_enemies>1,target_if=refreshable
+                //actions+=/corruption,if=refreshable&active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)
+                //actions+=/unstable_affliction,if=refreshable
+                //actions+=/siphon_life,if=refreshable
+                //actions+=/siphon_life,cycle_targets=1,if=active_enemies>1,target_if=refreshable
+                //actions+=/corruption,cycle_targets=1,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled),target_if=refreshable
+
+                //actions+=/drain_soul,interrupt=1
+                if (API.CanCast(DrainSoul) && NotChanneling)
                 {
                     API.CastSpell(DrainSoul);
                     return;
                 }
                 //actions+=/shadow_bolt
-                //ShadowBolt
-                if (API.CanCast(ShadowBolt) && NotMoving && IsRange && NotChanneling && !TalentDrainSoul && PlayerLevel >= 1)
+                if (API.CanCast(ShadowBolt))
                 {
                     API.CastSpell(ShadowBolt);
                     return;
                 }
+            }
+            //ROTATION AOE
+
+            //ROTATION SINGLE TARGET
+            if (IsAOE || !IsAOE && IsRange && API.TargetUnitInRangeCount <= AOEUnitNumber)
+            {
+
             }
         }
 
 
         public override void OutOfCombatPulse()
         {
-            DumpWatchLow.Stop();
-            DumpWatchHigh.Stop();
-            DumpWatchLow.Reset();
-            DumpWatchHigh.Reset();
+            if (DumpWatchHigh.IsRunning)
+            {
+                DumpWatchHigh.Reset();
+            }
             //Grimoire Of Sacrifice
             if (API.PlayerHasPet && TalentGrimoireOfSacrifice && API.PlayerHasBuff("Grimoire Of Sacrifice"))
             {

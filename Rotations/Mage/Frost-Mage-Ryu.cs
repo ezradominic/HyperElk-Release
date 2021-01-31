@@ -436,24 +436,13 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            // actions.st+=/ice_lance,if=buff.fingers_of_frost.react|debuff.frozen.remains>travel_time
-            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor && (!PlayerHasBuff(BrainFreeze) || API.PlayerBuffTimeRemaining(BrainFreeze) > 1100) && !API.TargetHasDebuff(WC))
-            {
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40)
-                {
-                    API.CastSpell(IL);
-                    API.WriteLog("Fingers of Frost :" + API.PlayerHasBuff(FoF));
-                    return;
-                }
-            }
             if (!ChannelingShift && NotChanneling && !ChannelingRoF && API.TargetHasDebuff(WC) && (!PlayerHasBuff(BrainFreeze) || PlayerHasBuff(BrainFreeze)) && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)))
             {
                 // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && IceWatch1.IsRunning)
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 2 && API.TargetDebuffPlayerSrc(WC) && !IceWatch2.IsRunning)
                 {
                     API.CastSpell(IL);
-                    IceWatch1.Stop();
-                    API.WriteLog("Target Debuff Stacks Winters Chill : " + API.TargetDebuffStacks(WC) + "Ice Lance Watch 1 Running? " + IceWatch1.IsRunning + "Ice Lance Watch 2 Running? " + IceWatch2.IsRunning);
+                    IceWatch2.Restart();
                     return;
                 }
                 //actions.st+=/ray_of_frost,if=remaining_winters_chill=1&debuff.winters_chill.remains
@@ -472,25 +461,23 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(IL);
                     IceWatch2.Stop();
-                    API.WriteLog("Target Debuff Stacks Winters Chill : " + API.TargetDebuffStacks(WC) + "Ice Lance Watch 2 Running? " + IceWatch2.IsRunning);
+                    API.WriteLog("Ice Lance Watch 2 Running? " + IceWatch2.IsRunning);
                     return;
                 }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffRemainingTime(WC) < 300)
-                {
-                    API.CastSpell(IL);
-                    IceWatch1.Stop();
-                    IceWatch2.Stop();
-                    API.WriteLog("Target Debuff Stacks Winters Chill : " + API.TargetDebuffStacks(WC) + "Ice Lance Watch Back up ");
-                    return;
-                }
+          //      if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffRemainingTime(WC) < 300)
+            //    {
+              //      API.CastSpell(IL);
+                //    IceWatch1.Stop();
+                  //  IceWatch2.Stop();
+                    //API.WriteLog("Target Debuff Stacks Winters Chill : " + API.TargetDebuffStacks(WC) + "Ice Lance Watch Back up ");
+                    //return;
+                //}
             }
             if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze) && !API.PlayerSpellonCursor && !API.TargetHasDebuff(WC) && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)))
             {
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && !CastRune && API.LastSpellCastInGame != IL && API.LastSpellCastInGame != FO)
+                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && API.LastSpellCastInGame != IV && API.LastSpellCastInGame != RoP && API.LastSpellCastInGame != IL && API.LastSpellCastInGame != FO)
                 {
                     API.CastSpell(Flurry);
-                    IceWatch1.Restart();
-                    IceWatch2.Restart();
                     return;
                 }
                 if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingFB || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry && (API.PlayerLastSpell != Frostbolt || !CastFB) && !CastEB)
@@ -501,8 +488,16 @@ namespace HyperElk.Core
                 if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && !CastRune && API.LastSpellCastInGame != IL && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt)
                 {
                     API.CastSpell(Flurry);
-                    IceWatch1.Restart();
-                    IceWatch2.Restart();
+                    return;
+                }
+            }
+            // actions.st+=/ice_lance,if=buff.fingers_of_frost.react|debuff.frozen.remains>travel_time
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor)
+            {
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40)
+                {
+                    API.CastSpell(IL);
+                    API.WriteLog("Fingers of Frost :" + API.PlayerHasBuff(FoF));
                     return;
                 }
             }
