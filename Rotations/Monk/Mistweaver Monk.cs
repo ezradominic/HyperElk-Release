@@ -180,6 +180,7 @@ namespace HyperElk.Core
             API.WriteLog("Invoke Chi-Ji, the Red Crane is not supported yet");
             API.WriteLog("Make sure you use a /stopcasting macro and bind it in the macro section of your spellbook");
 
+
             //Combat
             CombatRoutine.AddSpell(TigerPalm, 100780, "D1");
             CombatRoutine.AddSpell(BlackoutKick, 100784, "D2");
@@ -216,6 +217,7 @@ namespace HyperElk.Core
 
             //Macros
             CombatRoutine.AddMacro(TAB, "Tab");
+            CombatRoutine.AddMacro("Dismiss Totem");
 
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
@@ -371,6 +373,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS in party" + "is used,", "DPS Heal Group", 80);
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "DPS Heal Raid", 4);
             CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "DPS Heal Raid", 70);
+            CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
             CombatRoutine.AddProp("SwapSpeed", "SwapSpeed", 1500, "SwapSpeed", "Swap Speed");
 
@@ -752,6 +755,11 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
+            if (JadeSerpentStatue >= 1)
+            {
+                API.CastSpell("Dismiss Totem");
+                return;
+            }
             if (OOC)
             {
                 if (AoEHeal)
