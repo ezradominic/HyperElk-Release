@@ -10,6 +10,7 @@
 // v1.8 mouseover moonfire added
 // v1.9 racials and a few other fixes
 // v2.0 Growl added for torghast anima power
+// v2.1 convoke update
 
 namespace HyperElk.Core
 {
@@ -105,7 +106,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.0");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.1");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -323,7 +324,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.bear+=/convoke_the_spirits,if=!druid.catweave_bear&!druid.owlweave_bear
-                if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;

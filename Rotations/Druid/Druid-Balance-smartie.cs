@@ -30,6 +30,7 @@
 // v3.6 small aoe change
 // v3.7 aoe tweaks and a few small bugfixes
 // v3.8 Dot Spam fix
+// v3.9 convoke update
 
 using System.Diagnostics;
 
@@ -170,7 +171,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v3.8");
+            API.WriteLog("Welcome to smartie`s Balance Druid v3.9");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -491,7 +492,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/convoke_the_spirits,if=(variable.convoke_desync&!cooldown.ca_inc.ready|buff.ca_inc.up)&astral_power<50&(buff.eclipse_lunar.remains>10|buff.eclipse_solar.remains>10)|fight_remains<10
-                if (API.CanCast(ConvoketheSpirits) && isinRange && SaveQuake && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant && IncaCelestial && (IsLegendary != "Balance of all things" && API.PlayerAstral <= 30 && (API.PlayerBuffTimeRemaining(EclipseSolar) > 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) > 1000) || IsLegendary == "Balance of all things" && BOAT))
+                if (API.CanCast(ConvoketheSpirits) && isinRange && SaveQuake && PlayerCovenantSettings == "Night Fae" && IsCovenant && IncaCelestial && (IsLegendary != "Balance of all things" && API.PlayerAstral <= 30 && (API.PlayerBuffTimeRemaining(EclipseSolar) > 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) > 1000) || IsLegendary == "Balance of all things" && BOAT))
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;

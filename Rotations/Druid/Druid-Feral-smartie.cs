@@ -20,6 +20,7 @@
 // v2.8 regrowth fix
 // v2.9 new Bloodtalons logic
 // v3.0 aoe disabled finisher fix
+// v3.1 convoke update
 
 using System.Diagnostics;
 
@@ -185,7 +186,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.0");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.1");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -320,7 +321,8 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Bloodtalons save Energy: " + BloodtalonsEnergie);
+            //API.WriteLog("Casting: " + API.PlayerCurrentCastTimeRemaining);
+            //API.WriteLog("Channeling? : " + API.PlayerIsChanneling);
             //API.WriteLog("save: " + SaveEnergy);
             //API.WriteLog("Lastspell: " + API.LastSpellCastInGame);
             if (!BloodtalonsEnergie && !PlayerHasBuff(Bloodtalons) && TalentBloodtalons && !bloodtimer.IsRunning && API.PlayerIsInCombat)
@@ -650,7 +652,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cooldown+=/convoke_the_spirits,if=(dot.rip.remains>4&combo_points<3&dot.rake.ticking&energy.deficit>=20)|fight_remains<5
-                if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && API.PlayerComboPoints < 3 && TargetHasDebuff(Rake) && EnergyDefecit >= 20))
+                if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && API.PlayerComboPoints < 3 && TargetHasDebuff(Rake) && EnergyDefecit >= 20))
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;
