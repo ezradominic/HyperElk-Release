@@ -58,7 +58,7 @@ namespace HyperElk.Core
         private bool TalentGrimoireOfSacrifice => API.PlayerIsTalentSelected(6, 3);
         private bool TalentDarkSoulMisery => API.PlayerIsTalentSelected(7, 3);
         private bool TalentSowTheSeeds => API.PlayerIsTalentSelected(4, 1);
-
+        private bool TalentMortalCoil => API.PlayerIsTalentSelected(5, 2);
         //Misc
         private static readonly Stopwatch DumpWatchLow = new Stopwatch();
         private static readonly Stopwatch DumpWatchHigh = new Stopwatch();
@@ -93,6 +93,8 @@ namespace HyperElk.Core
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int DrainLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
+        private int MortalCoilPercentProc => numbList[CombatRoutine.GetPropertyInt(MortalCoil)];
+
 
         string[] MisdirectionList = new string[] { "None", "Imp", "Voidwalker", "Succubus", "Felhunter", };
         private string isMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
@@ -266,7 +268,11 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            // Dark Pact
+            if (API.CanCast(MortalCoil) && TalentMortalCoil && API.PlayerHealthPercent <= MortalCoilPercentProc)
+            {
+                API.CastSpell(MortalCoil);
+                return;
+            }
             if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
             {
                 API.CastSpell(DarkPact);
