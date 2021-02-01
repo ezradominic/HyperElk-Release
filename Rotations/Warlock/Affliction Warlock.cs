@@ -119,7 +119,6 @@ namespace HyperElk.Core
             API.WriteLog("/cast [@mouseover] Corruption");
             API.WriteLog("/cast [@cursor] Vile Taint");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
-            API.WriteLog("Put a Meele Pet Ability on your Action Bar for the AOE Detection");
 
 
             CombatRoutine.AddProp(DrainLife, "Drain Life", numbList, "Life percent at which " + DrainLife + " is used, set to 0 to disable", "Healing", 5);
@@ -205,68 +204,89 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-//            API.WriteLog("timeinto " + API.PlayerTimeInCombat);
+            //          API.WriteLog("Boss? " + API.TargetIsBoss);
         }
         public override void CombatPulse()
         {
-            if (IsMouseover)
+            //Summon Imp
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
             {
-                if (UseCO)
-                {
-                    if (!LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange && PlayerLevel >= 2)
-                    {
-                        API.CastSpell(Corruption + "MO");
-                        return;
-                    }
-                }
-                if (UseAG)
-                {
-                    if (!LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(Agony + "MO");
-                        return;
-                    }
-                }
-                if (UseSL)
-                {
-                    if (!LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange && PlayerLevel >= 10)
-                    {
-                        API.CastSpell(SiphonLife + "MO");
-                        return;
-                    }
-                }
-                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
-                {
-                    API.CastSpell(PhialofSerenity);
-                    return;
-                }
-                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
-                {
-                    API.CastSpell(SpiritualHealingPotion);
-                    return;
-                }
-                // Dark Pact
-                if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
-                {
-                    API.CastSpell(DarkPact);
-                    return;
-                }
-                if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9 && NotChanneling)
-                {
-                    API.CastSpell(DrainLife);
-                    return;
-                }
-                if (API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 9 && NotChanneling)
-                {
-                    API.CastSpell(HealthFunnel);
-                    return;
-                }
-                //Trinkets
-                if (UseTrinket1 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
-                    API.CastSpell(trinket1);
-                if (UseTrinket2 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
-                    API.CastSpell(trinket2);
+                API.WriteLog("We are in Combat , use Fel Domination summon");
+                API.CastSpell(SummonImp);
+                return;
             }
+            //Summon Voidwalker
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
+            {
+                API.WriteLog("We are in Combat , use Fel Domination summon");
+                API.CastSpell(SummonVoidwalker);
+                return;
+            }
+            //Summon Succubus
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && PlayerLevel >= 22)
+            {
+                API.WriteLog("We are in Combat , use Fel Domination summon");
+                API.CastSpell(SummonSuccubus);
+                return;
+            }
+            //Summon Fellhunter
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && PlayerLevel >= 23)
+            {
+                API.WriteLog("We are in Combat , use Fel Domination summon");
+                API.CastSpell(SummonFelhunter);
+                return;
+            }
+            if (!API.PlayerHasPet && (isMisdirection == "Felhunter" || isMisdirection == "Succubus" || isMisdirection == "Voidwalker" || isMisdirection == "Imp") && API.CanCast(FelDomination))
+            {
+                API.CastSpell(FelDomination);
+                return;
+            }
+            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange)
+            {
+                API.CastSpell(Corruption + "MO");
+                return;
+            }
+            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
+            {
+                API.CastSpell(Agony + "MO");
+                return;
+            }
+            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
+            {
+                API.CastSpell(SiphonLife + "MO");
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
+            // Dark Pact
+            if (API.PlayerHealthPercent <= DarkPactPercentProc && API.CanCast(DarkPact) && TalentDarkPact)
+            {
+                API.CastSpell(DarkPact);
+                return;
+            }
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
+            {
+                API.CastSpell(DrainLife);
+                return;
+            }
+            if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel))
+            {
+                API.CastSpell(HealthFunnel);
+                return;
+            }
+            //Trinkets
+            if (UseTrinket1 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 || UseTrinket1 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
+                API.CastSpell(trinket1);
+            if (UseTrinket2 == "AOE" && IsAOE && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 || UseTrinket2 == "Cooldowns" && IsCooldowns && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
+                API.CastSpell(trinket2);
             rotation();
             return;
         }
@@ -298,12 +318,12 @@ namespace HyperElk.Core
                 API.CastSpell(RacialSpell1);
                 return;
             }
-//            //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
-//            if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr")
-//            {
-//                API.WriteLog("!covenant.necrolor go to Covenant Section");
-//                Covenant();
-//            }
+            //            //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+            //            if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr")
+            //            {
+            //                API.WriteLog("!covenant.necrolor go to Covenant Section");
+            //                Covenant();
+            //            }
             //actions.darkglare_prep+=/summon_darkglare
             if (API.CanCast(SummonDarkglare) && DotCheck)
             {
@@ -313,7 +333,7 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            if (DumpShards && DumpWatchHigh.IsRunning && API.PlayerCurrentSoulShards == 0)
+            if (DumpShards && DumpWatchHigh.IsRunning && API.PlayerCurrentSoulShards <= 0)
             {
                 DumpWatchHigh.Reset();
             }
@@ -334,11 +354,13 @@ namespace HyperElk.Core
                 }
 
             }
-            if (API.CanCast(MaleficRapture) && API.TargetDebuffStacks(ShadowEmbrace) == 3 && DotCheck && IsRange && API.PlayerCurrentSoulShards == 5)
+
+            if (API.CanCast(MaleficRapture) && API.TargetDebuffStacks(ShadowEmbrace) == 3 && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 5)
             {
                 DumpWatchHigh.Start();
                 return;
             }
+
             if (!API.PlayerIsCasting(true))
             {
                 //# Executed every time the actor is available.
@@ -430,7 +452,7 @@ namespace HyperElk.Core
                         DarkGlarePrep();
                     }
                     //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                    if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.SpellCDDuration(SummonDarkglare) < 200 && ( API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                    if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                     {
                         DarkGlarePrep();
                     }
@@ -512,7 +534,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/phantom_singularity,if=time>30
-                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && API.PlayerTimeInCombat > 30000)
+                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && !DumpShards && API.PlayerTimeInCombat > 30000)
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
@@ -529,7 +551,7 @@ namespace HyperElk.Core
                     DarkGlarePrep();
                 }
                 //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
-                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity))
+                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
                     DarkGlarePrep();
                 }
@@ -553,11 +575,11 @@ namespace HyperElk.Core
                     DarkGlarePrep();
                 }
                 //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&(covenant.necrolord|covenant.kyrian|covenant.none)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
-//                if (IsCooldowns && API.TargetUnitInRangeCount > 2 && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity)
-//                {
-//                    API.WriteLog("3");
-//                    DarkGlarePrep();
-//                }
+                //                if (IsCooldowns && API.TargetUnitInRangeCount > 2 && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity)
+                //                {
+                //                    API.WriteLog("3");
+                //                    DarkGlarePrep();
+                //                }
                 //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
                 if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
@@ -631,7 +653,7 @@ namespace HyperElk.Core
                 }
                 //actions+=/corruption,cycle_targets=1,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled),target_if=dot.corruption.remains<2
                 //actions+=/phantom_singularity,if=covenant.necrolord|covenant.night_fae|covenant.kyrian|covenant.none
-                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae"|| PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None"))
+                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None"))
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
@@ -649,7 +671,7 @@ namespace HyperElk.Core
                 }
                 //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
                 //actions+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity)) 
+                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
                     DarkGlarePrep();
                 }

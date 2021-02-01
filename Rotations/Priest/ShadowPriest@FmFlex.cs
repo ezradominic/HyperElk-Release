@@ -39,6 +39,7 @@ namespace HyperElk.Core
         private string Trincket2 = "Trincket 2";
         private string BoonOfTheAscended = "Boon of the Ascended";
         private string DissonantEchoes = "Dissonant Echoes";
+        private string UnholyNova = "Unholy Nova";
 
         //Talents
         bool TalentTwistOfFate => API.PlayerIsTalentSelected(3, 1);
@@ -134,10 +135,13 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(PWFortitude, 21562, "F6");
             CombatRoutine.AddSpell(PWShield, 17, "F7");
             CombatRoutine.AddSpell(Mindgames, 323701, "0");
+            CombatRoutine.AddSpell(UnholyNova, 347788, "0");
+            
             CombatRoutine.AddMacro(SWPain + "MO", "D2");
             CombatRoutine.AddMacro(VampiricTouch + "MO", "D6");
             CombatRoutine.AddMacro(Trincket1);
             CombatRoutine.AddMacro(Trincket2);
+
             CombatRoutine.AddToggle("Mouseover");
 
             //Prop
@@ -306,6 +310,15 @@ namespace HyperElk.Core
                 return;
             }
 
+            //actions.main+=/void_torrent,target_if=variable.dots_up&target.time_to_die>4&buff.voidform.down&spell_targets.mind_sear<(5+(6*talent.twist_of_fate.enabled))
+            if (API.TargetUnitInRangeCount == 1 && TalentVoidTorrent && API.CanCast(VoidTorrent) && !API.PlayerIsMoving)
+            {
+                if (dots_up && API.TargetTimeToDie > 400 && !API.PlayerHasBuff(Voidform) && (!IsAOE || API.TargetUnitInRangeCount < (5 + (6 * (TalentTwistOfFate ? 1 : 0)))))
+                {
+                    API.CastSpell(VoidTorrent);
+                    return;
+                }
+            }
             if (IsCooldowns)
             {
                 //actions.cds=power_infusion,if=buff.voidform.up|!soulbind.combat_meditation.enabled&cooldown.void_eruption.remains>=10|fight_remains<cooldown.void_eruption.remains
@@ -329,7 +342,11 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Necrolord" && API.CanCast(UnholyNova))
+            {
+                API.CastSpell(UnholyNova);
+                return;
+            }
             if (IsAOE && (!API.PlayerIsCasting(true) || ChannelingMindFlay) && API.CanCast(MindSear) && !API.PlayerIsMoving && PlayerLevel >= 26)
             {
                 if (TalentSearingNightmare && API.TargetUnitInRangeCount > 2 && !API.TargetHasDebuff(SWPain, true) &&
@@ -424,15 +441,7 @@ namespace HyperElk.Core
                 }
             }
 
-            //actions.main+=/void_torrent,target_if=variable.dots_up&target.time_to_die>4&buff.voidform.down&spell_targets.mind_sear<(5+(6*talent.twist_of_fate.enabled))
-            if (TalentVoidTorrent && API.CanCast(VoidTorrent) && !API.PlayerIsMoving)
-            {
-                if (dots_up && API.TargetTimeToDie > 400 && !API.PlayerHasBuff(Voidform) && (!IsAOE || API.TargetUnitInRangeCount < (5 + (6 * (TalentTwistOfFate ? 1 : 0)))))
-                {
-                    API.CastSpell(VoidTorrent);
-                    return;
-                }
-            }
+
 
             //actions.main+=/shadow_crash,if=spell_targets.shadow_crash=1&(cooldown.shadow_crash.charges=3|debuff.shadow_crash_debuff.up|action.shadow_crash.in_flight|target.time_to_die<cooldown.shadow_crash.full_recharge_time)&raid_event.adds.in>30
             if (TalentShadowCrash && API.CanCast(ShadowCrash))
@@ -453,7 +462,11 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
+            if (!IsAOE &&  !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Necrolord" && API.CanCast(UnholyNova))
+            {
+                API.CastSpell(UnholyNova);
+                return;
+            }
             //actions.main+=/mind_flay,if=buff.dark_thoughts.up&variable.dots_up,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
             if (IsAOE && (!API.PlayerIsCasting(true) || ChannelingMindSear) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {
