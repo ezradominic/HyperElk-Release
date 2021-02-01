@@ -31,6 +31,7 @@
 // v3.7 aoe tweaks and a few small bugfixes
 // v3.8 Dot Spam fix
 // v3.9 convoke update
+// v4.0 woe update
 
 using System.Diagnostics;
 
@@ -171,7 +172,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v3.9");
+            API.WriteLog("Welcome to smartie`s Balance Druid v4.0");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -445,11 +446,6 @@ namespace HyperElk.Core
                     API.CastSpell("Trinket2");
                     return;
                 }
-                if (API.CanCast(WarriorofElune) && !PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune && API.PlayerAstral <= 30 && PlayerHasBuff(EclipseLunar))
-                {
-                    API.CastSpell(WarriorofElune);
-                    return;
-                }
                 if (PlayerCovenantSettings == "Night Fae" && IsLegendary == "Balance of all things" && IsCovenant && API.CanCast(ConvoketheSpirits))
                 {
                     if (API.CanCast(Incarnation) && API.PlayerAstral < 30 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && TalentIncarnation)
@@ -510,6 +506,11 @@ namespace HyperElk.Core
                 if (API.CanCast(AdaptiveSwarm) && isinRange && PlayerCovenantSettings == "Necrolord" && IsCovenant && !TargetHasDebuff(AdaptiveSwarm))
                 {
                     API.CastSpell(AdaptiveSwarm);
+                    return;
+                }
+                if (API.CanCast(WarriorofElune) && !PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune && API.PlayerAstral <= 30 && PlayerHasBuff(EclipseLunar))
+                {
+                    API.CastSpell(WarriorofElune);
                     return;
                 }
                 if (PlayerHasBuff(Starlord) && API.PlayerBuffTimeRemaining(Starlord) > 100 && !API.MacroIsIgnored(CancelStarlord) && API.PlayerAstral >= 85 && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 1000 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 1000))
