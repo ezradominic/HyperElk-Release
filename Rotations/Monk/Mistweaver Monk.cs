@@ -62,6 +62,7 @@ namespace HyperElk.Core
         private string AoEDPSH = "AOEDPS Health";
         private string AoEDPSHRaid = "AOEDPS Health Raid";
         private string AoEDPSRaid = "AOEDPS Raid";
+        private string Assist = "Assist";
 
 
         //Talents
@@ -171,6 +172,12 @@ namespace HyperElk.Core
         public string[] LegendaryList = new string[] { "None", "Ancient Teachings of the Monastery" };
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
+        int RoleCheck;
+        string Tank;
+
+
+
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Mistweaver Monk by Mufflon12";
@@ -179,6 +186,7 @@ namespace HyperElk.Core
             API.WriteLog("Use /cast [@cursor] Summon Jade Serpent Statue");
             API.WriteLog("Invoke Chi-Ji, the Red Crane is not supported yet");
             API.WriteLog("Make sure you use a /stopcasting macro and bind it in the macro section of your spellbook");
+            API.WriteLog("Use this Macro to dismiss your JadeSerpentStatue and bind it correctly in the Macro tab of your spellbook");
 
 
             //Combat
@@ -217,6 +225,7 @@ namespace HyperElk.Core
 
             //Macros
             CombatRoutine.AddMacro(TAB, "Tab");
+            CombatRoutine.AddMacro(Assist);
             CombatRoutine.AddMacro("Dismiss Totem");
 
             CombatRoutine.AddMacro(trinket1);
@@ -382,25 +391,29 @@ namespace HyperElk.Core
         {
             if (UseLeg == "Ancient Teachings of the Monastery" && LastCastEssenceFont)
             {
-                if (!API.PlayerCanAttackTarget && (API.CanCast(RisingSunKick) || API.CanCast(BlackoutKick) || API.CanCast(TigerPalm)))
+                for (int i = 0; i < units.Length; i++)
                 {
-                    API.CastSpell(TAB);
-                    return;
-                }
-                if (API.CanCast(RisingSunKick))
-                {
-                    API.CastSpell(RisingSunKick);
-                    return;
-                }
-                if (API.SpellISOnCooldown(RisingSunKick) && API.CanCast(BlackoutKick))
-                {
-                    API.CastSpell(BlackoutKick);
-                    return;
-                }
-                if (API.SpellISOnCooldown(RisingSunKick) &&  API.SpellISOnCooldown(BlackoutKick))
-                {
-                    API.CastSpell(TigerPalm);
-                    return;
+                    if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored(Assist) && (API.CanCast(RisingSunKick) || API.CanCast(BlackoutKick) || API.CanCast(TigerPalm) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)))
+                    {
+                        API.CastSpell(PlayerTargetArray[i]);
+                        API.CastSpell(Assist);
+                        return;
+                    }
+                    if (API.CanCast(RisingSunKick))
+                    {
+                        API.CastSpell(RisingSunKick);
+                        return;
+                    }
+                    if (API.SpellISOnCooldown(RisingSunKick) && API.CanCast(BlackoutKick))
+                    {
+                        API.CastSpell(BlackoutKick);
+                        return;
+                    }
+                    if (API.SpellISOnCooldown(RisingSunKick) && API.SpellISOnCooldown(BlackoutKick))
+                    {
+                        API.CastSpell(TigerPalm);
+                        return;
+                    }
                 }
             }
             if (IsAutoDetox)
@@ -463,7 +476,6 @@ namespace HyperElk.Core
             }
             if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && JadeSerpentStatue <= 0 && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
             {
-                JadeSerpentStatueWatch.Start();
                 API.CastSpell(SummonJadeSerpentStatue);
                 return;
             }
@@ -553,7 +565,13 @@ namespace HyperElk.Core
                 {
                     for (int i = 0; i < units.Length; i++)
                     {
-
+                        if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored(Assist) && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
+                        {
+                            API.CastSpell(PlayerTargetArray[i]);
+                            API.CastSpell(Assist);
+                            SwapWatch.Restart();
+                            return;
+                        }
                         if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40)
                         {
                             API.CastSpell(PlayerTargetArray[i]);
@@ -593,16 +611,6 @@ namespace HyperElk.Core
                         if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250))
                         {
                             API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-                        if (IsDpsHeal && !API.PlayerCanAttackTarget && !API.MacroIsIgnored(TAB) && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(TAB);
-                            if (!API.TargetIsIncombat)
-                            {
-                                API.CastSpell(TAB);
-                            }
                             SwapWatch.Restart();
                             return;
                         }
@@ -742,20 +750,21 @@ namespace HyperElk.Core
                 API.CastSpell(RisingSunKick);
                 return;
             }
-            if (API.CanCast(TigerPalm))
-            {
-                API.CastSpell(TigerPalm);
-                return;
-            }
             if (IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 && API.CanCast(SpinningCraneKick) && NotChanneling)
             {
                 API.CastSpell(SpinningCraneKick);
                 return;
             }
+            if (API.CanCast(TigerPalm))
+            {
+                API.CastSpell(TigerPalm);
+                return;
+            }
+
         }
         public override void OutOfCombatPulse()
         {
-            if (JadeSerpentStatue >= 1)
+            if (JadeSerpentStatue >= 1 && !API.MacroIsIgnored("Dismiss Totem"))
             {
                 API.CastSpell("Dismiss Totem");
                 return;
