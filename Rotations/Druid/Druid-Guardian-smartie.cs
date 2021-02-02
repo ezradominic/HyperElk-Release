@@ -331,7 +331,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.bear+=/berserk_bear,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
-                if (API.CanCast(Berserk) && !TalentIncarnation && (PlayerCovenantSettings != "Night Fae" || PlayerCovenantSettings == "Night Fae" && IsCovenant && API.SpellISOnCooldown(ConvoketheSpirits) || !IsCovenant) && isMelee && IsBerserk)
+                if (API.CanCast(Berserk) && !TalentIncarnation && (PlayerCovenantSettings != "Night Fae" || PlayerCovenantSettings == "Night Fae" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) >= 200 || !IsCovenant) && isMelee && IsBerserk)
                 {
                     API.CastSpell(Berserk);
                     return;
