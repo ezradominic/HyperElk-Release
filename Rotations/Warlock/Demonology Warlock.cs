@@ -175,6 +175,16 @@ namespace HyperElk.Core
                 ImpWatch.Reset();
                 return;
             }
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
+            {
+                API.CastSpell(DrainLife);
+                return;
+            }
+            if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel))
+            {
+                API.CastSpell(HealthFunnel);
+                return;
+            }
             rotation();
             return;
 
@@ -185,7 +195,7 @@ namespace HyperElk.Core
             {
 
                 //actions+=/run_action_list,name=summon_tyrant,if=variable.tyrant_ready
-                if (API.CanCast(SummonDemonicTyrant))
+                if (IsCooldowns && API.CanCast(SummonDemonicTyrant))
                 {
                     API.CastSpell(SummonDemonicTyrant);
                     return;
@@ -341,7 +351,7 @@ namespace HyperElk.Core
 
 
                 //actions.summon_tyrant+=/summon_demonic_tyrant
-                if (API.CanCast(SummonDemonicTyrant))
+                if (IsCooldowns && API.CanCast(SummonDemonicTyrant))
                 {
                     API.CastSpell(SummonDemonicTyrant);
                     return;
