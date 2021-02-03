@@ -168,7 +168,7 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 10000)
+            if (ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 8000)
             {
                 API.CastSpell(Implosion);
                 ImpWatch.Stop();
@@ -191,7 +191,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/summon_vilefiend,if=cooldown.summon_demonic_tyrant.remains>40|time_to_die<cooldown.summon_demonic_tyrant.remains+25
-                if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && API.SpellCDDuration(SummonDemonicTyrant) >= 400 || API.TargetTimeToDie <= API.SpellCDDuration(SummonDemonicTyrant) + 250)
+                if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && API.SpellCDDuration(SummonDemonicTyrant) >= 4000 || API.TargetTimeToDie <= API.SpellCDDuration(SummonDemonicTyrant) + 2500)
                 {
                     API.CastSpell(SummonVilefiend);
                     return;
