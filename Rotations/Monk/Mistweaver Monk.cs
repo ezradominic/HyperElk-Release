@@ -690,7 +690,7 @@ namespace HyperElk.Core
                 API.CastSpell(LegSweep);
                 return;
             }
-            if (API.CanCast(TouchOfDeath) && API.TargetHealthPercent <= 15)
+            if (API.CanCast(TouchOfDeath))
             {
                 API.CastSpell(TouchOfDeath);
                 return;
@@ -764,7 +764,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (JadeSerpentStatue >= 1 && !API.MacroIsIgnored("Dismiss Totem"))
+            if (JadeSerpentStatue >= 1 && !API.MacroIsIgnored("Dismiss Totem") && !API.PlayerIsInCombat && !API.PlayerIsInCombat)
             {
                 API.CastSpell("Dismiss Totem");
                 return;
