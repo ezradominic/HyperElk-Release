@@ -366,7 +366,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&((cooldown.bonedust_brew.remains>2&(chi>3|cooldown.fists_of_fury.remains>6)&(chi>=5|cooldown.fists_of_fury.remains>2))|energy.time_to_max<=3)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 200 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 600) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 200) || EnergyTimeToMax <= 300) && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && EnergyTimeToMax <= 300 && (API.SpellCDDuration(BonedustBrew) > 200 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 600) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 200) || EnergyTimeToMax <= 300) && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -496,13 +496,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(talent.serenity&cooldown.serenity.remains<3|cooldown.rising_sun_kick.remains>1&cooldown.fists_of_fury.remains>1|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>2|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>3|chi>5|buff.bok_proc.up)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && !CurrenCastFistsOfFury && (TalentSerenty && API.SpellCDDuration(Serenity) < 300 || API.SpellCDDuration(RisingSunKick) > 100 && API.SpellCDDuration(FistsofFury) > 100 || API.SpellCDDuration(RisingSunKick) < 300 && API.SpellCDDuration(FistsofFury) > 300 && API.PlayerCurrentChi == 2 || API.SpellCDDuration(RisingSunKick) > 300 && API.SpellCDDuration(FistsofFury) < 300 && API.PlayerCurrentChi > 3 || API.PlayerCurrentChi > 5 || API.PlayerHasBuff(BlackOutKickBuff)))
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && !CurrenCastFistsOfFury && (TalentSerenty && API.SpellCDDuration(Serenity) < 300 || API.SpellCDDuration(RisingSunKick) > 100 && API.SpellCDDuration(FistsofFury) > 100 || API.SpellCDDuration(RisingSunKick) < 300) && API.SpellCDDuration(FistsofFury) > 300 && API.PlayerCurrentChi == 2 || API.SpellCDDuration(RisingSunKick) > 300 && API.SpellCDDuration(FistsofFury) < 300 && API.PlayerCurrentChi > 3 || API.PlayerCurrentChi > 5 || API.PlayerHasBuff(BlackOutKickBuff))
                 {
                     API.CastSpell(BlackOutKick);
                     return;
                 }
                 //actions.st+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains+(debuff.recently_rushing_tiger_palm.up*20),if=combo_strike&chi.max-chi>=2
-                if (API.CanCast(TigerPalm) && UseLeg == "Keefer's Skyreach" && API.TargetHasDebuff(SkyreachExhaustion) && !LastCastTigerPalm && ChiDeficit >= 2 && !CurrenCastFistsOfFury)
+                if (API.CanCast(TigerPalm) && (API.TargetHasDebuff(SkyreachExhaustion) || ChiDeficit >= 2) && !LastCastTigerPalm && !CurrenCastFistsOfFury)
                 {
                     API.WriteLog("Use Legendary Keefer's Skyreach");
                     API.CastSpell(TigerPalm);
