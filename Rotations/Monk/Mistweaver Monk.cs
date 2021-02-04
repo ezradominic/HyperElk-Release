@@ -113,6 +113,8 @@ namespace HyperElk.Core
         private bool RevivalAoE => UnitBelowHealthPercent(RevivalPercent) >= AoENumber;
         private bool EssenceFontAoE => UnitBelowHealthPercent(EssenceFontPercent) >= AoENumber;
         private bool RefreshingJadeWindAoE => UnitBelowHealthPercent(RefreshingJadeWindPercent) >= AoENumber;
+        private bool ChiBurstAoE => UnitBelowHealthPercent(ChiBurstPercent) >= AoENumber;
+
         private int WeaponsofOrderPercent => numbList[CombatRoutine.GetPropertyInt(WeaponsofOrderAOE)];
         private int EnvelopingMistPercent => numbList[CombatRoutine.GetPropertyInt(EnvelopingMist)];
         private int VivifyPercent => numbList[CombatRoutine.GetPropertyInt(Vivify)];
@@ -172,8 +174,6 @@ namespace HyperElk.Core
         public string[] LegendaryList = new string[] { "None", "Ancient Teachings of the Monastery" };
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
-        int RoleCheck;
-        string Tank;
 
 
 
@@ -283,6 +283,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(EnvelopingMist, 124682);
             CombatRoutine.AddBuff(RenewingMist, 119611);
             CombatRoutine.AddBuff(ThunderFocusTea, 116680);
+            CombatRoutine.AddBuff(RefreshingJadeWind, 196725);
 
             //Debuffs / Detox
             CombatRoutine.AddDebuff("Chilled", 328664);
@@ -389,6 +390,101 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            if (API.PlayerIsInGroup)
+            {
+                for (int i = 0; i < units.Length; i++)
+                {
+                    if (API.PlayerIsInGroup && API.PlayerCanAttackTarget && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.TargetHealthPercent >= 0 && API.TargetIsIncombat)
+                    {
+                        if (isInterrupt && API.CanCast(LegSweep))
+                        {
+                            API.CastSpell(LegSweep);
+                            return;
+                        }
+                        if (API.CanCast(TouchOfDeath))
+                        {
+                            API.CastSpell(TouchOfDeath);
+                            return;
+                        }
+                        if (IsCooldowns && API.CanCast(FallenOrder) && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "Cooldowns")
+                        {
+                            API.CastSpell(FallenOrder);
+                            return;
+                        }
+                        if (API.CanCast(FallenOrder) && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "always")
+                        {
+                            API.CastSpell(FallenOrder);
+                            return;
+                        }
+                        if (IsAOE && API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
+                        {
+                            API.CastSpell(FallenOrder);
+                            return;
+                        }
+                        if (IsCooldowns && API.CanCast(FaelineStomp) && IsCooldowns && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "Cooldowns")
+                        {
+                            API.CastSpell(FaelineStomp);
+                            return;
+                        }
+                        if (IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 && API.CanCast(SpinningCraneKick) && NotChanneling)
+                        {
+                            API.CastSpell(SpinningCraneKick);
+                            return;
+                        }
+                        if (IsAOE && API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
+                        {
+                            API.CastSpell(FaelineStomp);
+                            return;
+                        }
+                        if (API.CanCast(HealingElixir) && TalentHealingElixir && API.PlayerHealthPercent <= HealingElixirPercent)
+                        {
+                            API.CanCast(HealingElixir);
+                            return;
+                        }
+                        if (API.CanCast(DampenHarm) && TalentDampenHarm && API.PlayerHealthPercent <= DampenHarmPercent)
+                        {
+                            API.CanCast(DampenHarm);
+                            return;
+                        }
+                        if (API.CanCast(ExpelHarm) && API.PlayerHealthPercent <= ExpelHarmtPercent)
+                        {
+                            API.CastSpell(ExpelHarm);
+                            return;
+                        }
+                        if (API.CanCast(BlackoutKick))
+                        {
+                            API.CastSpell(BlackoutKick);
+                            return;
+                        }
+                        if (API.CanCast(RisingSunKick) && API.SpellISOnCooldown(RisingSunKick) && !API.SpellISOnCooldown(ThunderFocusTea) && UseThunderFocusTea == "Rising Sun Kick Cooldown")
+                        {
+                            API.CastSpell(ThunderFocusTea);
+                            return;
+                        }
+                        if (API.CanCast(RisingSunKick))
+                        {
+                            API.CastSpell(RisingSunKick);
+                            return;
+                        }
+                        if (API.CanCast(TigerPalm))
+                        {
+                            API.CastSpell(TigerPalm);
+                            return;
+                        }
+                    }
+                    if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored(Assist) && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
+                    {
+                        API.CastSpell(PlayerTargetArray[i]);
+                        API.CastSpell(Assist);
+                        SwapWatch.Restart();
+                        return;
+                    }
+                }
+            }
+
+
+
+
             if (UseLeg == "Ancient Teachings of the Monastery" && LastCastEssenceFont)
             {
                 for (int i = 0; i < units.Length; i++)
@@ -468,6 +564,17 @@ namespace HyperElk.Core
                 for (int i = 0; i < units.Length; i++)
                 {
                     if (API.PlayerLastSpell == units[i] && ChannelSoothingMist)
+                    {
+                        API.CastSpell("stopcasting");
+                        return;
+                    }
+                }
+            }
+            if (API.PlayerIsInRaid)
+            {
+                for (int i = 0; i < raidunits.Length; i++)
+                {
+                    if (API.PlayerLastSpell == raidunits[i] && ChannelSoothingMist)
                     {
                         API.CastSpell("stopcasting");
                         return;
@@ -760,15 +867,14 @@ namespace HyperElk.Core
                 API.CastSpell(TigerPalm);
                 return;
             }
-
         }
         public override void OutOfCombatPulse()
         {
-            if (JadeSerpentStatue >= 1 && !API.MacroIsIgnored("Dismiss Totem") && !API.PlayerIsInCombat && !API.PlayerIsInCombat)
-            {
-                API.CastSpell("Dismiss Totem");
-                return;
-            }
+//            if (JadeSerpentStatue >= 1 && !API.MacroIsIgnored("Dismiss Totem") && !API.PlayerIsInCombat && !API.PlayerIsInCombat)
+//            {
+//                API.CastSpell("Dismiss Totem");
+//                return;
+//            }
             if (OOC)
             {
                 if (AoEHeal)
@@ -866,6 +972,11 @@ namespace HyperElk.Core
                                     API.CastSpell(RaidTargetArray[i]);
                                     return;
                                 }
+                                if (API.UnitHealthPercent(raidunits[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                {
+                                    API.CastSpell(RaidTargetArray[i]);
+                                    return;
+                                }
                                 if (API.UnitHealthPercent(raidunits[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
@@ -877,11 +988,6 @@ namespace HyperElk.Core
                                     return;
                                 }
                                 if (API.UnitHealthPercent(raidunits[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
                                     return;
