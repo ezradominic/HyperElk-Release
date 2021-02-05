@@ -11,6 +11,7 @@
 // v1.9 DoomWinds legendary fix
 // v2.0 Windfury Totem adjustments
 // v2.1 Auto weapon Enchantments
+// v2.2 added option to use Windfury totem while moving
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -104,6 +105,7 @@ namespace HyperElk.Core
         private string UseFireNova => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FireNova)];
         private string UseStormKeeper => CDUsageWithAOE[CombatRoutine.GetPropertyInt(StormKeeper)];
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
+        private bool Windfury => CombatRoutine.GetPropertyBool(WindfuryTotem);
         private bool WeaponEnchant => CombatRoutine.GetPropertyBool("WeaponEnchant");
         private bool DoomWindLeggy => CombatRoutine.GetPropertyBool("Doom Winds");
         private bool SelfLightningShield => CombatRoutine.GetPropertyBool("LightningShield");
@@ -120,7 +122,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.1");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.2");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, 60103, "D3");
@@ -201,6 +203,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
+            CombatRoutine.AddProp(WindfuryTotem, "Windfury Totem only when not moving", false, "Rota will use Windfury Totem only when not moving", "Generic");
             CombatRoutine.AddProp("WeaponEnchant", "WeaponEnchant", true, "Will auto enchant your Weapons", "Generic");
             CombatRoutine.AddProp("Doom Winds", "Doom Winds Legendary", false, "Pls enable if you have that Legendary", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
@@ -367,12 +370,12 @@ namespace HyperElk.Core
                 API.CastSpell("Trinket2");
                 return;
             }
-            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.LastSpellCastInGame != (WindfuryTotem) && API.PlayerBuffTimeRemaining(WindfuryTotem) < 100 && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.LastSpellCastInGame != (WindfuryTotem) && API.PlayerBuffTimeRemaining(WindfuryTotem) < 100 && isMelee && (!API.PlayerIsMoving && Windfury || !Windfury))
             {
                 API.CastSpell(WindfuryTotem);
                 return;
             }
-            if (API.CanCast(WindfuryTotem) && WindfuryToggle && DoomWindLeggy && API.LastSpellCastInGame != (WindfuryTotem) && (API.PlayerDebuffRemainingTime(DoomWinds) == 0 || API.PlayerBuffTimeRemaining(WindfuryTotem) < 100) && API.PlayerMana >= 12 && isMelee && !API.PlayerIsMoving)
+            if (API.CanCast(WindfuryTotem) && WindfuryToggle && DoomWindLeggy && API.LastSpellCastInGame != (WindfuryTotem) && (API.PlayerDebuffRemainingTime(DoomWinds) == 0 || API.PlayerBuffTimeRemaining(WindfuryTotem) < 100) && API.PlayerMana >= 12 && isMelee && (!API.PlayerIsMoving && Windfury || !Windfury))
             {
                 API.CastSpell(WindfuryTotem);
                 return;
@@ -555,7 +558,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/windfury_totem,if=buff.windfury_totem.remains<30
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && (!API.PlayerIsMoving && Windfury || !Windfury))
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
@@ -739,7 +742,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/windfury_totem,if=buff.windfury_totem.remains<30
-                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && !API.PlayerIsMoving)
+                if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && (!API.PlayerIsMoving && Windfury || !Windfury))
                 {
                     API.CastSpell(WindfuryTotem);
                     return;
