@@ -191,7 +191,7 @@ namespace HyperElk.Core
             API.WriteLog("Invoke Chi-Ji, the Red Crane is not supported yet");
             API.WriteLog("Make sure you use a /stopcasting macro and bind it in the macro section of your spellbook");
             API.WriteLog("Use this Macro to dismiss your JadeSerpentStatue and bind it correctly in the Macro tab of your spellbook");
-
+            API.WriteLog("/click TotemFrameTotem1 RightButton");
 
             //Combat
             CombatRoutine.AddSpell(TigerPalm, 100780, "D1");
@@ -596,7 +596,7 @@ namespace HyperElk.Core
                     }
                 }
             }
-            if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && JadeSerpentStatue == 0 && NotCasting && RangeCheck && API.TargetIsIncombat)
+            if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && JadeSerpentStatue == 0 && NotCasting && RangeCheck && API.PlayerIsInCombat)
             {
                 API.CastSpell(SummonJadeSerpentStatue);
                 return;
@@ -624,6 +624,11 @@ namespace HyperElk.Core
                     API.CastSpell(FaelineStomp);
                     return;
                 }
+            }
+            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            {
+                API.CastSpell(SoothingMist);
+                return;
             }
             if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !API.PlayerHasBuff(ThunderFocusTea) && API.PlayerMana >= ManaTeaPercent && TalentManaTea && UseThunderFocusTea == "Cooldowns" && IsCooldowns && API.PlayerIsInCombat)
             {
@@ -666,21 +671,33 @@ namespace HyperElk.Core
                 API.CastSpell(RenewingMist);
                 return;
             }
-            if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.PlayerIsChanneling && ChannelSoothingMist)
             {
-                API.CastSpell(SoothingMist);
-                return;
+                if (!API.PlayerIsChanneling && !ChannelSoothingMist)
+                {
+                    API.CastSpell(SoothingMist);
+                    return;
+                }
+                else if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && IsChanneling && !LastCastTargetChange && !LastCastRenewingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+                {
+                    API.CastSpell(EnvelopingMist);
+                    return;
+                }
             }
-            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && IsChanneling && !LastCastTargetChange && !LastCastRenewingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.PlayerIsChanneling && ChannelSoothingMist)
             {
-                API.CastSpell(EnvelopingMist);
-                return;
+                if (!API.PlayerIsChanneling && !ChannelSoothingMist)
+                {
+                    API.CastSpell(SoothingMist);
+                    return;
+                }                
+                else if (API.CanCast(Vivify) && ChannelSoothingMist && IsChanneling && !LastCastTargetChange && !LastCastRenewingMist && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+                {
+                    API.CastSpell(Vivify);
+                    return;
+                }
             }
-            if (API.CanCast(Vivify) && ChannelSoothingMist && IsChanneling && !LastCastTargetChange && !LastCastRenewingMist && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
-            {
-                API.CastSpell(Vivify);
-                return;
-            }
+
             // Auto Target
             if (IsAutoSwap)
             {
