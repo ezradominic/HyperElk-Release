@@ -91,6 +91,7 @@ namespace HyperElk.Core
 
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
+
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
         private bool IsAutoDetox => API.ToggleIsEnabled("Auto Detox");
@@ -170,6 +171,7 @@ namespace HyperElk.Core
         bool LastCastTargetChange => API.PlayerIsInRaid ? LastCastTargetChangeRaid : LastCastTargetChangeParty;
         bool LastCastStopCast => API.PlayerLastSpell == "stopcasting";
         bool LastCastEssenceFont => API.LastSpellCastInGame == "Essence Font";
+        bool LastCastRenewingMist => API.LastSpellCastInGame == "Renewing Mist";
         private int JadeSerpentStatue => API.PlayerTotemPetDuration();
         public string[] LegendaryList = new string[] { "None", "Ancient Teachings of the Monastery" };
 
@@ -565,27 +567,39 @@ namespace HyperElk.Core
                 {
                     if (API.PlayerLastSpell == units[i] && ChannelSoothingMist)
                     {
-                        API.CastSpell("stopcasting");
+                        API.CastSpell(SoothingMist);
+                        return;
+                    }
+                    if (API.UnitRoleSpec(units[i]) == 999 && API.UnitIsIncombat(units[i]))                  
+                    {
+                        API.CastSpell("Dismiss Totem");
                         return;
                     }
                 }
             }
+
             if (API.PlayerIsInRaid)
             {
                 for (int i = 0; i < raidunits.Length; i++)
                 {
-                    if (API.PlayerLastSpell == raidunits[i] && ChannelSoothingMist)
+                    if (API.PlayerLastSpell == units[i] && ChannelSoothingMist)
                     {
-                        API.CastSpell("stopcasting");
+                        API.CastSpell(SoothingMist);
+                        return;
+                    }
+                    if (API.UnitRoleSpec(units[i]) == 999 && API.UnitIsIncombat(units[i]))
+                    {
+                        API.CastSpell("Dismiss Totem");
                         return;
                     }
                 }
             }
-            if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && JadeSerpentStatue <= 0 && NotCasting && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.TargetIsIncombat && RangeCheck)
+            if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && JadeSerpentStatue == 0 && NotCasting && RangeCheck && API.TargetIsIncombat)
             {
                 API.CastSpell(SummonJadeSerpentStatue);
                 return;
             }
+
             if (AoEHeal)
             {
                 if (API.CanCast(Revival) && RevivalAoE && !API.PlayerCanAttackTarget)
@@ -645,7 +659,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (API.CanCast(RenewingMist) && NotCasting && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.CanCast(RenewingMist) && (ChannelSoothingMist || !ChannelSoothingMist) && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
             {
                 API.CastSpell(RenewingMist);
                 return;
@@ -655,7 +669,7 @@ namespace HyperElk.Core
                 API.CastSpell(SoothingMist);
                 return;
             }
-            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !LastCastStopCast && !LastCastTargetChange && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !LastCastStopCast && !LastCastTargetChange && !LastCastRenewingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
             {
                 API.CastSpell(EnvelopingMist);
                 return;
@@ -792,6 +806,29 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (!API.PlayerIsInGroup || !API.PlayerIsInRaid)
+            {
+                if (API.CanCast(RenewingMist) && (ChannelSoothingMist || !ChannelSoothingMist) && API.PlayerHealthPercent <= RenewingMistPercent && !API.PlayerHasBuff(RenewingMist))
+                {
+                    API.CastSpell(RenewingMist);
+                    return;
+                }
+                if (API.CanCast(SoothingMist) && NotCasting && API.TargetHealthPercent <= SoothingMistPercent)
+                {
+                    API.CastSpell(SoothingMist);
+                    return;
+                }
+                if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !LastCastStopCast && !LastCastTargetChange && !LastCastRenewingMist && !API.TargetHasBuff(EnvelopingMist) && API.PlayerHealthPercent <= EnvelopingMistPercent)
+                {
+                    API.CastSpell(EnvelopingMist);
+                    return;
+                }
+                if (API.CanCast(Vivify) && ChannelSoothingMist && API.PlayerHealthPercent <= VivifyPercent)
+                {
+                    API.CastSpell(Vivify);
+                    return;
+                }
+            }
             if (isInterrupt && API.CanCast(LegSweep))
             {
                 API.CastSpell(LegSweep);
