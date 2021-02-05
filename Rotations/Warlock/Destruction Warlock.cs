@@ -48,7 +48,7 @@ namespace HyperElk.Core
         private string FelDomination = "Fel Domination";
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
-
+        private string SpellLock = "Spell Lock";
 
         //Talents
         private bool TalentFlashover => API.PlayerIsTalentSelected(1, 1);
@@ -157,6 +157,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(SummonSuccubus, 712,"NumPad7");
             CombatRoutine.AddSpell(SummonVoidwalker, 697,"NumPad8");
             CombatRoutine.AddSpell(SummonImp, 688,"NumPad9");
+            CombatRoutine.AddSpell(SpellLock, 19647);
 
             CombatRoutine.AddSpell(ScouringTithe, 312321, "F1");
             CombatRoutine.AddSpell(SoulRot, 325640, "F1");
@@ -226,6 +227,11 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
+            {
+                API.CastSpell(SpellLock);
+                return;
+            }
             if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
             if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)

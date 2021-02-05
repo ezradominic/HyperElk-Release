@@ -44,13 +44,13 @@ namespace HyperElk.Core
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private bool NotCasting => !API.PlayerIsCasting(false);
         bool LastCastTigerPalm => API.PlayerLastSpell == TigerPalm;
-        bool LastCastBlackoutkick => API.PlayerLastSpell == BlackOutKick;
-        bool LastCastSpinningCraneKick => API.PlayerLastSpell == SpinningCraneKick;
-        bool LastCastRisingSunKick => API.PlayerLastSpell == RisingSunKick;
-        bool LastCastChiWave => API.PlayerLastSpell == ChiWave;
+        bool LastCastBlackoutkick => API.LastSpellCastInGame == BlackOutKick;
+        bool LastCastSpinningCraneKick => API.LastSpellCastInGame == SpinningCraneKick;
+        bool LastCastRisingSunKick => API.LastSpellCastInGame == RisingSunKick;
+        bool LastCastChiWave => API.LastSpellCastInGame == ChiWave;
         bool CurrenCastFistsOfFury => API.CurrentCastSpellID("player") == 113656;
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
-        string[] TouchofDeathList = new string[] {"with Cooldowns", "Manual" };
+        string[] TouchofDeathList = new string[] { "with Cooldowns", "Manual" };
         //Trinket1
         private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
         string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
@@ -58,20 +58,20 @@ namespace HyperElk.Core
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         private string UseInvokeXuen => InvokeXuenList[CombatRoutine.GetPropertyInt(InvokeXuen)];
-        string[] InvokeXuenList = new string[] {"with Cooldowns", "Manual" };
+        string[] InvokeXuenList = new string[] { "with Cooldowns", "Manual" };
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
-        string[] WeaponsofOrderList = new string[] {"with Cooldowns", "AOE" };
+        string[] WeaponsofOrderList = new string[] { "with Cooldowns", "AOE" };
         //Necrolords
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
-        string[] BonedustBrewList = new string[] {"with Cooldowns" };
+        string[] BonedustBrewList = new string[] { "with Cooldowns" };
         private string UseBonedustBrew => BonedustBrewList[CombatRoutine.GetPropertyInt(BonedustBrew)];
         //Nigh Fae
-        string[] FaelineStompList = new string[] {"with Cooldowns" };
+        string[] FaelineStompList = new string[] { "with Cooldowns" };
         private string UseFaelineStomp => FaelineStompList[CombatRoutine.GetPropertyInt(FaelineStomp)];
 
         //Venthyr 
-        string[] FallenOrderList = new string[] {"with Cooldowns" };
+        string[] FallenOrderList = new string[] { "with Cooldowns" };
         private string UseFallenOrder => FallenOrderList[CombatRoutine.GetPropertyInt(FallenOrder)];
 
         public string[] LegendaryList = new string[] { "None", "Last Emperor's Capacitor", "Keefer's Skyreach", "Jade Ignition" };
@@ -156,13 +156,13 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(BlackOutKick, 100784, "D2");
             CombatRoutine.AddSpell(SpinningCraneKick, 101546, "D3");
             CombatRoutine.AddSpell(SpearHandStrike, 116705, "D4");
-            CombatRoutine.AddSpell(FistsofFury, 113656,"D5");
-            CombatRoutine.AddSpell(FistsoftheWhiteTiger, 261947,"D6");
-            CombatRoutine.AddSpell(WhirlingDragonPunch, 152175,"D7");
-            CombatRoutine.AddSpell(TouchofDeath, 322109,"D7");
-            CombatRoutine.AddSpell(ChiWave, 115098,"D7");
-            CombatRoutine.AddSpell(StormEarthandFire, 137639,"OemOpenBrackets");
-            CombatRoutine.AddSpell(Serenity, 152173,"OemOpenBrackets");
+            CombatRoutine.AddSpell(FistsofFury, 113656, "D5");
+            CombatRoutine.AddSpell(FistsoftheWhiteTiger, 261947, "D6");
+            CombatRoutine.AddSpell(WhirlingDragonPunch, 152175, "D7");
+            CombatRoutine.AddSpell(TouchofDeath, 322109, "D7");
+            CombatRoutine.AddSpell(ChiWave, 115098, "D7");
+            CombatRoutine.AddSpell(StormEarthandFire, 137639, "OemOpenBrackets");
+            CombatRoutine.AddSpell(Serenity, 152173, "OemOpenBrackets");
 
             CombatRoutine.AddSpell(WeaponsofOrder, 310454, "Oem6");
             CombatRoutine.AddSpell(BonedustBrew, 325216, "Oem6");
@@ -170,16 +170,16 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FaelineStomp, 327104, "Oem6");
             CombatRoutine.AddSpell(FallenOrder, 326860, "Oem6");
 
-            CombatRoutine.AddSpell(ChiBurst, 123986,"D9");
-            CombatRoutine.AddSpell(RisingSunKick, 107428,"D0");
-            CombatRoutine.AddSpell(RushingJadeWind, 116847,"Oem6");
+            CombatRoutine.AddSpell(ChiBurst, 123986, "D9");
+            CombatRoutine.AddSpell(RisingSunKick, 107428, "D0");
+            CombatRoutine.AddSpell(RushingJadeWind, 116847, "Oem6");
             CombatRoutine.AddSpell(CracklingJadeLightning, 172724);
-            CombatRoutine.AddSpell(Vivify, 116670,"NumPad1");
-            CombatRoutine.AddSpell(ExpelHarm, 322101,"NumPad2");
-            CombatRoutine.AddSpell(EnergizingElixir, 115288,"NumPad3");
-            CombatRoutine.AddSpell(DampenHarm, 122278,"F1");
-            CombatRoutine.AddSpell(FortifyingBrew, 243435,"F2");
-            CombatRoutine.AddSpell(InvokeXuen, 123904,"F3");
+            CombatRoutine.AddSpell(Vivify, 116670, "NumPad1");
+            CombatRoutine.AddSpell(ExpelHarm, 322101, "NumPad2");
+            CombatRoutine.AddSpell(EnergizingElixir, 115288, "NumPad3");
+            CombatRoutine.AddSpell(DampenHarm, 122278, "F1");
+            CombatRoutine.AddSpell(FortifyingBrew, 243435, "F2");
+            CombatRoutine.AddSpell(InvokeXuen, 123904, "F3");
             CombatRoutine.AddSpell(TouchofKarma, 122470, "NumPad3");
             CombatRoutine.AddSpell(LegSweep, 119381);
 
@@ -215,27 +215,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-//            API.WriteLog("test" + EnergyTimeToMax);
-            //actions+=/call_action_list,name=cd_sef,if=!talent.serenity
-            if (IsCooldowns && !TalentSerenty && API.PlayerIsInCombat)
-            {
-                Cooldowns();
-            }
-            //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
-            if (IsCooldowns && TalentSerenty && API.PlayerIsInCombat)
-            {
-                CooldownsSerenty();
-            }
-            //actions+=/call_action_list,name=serenity,if=buff.serenity.up
-            if (API.PlayerHasBuff(Serenity) && API.PlayerIsInCombat)
-            {
-                SerentyRotation();
-            }
-            //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
-            if (API.PlayerHasBuff(WeaponsofOrder) && API.PlayerIsInCombat)
-            {
-                WeaponsOfOrderRotation();
-            }
+
         }
 
         public override void CombatPulse()
@@ -312,8 +292,26 @@ namespace HyperElk.Core
                 API.CastSpell(TigerPalm);
                 return;
             }
-
-
+            //actions+=/call_action_list,name=cd_sef,if=!talent.serenity
+            if (IsCooldowns && !TalentSerenty && API.PlayerIsInCombat)
+            {
+                Cooldowns();
+            }
+            //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
+            if (IsCooldowns && TalentSerenty && API.PlayerIsInCombat)
+            {
+                CooldownsSerenty();
+            }
+            //actions+=/call_action_list,name=serenity,if=buff.serenity.up
+            if (API.PlayerHasBuff(Serenity) && API.PlayerIsInCombat)
+            {
+                SerentyRotation();
+            }
+            //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
+            if (API.PlayerHasBuff(WeaponsofOrder) && API.PlayerIsInCombat)
+            {
+                WeaponsOfOrderRotation();
+            }
 
             //actions+=/call_action_list,name=aoe,if=active_enemies>=3
             if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber)
@@ -366,7 +364,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/spinning_crane_kick,if=combo_strike&((cooldown.bonedust_brew.remains>2&(chi>3|cooldown.fists_of_fury.remains>6)&(chi>=5|cooldown.fists_of_fury.remains>2))|energy.time_to_max<=3)
-                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && EnergyTimeToMax <= 300 && (API.SpellCDDuration(BonedustBrew) > 200 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 600) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 200) || EnergyTimeToMax <= 300) && !CurrenCastFistsOfFury)
+                if (API.CanCast(SpinningCraneKick) && !LastCastSpinningCraneKick && (API.SpellCDDuration(BonedustBrew) > 200 && (API.PlayerCurrentChi > 3 || API.SpellCDDuration(FistsofFury) > 600) && (API.PlayerCurrentChi >= 5 || API.SpellCDDuration(FistsofFury) > 200) || EnergyTimeToMax <= 300) && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(SpinningCraneKick);
                     return;
@@ -404,7 +402,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/flying_serpent_kick,if=buff.bok_proc.down,interrupt=1
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo &&  API.PlayerCurrentChi >= 2 && (API.SpellCDDuration(FistsofFury) < 300 || ChiDeficit <= 1) && EnergyTimeToMax < 300) && !CurrenCastFistsOfFury)
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo && API.PlayerCurrentChi >= 2 && (API.SpellCDDuration(FistsofFury) < 300 || ChiDeficit <= 1) && EnergyTimeToMax < 300) && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -452,7 +450,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/rushing_jade_wind,if=buff.rushing_jade_wind.down&active_enemies>1
-                if (API.CanCast(RushingJadeWind) &&TalentRushingJadeWind && !API.PlayerHasBuff(RushingJadeWind) && API.PlayerUnitInMeleeRangeCount > 1 && !CurrenCastFistsOfFury)
+                if (API.CanCast(RushingJadeWind) && TalentRushingJadeWind && !API.PlayerHasBuff(RushingJadeWind) && API.PlayerUnitInMeleeRangeCount > 1 && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(RushingJadeWind);
                     return;
@@ -496,13 +494,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(talent.serenity&cooldown.serenity.remains<3|cooldown.rising_sun_kick.remains>1&cooldown.fists_of_fury.remains>1|cooldown.rising_sun_kick.remains<3&cooldown.fists_of_fury.remains>3&chi>2|cooldown.rising_sun_kick.remains>3&cooldown.fists_of_fury.remains<3&chi>3|chi>5|buff.bok_proc.up)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && !CurrenCastFistsOfFury && (TalentSerenty && API.SpellCDDuration(Serenity) < 300 || API.SpellCDDuration(RisingSunKick) > 100 && API.SpellCDDuration(FistsofFury) > 100 || API.SpellCDDuration(RisingSunKick) < 300) && API.SpellCDDuration(FistsofFury) > 300 && API.PlayerCurrentChi == 2 || API.SpellCDDuration(RisingSunKick) > 300 && API.SpellCDDuration(FistsofFury) < 300 && API.PlayerCurrentChi > 3 || API.PlayerCurrentChi > 5 || API.PlayerHasBuff(BlackOutKickBuff))
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && !CurrenCastFistsOfFury && (TalentSerenty && API.SpellCDDuration(Serenity) < 300 || API.SpellCDDuration(RisingSunKick) > 100 && API.SpellCDDuration(FistsofFury) > 100 || API.SpellCDDuration(RisingSunKick) < 300 && API.SpellCDDuration(FistsofFury) > 300 && API.PlayerCurrentChi == 2 || API.SpellCDDuration(RisingSunKick) > 300 && API.SpellCDDuration(FistsofFury) < 300 && API.PlayerCurrentChi > 3 || API.PlayerCurrentChi >= 5 || API.PlayerHasBuff(BlackOutKickBuff)))
                 {
                     API.CastSpell(BlackOutKick);
                     return;
                 }
                 //actions.st+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains+(debuff.recently_rushing_tiger_palm.up*20),if=combo_strike&chi.max-chi>=2
-                if (API.CanCast(TigerPalm) && (API.TargetHasDebuff(SkyreachExhaustion) || ChiDeficit >= 2) && !LastCastTigerPalm && !CurrenCastFistsOfFury)
+                if (API.CanCast(TigerPalm) && UseLeg == "Keefer's Skyreach" && API.TargetHasDebuff(SkyreachExhaustion) && !LastCastTigerPalm && ChiDeficit >= 2 && !CurrenCastFistsOfFury)
                 {
                     API.WriteLog("Use Legendary Keefer's Skyreach");
                     API.CastSpell(TigerPalm);
@@ -516,7 +514,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&energy.time_to_max<2&(chi.max-chi<=1|prev_gcd.1.tiger_palm)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick  && ChiDeficit <= 1 && !CurrenCastFistsOfFury && EnergyTimeToMax < 200)
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && ChiDeficit <= 1 && !CurrenCastFistsOfFury && EnergyTimeToMax < 200)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
