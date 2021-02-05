@@ -12,6 +12,7 @@
 // v2.0 Windfury Totem adjustments
 // v2.1 Auto weapon Enchantments
 // v2.2 added option to use Windfury totem while moving
+// v2.3 ghost wolf while moving and nothing else to do
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -95,6 +96,7 @@ namespace HyperElk.Core
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public string[] Wolfoptions = new string[] { "only out of Fight", "only in Fight", "both" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with CDS and AOE", "always" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
@@ -105,6 +107,7 @@ namespace HyperElk.Core
         private string UseFireNova => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FireNova)];
         private string UseStormKeeper => CDUsageWithAOE[CombatRoutine.GetPropertyInt(StormKeeper)];
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
+        private string UseAutoWolf => Wolfoptions[CombatRoutine.GetPropertyInt("UseAutoWolf")];
         private bool Windfury => CombatRoutine.GetPropertyBool(WindfuryTotem);
         private bool WeaponEnchant => CombatRoutine.GetPropertyBool("WeaponEnchant");
         private bool DoomWindLeggy => CombatRoutine.GetPropertyBool("Doom Winds");
@@ -122,7 +125,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.2");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.3");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, 60103, "D3");
@@ -202,6 +205,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(StormKeeper, "Use " + StormKeeper, CDUsageWithAOE, "Use " + StormKeeper + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + " on ourselfs", "Generic");
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + " on ourselfs", "Generic");
+            CombatRoutine.AddProp("UseAutoWolf", "Use " + GhostWolf, Wolfoptions, "Use " + GhostWolf + " only in Fight, out of Fight or both", "Generic", 0);
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
             CombatRoutine.AddProp(WindfuryTotem, "Windfury Totem only when not moving", false, "Rota will use Windfury Totem only when not moving", "Generic");
             CombatRoutine.AddProp("WeaponEnchant", "WeaponEnchant", true, "Will auto enchant your Weapons", "Generic");
@@ -291,7 +295,12 @@ namespace HyperElk.Core
         {
             if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
                 return;
-            if (AutoWolf && API.CanCast(GhostWolf) && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
+            if (API.CanCast(HealingSurge) && PlayerLevel >= 4 && API.PlayerMana >= 24 && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && API.PlayerHealthPercent <= HealingSurgeFreeLifePercent)
+            {
+                API.CastSpell(HealingSurge);
+                return;
+            }
+            if (API.CanCast(GhostWolf) && AutoWolf && (UseAutoWolf == "only out of Fight" || UseAutoWolf == "both") && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
             {
                 API.CastSpell(GhostWolf);
                 return;
@@ -563,6 +572,11 @@ namespace HyperElk.Core
                     API.CastSpell(WindfuryTotem);
                     return;
                 }
+                if (API.CanCast(GhostWolf) && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
+                {
+                    API.CastSpell(GhostWolf);
+                    return;
+                }
             }
             //AoE rota
             if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
@@ -745,6 +759,11 @@ namespace HyperElk.Core
                 if (API.CanCast(WindfuryTotem) && PlayerLevel >= 49 && WindfuryToggle && !DoomWindLeggy && API.PlayerMana >= 12 && API.PlayerBuffTimeRemaining(WindfuryTotem) < 3000 && isMelee && (!API.PlayerIsMoving && Windfury || !Windfury))
                 {
                     API.CastSpell(WindfuryTotem);
+                    return;
+                }
+                if (API.CanCast(GhostWolf) && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
+                {
+                    API.CastSpell(GhostWolf);
                     return;
                 }
             }
