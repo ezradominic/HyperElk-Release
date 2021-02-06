@@ -21,6 +21,7 @@
 // v2.9 some small adjustments
 // v3.0 Torghast tweaks
 // v3.1 small hotfix
+// v3.2 new Signet Logic
 
 using System.Linq;
 
@@ -104,6 +105,7 @@ namespace HyperElk.Core
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private string UseHeroicThrow => heroiclist[CombatRoutine.GetPropertyInt(HeroicThrow)];
         private bool IsLineUp => CombatRoutine.GetPropertyBool("LineUp");
+        private bool IsSignet => CombatRoutine.GetPropertyBool("Signet Legendary");
         private int EnragedRegenerationLifePercent => numbList[CombatRoutine.GetPropertyInt(EnragedRegeneration)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
@@ -135,13 +137,16 @@ namespace HyperElk.Core
         private bool UsePiercingHowl => CombatRoutine.GetPropertyBool(PiercingHowl);
         private bool IsMassacre => CombatRoutine.GetPropertyBool("Massacre");
         private bool SlamBuff => CombatRoutine.GetPropertyBool("Slam Buff");
+        bool CanBladestorm => !API.SpellISOnCooldown(Bladestorm) && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle;
 
 
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.1");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.2");
+            API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
+            API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, 23881, "D1");
@@ -183,6 +188,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(Condemn + "MO", "D6");
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
+            CombatRoutine.AddMacro("Cancel Bladestorm", "F10");
 
             //Buffs
             CombatRoutine.AddBuff(Enrage, 184362);
@@ -196,6 +202,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(IgnorePain, 190456);
             CombatRoutine.AddBuff(Slambuff, 322054);
             CombatRoutine.AddBuff(NoLImitCondemn, 329214);
+            CombatRoutine.AddBuff(Bladestorm, 46924);
 
             //Debuff
             CombatRoutine.AddDebuff(Siegebreaker,280773);
@@ -220,6 +227,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(DragonRoar, "Use " + DragonRoar, CDUsageWithAOE, "Use " + DragonRoar + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Bladestorm, "Use " + Bladestorm, CDUsageWithAOE, "Use " + Bladestorm + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, " Lineup Recklessness and Siegebreaker", "Cooldowns");
+            CombatRoutine.AddProp("Signet Legendary", "Signet Legendary", false, " Do you have the Signet Legendary?", "Generic");
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", numbList, " Life percent at which" + EnragedRegeneration + " is used, set to 0 to disable", "Defense", 60);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
@@ -343,12 +351,17 @@ namespace HyperElk.Core
                     API.CastSpell(Rampage);
                     return;
                 }
-                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && !API.PlayerHasBuff(Recklessness) && (!TalentRecklessAbandon || TalentRecklessAbandon && API.PlayerRage < 50) && IsRecklessness)
+                if (API.CanCast(Recklessness) && PlayerLevel >= 38 && (IsSignet && API.PlayerHasBuff(Enrage) && API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber  && IsAOE || IsSignet && API.PlayerHasBuff(Enrage) && !IsAOE || !IsSignet) && !API.PlayerHasBuff(Recklessness) && (!TalentRecklessAbandon || TalentRecklessAbandon && API.PlayerRage < 50) && IsRecklessness)
                 {
                     API.CastSpell(Recklessness);
                     return;
                 }
-                if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff(Whirlwind) && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
+                if (!API.MacroIsIgnored("Cancel Bladestorm") && IsSignet && API.PlayerHasBuff(Bladestorm) && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && !TalentMassacre || API.CanCast(MassacreCondemn, true, false) && PlayerCovenantSettings == "Venthyr" && TalentMassacre || API.CanCast(Execute, true, false) && PlayerCovenantSettings != "Venthyr" && !TalentMassacre || API.CanCast(MassacreExecute, true, false) && PlayerCovenantSettings != "Venthyr" && TalentMassacre))
+                {
+                    API.CastSpell("Cancel Bladestorm");
+                    return;
+                }
+                if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && !CanBladestorm && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff(Whirlwind) && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(Whirlwind);
                     return;
