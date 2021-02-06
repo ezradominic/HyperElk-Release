@@ -22,6 +22,7 @@
 // v3.0 Torghast tweaks
 // v3.1 small hotfix
 // v3.2 new Signet Logic
+// v3.3 small hotfix for cancel Bladestorm
 
 using System.Linq;
 
@@ -144,7 +145,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.2");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.3");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
@@ -356,7 +357,7 @@ namespace HyperElk.Core
                     API.CastSpell(Recklessness);
                     return;
                 }
-                if (!API.MacroIsIgnored("Cancel Bladestorm") && IsSignet && API.PlayerHasBuff(Bladestorm) && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && !TalentMassacre || API.CanCast(MassacreCondemn, true, false) && PlayerCovenantSettings == "Venthyr" && TalentMassacre || API.CanCast(Execute, true, false) && PlayerCovenantSettings != "Venthyr" && !TalentMassacre || API.CanCast(MassacreExecute, true, false) && PlayerCovenantSettings != "Venthyr" && TalentMassacre))
+                if (!API.MacroIsIgnored("Cancel Bladestorm") && IsSignet && API.PlayerHasBuff(Bladestorm) && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && !IsMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)) || API.CanCast(MassacreCondemn, true, false) && PlayerCovenantSettings == "Venthyr" && (TalentMassacre || IsMassacre) && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn))))
                 {
                     API.CastSpell("Cancel Bladestorm");
                     return;
