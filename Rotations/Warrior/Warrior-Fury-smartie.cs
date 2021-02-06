@@ -20,6 +20,7 @@
 // v2.8 Racials and a few other things
 // v2.9 some small adjustments
 // v3.0 Torghast tweaks
+// v3.1 small hotfix
 
 using System.Linq;
 
@@ -90,9 +91,9 @@ namespace HyperElk.Core
         bool WWup => (API.PlayerHasBuff(Whirlwind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber && IsAOE || !IsAOE);
         bool IsRecklessness => UseRecklessness == "with Cooldowns" && IsCooldowns || UseRecklessness == "always";
         bool IsSiegebreaker => UseSiegebreaker == "with Cooldowns" && IsCooldowns || UseSiegebreaker == "always";
-        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns and AoE") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
         bool IsDragonRoar => (UseDragonRoar == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE") && IsCooldowns || UseDragonRoar == "always" || (UseDragonRoar == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
-        bool IsBladestorm => (UseBladestorm == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE") && IsCooldowns || UseBladestorm == "always" || (UseBladestorm == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
+        bool IsBladestorm => (UseBladestorm == "with Cooldowns" || UseBladestorm == "with Cooldowns and AoE") && IsCooldowns || UseBladestorm == "always" || (UseBladestorm == "on AOE" || UseBladestorm == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
         bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
         bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
 
@@ -140,7 +141,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.0");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.1");
 
             //Spells
             CombatRoutine.AddSpell(Bloodthirst, 23881, "D1");
