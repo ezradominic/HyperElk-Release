@@ -80,6 +80,15 @@ namespace HyperElk.Core
         float CastTigerPalm => TigerPalmMath / 100;
         float SpinningCraneKickMath => API.PlayerEnergy + (EnergyRegen * (API.SpellCDDuration(KegSmash) + API.TargetTimeToExec));
         float CastSpinningCraneKick => SpinningCraneKickMath / 100;
+        string[] DetoxList = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Debilitating Plague", "Burning Strain", "Blightbeak", "Corroded Claws", "Wasting Blight", "Hurl Spores", "Corrosive Gunk", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Bewildering Pollen", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen2", "Bramblethorn Entanglement", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Anguished Cries", "Wrack Soul", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom2", "Soul Corruption", "Genetic Alteration", "Withering Blight", "Decaying Blight" };
+        private static bool CanDetoxTarget(string debuff)
+        {
+            return API.PlayerHasDebuff(debuff, false, true);
+        }
+        private static bool CanDetoxTarget(string debuff, string unit)
+        {
+            return API.UnitHasDebuff(debuff, unit, false, true);
+        }
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
         private string BlackOutKick = "Blackout Kick";
@@ -200,7 +209,53 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(LightStagger, 124275);
             CombatRoutine.AddDebuff(ModerateStagger, 124274);
             CombatRoutine.AddDebuff(HeavyStagger, 124273);
-
+            //Debuffs / Detox
+            CombatRoutine.AddDebuff("Chilled", 328664);
+            CombatRoutine.AddDebuff("Frozen Binds", 320788);
+            CombatRoutine.AddDebuff("Clinging Darkness", 323347);
+            CombatRoutine.AddDebuff("Rasping Scream", 324293);
+            CombatRoutine.AddDebuff("Heaving Retch", 320596);
+            CombatRoutine.AddDebuff("Goresplatter", 338353);
+            CombatRoutine.AddDebuff("Slime Injection", 329110);
+            CombatRoutine.AddDebuff("Gripping Infection", 328180);
+            CombatRoutine.AddDebuff("Debilitating Plague", 324652);
+            CombatRoutine.AddDebuff("Burning Strain", 322358);
+            CombatRoutine.AddDebuff("Blightbeak", 327882);
+            CombatRoutine.AddDebuff("Corroded Claws", 320512);
+            CombatRoutine.AddDebuff("Wasting Blight", 320542);
+            CombatRoutine.AddDebuff("Hurl Spores", 328002);
+            CombatRoutine.AddDebuff("Corrosive Gunk", 319070);
+            CombatRoutine.AddDebuff("Cytotoxic Slash", 325552);
+            CombatRoutine.AddDebuff("Venompiercer", 328395);
+            CombatRoutine.AddDebuff("Wretched Phlegm", 334926);
+            CombatRoutine.AddDebuff("Bewildering Pollen", 323137);
+            CombatRoutine.AddDebuff("Repulsive Visage", 328756);
+            CombatRoutine.AddDebuff("Soul Split", 322557);
+            CombatRoutine.AddDebuff("Anima Injection", 325224);
+            CombatRoutine.AddDebuff("Bewildering Pollen2", 321968);
+            CombatRoutine.AddDebuff("Bramblethorn Entanglement", 324859);
+            CombatRoutine.AddDebuff("Debilitating Poison", 326092);
+            CombatRoutine.AddDebuff("Sinlight Visions", 339237);
+            CombatRoutine.AddDebuff("Siphon Life", 325701);
+            CombatRoutine.AddDebuff("Turn to Stone", 326607);
+            CombatRoutine.AddDebuff("Stony Veins", 326632);
+            CombatRoutine.AddDebuff("Cosmic Artifice", 325725);
+            CombatRoutine.AddDebuff("Wailing Grief", 340026);
+            CombatRoutine.AddDebuff("Shadow Word:  Pain", 332707);
+            CombatRoutine.AddDebuff("Anguished Cries", 325885);
+            CombatRoutine.AddDebuff("Wrack Soul", 321038);
+            CombatRoutine.AddDebuff("Dark Lance", 327481);
+            CombatRoutine.AddDebuff("Insidious Venom", 323636);
+            CombatRoutine.AddDebuff("Charged Anima", 338731);
+            CombatRoutine.AddDebuff("Lost Confidence", 322818);
+            CombatRoutine.AddDebuff("Burden of Knowledge", 317963);
+            CombatRoutine.AddDebuff("Internal Strife", 327648);
+            CombatRoutine.AddDebuff("Forced Confession", 328331);
+            CombatRoutine.AddDebuff("Insidious Venom2", 317661);
+            CombatRoutine.AddDebuff("Soul Corruption", 333708);
+            CombatRoutine.AddDebuff("Genetic Alteration", 320248);
+            CombatRoutine.AddDebuff("Withering Blight", 341949);
+            CombatRoutine.AddDebuff("Decaying Blight", 330700);
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -212,6 +267,17 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.CanCast(Detox))
+            {
+                for (int i = 0; i < DetoxList.Length; i++)
+                {
+                    if (CanDetoxTarget(DetoxList[i]))
+                    {
+                        API.CastSpell(Detox);
+                        return;
+                    }
+                }
+            }
             if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
             {
                 API.CastSpell("Healthstone");
