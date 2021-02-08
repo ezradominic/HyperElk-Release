@@ -80,14 +80,10 @@ namespace HyperElk.Core
         float CastTigerPalm => TigerPalmMath / 100;
         float SpinningCraneKickMath => API.PlayerEnergy + (EnergyRegen * (API.SpellCDDuration(KegSmash) + API.TargetTimeToExec));
         float CastSpinningCraneKick => SpinningCraneKickMath / 100;
-        string[] DetoxList = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Debilitating Plague", "Burning Strain", "Blightbeak", "Corroded Claws", "Wasting Blight", "Hurl Spores", "Corrosive Gunk", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Bewildering Pollen", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen2", "Bramblethorn Entanglement", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Anguished Cries", "Wrack Soul", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom2", "Soul Corruption", "Genetic Alteration", "Withering Blight", "Decaying Blight" };
-        private static bool CanDetoxTarget(string debuff)
+        string[] DetoxList = {"Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Debilitating Plague", "Burning Strain", "Blightbeak", "Corroded Claws", "Wasting Blight", "Hurl Spores", "Corrosive Gunk", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Bewildering Pollen", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen2", "Bramblethorn Entanglement", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Anguished Cries", "Wrack Soul", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom2", "Soul Corruption", "Genetic Alteration", "Withering Blight", "Decaying Blight"};
+        private static bool CanDetoxPlayer(string debuff)
         {
             return API.PlayerHasDebuff(debuff, false, true);
-        }
-        private static bool CanDetoxTarget(string debuff, string unit)
-        {
-            return API.UnitHasDebuff(debuff, unit, false, true);
         }
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
@@ -271,7 +267,7 @@ namespace HyperElk.Core
             {
                 for (int i = 0; i < DetoxList.Length; i++)
                 {
-                    if (CanDetoxTarget(DetoxList[i]))
+                    if (CanDetoxPlayer(DetoxList[i]))
                     {
                         API.CastSpell(Detox);
                         return;
@@ -434,6 +430,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/touch_of_death,if=target.health.pct<=15
+            if (API.CanCast(TouchofDeath) && API.TargetHealthPercent <= 15 && (UseTouchofDeath == "with Cooldowns" && IsCooldowns || UseTouchofDeath == "always"))
+            {
+                API.CastSpell(TouchofDeath);
+                return;
+            }
             //actions+=/weapons_of_order
             if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && (API.TargetHealthPercent <= 15 && UseWeaponsofOrder == "with Cooldowns" && IsCooldowns || UseWeaponsofOrder == "always"))
             {
