@@ -21,6 +21,7 @@
 // v2.9 new Bloodtalons logic
 // v3.0 aoe disabled finisher fix
 // v3.1 convoke update
+// v3.2 alot of small fixes and adds
 
 using System.Diagnostics;
 
@@ -90,6 +91,7 @@ namespace HyperElk.Core
         private string MoonfireOwl = "MoonfireOwl";
         private string EntanglingRoots = "Entangling Roots";
         private string MassEntanglement = "Mass Entanglement";
+        private string TasteforBlood = "Taste for Blood";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
@@ -186,7 +188,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.1");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.2");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -295,6 +297,9 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
+            //Conduit
+            CombatRoutine.AddConduit(TasteforBlood);
+
             //Prop
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
@@ -321,7 +326,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Casting: " + API.PlayerCurrentCastTimeRemaining);
+            //API.WriteLog("Conduit: " + API.PlayerIsConduitSelected(TasteforBlood));
             //API.WriteLog("Channeling? : " + API.PlayerIsChanneling);
             //API.WriteLog("save: " + SaveEnergy);
             //API.WriteLog("Lastspell: " + API.LastSpellCastInGame);
@@ -573,6 +578,27 @@ namespace HyperElk.Core
                     return;
                 }
             }
+            if (PlayerCovenantSettings == "Night Fae" && IsAutoForm && IsOwlweave && (API.PlayerUnitInMeleeRangeCount >= 6 && TalentBalanceAffinity && TalentHeartoftheWild && API.CanCast(HeartoftheWild) || API.PlayerUnitInMeleeRangeCount >= 9 && TalentBalanceAffinity))
+            {
+                if (API.SpellCDDuration(ConvoketheSpirits) < 40 && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && API.PlayerComboPoints < 3 && TargetHasDebuff(Rake) && EnergyDefecit >= 20))
+                {
+                    if (API.CanCast(HeartoftheWild) && TalentHeartoftheWild)
+                    {
+                        API.CastSpell(HeartoftheWild);
+                        return;
+                    }
+                    if (!API.PlayerHasBuff(MoonkinForm))
+                    {
+                        API.CastSpell(MoonkinForm);
+                        return;
+                    }
+                }
+                if (API.CanCast(ConvoketheSpirits) && PlayerHasBuff(MoonkinForm) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && API.PlayerComboPoints < 3 && TargetHasDebuff(Rake) && EnergyDefecit >= 20))
+                {
+                    API.CastSpell(ConvoketheSpirits);
+                    return;
+                }
+            }
             if ((!API.PlayerHasBuff(CatForm) && PlayerLevel >= 5) && (API.TargetDebuffRemainingTime(Sunfire) > 200 && IsOwlweave && TalentBalanceAffinity || !IsOwlweave || !TalentBalanceAffinity) && isMelee && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(Soulshape) && IsAutoForm)
             {
                 API.CastSpell(CatForm);
@@ -606,7 +632,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/call_action_list,name=cooldown
-            if (PlayerHasBuff(CatForm))
+            if (PlayerHasBuff(CatForm) && !(PlayerHasBuff(Shadowmeld) || PlayerHasBuff(Prowl)))
             {
                 //Cooldowns
                 //actions.cooldown=feral_frenzy,if=combo_points<3
@@ -652,10 +678,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cooldown+=/convoke_the_spirits,if=(dot.rip.remains>4&combo_points<3&dot.rake.ticking&energy.deficit>=20)|fight_remains<5
-                if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && API.PlayerComboPoints < 3 && TargetHasDebuff(Rake) && EnergyDefecit >= 20))
+                if ((API.PlayerUnitInMeleeRangeCount < 6 || !TalentBalanceAffinity || API.PlayerUnitInMeleeRangeCount < 9 && !TalentHeartoftheWild || !IsAutoForm || !IsOwlweave) && PlayerCovenantSettings == "Night Fae")
                 {
-                    API.CastSpell(ConvoketheSpirits);
-                    return;
+                    if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && API.PlayerComboPoints < 3 && TargetHasDebuff(Rake) && EnergyDefecit >= 20))
+                    {
+                        API.CastSpell(ConvoketheSpirits);
+                        return;
+                    }
                 }
                 //actions.cooldown+=/kindred_spirits,if=buff.tigers_fury.up|(conduit.deep_allegiance.enabled)
                 if (API.CanCast(LoneEmpowerment) && isMelee && PlayerCovenantSettings == "Kyrian" && IsCovenant && API.PlayerBuffTimeRemaining(TigersFury) >= 900 && PlayerHasBuff(LoneSpirit))
@@ -676,13 +705,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cooldown+=/use_items
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
                     return;
                 }
                 //actions.cooldown+=/use_items
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
                     return;
@@ -801,7 +830,7 @@ namespace HyperElk.Core
                                 API.CastSpell(Moonfire);
                                 return;
                             }
-                            if (isThrashMelee && PlayerLevel >= 11 && !PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || PlayerHasBuff(Clearcasting)))
+                            if (isThrashMelee && PlayerLevel >= 11 && API.PlayerIsConduitSelected(TasteforBlood) && !PlayerHasBuff(Prowl) && API.CanCast(Thrash) && (!TargetHasDebuff(Thrash) || API.TargetDebuffRemainingTime(Thrash) <= 300) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || PlayerHasBuff(Clearcasting)))
                             {
                                 API.CastSpell(Thrash);
                                 return;
