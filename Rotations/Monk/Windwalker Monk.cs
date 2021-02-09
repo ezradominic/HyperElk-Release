@@ -382,7 +382,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/chi_burst,if=chi.max-chi>=2
-                if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 2 && !CurrenCastFistsOfFury)
+                if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 2 && !CurrenCastFistsOfFury && !API.PlayerIsMoving && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(ChiBurst);
                     return;
@@ -402,7 +402,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/flying_serpent_kick,if=buff.bok_proc.down,interrupt=1
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo && API.PlayerCurrentChi >= 2 && (API.SpellCDDuration(FistsofFury) < 300 || ChiDeficit <= 1) && EnergyTimeToMax < 300) && !CurrenCastFistsOfFury)
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo && API.PlayerCurrentChi >= 2 && API.SpellCDDuration(FistsofFury) < 300 || ChiDeficit <= 1 && EnergyTimeToMax < 300) && !CurrenCastFistsOfFury)
                 {
                     API.CastSpell(BlackOutKick);
                     return;
@@ -410,7 +410,7 @@ namespace HyperElk.Core
             }
 
             //actions+=/call_action_list,name=st,if=active_enemies<3
-            if (IsAOE || !IsAOE && API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber)
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber || !IsAOE)
             {
                 //actions.st=whirling_dragon_punch,if=raid_event.adds.in>cooldown.whirling_dragon_punch.duration*0.8|raid_event.adds.up
                 if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch && !CurrenCastFistsOfFury)
@@ -468,7 +468,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/chi_burst,if=chi.max-chi>=1&active_enemies=1&raid_event.adds.in>20|chi.max-chi>=2&active_enemies>=2
-                if (API.CanCast(ChiBurst) && !CurrenCastFistsOfFury && TalentChiBurst && (ChiDeficit >= 1 && API.PlayerUnitInMeleeRangeCount == 1 || ChiDeficit >= 2 && API.PlayerUnitInMeleeRangeCount >= 2))
+                if (API.CanCast(ChiBurst) && !CurrenCastFistsOfFury && TalentChiBurst && (ChiDeficit >= 1 && API.PlayerUnitInMeleeRangeCount == 1 || ChiDeficit >= 2 && API.PlayerUnitInMeleeRangeCount >= 2) && !API.PlayerIsMoving && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(ChiBurst);
                     return;
@@ -659,7 +659,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions.weapons_of_order+=/chi_burst,if=chi.max-chi>=(1+active_enemies>1)
-            if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 1 && !CurrenCastFistsOfFury)
+            if (API.CanCast(ChiBurst) && TalentChiBurst && ChiDeficit >= 1 && !CurrenCastFistsOfFury && !API.PlayerIsMoving && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(ChiBurst);
                 return;
