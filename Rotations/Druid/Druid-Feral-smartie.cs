@@ -22,6 +22,7 @@
 // v3.0 aoe disabled finisher fix
 // v3.1 convoke update
 // v3.2 alot of small fixes and adds
+// v3.3 shred fix
 
 using System.Diagnostics;
 
@@ -188,7 +189,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.2");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.3");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -835,7 +836,7 @@ namespace HyperElk.Core
                                 API.CastSpell(Thrash);
                                 return;
                             }
-                            if (isMelee && PlayerLevel >= 5 && (API.TargetDebuffRemainingTime(Thrash) > 300 || PlayerLevel < 11) && !PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || PlayerLevel < 10) && API.CanCast(Shred) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || PlayerHasBuff(Clearcasting)))
+                            if (isMelee && PlayerLevel >= 5 && (API.TargetDebuffRemainingTime(Thrash) > 300 || PlayerLevel < 11 || !API.PlayerIsConduitSelected(TasteforBlood)) && !PlayerHasBuff(Prowl) && (API.TargetDebuffRemainingTime(Rake) > 360 || PlayerLevel < 10) && API.CanCast(Shred) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 40 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 32 || PlayerHasBuff(Clearcasting)))
                             {
                                 API.CastSpell(Shred);
                                 return;
