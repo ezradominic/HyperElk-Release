@@ -28,7 +28,6 @@ namespace HyperElk.Core
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int ChiWaveLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int DampenHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
-        private int Stagger1 => API.PlayerMaxHealth / PurifyingBrewStaggerPercentProc ;
         //Talents
         private bool TalentEyeOfTheTiger => API.PlayerIsTalentSelected(1, 1);
         private bool TalentChiWave => API.PlayerIsTalentSelected(1, 2);
@@ -55,6 +54,8 @@ namespace HyperElk.Core
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
+        private bool OOC => (bool)CombatRoutine.GetProperty("OOC");
+
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
@@ -125,6 +126,7 @@ namespace HyperElk.Core
         private string BlackoutCombo = "Blackout Combo";
         private string Bloodlust = "Bloodlust";
         private string GiftOfTheOx = "Gift of the Ox";
+        private string Paralyse = "Paralyse";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
@@ -157,6 +159,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
 
+            CombatRoutine.AddProp("OOC", "Out of Combat Healing", true, "Use Vivify Out of Combat", "Out of Combat");
 
 
             //Spells
@@ -252,6 +255,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Genetic Alteration", 320248);
             CombatRoutine.AddDebuff("Withering Blight", 341949);
             CombatRoutine.AddDebuff("Decaying Blight", 330700);
+            CombatRoutine.AddDebuff("Infectious Rain", 322232);
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -263,6 +267,11 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.CanCast(Detox) && API.PlayerDebuffStacks("Infectious Rain") >= 3) 
+            {
+                API.CastSpell(Detox);
+                return;
+            }
             if (API.CanCast(Detox))
             {
                 for (int i = 0; i < DetoxList.Length; i++)
@@ -579,9 +588,8 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-
             //Vivify
-            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
+            if (OOC && API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
             {
                 API.CastSpell(Vivify);
                 return;
