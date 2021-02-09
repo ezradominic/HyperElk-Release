@@ -81,6 +81,7 @@ namespace HyperElk.Core
         float CastTigerPalm => TigerPalmMath / 100;
         float SpinningCraneKickMath => API.PlayerEnergy + (EnergyRegen * (API.SpellCDDuration(KegSmash) + API.TargetTimeToExec));
         float CastSpinningCraneKick => SpinningCraneKickMath / 100;
+        bool CurrentCastSpinningCraneKick => API.CurrentCastSpellID("player") == 101546;
         string[] DetoxList = {"Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Debilitating Plague", "Burning Strain", "Blightbeak", "Corroded Claws", "Wasting Blight", "Hurl Spores", "Corrosive Gunk", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Bewildering Pollen", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen2", "Bramblethorn Entanglement", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Anguished Cries", "Wrack Soul", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom2", "Soul Corruption", "Genetic Alteration", "Withering Blight", "Decaying Blight"};
         private static bool CanDetoxPlayer(string debuff)
         {
@@ -483,7 +484,7 @@ namespace HyperElk.Core
             }
             //# Offensively, the APL prioritizes KS on cleave, BoS else, with energy spenders and cds sorted below
             //actions+=/keg_smash,if=spell_targets>=2
-            if (IsAOE && API.CanCast(KegSmash) && API.PlayerUnitInMeleeRangeCount >= 2)
+            if (IsAOE && API.CanCast(KegSmash) && API.PlayerUnitInMeleeRangeCount >= 2 && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(KegSmash);
                 return;
@@ -509,20 +510,20 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/tiger_palm,if=talent.rushing_jade_wind.enabled&buff.blackout_combo.up&buff.rushing_jade_wind.up
-            if (API.CanCast(TigerPalm) && TalentRushingJadeWind && API.PlayerHasBuff(BlackoutCombo) && API.PlayerHasBuff(RushingJadeWind))
+            if (API.CanCast(TigerPalm) && TalentRushingJadeWind && API.PlayerHasBuff(BlackoutCombo) && API.PlayerHasBuff(RushingJadeWind) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(TigerPalm);
                 return;
             }
             //actions+=/breath_of_fire,if=buff.charred_passions.down&runeforge.charred_passions.equipped
             //actions+=/blackout_kick
-            if (API.CanCast(BlackOutKick))
+            if (API.CanCast(BlackOutKick) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(BlackOutKick);
                 return;
             }
             //actions+=/keg_smash
-            if (API.CanCast(KegSmash))
+            if (API.CanCast(KegSmash) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(KegSmash);
                 return;
@@ -541,7 +542,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/rushing_jade_wind,if=buff.rushing_jade_wind.down
-            if (API.CanCast(RushingJadeWind) && TalentRushingJadeWind && !API.PlayerHasBuff(RushingJadeWind))
+            if (API.CanCast(RushingJadeWind) && TalentRushingJadeWind && !API.PlayerHasBuff(RushingJadeWind) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(RushingJadeWind);
                 return;
@@ -549,19 +550,19 @@ namespace HyperElk.Core
             //actions+=/spinning_crane_kick,if=buff.charred_passions.up
 
             //actions+=/breath_of_fire,if=buff.blackout_combo.down&(buff.bloodlust.down|(buff.bloodlust.up&dot.breath_of_fire_dot.refreshable))
-            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && !API.PlayerHasBuff(Bloodlust))
+            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && !API.PlayerHasBuff(Bloodlust) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(BreathOfFire);
                 return;
             }
             //actions+=/chi_burst
-            if (API.CanCast(ChiBurst) && TalentChiBurst)
+            if (API.CanCast(ChiBurst) && TalentChiBurst && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(ChiBurst);
                 return;
             }
             //actions+=/chi_wave
-            if (API.CanCast(ChiWave) && TalentChiWave)
+            if (API.CanCast(ChiWave) && TalentChiWave && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(ChiWave);
                 return;
@@ -573,7 +574,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/tiger_palm,if=!talent.blackout_combo&cooldown.keg_smash.remains>gcd&(energy+(energy.regen*(cooldown.keg_smash.remains+gcd)))>=65
-            if (API.CanCast(TigerPalm) && !TalentBlackoutCombo && API.SpellCDDuration(KegSmash) > API.SpellGCDDuration && CastTigerPalm >= 65)
+            if (API.CanCast(TigerPalm) && !TalentBlackoutCombo && API.SpellCDDuration(KegSmash) > API.SpellGCDDuration && CastTigerPalm >= 65 && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(TigerPalm);
                 return;
