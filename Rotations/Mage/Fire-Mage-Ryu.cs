@@ -66,6 +66,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch PFWatch = new Stopwatch();
         private static readonly Stopwatch ScorchWatch = new Stopwatch();
         private static readonly Stopwatch OpenerWatch = new Stopwatch();
+        private static readonly Stopwatch PyroWatch = new Stopwatch();
         private int BBPercentProc => numbList[CombatRoutine.GetPropertyInt(BB)];
         private int IBPercentProc => numbList[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => numbList[CombatRoutine.GetPropertyInt(MI)];
@@ -309,16 +310,18 @@ namespace HyperElk.Core
                     FBWatch.Stop();
                     API.WriteLog("Fireblast Second Opener Combo");
                 }
-                if (API.CanCast("Pyroblast") && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && InRange && Level >= 12 && OpenerWatch.IsRunning && API.PlayerLastSpell != "Pyroblast")
+                if (API.CanCast("Pyroblast") && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && InRange && Level >= 12 && OpenerWatch.IsRunning && !PyroWatch.IsRunning)
                 {
                     API.CastSpell("Pyroblast");
+                    PyroWatch.Restart();
                     API.WriteLog("First Pyroblast during Opener");
                     return;
                 }
-                if (API.CanCast("Pyroblast") && (API.PlayerLastSpell == "Pyroblast" || API.PlayerLastSpell == Trinket2) && InRange && Level >= 12 && OpenerWatch.IsRunning)
+                if (API.CanCast("Pyroblast") && (API.PlayerLastSpell == "Pyroblast" || API.PlayerLastSpell == Trinket2) && InRange && Level >= 12 && OpenerWatch.IsRunning && PyroWatch.IsRunning)
                 {
                     API.CastSpell("Pyroblast");
                     API.WriteLog("Second Pyroblast during Opener");
+                    PyroWatch.Stop();
                     OpenerWatch.Stop();
                     return;
                 }
@@ -518,11 +521,13 @@ namespace HyperElk.Core
                     API.WriteLog("Flamestrike Targets :" + API.TargetUnitInRangeCount);
                     return;
                 }
-                if (API.CanCast("Pyroblast") && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && InRange && Level >= 12 && !IsForceAOE && (API.PlayerIsMoving || !API.PlayerIsMoving) && (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= 1) && API.PlayerLastSpell != "Pyroblast")
+                if (API.CanCast("Pyroblast") && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && InRange && Level >= 12 && !IsForceAOE && (API.PlayerIsMoving || !API.PlayerIsMoving) && (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= 1) && !OpenerWatch.IsRunning)
                 {
                     API.CastSpell("Pyroblast");
                     ScorchWatch.Stop();
                     PFWatch.Stop();
+                    OpenerWatch.Stop();
+                    PyroWatch.Stop();
                     return;
                 }
                 if (CastingScorch && (API.PlayerHasBuff("Hot Streak!") || API.PlayerHasBuff(Firestorm)) && InRange && Level >= 12 && (API.PlayerIsMoving || !API.PlayerIsMoving) && (!IsAOE || !IsForceAOE || IsAOE && API.TargetUnitInRangeCount == 1) && !API.MacroIsIgnored("Pyroblast" + "Stop"))
@@ -665,7 +670,7 @@ namespace HyperElk.Core
                     API.WriteLog("Scorch while moving");
                     return;
                 }
-                if (API.CanCast("Fireball") && !API.PlayerIsCasting(true) && !API.PlayerIsMoving && InRange && (API.TargetHealthPercent > 30.0 && SearingTouch || !SearingTouch) && (API.SpellCharges("Phoenix Flames") >= 0 && API.SpellCharges("Fire Blast") >= 0 || !API.PlayerHasBuff("Heating Up") || API.SpellCharges("Phoenix Flames") >= 0 && API.SpellCharges("Fire Blast") >= 0 && API.PlayerHasBuff("Heating Up")) && !API.PlayerHasBuff("Combustion") && Level >= 10 && !API.PlayerHasBuff(Firestorm) && (!QuakingFireBall || QuakingFireBall && QuakingHelper))
+                if (API.CanCast("Fireball") && !API.PlayerIsCasting(true) && !API.PlayerIsMoving && InRange && (API.TargetHealthPercent > 30.0 && SearingTouch || !SearingTouch) && (API.SpellCharges("Phoenix Flames") >= 0 && API.SpellCharges("Fire Blast") >= 0 || !API.PlayerHasBuff("Heating Up") || API.SpellCharges("Phoenix Flames") >= 0 && API.SpellCharges("Fire Blast") >= 0 && API.PlayerHasBuff("Heating Up")) && !API.PlayerHasBuff("Combustion") && Level >= 10 && !API.PlayerHasBuff(Firestorm) && (!QuakingFireBall || QuakingFireBall && QuakingHelper) && !API.PlayerHasBuff(HotStreak))
                 {
                     API.CastSpell("Fireball");
                     return;
