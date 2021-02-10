@@ -67,6 +67,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch ScorchWatch = new Stopwatch();
         private static readonly Stopwatch OpenerWatch = new Stopwatch();
         private static readonly Stopwatch PyroWatch = new Stopwatch();
+        private static readonly Stopwatch RuneWatch = new Stopwatch();
         private int BBPercentProc => numbList[CombatRoutine.GetPropertyInt(BB)];
         private int IBPercentProc => numbList[CombatRoutine.GetPropertyInt(IB)];
         private int MIPercentProc => numbList[CombatRoutine.GetPropertyInt(MI)];
@@ -287,6 +288,14 @@ namespace HyperElk.Core
                 PFWatch.Stop();
                 FBWatch.Stop();
                 ScorchWatch.Stop();
+            }
+            if (API.PlayerLastSpell == "Combustion" || API.PlayerLastSpell == RoP)
+            {
+                RuneWatch.Restart();
+            }
+            if (RuneWatch.ElapsedMilliseconds >= 12000)
+            {
+                RuneWatch.Stop();
             }
             #region Combustion Opener
             if (!ChannelingShift && NotChanneling && !API.PlayerSpellonCursor && Opener && IsOpener)
@@ -620,7 +629,7 @@ namespace HyperElk.Core
                     API.WriteLog("Shifting Power /w Combust on AoE");
                     return;
                 }
-                if (API.CanCast(ShiftingPower) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration("Combustion") >= 1600 && Kindling && !API.PlayerHasBuff("Combustion") || API.SpellCDDuration("Combustion") >= 1100 && !API.PlayerHasBuff("Combustion") && !Kindling) && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") <= 1 && (API.PlayerHasBuff("Rune of Power") || !API.PlayerHasBuff("Rune of Power") && !RuneOfPower) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion && !API.PlayerHasBuff(Firestorm) && !API.PlayerIsMoving && (!QuakingShifting || QuakingShifting && QuakingHelper) && API.PlayerLastSpell != "Fire Blast")
+                if (API.CanCast(ShiftingPower) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration("Combustion") >= 1600 && Kindling && !API.PlayerHasBuff("Combustion") || API.SpellCDDuration("Combustion") >= 1100 && !API.PlayerHasBuff("Combustion") && !Kindling) && !API.PlayerHasBuff("Hot Streak!") && API.SpellCharges("Fire Blast") <= 1 && (API.PlayerHasBuff("Rune of Power") && RuneWatch.IsRunning && RuneWatch.ElapsedMilliseconds < 10000 || !API.PlayerHasBuff("Rune of Power") && !RuneOfPower) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && !CastCombustion && !API.PlayerHasBuff(Firestorm) && !API.PlayerIsMoving && (!QuakingShifting || QuakingShifting && QuakingHelper) && API.PlayerLastSpell != "Fire Blast")
                 {
                     API.CastSpell(ShiftingPower);
                     API.WriteLog("Shifting Power on Single Target");
