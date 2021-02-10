@@ -112,6 +112,7 @@ namespace HyperElk.Core
         private bool IsTimeWarp => API.ToggleIsEnabled("TimeWarp");
         private bool IsForceAOE => API.ToggleIsEnabled("ForceAOE");
         private bool IsSmallCD => API.ToggleIsEnabled("SmallCD");
+        private bool IsOpener => API.ToggleIsEnabled("Opener");
         private bool CastRune => API.PlayerLastSpell == "Rune of Power";
         private bool CastFB => API.PlayerLastSpell == "Fire Blast";
         private bool CastPF => API.PlayerLastSpell == "Phoenix Flames";
@@ -153,7 +154,7 @@ namespace HyperElk.Core
             API.WriteLog("Fireblast and Pheonix Flames WILL not be used if you do not have SmallCd's toggle on, or when you have Combustion Buff.");
             API.WriteLog("If you have Trinkets used With Cooldowns, it will only ever cast them while you have Combustion Buff.");
             API.WriteLog("Rotation supports Auto Spellsteal for certain buffs and auto Remove Curse for certian curses along with Mouseover Support for them, please create the correct Mouseover Marco if you wish to use it. If you DONT want it do that, please check Ignore in the keybinds for SpellSteal/Remove Curse");
-            API.WriteLog("Opening Sequence and combust sequence is based on this /castsequence reset=30 Combustion, Fire Blast, Fire Blast, Pyroblast, Pyroblast, Phoenix Flames, Pyroblast, Fire Blast, Pyroblast, Phoenix Flames, Pyroblast, Fire Blast, Pyroblast, Phoenix Flames, Pyroblast -- If you want to use that as your opener THEN PLEASE Change the SETTING in Cooldowns for Opener to TRUE. If you DO SO PLEASE FOLLOW THESE INSTRUCTIONS : Keep Rotation on Pause with Cooldowns/SmallCDS On, Pre-Use your Glad/PVP Int Trinket, Pre-Cast Fireball at your Target, IMMEDIATELY Un-Pause the Rotation and it will do it thing. -- THIS IS ONLY IF YOU ARE NOT RUNNING FIRESTARTER");
+            API.WriteLog("Opening Sequence and combust sequence is based on this /castsequence reset=30 Combustion, Fire Blast, Fire Blast, Pyroblast, Pyroblast, Phoenix Flames, Pyroblast, Fire Blast, Pyroblast, Phoenix Flames, Pyroblast, Fire Blast, Pyroblast, Phoenix Flames, Pyroblast -- If you want to use that as your opener THEN PLEASE Change the SETTING in Cooldowns for Opener to TRUE and USE THE TOGGLE. If you DO SO PLEASE FOLLOW THESE INSTRUCTIONS : Keep Rotation on Pause with Cooldowns/SmallCDS On, Pre-Use your Glad/PVP Int Trinket, Pre-Cast Fireball at your Target, IMMEDIATELY Un-Pause the Rotation and it will do it thing. -- THIS IS ONLY IF YOU ARE NOT RUNNING FIRESTARTER -- Opener is only for Single Target");
             //Buff
             CombatRoutine.AddBuff("Heating Up", 48107);
             CombatRoutine.AddBuff("Pyroclasm", 269651);
@@ -237,6 +238,7 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("TimeWarp");
             CombatRoutine.AddToggle("ForceAOE");
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Opener");
 
 
             //Prop
@@ -287,7 +289,7 @@ namespace HyperElk.Core
                 ScorchWatch.Stop();
             }
             #region Combustion Opener
-            if (!ChannelingShift && NotChanneling && !API.PlayerSpellonCursor && Opener)
+            if (!ChannelingShift && NotChanneling && !API.PlayerSpellonCursor && Opener && IsOpener)
             {
                 if (API.CanCast("Combustion") && Level >= 29 && (!API.PlayerIsMoving || API.PlayerIsMoving) && API.SpellCharges("Fire Blast") > 2 && CastingFireball && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29 && !API.PlayerHasBuff("Rune of Power") && (FireStarter && API.TargetHealthPercent < 90 || !FireStarter))
                 {
