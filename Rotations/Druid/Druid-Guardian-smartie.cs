@@ -10,6 +10,8 @@
 // v1.8 mouseover moonfire added
 // v1.9 racials and a few other fixes
 // v2.0 Growl added for torghast anima power
+// v2.1 convoke update
+// v2.2 convoke/berserk fix
 
 namespace HyperElk.Core
 {
@@ -105,7 +107,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.0");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.2");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -323,13 +325,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.bear+=/convoke_the_spirits,if=!druid.catweave_bear&!druid.owlweave_bear
-                if (API.CanCast(ConvoketheSpirits) && isMelee && !API.PlayerIsMoving && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;
                 }
                 //actions.bear+=/berserk_bear,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
-                if (API.CanCast(Berserk) && !TalentIncarnation && isMelee && IsBerserk)
+                if (API.CanCast(Berserk) && !TalentIncarnation && (PlayerCovenantSettings != "Night Fae" || PlayerCovenantSettings == "Night Fae" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) >= 200 || !IsCovenant) && isMelee && IsBerserk)
                 {
                     API.CastSpell(Berserk);
                     return;

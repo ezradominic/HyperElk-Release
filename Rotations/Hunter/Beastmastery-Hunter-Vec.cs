@@ -238,6 +238,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            //API.WriteLog("debug: "  + API.SpellCharges(Barbed_Shot) +" " + API.SpellChargeCD(Barbed_Shot)+" " + API.SpellISOnCooldown(Bestial_Wrath));
             //API.WriteLog("MS  " + FocusRegen);
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
@@ -505,7 +506,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //cleave->add_action("barbed_shot,target_if=min:dot.barbed_shot.remains,if=full_recharge_time<gcd&cooldown.bestial_wrath.remains|cooldown.bestial_wrath.remains<12+gcd&talent.scent_of_blood");
-                    else if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && (API.SpellCharges(Barbed_Shot) == 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath) || API.SpellCDDuration(Bestial_Wrath) < 1200 + gcd && Talent_ScentOfBlood))
+                    else if (API.CanCast(Barbed_Shot) && (!BarbedShotPetInRange && InRange || BarbedShotPetInRange && API.TargetUnitInRangeCount > 0) && API.PlayerLevel >= 12 && (API.SpellCharges(Barbed_Shot) >= 1 && API.SpellChargeCD(Barbed_Shot) < gcd && API.SpellISOnCooldown(Bestial_Wrath) || API.SpellCDDuration(Bestial_Wrath) < 1200 + gcd && Talent_ScentOfBlood))
                     {
                         API.CastSpell(Barbed_Shot);
                         return;

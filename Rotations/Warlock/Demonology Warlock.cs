@@ -168,11 +168,21 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
-            if (ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 10000)
+            if (ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 8000)
             {
                 API.CastSpell(Implosion);
                 ImpWatch.Stop();
                 ImpWatch.Reset();
+                return;
+            }
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
+            {
+                API.CastSpell(DrainLife);
+                return;
+            }
+            if (API.PlayerHasPet && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel))
+            {
+                API.CastSpell(HealthFunnel);
                 return;
             }
             rotation();
@@ -185,13 +195,13 @@ namespace HyperElk.Core
             {
 
                 //actions+=/run_action_list,name=summon_tyrant,if=variable.tyrant_ready
-                if (API.CanCast(SummonDemonicTyrant))
+                if (IsCooldowns && API.CanCast(SummonDemonicTyrant))
                 {
                     API.CastSpell(SummonDemonicTyrant);
                     return;
                 }
                 //actions+=/summon_vilefiend,if=cooldown.summon_demonic_tyrant.remains>40|time_to_die<cooldown.summon_demonic_tyrant.remains+25
-                if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && API.SpellCDDuration(SummonDemonicTyrant) >= 400 || API.TargetTimeToDie <= API.SpellCDDuration(SummonDemonicTyrant) + 250)
+                if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && API.SpellCDDuration(SummonDemonicTyrant) >= 4000 || API.TargetTimeToDie <= API.SpellCDDuration(SummonDemonicTyrant) + 2500)
                 {
                     API.CastSpell(SummonVilefiend);
                     return;
@@ -341,7 +351,7 @@ namespace HyperElk.Core
 
 
                 //actions.summon_tyrant+=/summon_demonic_tyrant
-                if (API.CanCast(SummonDemonicTyrant))
+                if (IsCooldowns && API.CanCast(SummonDemonicTyrant))
                 {
                     API.CastSpell(SummonDemonicTyrant);
                     return;

@@ -28,7 +28,6 @@ namespace HyperElk.Core
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int ChiWaveLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int DampenHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
-        private int Stagger1 => API.PlayerMaxHealth / PurifyingBrewStaggerPercentProc ;
         //Talents
         private bool TalentEyeOfTheTiger => API.PlayerIsTalentSelected(1, 1);
         private bool TalentChiWave => API.PlayerIsTalentSelected(1, 2);
@@ -55,6 +54,8 @@ namespace HyperElk.Core
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
+        private bool OOC => (bool)CombatRoutine.GetProperty("OOC");
+
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
@@ -80,6 +81,12 @@ namespace HyperElk.Core
         float CastTigerPalm => TigerPalmMath / 100;
         float SpinningCraneKickMath => API.PlayerEnergy + (EnergyRegen * (API.SpellCDDuration(KegSmash) + API.TargetTimeToExec));
         float CastSpinningCraneKick => SpinningCraneKickMath / 100;
+        bool CurrentCastSpinningCraneKick => API.CurrentCastSpellID("player") == 101546;
+        string[] DetoxList = {"Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Debilitating Plague", "Burning Strain", "Blightbeak", "Corroded Claws", "Wasting Blight", "Hurl Spores", "Corrosive Gunk", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Bewildering Pollen", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen2", "Bramblethorn Entanglement", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Anguished Cries", "Wrack Soul", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom2", "Soul Corruption", "Genetic Alteration", "Withering Blight", "Decaying Blight"};
+        private static bool CanDetoxPlayer(string debuff)
+        {
+            return API.PlayerHasDebuff(debuff, false, true);
+        }
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
         private string BlackOutKick = "Blackout Kick";
@@ -120,6 +127,7 @@ namespace HyperElk.Core
         private string BlackoutCombo = "Blackout Combo";
         private string Bloodlust = "Bloodlust";
         private string GiftOfTheOx = "Gift of the Ox";
+        private string Paralyse = "Paralyse";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
@@ -152,6 +160,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
 
+            CombatRoutine.AddProp("OOC", "Out of Combat Healing", true, "Use Vivify Out of Combat", "Out of Combat");
 
 
             //Spells
@@ -200,7 +209,54 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(LightStagger, 124275);
             CombatRoutine.AddDebuff(ModerateStagger, 124274);
             CombatRoutine.AddDebuff(HeavyStagger, 124273);
-
+            //Debuffs / Detox
+            CombatRoutine.AddDebuff("Chilled", 328664);
+            CombatRoutine.AddDebuff("Frozen Binds", 320788);
+            CombatRoutine.AddDebuff("Clinging Darkness", 323347);
+            CombatRoutine.AddDebuff("Rasping Scream", 324293);
+            CombatRoutine.AddDebuff("Heaving Retch", 320596);
+            CombatRoutine.AddDebuff("Goresplatter", 338353);
+            CombatRoutine.AddDebuff("Slime Injection", 329110);
+            CombatRoutine.AddDebuff("Gripping Infection", 328180);
+            CombatRoutine.AddDebuff("Debilitating Plague", 324652);
+            CombatRoutine.AddDebuff("Burning Strain", 322358);
+            CombatRoutine.AddDebuff("Blightbeak", 327882);
+            CombatRoutine.AddDebuff("Corroded Claws", 320512);
+            CombatRoutine.AddDebuff("Wasting Blight", 320542);
+            CombatRoutine.AddDebuff("Hurl Spores", 328002);
+            CombatRoutine.AddDebuff("Corrosive Gunk", 319070);
+            CombatRoutine.AddDebuff("Cytotoxic Slash", 325552);
+            CombatRoutine.AddDebuff("Venompiercer", 328395);
+            CombatRoutine.AddDebuff("Wretched Phlegm", 334926);
+            CombatRoutine.AddDebuff("Bewildering Pollen", 323137);
+            CombatRoutine.AddDebuff("Repulsive Visage", 328756);
+            CombatRoutine.AddDebuff("Soul Split", 322557);
+            CombatRoutine.AddDebuff("Anima Injection", 325224);
+            CombatRoutine.AddDebuff("Bewildering Pollen2", 321968);
+            CombatRoutine.AddDebuff("Bramblethorn Entanglement", 324859);
+            CombatRoutine.AddDebuff("Debilitating Poison", 326092);
+            CombatRoutine.AddDebuff("Sinlight Visions", 339237);
+            CombatRoutine.AddDebuff("Siphon Life", 325701);
+            CombatRoutine.AddDebuff("Turn to Stone", 326607);
+            CombatRoutine.AddDebuff("Stony Veins", 326632);
+            CombatRoutine.AddDebuff("Cosmic Artifice", 325725);
+            CombatRoutine.AddDebuff("Wailing Grief", 340026);
+            CombatRoutine.AddDebuff("Shadow Word:  Pain", 332707);
+            CombatRoutine.AddDebuff("Anguished Cries", 325885);
+            CombatRoutine.AddDebuff("Wrack Soul", 321038);
+            CombatRoutine.AddDebuff("Dark Lance", 327481);
+            CombatRoutine.AddDebuff("Insidious Venom", 323636);
+            CombatRoutine.AddDebuff("Charged Anima", 338731);
+            CombatRoutine.AddDebuff("Lost Confidence", 322818);
+            CombatRoutine.AddDebuff("Burden of Knowledge", 317963);
+            CombatRoutine.AddDebuff("Internal Strife", 327648);
+            CombatRoutine.AddDebuff("Forced Confession", 328331);
+            CombatRoutine.AddDebuff("Insidious Venom2", 317661);
+            CombatRoutine.AddDebuff("Soul Corruption", 333708);
+            CombatRoutine.AddDebuff("Genetic Alteration", 320248);
+            CombatRoutine.AddDebuff("Withering Blight", 341949);
+            CombatRoutine.AddDebuff("Decaying Blight", 330700);
+            CombatRoutine.AddDebuff("Infectious Rain", 322232);
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -212,6 +268,22 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.CanCast(Detox) && API.PlayerDebuffStacks("Infectious Rain") >= 3) 
+            {
+                API.CastSpell(Detox);
+                return;
+            }
+            if (API.CanCast(Detox))
+            {
+                for (int i = 0; i < DetoxList.Length; i++)
+                {
+                    if (CanDetoxPlayer(DetoxList[i]))
+                    {
+                        API.CastSpell(Detox);
+                        return;
+                    }
+                }
+            }
             if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
             {
                 API.CastSpell("Healthstone");
@@ -368,6 +440,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/touch_of_death,if=target.health.pct<=15
+            if (API.CanCast(TouchofDeath) && API.TargetHealthPercent <= 15 && (UseTouchofDeath == "with Cooldowns" && IsCooldowns || UseTouchofDeath == "always"))
+            {
+                API.CastSpell(TouchofDeath);
+                return;
+            }
             //actions+=/weapons_of_order
             if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && (API.TargetHealthPercent <= 15 && UseWeaponsofOrder == "with Cooldowns" && IsCooldowns || UseWeaponsofOrder == "always"))
             {
@@ -407,7 +484,7 @@ namespace HyperElk.Core
             }
             //# Offensively, the APL prioritizes KS on cleave, BoS else, with energy spenders and cds sorted below
             //actions+=/keg_smash,if=spell_targets>=2
-            if (IsAOE && API.CanCast(KegSmash) && API.PlayerUnitInMeleeRangeCount >= 2)
+            if (IsAOE && API.CanCast(KegSmash) && API.PlayerUnitInMeleeRangeCount >= 2 && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(KegSmash);
                 return;
@@ -433,20 +510,20 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/tiger_palm,if=talent.rushing_jade_wind.enabled&buff.blackout_combo.up&buff.rushing_jade_wind.up
-            if (API.CanCast(TigerPalm) && TalentRushingJadeWind && API.PlayerHasBuff(BlackoutCombo) && API.PlayerHasBuff(RushingJadeWind))
+            if (API.CanCast(TigerPalm) && TalentRushingJadeWind && API.PlayerHasBuff(BlackoutCombo) && API.PlayerHasBuff(RushingJadeWind) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(TigerPalm);
                 return;
             }
             //actions+=/breath_of_fire,if=buff.charred_passions.down&runeforge.charred_passions.equipped
             //actions+=/blackout_kick
-            if (API.CanCast(BlackOutKick))
+            if (API.CanCast(BlackOutKick) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(BlackOutKick);
                 return;
             }
             //actions+=/keg_smash
-            if (API.CanCast(KegSmash))
+            if (API.CanCast(KegSmash) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(KegSmash);
                 return;
@@ -465,7 +542,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/rushing_jade_wind,if=buff.rushing_jade_wind.down
-            if (API.CanCast(RushingJadeWind) && TalentRushingJadeWind && !API.PlayerHasBuff(RushingJadeWind))
+            if (API.CanCast(RushingJadeWind) && TalentRushingJadeWind && !API.PlayerHasBuff(RushingJadeWind) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(RushingJadeWind);
                 return;
@@ -473,19 +550,19 @@ namespace HyperElk.Core
             //actions+=/spinning_crane_kick,if=buff.charred_passions.up
 
             //actions+=/breath_of_fire,if=buff.blackout_combo.down&(buff.bloodlust.down|(buff.bloodlust.up&dot.breath_of_fire_dot.refreshable))
-            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && !API.PlayerHasBuff(Bloodlust))
+            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && !API.PlayerHasBuff(Bloodlust) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(BreathOfFire);
                 return;
             }
             //actions+=/chi_burst
-            if (API.CanCast(ChiBurst) && TalentChiBurst)
+            if (API.CanCast(ChiBurst) && TalentChiBurst && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(ChiBurst);
                 return;
             }
             //actions+=/chi_wave
-            if (API.CanCast(ChiWave) && TalentChiWave)
+            if (API.CanCast(ChiWave) && TalentChiWave && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(ChiWave);
                 return;
@@ -497,7 +574,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/tiger_palm,if=!talent.blackout_combo&cooldown.keg_smash.remains>gcd&(energy+(energy.regen*(cooldown.keg_smash.remains+gcd)))>=65
-            if (API.CanCast(TigerPalm) && !TalentBlackoutCombo && API.SpellCDDuration(KegSmash) > API.SpellGCDDuration && CastTigerPalm >= 65)
+            if (API.CanCast(TigerPalm) && !TalentBlackoutCombo && API.SpellCDDuration(KegSmash) > API.SpellGCDDuration && CastTigerPalm >= 65 && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -512,9 +589,8 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-
             //Vivify
-            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
+            if (OOC && API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
             {
                 API.CastSpell(Vivify);
                 return;
