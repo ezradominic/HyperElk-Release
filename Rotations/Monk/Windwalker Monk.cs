@@ -77,7 +77,7 @@ namespace HyperElk.Core
         public string[] LegendaryList = new string[] { "None", "Last Emperor's Capacitor", "Keefer's Skyreach", "Jade Ignition" };
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
-
+        int FocusHelper = 0;
 
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
@@ -120,6 +120,7 @@ namespace HyperElk.Core
         private string Stopcast = "Stopcast";
         private string ChiEnergy = "Chi Energy";
         private string CoordinatedOffensive = "Coordinated Offensive";
+        private string Fixate = "Storm,  Earth,  and Fire:  Fixate";
 
         private string LegSweep = "Leg Sweep";
 
@@ -162,6 +163,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TouchofDeath, 322109, "D7");
             CombatRoutine.AddSpell(ChiWave, 115098, "D7");
             CombatRoutine.AddSpell(StormEarthandFire, 137639, "OemOpenBrackets");
+            CombatRoutine.AddSpell(Fixate, 221771);
             CombatRoutine.AddSpell(Serenity, 152173, "OemOpenBrackets");
 
             CombatRoutine.AddSpell(WeaponsofOrder, 310454, "Oem6");
@@ -183,6 +185,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TouchofKarma, 122470, "NumPad3");
             CombatRoutine.AddSpell(LegSweep, 119381);
 
+
             //Macro
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
@@ -192,7 +195,7 @@ namespace HyperElk.Core
             //Buffs
             CombatRoutine.AddBuff(BlackOutKickBuff, 116768);
             CombatRoutine.AddBuff(DanceofChiJi, 325202);
-            CombatRoutine.AddBuff("Storm,  Earth,  and Fire", 137639);
+            CombatRoutine.AddBuff(StormEarthandFire, 137639);
             CombatRoutine.AddBuff(Serenity, 152173);
             CombatRoutine.AddBuff(WeaponsofOrder, 310454);
             CombatRoutine.AddBuff(RushingJadeWind, 116847);
@@ -215,11 +218,17 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-
         }
 
         public override void CombatPulse()
         {
+            if (API.PlayerHasBuff(StormEarthandFire) && API.CanCast(Fixate) &&  FocusHelper == 0 && API.PlayerUnitInMeleeRangeCount == 1)
+            {
+                API.CastSpell(Fixate);
+                API.WriteLog("StormEarthandFire Focus helper started");
+                FocusHelper++;
+                return;
+            }
             if (API.PlayerIsCC(CCList.STUN) && PlayerRaceSettings == "Human" && API.CanCast(RacialSpell1))
             {
                 API.CastSpell(RacialSpell1);
@@ -821,18 +830,21 @@ namespace HyperElk.Core
             if (API.CanCast(StormEarthAndFire) && API.PlayerIsConduitSelected(CoordinatedOffensive))
             {
                 API.CastSpell(StormEarthAndFire);
+                FocusHelper = 0;
                 return;
             }
             //actions.cd_sef+=/storm_earth_and_fire,if=cooldown.storm_earth_and_fire.charges=2|fight_remains<20|(raid_event.adds.remains>15|!covenant.kyrian&((raid_event.adds.in>cooldown.storm_earth_and_fire.full_recharge_time|!raid_event.adds.exists)&(cooldown.invoke_xuen_the_white_tiger.remains>cooldown.storm_earth_and_fire.full_recharge_time|variable.hold_xuen))&cooldown.fists_of_fury.remains<=9&chi>=2&cooldown.whirling_dragon_punch.remains<=12)
             if (API.CanCast(StormEarthandFire))
             {
                 API.CastSpell(StormEarthandFire);
+                FocusHelper = 0;
                 return;
             }
             //actions.cd_sef+=/storm_earth_and_fire,if=covenant.kyrian&(buff.weapons_of_order.up|(fight_remains<cooldown.weapons_of_order.remains|cooldown.weapons_of_order.remains>cooldown.storm_earth_and_fire.full_recharge_time)&cooldown.fists_of_fury.remains<=9&chi>=2&cooldown.whirling_dragon_punch.remains<=12)
             if (API.CanCast(StormEarthandFire) && PlayerCovenantSettings == "Kyrian" && API.PlayerHasBuff(WeaponsofOrder))
             {
                 API.CastSpell(StormEarthandFire);
+                FocusHelper = 0;
                 return;
             }
             //actions.cd_sef+=/touch_of_karma,if=fight_remains>159|pet.xuen_the_white_tiger.active|variable.hold_xuen
