@@ -135,7 +135,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(PWFortitude, 21562, "F6");
             CombatRoutine.AddSpell(PWShield, 17, "F7");
             CombatRoutine.AddSpell(Mindgames, 323701, "0");
-            CombatRoutine.AddSpell(UnholyNova, 347788, "0");
+            CombatRoutine.AddSpell(UnholyNova, 324724, "0");
 
             CombatRoutine.AddMacro(SWPain + "MO", "D2");
             CombatRoutine.AddMacro(VampiricTouch + "MO", "D6");
