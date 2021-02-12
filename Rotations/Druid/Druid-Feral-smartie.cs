@@ -23,6 +23,7 @@
 // v3.1 convoke update
 // v3.2 alot of small fixes and adds
 // v3.3 shred fix
+// v3.4 owlweave update
 
 using System.Diagnostics;
 
@@ -93,6 +94,11 @@ namespace HyperElk.Core
         private string EntanglingRoots = "Entangling Roots";
         private string MassEntanglement = "Mass Entanglement";
         private string TasteforBlood = "Taste for Blood";
+        private string AncientHysteria= "Ancient Hysteria";
+        private string TimeWarp= "Time Warp";
+        private string Bloodlust = "Bloodlust";
+        private string Heroism = "Heroism";
+        private string DrumsofDeathlyFerocity = "Drums of Deathly Ferocity";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
@@ -130,7 +136,9 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, true, false);
         }
-        bool WeaveConditions => (API.PlayerEnergy < 40 && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (API.TargetDebuffRemainingTime(Rip) > 450 || API.PlayerComboPoints < 5) && API.SpellCDDuration(TigersFury) >= 650 && API.PlayerBuffStacks(Clearcasting) < 1 && !PlayerHasBuff(ApexPredatorsCraving) && (API.PlayerBuffTimeRemaining(Incarnation) > 500 && TalentIncarnation || !TalentIncarnation && API.PlayerBuffTimeRemaining(Berserk) > 500 || !IncaBerserk) && (API.SpellISOnCooldown(ConvoketheSpirits) || PlayerCovenantSettings != "Night Fae"));
+        bool isBloodlust => PlayerHasBuff(AncientHysteria) || PlayerHasBuff(TimeWarp) || PlayerHasBuff(Bloodlust) || PlayerHasBuff(Heroism) || PlayerHasBuff(DrumsofDeathlyFerocity);
+        //actions.owlweave+=/moonkin_form,if=energy<30&dot.rip.remains>4.5&(cooldown.tigers_fury.remains>=6.5|runeforge.cateye_curio)&buff.clearcasting.stack<1&!buff.apex_predators_craving.up&!buff.bloodlust.up&!buff.bs_inc.up&(cooldown.convoke_the_spirits.remains>6.5|!covenant.night_fae)
+        bool WeaveConditions => (API.PlayerEnergy < 30 && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && API.TargetDebuffRemainingTime(Rip) > 450 && API.SpellCDDuration(TigersFury) >= 650 && API.PlayerBuffStacks(Clearcasting) < 1 && !PlayerHasBuff(ApexPredatorsCraving) && !isBloodlust && !IncaBerserk && (API.SpellCDDuration(ConvoketheSpirits) >= 650 || PlayerCovenantSettings != "Night Fae"));
         //actions+=/pool_resource,if=talent.bloodtalons.enabled&buff.bloodtalons.down&(energy+3.5*energy.regen+(40*buff.clearcasting.up))<(115-23*buff.incarnation_king_of_the_jungle.up)&active_bt_triggers=0
         bool BloodtalonsEnergie => TalentBloodtalons && !PlayerHasBuff(Bloodtalons) && (API.PlayerEnergy + 3.5 * EnergyRegen + (40 * (PlayerHasBuff(Clearcasting) ? 1 : 0))) < (115 - 23 * (PlayerHasBuff(Incarnation) ? 1 : 0));
         bool SaveEnergy => !PlayerHasBuff(Bloodtalons) && TalentBloodtalons && !bloodtimer.IsRunning;
@@ -184,12 +192,11 @@ namespace HyperElk.Core
         private int KittyFormLifePercent => numbList[CombatRoutine.GetPropertyInt(CatForm)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
-        private bool needheal => PlayerHasBuff(PredatorySwiftness) && API.PlayerHealthPercent <= RegrowthLifePercent && !API.SpellIsIgnored(Regrowth);
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.3");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.4");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -276,6 +283,11 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SuddenAmbush, 340698);
             CombatRoutine.AddBuff(HeartoftheWild, 108291);
             CombatRoutine.AddBuff(MoonkinForm, 197625);
+            CombatRoutine.AddBuff(AncientHysteria, 90355);
+            CombatRoutine.AddBuff(TimeWarp, 80353);
+            CombatRoutine.AddBuff(Bloodlust, 2825);
+            CombatRoutine.AddBuff(Heroism, 32182);
+            CombatRoutine.AddBuff(DrumsofDeathlyFerocity, 172233);
 
             //Debuff
             CombatRoutine.AddDebuff(Rip, 1079);
