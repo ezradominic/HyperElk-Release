@@ -13,6 +13,7 @@
 // v2.1 Echoes of Great Sundering fixed
 // v2.2 Quaking helper added
 // v2.3 Quaking helper fixed
+// v2.4 auto enchant weapon and alot of other small changes
 
 using System.Diagnostics;
 
@@ -61,6 +62,7 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string Quake = "Quake";
         private string Stopcast = "Stopcast Macro";
+        private string FlametongueWeapon = "Flametongue Weapon";
 
         //Talents
         bool TalentEchoingShock => API.PlayerIsTalentSelected(2, 2);
@@ -95,17 +97,17 @@ namespace HyperElk.Core
         bool IsStormElemental => (UseStormElemental == "with Cooldowns" && IsCooldowns || UseStormElemental == "always");
         bool IsEarthElemental => (UseEarthElemental == "with Cooldowns" && IsCooldowns || UseEarthElemental == "always");
         bool IsFireElemental => (UseFireElemental == "with Cooldowns" && IsCooldowns || UseFireElemental == "always");
-        bool IsStormkeeper => (UseStormkeeper == "with Cooldowns" && IsCooldowns || UseStormkeeper == "always" || UseStormkeeper == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsStormkeeper => ((UseStormkeeper == "with Cooldowns" && IsCooldowns || UseStormkeeper == "with CDS and AOE") || UseStormkeeper == "always" || (UseStormkeeper == "on AOE" || UseStormkeeper == "with CDS and AOE") && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
 
-        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsInRange;
-        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsInRange;
+        bool IsCovenant => ((UseCovenant == "with Cooldowns" || UseCovenant == "with CDS and AOE") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with CDS and AOE") && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
+        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "with CDS and AOE") || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with CDS and AOE") && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsInRange;
+        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with CDS and AOE") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with CDS and AOE") && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsInRange;
 
         //CBProperties
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
-        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with CDS and AOE", "always" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseAscendance => CDUsage[CombatRoutine.GetPropertyInt(Ascendance)];
@@ -124,6 +126,7 @@ namespace HyperElk.Core
         private int HealingSurgeLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingSurge)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private bool WeaponEnchant => CombatRoutine.GetPropertyBool("WeaponEnchant");
 
         private static readonly Stopwatch stormwatch = new Stopwatch();
         private static readonly Stopwatch vesperwatch = new Stopwatch();
@@ -136,7 +139,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.3");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.4");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
 
             //Spells
@@ -168,6 +171,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(VesperTotem, 324386, "D1");
             CombatRoutine.AddSpell(FaeTransfusion, 328923, "D1");
             CombatRoutine.AddSpell(ChainHarvest, 320674, "D1");
+            CombatRoutine.AddSpell(FlametongueWeapon, 318038);
 
             //Macros
             CombatRoutine.AddMacro(FlameShock + "MO", "NumPad7");
@@ -215,6 +219,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(FireElemental, "Use " + FireElemental, CDUsage, "Use " + FireElemental + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Stormkeeper, "Use " + Stormkeeper, CDUsageWithAOE, "Use " + Stormkeeper + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("LightningShield", "LightningShield", true, "Put" + LightningShield + "on ourselfs", "Generic");
+            CombatRoutine.AddProp("WeaponEnchant", "WeaponEnchant", true, "Will auto enchant your Weapons", "Generic");
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + "on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancle casts on Quaking", "Generic");
@@ -343,11 +348,21 @@ namespace HyperElk.Core
                 API.CastSpell(EarthShield);
                 return;
             }
+            if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(true) < 30000)
+            {
+                API.CastSpell(FlametongueWeapon);
+                return;
+            }
         }
         private void rotation()
         {
             if (IsInRange)
             {
+                if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(true) < 3000)
+                {
+                    API.CastSpell(FlametongueWeapon);
+                    return;
+                }
                 //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
                 if (PlayerRaceSettings == "Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsInRange && (!TalentAscendance || PlayerHasBuff(Ascendance) || TalentAscendance && API.SpellCDDuration(Ascendance) > 5000))
                 {
