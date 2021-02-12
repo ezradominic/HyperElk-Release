@@ -13,6 +13,7 @@
 // v2.1 Auto weapon Enchantments
 // v2.2 added option to use Windfury totem while moving
 // v2.3 ghost wolf while moving and nothing else to do
+// v2.35 small ghostwolf change
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -122,10 +123,11 @@ namespace HyperElk.Core
 
 
         private static readonly Stopwatch vesperwatch = new Stopwatch();
+        private static readonly Stopwatch movingwatch = new Stopwatch();
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.3");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.35");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, 60103, "D3");
@@ -219,16 +221,33 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Weapons: "+ "Main" +API.PlayerWeaponBuffDuration(true) + "Offhand"+ API.PlayerWeaponBuffDuration(false));
+            //API.WriteLog("check it all: "+ (API.CanCast(GhostWolf) && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && (API.TargetRange > 6 || API.TargetRange == 1) && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving));
             if (!vesperwatch.IsRunning && API.LastSpellCastInGame == VesperTotem)
             {
                 vesperwatch.Restart();
                 API.WriteLog("Starting Vespermwatch.");
             }
+            if (!movingwatch.IsRunning && API.PlayerIsMoving && API.PlayerIsInCombat)
+            {
+                movingwatch.Restart();
+            }
+            if (movingwatch.IsRunning && !API.PlayerIsMoving)
+            {
+                movingwatch.Reset();
+            }
+            if (movingwatch.IsRunning && !API.PlayerIsInCombat)
+            {
+                movingwatch.Reset();
+            }
             if (vesperwatch.IsRunning && vesperwatch.ElapsedMilliseconds > 30000)
             {
                 vesperwatch.Reset();
                 API.WriteLog("Resetting Vespermwatch.");
+            }
+            if (API.CanCast(GhostWolf) && movingwatch.ElapsedMilliseconds > 500 && API.PlayerIsInCombat && !API.PlayerIsMounted && API.PlayerCurrentCastTimeRemaining == 0 && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && !API.PlayerCanAttackTarget && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
+            {
+                API.CastSpell(GhostWolf);
+                return;
             }
         }
         public override void CombatPulse()
@@ -572,7 +591,7 @@ namespace HyperElk.Core
                     API.CastSpell(WindfuryTotem);
                     return;
                 }
-                if (API.CanCast(GhostWolf) && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
+                if (API.CanCast(GhostWolf) && movingwatch.ElapsedMilliseconds > 500 && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && !isMelee && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
                 {
                     API.CastSpell(GhostWolf);
                     return;
@@ -761,7 +780,7 @@ namespace HyperElk.Core
                     API.CastSpell(WindfuryTotem);
                     return;
                 }
-                if (API.CanCast(GhostWolf) && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && PlayerLevel > 10 && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
+                if (API.CanCast(GhostWolf) && movingwatch.ElapsedMilliseconds > 500 && AutoWolf && (UseAutoWolf == "only in Fight" || UseAutoWolf == "both") && !isMelee && !API.PlayerHasBuff(GhostWolf) && !API.PlayerIsMounted && API.PlayerIsMoving)
                 {
                     API.CastSpell(GhostWolf);
                     return;
