@@ -40,6 +40,8 @@ namespace HyperElk.Core
         private string BilescourgeBombers = "Bilescourge Bombers";
         private string SummonFelguard = "Summon Felguard";
         private string FelDomination = "Fel Domination";
+        private string SpellLock = "Spell Lock";
+
 
 
 
@@ -52,6 +54,8 @@ namespace HyperElk.Core
         private bool TalentDemonicStrength => API.PlayerIsTalentSelected(1, 3);
         private bool TalentBilescourgeBombers => API.PlayerIsTalentSelected(1, 2);
         private bool TalentNetherPortal => API.PlayerIsTalentSelected(7, 3);
+        private bool TalentGrimoireFelguard => API.PlayerIsTalentSelected(6, 3);
+        private bool TalentDemonicConsumption => API.PlayerIsTalentSelected(7, 2);
         //Misc
         private static readonly Stopwatch ImpWatch = new Stopwatch();
 
@@ -61,7 +65,7 @@ namespace HyperElk.Core
         //        private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
-
+        private int SoulShards => API.PlayerCurrentSoulShards;
 
 
         //CBProperties
@@ -73,6 +77,9 @@ namespace HyperElk.Core
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private string UseCovenantAbility => CovenantAbilityList[CombatRoutine.GetPropertyInt(CovenantAbility)];
         string[] CovenantAbilityList = new string[] { "None", "always", "with Cooldowns", "AOE" };
+        private static readonly Stopwatch TyrantWatch = new Stopwatch();
+        private static readonly Stopwatch VilefiendWatch = new Stopwatch();
+        private static readonly Stopwatch GrimoireFelguardWatch = new Stopwatch();
 
 
         public override void Initialize()
@@ -117,6 +124,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Summon Succubus", 712, "NumPad7");
             CombatRoutine.AddSpell("Summon Voidwalker", 697, "NumPad8");
             CombatRoutine.AddSpell("Summon Imp", 688, "NumPad9");
+            CombatRoutine.AddSpell(SpellLock, 19647);
 
 
             //Buffs
@@ -126,53 +134,65 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(FelDomination, 333889);
 
             //Debuffs
+            CombatRoutine.AddDebuff(Doom, 603);
         }
 
 
         public override void Pulse()
         {
+            API.WriteLog("Imp Count " + API.PlayerImpCount);
+            if (GrimoireFelguardWatch.IsRunning && GrimoireFelguardWatch.ElapsedMilliseconds >= 17000)
+            {
+                GrimoireFelguardWatch.Reset();
+            }
+            if (VilefiendWatch.IsRunning && VilefiendWatch.ElapsedMilliseconds >= 15000)
+            {
+                VilefiendWatch.Reset();
+            }
+            if (TyrantWatch.IsRunning && TyrantWatch.ElapsedMilliseconds >= 15000)
+            {
+                TyrantWatch.Reset();
+            }
+        }
+
+        public override void CombatPulse()
+        {
             //Summon Imp
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonImp);
                 return;
             }
             //Summon Voidwalker
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
             //Summon Succubus
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && PlayerLevel >= 22)
+            if (API.PlayerHasBuff(FelDomination) && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && PlayerLevel >= 22)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
             //Summon Fellhunter
-            if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && PlayerLevel >= 23)
+            if (API.PlayerHasBuff(FelDomination) && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && PlayerLevel >= 23)
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonFelhunter);
                 return;
             }
-            if (!API.PlayerHasPet && API.PlayerIsInCombat && API.CanCast(FelDomination))
+            if (!API.PlayerHasPet && API.CanCast(FelDomination) && (isMisdirection == "Felhunter" || isMisdirection == "Succubus" || isMisdirection == "Voidwalker" || isMisdirection == "Imp"))
             {
                 API.CastSpell(FelDomination);
                 return;
             }
-        }
-
-        public override void CombatPulse()
-        {
-            if (ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 8000)
+            if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
             {
-                API.CastSpell(Implosion);
-                ImpWatch.Stop();
-                ImpWatch.Reset();
+                API.CastSpell(SpellLock);
                 return;
             }
             if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
@@ -193,180 +213,262 @@ namespace HyperElk.Core
         {
             if (NotMoving && IsRange && NotChanneling && !API.PlayerIsCasting(true))
             {
-
+                //actions=call_action_list,name=off_gcd
+                //actions+=/run_action_list,name=tyrant_prep,if=cooldown.summon_demonic_tyrant.remains<4&!variable.tyrant_ready
+                if (IsCooldowns && API.SpellCDDuration(SummonDemonicTyrant) < 400)
+                {
+                    tyrant_prep();
+                }
                 //actions+=/run_action_list,name=summon_tyrant,if=variable.tyrant_ready
                 if (IsCooldowns && API.CanCast(SummonDemonicTyrant))
                 {
-                    API.CastSpell(SummonDemonicTyrant);
-                    return;
+                    summon_tyrant();
                 }
                 //actions+=/summon_vilefiend,if=cooldown.summon_demonic_tyrant.remains>40|time_to_die<cooldown.summon_demonic_tyrant.remains+25
-                if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && API.SpellCDDuration(SummonDemonicTyrant) >= 4000 || API.TargetTimeToDie <= API.SpellCDDuration(SummonDemonicTyrant) + 2500)
+                if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && (API.SpellCDDuration(SummonDemonicTyrant) > 4000 || API.TargetTimeToDie < API.SpellCDDuration(SummonDemonicTyrant) + 2500))
                 {
                     API.CastSpell(SummonVilefiend);
+                    VilefiendWatch.Start();
                     return;
                 }
                 //actions+=/call_dreadstalkers
-                if (API.CanCast(CallDreadstalkers) && API.PlayerCurrentSoulShards >= 2)
+                if (API.CanCast(CallDreadstalkers) && SoulShards >= 2)
                 {
                     API.CastSpell(CallDreadstalkers);
                     return;
                 }
                 //actions+=/doom,if=refreshable
-                if (TalentDoom && API.CanCast(Doom))
+                if (API.CanCast(Doom) && TalentDoom && !API.TargetHasDebuff(Doom))
                 {
                     API.CastSpell(Doom);
                     return;
                 }
                 //actions+=/demonic_strength
-                if (TalentDemonicStrength && API.CanCast(DemonicStrength))
+                if (API.CanCast(DemonicStrength) && TalentDemonicStrength)
                 {
                     API.CastSpell(DemonicStrength);
                     return;
                 }
                 //actions+=/bilescourge_bombers
-                if (TalentBilescourgeBombers && !API.SpellISOnCooldown(BilescourgeBombers) && API.PlayerCurrentSoulShards >= 2)
+                if (API.CanCast(BilescourgeBombers) && TalentBilescourgeBombers && SoulShards >= 2)
                 {
                     API.CastSpell(BilescourgeBombers);
                     return;
                 }
                 //actions+=/implosion,if=active_enemies>1&!talent.sacrificed_souls.enabled&buff.wild_imps.stack>=8&buff.tyrant.down&cooldown.summon_demonic_tyrant.remains>5
-                if (API.CanCast(Implosion) && API.TargetUnitInRangeCount >= 1 && !TalentSacrificedSouls && API.PlayerImpCount >= 8 && !API.PlayerHasBuff(DemonicPower) && API.SpellCDDuration(SummonDemonicTyrant) >= 500)
+                if (API.CanCast(Implosion) && API.TargetUnitInRangeCount > 1 && !TalentSacrificedSouls && API.PlayerImpCount >= 8 && !TyrantWatch.IsRunning && API.SpellCDDuration(SummonDemonicTyrant) > 500)
                 {
                     API.CastSpell(Implosion);
                     return;
                 }
                 //actions+=/implosion,if=active_enemies>2&buff.wild_imps.stack>=8&buff.tyrant.down
-                if (API.CanCast(Implosion) && API.TargetUnitInRangeCount >= 2 && API.PlayerImpCount >= 8 && !API.PlayerHasBuff(DemonicPower))
+                if (API.CanCast(Implosion) && API.PlayerImpCount >= 8)
                 {
                     API.CastSpell(Implosion);
                     return;
                 }
                 //actions+=/hand_of_guldan,if=soul_shard=5|buff.nether_portal.up
-                if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 5 && API.PlayerHasBuff(NetherPortal))
+                if (API.CanCast(HandofGuldan) && SoulShards == 5 || API.PlayerHasBuff(NetherPortal))
                 {
                     API.CastSpell(HandofGuldan);
-                    ImpWatch.Start();
                     return;
                 }
                 //actions+=/hand_of_guldan,if=soul_shard>=3&cooldown.summon_demonic_tyrant.remains>20&(cooldown.summon_vilefiend.remains>5|!talent.summon_vilefiend.enabled)&cooldown.call_dreadstalkers.remains>2
-                if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 3 && API.SpellCDDuration(SummonDemonicTyrant) >= 200 && API.SpellCDDuration(SummonVilefiend) >= 500 && API.SpellCDDuration(CallDreadstalkers) >= 200)
+                if (API.CanCast(HandofGuldan) && SoulShards >= 3 && API.SpellCDDuration(SummonDemonicTyrant) > 2000 && (API.SpellCDDuration(SummonVilefiend) > 500 || !TalentSummonVilefiend) && API.SpellCDDuration(CallDreadstalkers) > 200)
                 {
                     API.CastSpell(HandofGuldan);
-                    ImpWatch.Start();
                     return;
                 }
                 //actions+=/call_action_list,name=covenant,if=(covenant.necrolord|covenant.night_fae)&!talent.nether_portal.enabled
-                if (!TalentNetherPortal && API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
+                if (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" && !TalentNetherPortal)
                 {
-                    API.CastSpell(SoulRot);
-                    return;
-                }
-                if (!TalentNetherPortal && API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(DecimatingBolt);
-                    return;
+                    covenant();
                 }
                 //actions+=/demonbolt,if=buff.demonic_core.react&soul_shard<4
-                if (!API.SpellISOnCooldown(Demonbolt) && API.PlayerHasBuff(DemonicCore) && API.PlayerCurrentSoulShards <= 4)
+                if (API.CanCast(Demonbolt) && API.PlayerHasBuff(DemonicCore) && SoulShards < 4)
                 {
                     API.CastSpell(Demonbolt);
                     return;
                 }
-
                 //actions+=/grimoire_felguard,if=cooldown.summon_demonic_tyrant.remains+cooldown.summon_demonic_tyrant.duration>time_to_die|time_to_die<cooldown.summon_demonic_tyrant.remains+15
-                if (API.CanCast(GrimoireFelguard) && API.SpellCDDuration(SummonDemonicTyrant) + API.PlayerBuffTimeRemaining(DemonicPower) >= API.TargetTimeToDie)
+                if (API.CanCast(GrimoireFelguard) && TalentGrimoireFelguard && API.SpellCDDuration(SummonDemonicTyrant) + API.SpellCDDuration(SummonDemonicTyrant) > API.TargetTimeToDie || API.TargetTimeToDie < API.SpellCDDuration(SummonDemonicTyrant) + 1500)
                 {
                     API.CastSpell(GrimoireFelguard);
                     return;
                 }
+                //actions+=/use_items
                 //actions+=/power_siphon,if=buff.wild_imps.stack>1&buff.demonic_core.stack<3
-                if (TalentPowerSiphon && API.CanCast(PowerSiphon) && API.PlayerImpCount >= 1 && API.PlayerBuffStacks(DemonicCore) <= 3)
+                if (API.CanCast(PowerSiphon) && TalentPowerSiphon && API.PlayerImpCount > 1 && API.PlayerHasBuff(DemonicCore))
                 {
                     API.CastSpell(PowerSiphon);
                     return;
                 }
                 //actions+=/soul_strike
-                if (TalentSoulStrike && !API.SpellISOnCooldown(SoulStrike) && API.PlayerHasPet && (isMisdirection == "Felguard"))
+                if (API.CanCast(SoulStrike) && TalentSoulStrike)
                 {
                     API.CastSpell(SoulStrike);
                     return;
                 }
-                //actions.covenant=impending_catastrophe,if=!talent.sacrificed_souls.enabled|active_enemies>1
-                //ImpendingCatastrophe
-                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
+                //actions+=/call_action_list,name=covenant
+                if (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Venthyr")
                 {
-                    API.CastSpell(ImpendingCatastrophe);
-                    return;
+                    covenant();
                 }
-                //actions.covenant+=/scouring_tithe,if=talent.sacrificed_souls.enabled&active_enemies=1
-                if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(ScouringTithe);
-                    return;
-                }
-                //actions.covenant+=/scouring_tithe,if=!talent.sacrificed_souls.enabled&active_enemies<4
-                if (!TalentSacrificedSouls && API.TargetUnitInRangeCount <= 4 && PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(ScouringTithe);
-                    return;
-                }
-                //actions.covenant+=/soul_rot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(SoulRot);
-                    return;
-                }
-                //actions.covenant+=/decimating_bolt
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "with Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(DecimatingBolt);
-                    return;
-                }
-                //actions.summon_tyrant=hand_of_guldan,if=soul_shard=5,line_cd=20
-                if (API.CanCast(HandofGuldan) && API.PlayerCurrentSoulShards >= 5)
-                {
-                    API.CastSpell(HandofGuldan);
-                    ImpWatch.Start();
-                    return;
-                }
-
-                //actions.summon_tyrant+=/demonbolt,if=buff.demonic_core.up&(talent.demonic_consumption.enabled|buff.nether_portal.down),line_cd=20
-
-                //actions.summon_tyrant+=/shadow_bolt,if=buff.wild_imps.stack+incoming_imps<4&(talent.demonic_consumption.enabled|buff.nether_portal.down),line_cd=20
-
-                //actions.summon_tyrant+=/call_dreadstalkers
-                //actions+=/call_dreadstalkers
-                if (API.CanCast(CallDreadstalkers) && API.PlayerCurrentSoulShards >= 2)
-                {
-                    API.CastSpell(CallDreadstalkers);
-                    return;
-                }
-
-                //actions.summon_tyrant+=/demonbolt,if=buff.demonic_core.up&buff.nether_portal.up&((buff.vilefiend.remains>5|!talent.summon_vilefiend.enabled)&(buff.grimoire_felguard.remains>5|buff.grimoire_felguard.down))
-
-                //actions.summon_tyrant+=/shadow_bolt,if=buff.nether_portal.up&((buff.vilefiend.remains>5|!talent.summon_vilefiend.enabled)&(buff.grimoire_felguard.remains>5|buff.grimoire_felguard.down))
-
-                //actions.summon_tyrant+=/variable,name=tyrant_ready,value=!cooldown.summon_demonic_tyrant.ready
-
-
-                //actions.summon_tyrant+=/summon_demonic_tyrant
-                if (IsCooldowns && API.CanCast(SummonDemonicTyrant))
-                {
-                    API.CastSpell(SummonDemonicTyrant);
-                    return;
-                }
-                //actions.summon_tyrant+=/shadow_bolt
+                //actions+=/shadow_bolt
                 if (API.CanCast(ShadowBolt))
                 {
                     API.CastSpell(ShadowBolt);
                     return;
                 }
-
-
-
+            }
+        }
+        private void tyrant_prep()
+        {
+            //actions.tyrant_prep=doom,line_cd=30
+            if (API.CanCast(Doom) && TalentDoom)
+            {
+                API.CastSpell(Doom);
+                return;
+            }
+            //actions.tyrant_prep+=/nether_portal
+            if (API.CanCast(NetherPortal) && TalentNetherPortal)
+            {
+                API.CastSpell(NetherPortal);
+                return;
+            }
+            //actions.tyrant_prep+=/grimoire_felguard
+            if (API.CanCast(GrimoireFelguard) && TalentGrimoireFelguard && SoulShards >= 1)
+            {
+                API.CastSpell(GrimoireFelguard);
+                GrimoireFelguardWatch.Start();
+                return;
+            }
+            //actions.tyrant_prep+=/summon_vilefiend
+            if (API.CanCast(SummonVilefiend) && TalentSummonVilefiend && SoulShards >= 1)
+            {
+                API.CastSpell(SummonVilefiend);
+                return;
+            }
+            //actions.tyrant_prep+=/call_dreadstalkers
+            if (API.CanCast(CallDreadstalkers) && SoulShards >= 2)
+            {
+                API.CastSpell(CallDreadstalkers);
+                return;
+            }
+            //actions.tyrant_prep+=/demonbolt,if=buff.demonic_core.up&soul_shard<4&(talent.demonic_consumption.enabled|buff.nether_portal.down)
+            if (API.CanCast(Demonbolt) && API.PlayerHasBuff(DemonicCore) && SoulShards < 4 && (TalentDemonicConsumption || !API.PlayerHasBuff(NetherPortal)))
+            {
+                API.CastSpell(Demonbolt);
+                return;
+            }
+            //actions.tyrant_prep+=/soul_strike,if=soul_shard<5-4*buff.nether_portal.up
+            //actions.tyrant_prep+=/shadow_bolt,if=soul_shard<5-4*buff.nether_portal.up
+            //actions.tyrant_prep+=/variable,name=tyrant_ready,value=1
+            //actions.tyrant_prep+=/hand_of_guldan
+            if (API.CanCast(HandofGuldan) && SoulShards >= 1)
+            {
+                API.CastSpell(HandofGuldan);
+                return;
             }
 
+        }
+        private void summon_tyrant()
+        {
+            //actions.summon_tyrant=hand_of_guldan,if=soul_shard=5,line_cd=20
+            if (API.CanCast(HandofGuldan) && SoulShards == 5)
+            {
+                API.CastSpell(HandofGuldan);
+                return;
+            }
+            //actions.summon_tyrant+=/demonbolt,if=buff.demonic_core.up&(talent.demonic_consumption.enabled|buff.nether_portal.down),line_cd=20
+            if (API.CanCast(Demonbolt) && API.PlayerHasBuff(DemonicCore) && (TalentDemonicConsumption || !API.PlayerHasBuff(NetherPortal)))
+            {
+                API.CastSpell(Demonbolt);
+                return;
+            }
+            //actions.summon_tyrant+=/shadow_bolt,if=buff.wild_imps.stack+incoming_imps<4&(talent.demonic_consumption.enabled|buff.nether_portal.down),line_cd=20
+            if (API.CanCast(ShadowBolt) && API.PlayerImpCount < 4 && (TalentDemonicConsumption || !API.PlayerHasBuff(NetherPortal)))
+            {
+                API.CastSpell(ShadowBolt);
+                return;
+            }
+            //actions.summon_tyrant+=/call_dreadstalkers
+            if (API.CanCast(CallDreadstalkers) && SoulShards >= 2)
+            {
+                API.CastSpell(CallDreadstalkers);
+                return;
+            }
+            //actions.summon_tyrant+=/hand_of_guldan
+            if (API.CanCast(HandofGuldan) && SoulShards >= 1)
+            {
+                API.CastSpell(HandofGuldan);
+                return;
+            }
+            //actions.summon_tyrant+=/demonbolt,if=buff.demonic_core.up&buff.nether_portal.up&((buff.vilefiend.remains>5|!talent.summon_vilefiend.enabled)&(buff.grimoire_felguard.remains>5|buff.grimoire_felguard.down))
+            if (API.CanCast(Demonbolt) && API.PlayerHasBuff(NetherPortal) && (VilefiendWatch.ElapsedMilliseconds <= 10000 || !TalentSummonVilefiend) && (GrimoireFelguardWatch.ElapsedMilliseconds <= 12000 || !GrimoireFelguardWatch.IsRunning))
+            {
+                API.CastSpell(Demonbolt);
+                return;
+            }
+            //actions.summon_tyrant+=/soul_strike,if=buff.nether_portal.up&((buff.vilefiend.remains>5|!talent.summon_vilefiend.enabled)&(buff.grimoire_felguard.remains>5|buff.grimoire_felguard.down))
+            if (API.CanCast(SoulStrike) && TalentSoulStrike && API.PlayerHasBuff(NetherPortal) && (VilefiendWatch.ElapsedMilliseconds <= 10000 || !TalentSummonVilefiend) && (GrimoireFelguardWatch.ElapsedMilliseconds <= 12000 || !GrimoireFelguardWatch.IsRunning))
+            {
+                API.CastSpell(SoulStrike);
+                return;
+            }
+            //actions.summon_tyrant+=/shadow_bolt,if=buff.nether_portal.up&((buff.vilefiend.remains>5|!talent.summon_vilefiend.enabled)&(buff.grimoire_felguard.remains>5|buff.grimoire_felguard.down))
+            if (API.CanCast(ShadowBolt) && API.PlayerHasBuff(NetherPortal) && (VilefiendWatch.ElapsedMilliseconds <= 10000 || !TalentSummonVilefiend) && (GrimoireFelguardWatch.ElapsedMilliseconds <= 12000 || !GrimoireFelguardWatch.IsRunning))
+            {
+                API.CastSpell(ShadowBolt);
+                return;
+            }
+            //actions.summon_tyrant+=/variable,name=tyrant_ready,value=!cooldown.summon_demonic_tyrant.ready
+            //actions.summon_tyrant+=/summon_demonic_tyrant
+            if (API.CanCast(SummonDemonicTyrant))
+            {
+                API.CastSpell(SummonDemonicTyrant);
+                TyrantWatch.Start();
+                return;
+            }
+//            //actions.summon_tyrant+=/shadow_bolt
+//            if (API.CanCast(ShadowBolt))
+//            {
+//                API.CastSpell(ShadowBolt);
+//                return;
+//            }
+        }
+        private void covenant()
+        {
+            //actions.covenant=impending_catastrophe,if=!talent.sacrificed_souls.enabled|active_enemies>1
+            if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && !TalentSacrificedSouls && API.TargetUnitInRangeCount > 1)
+            {
+                API.CastSpell(ScouringTithe);
+                return;
+            }
+            //actions.covenant+=/scouring_tithe,if=talent.sacrificed_souls.enabled&active_enemies=1
+            if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && TalentSacrificedSouls && API.TargetUnitInRangeCount == 1)
+            {
+                API.CastSpell(ScouringTithe);
+                return;
+            }
+            //actions.covenant+=/scouring_tithe,if=!talent.sacrificed_souls.enabled&active_enemies<4
+            if (PlayerCovenantSettings == "Kyrian" && API.CanCast(ScouringTithe) && !TalentSacrificedSouls && API.TargetUnitInRangeCount < 4)
+            {
+                API.CastSpell(ScouringTithe);
+                return;
+            }
+            //actions.covenant+=/soul_rot
+            if (PlayerCovenantSettings == "Night Fae" && API.CanCast(SoulRot))
+            {
+                API.CastSpell(SoulRot);
+                return;
+            }
+            //actions.covenant+=/decimating_bolt
+            if (PlayerCovenantSettings == "Necrolord" && API.CanCast(DecimatingBolt))
+            {
+                API.CastSpell(DecimatingBolt);
+                return;
+            }
         }
         public override void OutOfCombatPulse()
         {
