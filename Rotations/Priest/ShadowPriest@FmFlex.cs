@@ -80,7 +80,7 @@ namespace HyperElk.Core
         //actions+=/variable,name=searing_nightmare_cutoff,op=set,value=spell_targets.mind_sear>3
         bool searing_nightmare_cutoff => API.TargetUnitInRangeCount > 3;
         //actions+=/variable,name=pi_or_vf_sync_condition,op=set,value=(priest.self_power_infusion|runeforge.twins_of_the_sun_priestess.equipped)&level>=58&cooldown.power_infusion.up|(level<58|!priest.self_power_infusion&!runeforge.twins_of_the_sun_priestess.equipped)&cooldown.void_eruption.up
-        bool pi_or_vf_sync_condition => Sync?((API.CanCast(PowerInfusion) || API.PlayerHasBuff(PowerInfusion)) && API.CanCast(VoidEruption)):API.CanCast(VoidEruption);
+        bool pi_or_vf_sync_condition => Sync ? ((API.CanCast(PowerInfusion) || API.PlayerHasBuff(PowerInfusion)) && API.CanCast(VoidEruption)) : API.CanCast(VoidEruption);
 
         public override void Initialize()
         {
@@ -135,13 +135,12 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(PWFortitude, 21562, "F6");
             CombatRoutine.AddSpell(PWShield, 17, "F7");
             CombatRoutine.AddSpell(Mindgames, 323701, "0");
-            CombatRoutine.AddSpell(UnholyNova, 347788, "0");
-            
+            CombatRoutine.AddSpell(UnholyNova, 324724, "0");
+
             CombatRoutine.AddMacro(SWPain + "MO", "D2");
             CombatRoutine.AddMacro(VampiricTouch + "MO", "D6");
             CombatRoutine.AddMacro(Trincket1);
             CombatRoutine.AddMacro(Trincket2);
-
             CombatRoutine.AddToggle("Mouseover");
 
             //Prop
@@ -157,7 +156,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Trincket1, "Trinket 1 usage", CDUsage, "When should Trinket 1 be used", "Trinket", 0);
             CombatRoutine.AddProp(Trincket2, "Trinket 2 usage", CDUsage, "When should Trinket 2 be used", "Trinket", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsage, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
-            CombatRoutine.AddProp("sync", "Sync PI/VF", true, "Sync PI/VF", "Generic");
+            CombatRoutine.AddProp("sync", "Sync PI/VF", false, "Sync PI/VF", "Generic");
 
         }
 
@@ -310,8 +309,14 @@ namespace HyperElk.Core
                 return;
             }
 
+            //actions.cds=power_infusion,if=buff.voidform.up|!soulbind.combat_meditation.enabled&cooldown.void_eruption.remains>=10|fight_remains<cooldown.void_eruption.remains
+            if (IsCooldowns && API.CanCast(PowerInfusion) && API.PlayerHasBuff(Voidform) && PlayerLevel >= 58)
+            {
+                API.CastSpell(PowerInfusion);
+                return;
+            }
             //actions.main+=/void_torrent,target_if=variable.dots_up&target.time_to_die>4&buff.voidform.down&spell_targets.mind_sear<(5+(6*talent.twist_of_fate.enabled))
-            if (API.TargetUnitInRangeCount == 1 && TalentVoidTorrent && API.CanCast(VoidTorrent) && !API.PlayerIsMoving)
+            if (TalentVoidTorrent && API.CanCast(VoidTorrent) && !API.PlayerIsMoving)
             {
                 if (dots_up && API.TargetTimeToDie > 400 && !API.PlayerHasBuff(Voidform) && (!IsAOE || API.TargetUnitInRangeCount < (5 + (6 * (TalentTwistOfFate ? 1 : 0)))))
                 {
@@ -321,16 +326,9 @@ namespace HyperElk.Core
             }
             if (IsCooldowns)
             {
-                //actions.cds=power_infusion,if=buff.voidform.up|!soulbind.combat_meditation.enabled&cooldown.void_eruption.remains>=10|fight_remains<cooldown.void_eruption.remains
-                if (API.CanCast(PowerInfusion) && API.PlayerHasBuff(Voidform) && PlayerLevel >= 58)
-                {
-                    API.CastSpell(PowerInfusion);
-                    return;
-                }
-
                 //actions+=/run_action_list,name=main
                 //actions.main=void_eruption,if=variable.pi_or_vf_sync_condition&insanity>=40
-                if (!API.PlayerIsMoving && pi_or_vf_sync_condition && API.PlayerInsanity >= 40)
+                if (!API.PlayerIsMoving && pi_or_vf_sync_condition && API.PlayerInsanity >= 40 )
                 {
                     API.CastSpell(VoidEruption);
                     return;
@@ -452,7 +450,11 @@ namespace HyperElk.Core
                     return;
                 }
             }
-
+            if (!IsAOE && !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Necrolord" && API.CanCast(UnholyNova))
+            {
+                API.CastSpell(UnholyNova);
+                return;
+            }
             //actions.main+=/shadow_crash,if=raid_event.adds.in>30&spell_targets.shadow_crash>1
             if (TalentShadowCrash && API.CanCast(ShadowCrash))
             {
@@ -462,11 +464,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (!IsAOE &&  !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Necrolord" && API.CanCast(UnholyNova))
-            {
-                API.CastSpell(UnholyNova);
-                return;
-            }
+
             //actions.main+=/mind_flay,if=buff.dark_thoughts.up&variable.dots_up,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
             if (IsAOE && (!API.PlayerIsCasting(true) || ChannelingMindSear) && API.CanCast(MindFlay) && !API.PlayerIsMoving && PlayerLevel >= 11)
             {

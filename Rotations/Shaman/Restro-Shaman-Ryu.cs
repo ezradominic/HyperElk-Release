@@ -48,6 +48,7 @@ namespace HyperElk.Core
         private string HighTide = "High Tide";
         private string Wellspring = "Wellspring";
         private string Ascendance = "Ascendance";
+        private string AscendanceUse = "Ascendance Usage";
         private string AoE = "AOE";
         private string AoEP = "AOE Party";
         private string AoER = "AOE Raid";
@@ -76,6 +77,7 @@ namespace HyperElk.Core
         private string Quake = "Quake";
         private string PurifySpirit = "Purify Spirit";
         private string SwapSpeed = "Target Swap Speed";
+        private string SpiritWalkersTidalTotem = "Spiritwalker's Tidal Totem";
 
         //Talents
         bool TorrentTalent => API.PlayerIsTalentSelected(1, 1);
@@ -129,7 +131,7 @@ namespace HyperElk.Core
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
         string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         string[] DispellList = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen", "Bramblethorn Entanglement", "Dying Breath", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Curse of Stone", "Turned to Stone", "Curse of Obliteration", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust 2", "Anguished Cries", "Wrack Soul", "Sintouched Anima", "Curse of Suppression", "Explosive Anger", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom 2", "Soul Corruption", "Spectral Reach", "Death Grasp", "Shadow Vulnerability", "Curse of Desolation", "Hex" };
-        public string[] LegendaryList = new string[] { "None", "Verdant Infustion", "The Dark Titan's Lesson" };
+        public string[] LegendaryList = new string[] { "None", "Spiritwalker's Tidal Totem" };
         public string[] EarthTarget = new string[] { "Tank", "DPS", "Healer" };
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
@@ -151,7 +153,6 @@ namespace HyperElk.Core
         private int BuffRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p) && API.UnitBuffPlayerSrc(buff, p));
         private int BuffPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p) && API.UnitBuffPlayerSrc(buff, p));
         private int BuffTracking(string buff) => API.PlayerIsInRaid ? BuffRaidTracking(buff) : BuffPartyTracking(buff);
-
         private int RiptideRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p));
         private int RiptidePartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p));
         private int EarthShieldRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p) && API.UnitBuffPlayerSrc(buff, p));
@@ -180,6 +181,7 @@ namespace HyperElk.Core
         bool ChannelingFae => API.CurrentCastSpellID("player") == 328923;
         private bool EarthShieldTracking => API.PlayerIsInRaid ? EarthShieldRaidTracking(EarthShield) < 1 : EarthShieldPartyTracking(EarthShield) < 1;
         private bool ManaAoE => API.PlayerIsInRaid ? UnitBelowManaPercentRaid(ManaPercent) >= AoERaidNumber : API.PlayerMana <= ManaPercent;
+        private bool AscendAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AscendanceLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(AscendanceLifePercent) >= AoENumber;
         private bool TrinketAoE => UnitBelowHealthPercent(TrinketLifePercent) >= AoENumber;
         private bool VesperAoE => UnitBelowHealthPercent(VesperTotemLifePercent) >= AoENumber;
         private bool DownpourAoE => UnitBelowHealthPercent(DownpourLifePercent) >= AoENumber;
@@ -191,6 +193,7 @@ namespace HyperElk.Core
         private bool HealingRainAoE => UnitBelowHealthPercent(HealingRainLifePercent) >= AoENumber;
         private bool HealingStreamAoE => UnitBelowHealthPercent(HealingStreamTotemLifePercent) >= AoENumber;
         private bool HealingTideAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealingTideTotemLifePercent) >= RaidCDNumber : UnitBelowHealthPercentParty(HealingTideTotemLifePercent) >= DungeonCDNumber;
+        private bool SpirtWalkersTotemAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(SpiritWalkersTidalTotemLifePercent) >= RaidCDNumber : UnitBelowHealthPercentParty(SpiritWalkersTidalTotemLifePercent) >= DungeonCDNumber;
         private bool FaeAoE => UnitBelowHealthPercent(FaeLifePercent) >= AoENumber;
         private bool RiptideTracking => API.PlayerIsInRaid ? RiptideRaidTracking(Riptide) >= 3 : RiptidePartyTracking(Riptide) >= 2;
         private bool KyrianCheck => API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && VesperAoE && NotChanneling && !API.PlayerCanAttackTarget && (!API.PlayerIsMoving || API.PlayerIsMoving);
@@ -262,12 +265,14 @@ namespace HyperElk.Core
         private int HealingTideTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingTideTotem)];
      //   private int AncestralProtectionTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(AncestralProtectionTotem)];
         private int EarthenWallTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(EarthenWallTotem)];
+        private int AscendanceLifePercent => numbList[CombatRoutine.GetPropertyInt(Ascendance)];
         private int SurgeofEarthLifePercent => numbList[CombatRoutine.GetPropertyInt(SurgeofEarth)];
         private int ManaPercent => numbList[CombatRoutine.GetPropertyInt(ManaTideTotem)];
+        private int SpiritWalkersTidalTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritWalkersTidalTotem)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
-        private string UseAscend => CDUsage[CombatRoutine.GetPropertyInt(Ascendance)];
+        private string UseAscend => CDUsage[CombatRoutine.GetPropertyInt(AscendanceUse)];
         private int AoENumber => numbPartyList[CombatRoutine.GetPropertyInt(AoE)];
         private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoERaid)];
         private int AoEDPSHLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSH)];
@@ -289,8 +294,9 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Resto Shaman by Ryu";
-            API.WriteLog("Welcome to Resto Shaman v1.0 by Ryu");
+            API.WriteLog("Welcome to Resto Shaman v1.1 by Ryu");
             API.WriteLog("BETA ROTATION : Some things are still missing. Please post feedback in Shaman Channel.");
+            API.WriteLog("If you wish to use my AoE Logic with the Health Percent Setting for Ascendance, please use On Cooldown. If not, With Cooldowns will use the toggle.");
             API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
             API.WriteLog("For all ground spells, either use @Cursor or when it is time to place it, the Bot will pause until you've placed it. If you'd perfer to use your own logic for them, please place them on ignore in the spellbook.");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
@@ -311,6 +317,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(VesperTotem, 324386);
             CombatRoutine.AddBuff(UnleashLife, 73685);
             CombatRoutine.AddBuff(Quake, 240447);
+            CombatRoutine.AddBuff(SpiritWalkersTidalTotem, 335891);
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock, 188389);
@@ -489,11 +496,12 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 1);
             CombatRoutine.AddProp(EarthElemental, "Use " + EarthElemental, CDUsage, "Use " + EarthElemental + "On Cooldown, with Cooldowns, Not Used", "Cooldowns", 0);
-            CombatRoutine.AddProp(Ascendance, "Use " + Ascendance, CDUsage, "Use " + Ascendance + "On Cooldown, with Cooldowns, Not Used", "Cooldowns", 0);
+            CombatRoutine.AddProp(AscendanceUse, "Use " + Ascendance, CDUsage, "Use " + Ascendance + "On Cooldown, with Cooldowns, Not Used", "Cooldowns", 0);
+            CombatRoutine.AddProp(Ascendance, Ascendance + " Life Percent", numbList, "Life percent at which " + Ascendance + " is used when AoE Number of members are at life percent, set to 0 to disable", "Cooldowns", 65);
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
             // CombatRoutine.AddProp(SwapSpeed, SwapSpeed + "Speed ", SwapSpeedList, "Speed at which to change targets, it is in Milliseconds, to convert to seconds please divide by 1000. If you don't understand, please leave at at default setting", "Targeting", 1250);
-
+                        CombatRoutine.AddProp(ChainHeal, ChainHeal + " Life Percent", numbList, "Life percent at which " + ChainHeal + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 65);
             //CombatRoutine.AddProp(PartySwap, PartySwap + " Life Percent", numbList, "Life percent at which" + PartySwap + "is used, set to 0 to disable", "Healing", 0);
             //CombatRoutine.AddProp(TargetChange, TargetChange + " Life Percent", numbList, "Life percent at which" + TargetChange + "is used to change from your current target, when using Auto Swap logic, set to 0 to disable", "Healing", 0);
             // CombatRoutine.AddProp("OOC", "Healing out of Combat", true, "Heal out of combat", "Healing");
@@ -509,6 +517,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(VesperTotem, VesperTotem + " Life Percent", numbList, "Life percent at which " + VesperTotem + " is used when AoE Number of members are at and Cov is Kyrian, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp(FaeTransfusion, FaeTransfusion + " Life Percent", numbList, "Life percent at which " + FaeTransfusion + " is used when AoE Number of members are at and Cov is Kyrian, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp(ChainHeal, ChainHeal + " Life Percent", numbList, "Life percent at which " + ChainHeal + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 65);
+            CombatRoutine.AddProp(SpiritWalkersTidalTotem, SpiritWalkersTidalTotem + " Life Percent", numbList, "Life percent at which " + SpiritWalkersTidalTotem + " is used when AoE Number of members are at life percent if you have that legendary, set to 0 to disable", "Healing", 65);
             CombatRoutine.AddProp(ChainHarvest, ChainHarvest + " Life Percent", numbList, "Life percent at which " + ChainHarvest + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 65);
             CombatRoutine.AddProp(HealingRain, HealingRain + " Life Percent", numbList, "Life percent at which " + HealingRain + " is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", numbList, "Life percent at which " + HealingStreamTotem + " Or Cloudburst Totem is used when AoE Number of members are at life percent, set to 0 to disable", "Healing", 92);
@@ -525,7 +534,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "Healing", 70);
             CombatRoutine.AddProp(DungeonCD, "Number of units for Cooldowns Healing in 5-man ", numbPartyList, " Units for Cooldowns Healing", "Healing", 2);
             CombatRoutine.AddProp(RaidCD, "Number of units for Cooldowns Healing in raid ", numbRaidList, " Units for Cooldowns Healing in raid", "Healing", 6);
-            // CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
+            CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
             CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " should be used, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
@@ -542,7 +551,7 @@ namespace HyperElk.Core
                     API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                     return;
                 }
-                if (API.CanCast(Ascendance) && AscendanceTalent && (UseAscend == "With Cooldowns" && IsCooldowns || UseAscend == "On Cooldown"))
+                if (API.CanCast(Ascendance) && AscendanceTalent && (UseAscend == "With Cooldowns" && IsCooldowns || UseAscend == "On Cooldown" && AscendAoE))
                 {
                     API.CastSpell(Ascendance);
                     return;
@@ -574,10 +583,9 @@ namespace HyperElk.Core
                     }
                 }
                 #endregion
-                if (API.CanCast(ManaTideTotem) && ManaAoE && InRange)
+                if (API.CanCast(ManaTideTotem) && ManaAoE && InRange || API.CanCast(ManaTideTotem) && SpirtWalkersTotemAoE && UseLeg == SpiritWalkersTidalTotem)
                 {
                     API.CastSpell(ManaTideTotem);
-                    API.WriteLog("Mana Percent : " + API.PlayerMana + "Party 1 Mana : " + API.UnitManaPercent("party1"));
                     return;
                 }
                 if (API.CanCast(EarthShield) && API.TargetRoleSpec == RoleSpec && !API.TargetHasBuff(EarthShield) && InRange && !API.PlayerCanAttackTarget && API.TargetHealthPercent <= 100 && EarthShieldTracking && API.TargetHealthPercent > 0)
