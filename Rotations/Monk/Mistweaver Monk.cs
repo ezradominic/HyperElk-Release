@@ -826,7 +826,7 @@ namespace HyperElk.Core
                 API.CastSpell("Dismiss Totem");
                 return;
             }
-            if (OOC)
+            if (OOC && NotCasting && !API.PlayerIsMounted && !API.PlayerIsMoving)
             {
                 if (AoEHeal)
                 {
