@@ -266,7 +266,7 @@ namespace HyperElk.Core
             if (ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds > 15000) { ApocGhoulActiveTime.Reset(); API.WriteLog("Apoc Ghoul ran off"); }
             if ((API.LastSpellCastInGame == ArmyoftheDead) && !ApocGhoulActiveTime.IsRunning) { ArmyGhoulActiveTime.Start(); API.WriteLog("Army Ghoul is active"); }
             if (ApocGhoulActiveTime.IsRunning && ArmyGhoulActiveTime.ElapsedMilliseconds > 15000) { ArmyGhoulActiveTime.Reset(); API.WriteLog("Army Ghoul ran off"); }
-            API.WriteLog("debug: " + "Festering Wounds: " + Festering_Wound_Stacks +" can Apo? " + API.CanCast(Apocalypse));
+            //API.WriteLog("debug: " + "Festering Wounds: " + Festering_Wound_Stacks +" can Apo? " + API.CanCast(Apocalypse));
 
             if (!API.PlayerIsMounted && !API.PlayerIsCasting(true) && !API.PlayerSpellonCursor)
             {
