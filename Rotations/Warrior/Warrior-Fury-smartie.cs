@@ -23,6 +23,7 @@
 // v3.1 small hotfix
 // v3.2 new Signet Logic
 // v3.3 small hotfix for cancel Bladestorm
+// v3.4 small Bladestorm cancel update
 
 using System.Linq;
 
@@ -89,7 +90,7 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
-
+        //actions+=/variable,name=execute_phase,value=talent.massacre&target.health.pct<35|target.health.pct<20|target.health.pct>80&covenant.venthyr
         bool WWup => (API.PlayerHasBuff(Whirlwind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber && IsAOE || !IsAOE);
         bool IsRecklessness => UseRecklessness == "with Cooldowns" && IsCooldowns || UseRecklessness == "always";
         bool IsSiegebreaker => UseSiegebreaker == "with Cooldowns" && IsCooldowns || UseSiegebreaker == "always";
@@ -145,7 +146,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.3");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.4");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
@@ -357,7 +358,7 @@ namespace HyperElk.Core
                     API.CastSpell(Recklessness);
                     return;
                 }
-                if (!API.MacroIsIgnored("Cancel Bladestorm") && IsSignet && API.PlayerHasBuff(Bladestorm) && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && !IsMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)) || API.CanCast(MassacreCondemn, true, false) && PlayerCovenantSettings == "Venthyr" && (TalentMassacre || IsMassacre) && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn))))
+                if (!API.MacroIsIgnored("Cancel Bladestorm") && IsSignet && API.PlayerHasBuff(Bladestorm) && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.PlayerRage > 90|| API.CanCast(Condemn, true, false) && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && !IsMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)) || API.CanCast(MassacreCondemn, true, false) && PlayerCovenantSettings == "Venthyr" && (TalentMassacre || IsMassacre) && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn))))
                 {
                     API.CastSpell("Cancel Bladestorm");
                     return;
