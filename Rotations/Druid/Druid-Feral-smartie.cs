@@ -24,6 +24,7 @@
 // v3.2 alot of small fixes and adds
 // v3.3 shred fix
 // v3.4 owlweave update
+// v3.5 another owlweave update
 
 using System.Diagnostics;
 
@@ -138,7 +139,7 @@ namespace HyperElk.Core
         }
         bool isBloodlust => PlayerHasBuff(AncientHysteria) || PlayerHasBuff(TimeWarp) || PlayerHasBuff(Bloodlust) || PlayerHasBuff(Heroism) || PlayerHasBuff(DrumsofDeathlyFerocity);
         //actions.owlweave+=/moonkin_form,if=energy<30&dot.rip.remains>4.5&(cooldown.tigers_fury.remains>=6.5|runeforge.cateye_curio)&buff.clearcasting.stack<1&!buff.apex_predators_craving.up&!buff.bloodlust.up&!buff.bs_inc.up&(cooldown.convoke_the_spirits.remains>6.5|!covenant.night_fae)
-        bool WeaveConditions => (API.PlayerEnergy < 30 && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && API.TargetDebuffRemainingTime(Rip) > 450 && API.SpellCDDuration(TigersFury) >= 650 && API.PlayerBuffStacks(Clearcasting) < 1 && !PlayerHasBuff(ApexPredatorsCraving) && !isBloodlust && !IncaBerserk && (API.SpellCDDuration(ConvoketheSpirits) >= 650 || PlayerCovenantSettings != "Night Fae"));
+        bool WeaveConditions => (API.PlayerEnergy < 30 && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && API.TargetDebuffRemainingTime(Rip) > 450 && (API.SpellCDDuration(TigersFury) >= 650 || IsLegendary == "Cat-eye Curio") && API.PlayerBuffStacks(Clearcasting) < 1 && !PlayerHasBuff(ApexPredatorsCraving) && !isBloodlust && !IncaBerserk && (API.SpellCDDuration(ConvoketheSpirits) >= 650 && IsCovenant || !IsCovenant || PlayerCovenantSettings != "Night Fae"));
         //actions+=/pool_resource,if=talent.bloodtalons.enabled&buff.bloodtalons.down&(energy+3.5*energy.regen+(40*buff.clearcasting.up))<(115-23*buff.incarnation_king_of_the_jungle.up)&active_bt_triggers=0
         bool BloodtalonsEnergie => TalentBloodtalons && !PlayerHasBuff(Bloodtalons) && (API.PlayerEnergy + 3.5 * EnergyRegen + (40 * (PlayerHasBuff(Clearcasting) ? 1 : 0))) < (115 - 23 * (PlayerHasBuff(Incarnation) ? 1 : 0));
         bool SaveEnergy => !PlayerHasBuff(Bloodtalons) && TalentBloodtalons && !bloodtimer.IsRunning;
@@ -171,10 +172,12 @@ namespace HyperElk.Core
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        public string[] Legendary = new string[] { "No Legendary", "Draught of Deep Focus", "Apex Predator's Craving", "Cat-eye Curio" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseFeralFrenzy => CDUsage[CombatRoutine.GetPropertyInt(FeralFrenzy)];
         private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
+        private string IsLegendary => Legendary[CombatRoutine.GetPropertyInt("IsLegendary")];
         private string UseBerserk => CDUsage[CombatRoutine.GetPropertyInt(Berserk)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool ProwlOOC => CombatRoutine.GetPropertyBool("ProwlOOC");
@@ -196,7 +199,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.4");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.5");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -326,6 +329,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("RootsTorghast", "Use Roots in Torghast", false, "Use Roots in Torghast", "Roots");
             CombatRoutine.AddProp("DontAttackRoots", "Dont Attack roots", false, "Rota wont attack Targets that are rooted", "Roots");
             CombatRoutine.AddProp(MoonkinForm, "Auto Moonkin Form", false, "Will auto switch to Moonkin Form when out of melee Range", "Generic");
+            CombatRoutine.AddProp("IsLegendary", "Choose your Legendary", Legendary, "Please choose your Legendary", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", numbList, "Life percent at which" + Regrowth + "is used, set to 0 to disable", "Defense", 60);
@@ -573,9 +577,15 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.owlweave +=/ sunfire,if= !prev_gcd.1.sunfire & !prev_gcd.2.sunfire
-                if (API.CanCast(Sunfire) && isInRange && PlayerHasBuff(MoonkinForm) && API.TargetDebuffRemainingTime(Sunfire) < 200)
+                if (API.CanCast(Sunfire) && isInRange && PlayerHasBuff(MoonkinForm) && API.TargetDebuffRemainingTime(Sunfire) < GCD*4)
                 {
                     API.CastSpell(Sunfire);
+                    return;
+                }
+                //actions.owlweave+=/moonfire,line_cd=4*gcd,if=buff.moonkin_form.up&(runeforge.cateye_curio|runeforge.draught_of_deep_focus)&spell_targets.thrash_cat<2
+                if (API.CanCast(Moonfire) && isInRange && PlayerHasBuff(MoonkinForm) && API.TargetDebuffRemainingTime(MoonfireOwl) < GCD * 4 && API.PlayerUnitInMeleeRangeCount < 2 && (IsLegendary == "Draught of Deep Focus" || IsLegendary == "Cat-eye Curio"))
+                {
+                    API.CastSpell(Moonfire);
                     return;
                 }
                 //actions.owlweave +=/ heart_of_the_wild,if= energy < 40 & (dot.rip.remains > 4.5 | combo_points < 5) & cooldown.tigers_fury.remains >= 6.5 & buff.clearcasting.stack < 1 & !buff.apex_predators_craving.up & !buff.bloodlust.up & (buff.bs_inc.remains > 5 | !buff.bs_inc.up) & (!cooldown.convoke_the_spirits.up | !covenant.night_fae)
@@ -612,7 +622,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if ((!API.PlayerHasBuff(CatForm) && PlayerLevel >= 5) && (API.TargetDebuffRemainingTime(Sunfire) > 200 && IsOwlweave && TalentBalanceAffinity || !IsOwlweave || !TalentBalanceAffinity) && isMelee && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(Soulshape) && IsAutoForm)
+            if ((!API.PlayerHasBuff(CatForm) && PlayerLevel >= 5) && (API.TargetDebuffRemainingTime(Sunfire) > 200 && (API.TargetDebuffRemainingTime(MoonfireOwl) > 200 && API.PlayerUnitInMeleeRangeCount < 2 && (IsLegendary == "Draught of Deep Focus" || IsLegendary == "Cat-eye Curio") || API.PlayerUnitInMeleeRangeCount >= 2 || !(IsLegendary == "Draught of Deep Focus" || IsLegendary == "Cat-eye Curio")) && IsOwlweave && TalentBalanceAffinity || !IsOwlweave || !TalentBalanceAffinity) && isMelee && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(Soulshape) && IsAutoForm)
             {
                 API.CastSpell(CatForm);
                 return;
