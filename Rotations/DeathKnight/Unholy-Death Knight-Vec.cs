@@ -28,6 +28,8 @@ namespace HyperElk.Core
         private string DarkTransformation = "Dark Transformation";
         private string SacrificialPact = "Sacrificial Pact";
         private string VirulentPlague = "Virulent Plague";
+        private string FesteringWound = "Festering Wound";
+        private string FesteringStrike = "Festering Strike";
         //stopwatch
         private readonly Stopwatch Dark_Transformation_Ghoul = new Stopwatch();
         private readonly Stopwatch GargoyleActiveTime = new Stopwatch();
@@ -72,6 +74,16 @@ namespace HyperElk.Core
         private bool Talent_SummonGargoyle => API.PlayerIsTalentSelected(7, 2);
         private bool Talent_UnholyAssault => API.PlayerIsTalentSelected(7, 3);
 
+        private int Festering_Wound_Stacks
+        {
+            get
+            {
+                if (API.TargetDebuffPlayerSrc(FesteringWound))
+                    return API.TargetDebuffStacks(FesteringWound);
+                return 0;
+            }
+        }
+      
         private static void CastSpell(string spell)
         {
             if (API.CanCast(spell))
@@ -121,7 +133,7 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, true, false);
         }
-        private static int Festering_Wound_Stacks => API.TargetDebuffStacks("Festering Wound");
+        
         private bool GargoyleActive => GargoyleActiveTime.IsRunning && GargoyleActiveTime.ElapsedMilliseconds <= 30000;
         private bool ApocGhoulActive => ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds <= 15000;
         private bool ArmyGhoulActive => ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds <= 30000;
@@ -150,7 +162,6 @@ namespace HyperElk.Core
         private string UseUnholyBlight => CDUsageWithAOE[CombatRoutine.GetPropertyInt(UnholyBlight)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
-
         public override void Initialize()
         {
             CombatRoutine.Name = "Unholy DK by Vec";
@@ -165,7 +176,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Apocalypse", 275699, "D4");
             CombatRoutine.AddSpell(DeathCoil, 47541, "D5");
             CombatRoutine.AddSpell("Death and Decay", 43265, "D6");
-            CombatRoutine.AddSpell("Festering Strike", 85948, "D7");
+            CombatRoutine.AddSpell(FesteringStrike, 85948, "D7");
             CombatRoutine.AddSpell("Mind Freeze", 47528, "D8");
             CombatRoutine.AddSpell("Unholy Assault", 207289, "D9");
             CombatRoutine.AddSpell("Chains of Ice", 45524, "F1");
@@ -205,7 +216,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(UnholyBlight, 115989);
 
             CombatRoutine.AddDebuff("Virulent Plague", 191587);
-            CombatRoutine.AddDebuff("Festering Wound", 194310);
+            CombatRoutine.AddDebuff(FesteringWound, 194310);
             CombatRoutine.AddDebuff("Necrotic Wound", 209858);
             CombatRoutine.AddDebuff(UnholyBlight, 115994);
 
@@ -255,7 +266,7 @@ namespace HyperElk.Core
             if (ApocGhoulActiveTime.IsRunning && ApocGhoulActiveTime.ElapsedMilliseconds > 15000) { ApocGhoulActiveTime.Reset(); API.WriteLog("Apoc Ghoul ran off"); }
             if ((API.LastSpellCastInGame == ArmyoftheDead) && !ApocGhoulActiveTime.IsRunning) { ArmyGhoulActiveTime.Start(); API.WriteLog("Army Ghoul is active"); }
             if (ApocGhoulActiveTime.IsRunning && ArmyGhoulActiveTime.ElapsedMilliseconds > 15000) { ArmyGhoulActiveTime.Reset(); API.WriteLog("Army Ghoul ran off"); }
-            //API.WriteLog("debug" + MultiDot + API.CanCast(Kill_Command) + API.TargetHasDebuff(Kill_Command, false, false)+ " " + API.PlayerUnitInMeleeRangeCount  +" "+ API.PlayerBuffStacks(Predator));
+            //API.WriteLog("debug: " + "Festering Wounds: " + Festering_Wound_Stacks +" can Apo? " + API.CanCast(Apocalypse));
 
             if (!API.PlayerIsMounted && !API.PlayerIsCasting(true) && !API.PlayerSpellonCursor)
             {
@@ -482,9 +493,9 @@ namespace HyperElk.Core
                             API.CastSpell("Clawing Shadows");
                             return;
                         }
-                        else if (API.CanCast("Festering Strike") && API.PlayerCurrentRunes >= 2 && Festering_Wound_Stacks < 4 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
+                        else if (API.CanCast(FesteringStrike) && Festering_Wound_Stacks < 4 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
                         {
-                            API.CastSpell("Festering Strike");
+                            API.CastSpell(FesteringStrike);
                             return;
                         }
                     }
@@ -526,9 +537,9 @@ namespace HyperElk.Core
                             API.CastSpell("Clawing Shadows");
                             return;
                         }
-                        else if (API.CanCast("Festering Strike") && API.PlayerCurrentRunes >= 2 && Festering_Wound_Stacks < 4 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
+                        else if (API.CanCast(FesteringStrike) && Festering_Wound_Stacks < 4 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
                         {
-                            API.CastSpell("Festering Strike");
+                            API.CastSpell(FesteringStrike);
                             return;
                         }
                         else if (API.CanCast(DeathCoil) && (API.PlayerHealthPercent >= DeathStrikePercent || API.PlayerHasBuff("Sudden Doom")) && (!PoolingForGargoyle || !IsCooldowns) && API.PlayerRunicPower >= 40 && API.TargetRange <= 30)
@@ -606,9 +617,9 @@ namespace HyperElk.Core
                         API.CastSpell("Clawing Shadows");
                         return;
                     }
-                    else if (API.CanCast("Festering Strike") && API.PlayerCurrentRunes >= 2 && Festering_Wound_Stacks < 4 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
+                    else if (API.CanCast(FesteringStrike) && Festering_Wound_Stacks < 4 && (!PoolingForGargoyle || !IsCooldowns) && MeleeRange)
                     {
-                        API.CastSpell("Festering Strike");
+                        API.CastSpell(FesteringStrike);
                         return;
                     }
                     #endregion

@@ -293,13 +293,13 @@ namespace HyperElk.Core
             if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
                 //actions.aoe=phantom_singularity
-                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity)
+                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
                 }
                 //actions.aoe+=/haunt
-                if (API.CanCast(Haunt) && TalentHaunt)
+                if (API.CanCast(Haunt) && TalentHaunt && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(Haunt);
                     return;
@@ -321,13 +321,13 @@ namespace HyperElk.Core
                     DarkGlarePrep();
                 }
                 //actions.aoe+=/seed_of_corruption,if=talent.sow_the_seeds.enabled&can_seed
-                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !API.TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000))
+                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !API.TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
                 }
                 //actions.aoe+=/seed_of_corruption,if=!talent.sow_the_seeds.enabled&!dot.seed_of_corruption.ticking&!in_flight&dot.corruption.refreshable
-                if (!LastCastSeedOfCorruption && !API.TargetHasDebuff(SeedofCorruption) && !API.TargetHasDebuff(Corruption) && API.CanCast(SeedofCorruption) && IsRange && API.PlayerCurrentSoulShards >= 1)
+                if (!LastCastSeedOfCorruption && !API.TargetHasDebuff(SeedofCorruption) && !API.TargetHasDebuff(Corruption) && API.CanCast(SeedofCorruption) && IsRange && API.PlayerCurrentSoulShards >= 1 && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
@@ -335,12 +335,12 @@ namespace HyperElk.Core
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony<4,target_if=!dot.agony.ticking
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony>=4,target_if=refreshable&dot.agony.ticking
                 //actions.aoe+=/unstable_affliction,if=dot.unstable_affliction.refreshable
-                if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) < 200)
+                if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 200)
                 {
                     API.CastSpell(UnstableAffliction);
                 }
                 //actions.aoe+=/vile_taint,if=soul_shard>1
-                if (API.CanCast(VileTaint) && TalentVileTaint && API.PlayerCurrentSoulShards > 1)
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.PlayerCurrentSoulShards > 1 && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(VileTaint);
                     return;
@@ -366,27 +366,27 @@ namespace HyperElk.Core
                     DarkGlarePrep();
                 }
                 //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
-                if (DsM && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || !API.TargetIsBoss && API.TargetHealthPercent > 30))
+                if (DsM && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || !API.TargetIsBoss && API.TargetHealthPercent > 30) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(DarkSoulMisery);
                     return;
                 }
                 //actions.aoe+=/call_action_list,name=item
                 //actions.aoe+=/malefic_rapture,if=dot.vile_taint.ticking
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint)
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //actions.aoe+=/malefic_rapture,if=dot.soul_rot.ticking&!talent.sow_the_seeds.enabled
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot))
+                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //actions.aoe+=/malefic_rapture,if=!talent.vile_taint.enabled
                 //actions.aoe+=/malefic_rapture,if=soul_shard>4
-                if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4)
+                if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4 && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -398,21 +398,21 @@ namespace HyperElk.Core
                     Covenant();
                 }
                 //actions.aoe+=/drain_life,if=buff.inevitable_demise.stack>=50|buff.inevitable_demise.up&time_to_die<5|buff.inevitable_demise.stack>=35&dot.soul_rot.ticking
-                if (API.CanCast(DrainLife) && NotChanneling && API.PlayerBuffStacks(InevitableDemise) > 50 || (API.PlayerBuffStacks(InevitableDemise) >= 1 && API.TargetTimeToDie < 500))
+                if (API.CanCast(DrainLife) && NotChanneling && API.PlayerBuffStacks(InevitableDemise) > 50 || (API.PlayerBuffStacks(InevitableDemise) >= 1 && API.TargetTimeToDie < 500) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(DrainLife);
                     return;
                 }
                 //actions.aoe+=/drain_soul,interrupt=1
                 //actions.aoe+=/shadow_bolt
-                if (API.CanCast(ShadowBolt))
+                if (API.CanCast(ShadowBolt) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(ShadowBolt);
                     return;
                 }
             }
             //actions+=/phantom_singularity,if=time>30
-            if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && !DumpShards && API.PlayerTimeInCombat > 30000)
+            if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && !DumpShards && API.PlayerTimeInCombat > 30000 && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(PhantomSingularity);
                 return;
@@ -440,7 +440,7 @@ namespace HyperElk.Core
             }
             //actions+=/agony,cycle_targets=1,if=active_enemies>1,target_if=dot.agony.remains<4
             //actions+=/haunt
-            if (API.CanCast(Haunt) && TalentHaunt)
+            if (API.CanCast(Haunt) && TalentHaunt && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(Haunt);
                 return;
@@ -461,19 +461,19 @@ namespace HyperElk.Core
                 DarkGlarePrep();
             }
             //actions+=/seed_of_corruption,if=active_enemies>2&talent.sow_the_seeds.enabled&!dot.seed_of_corruption.ticking&!in_flight
-            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSowTheSeeds && !API.TargetHasDebuff(Corruption))
+            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSowTheSeeds && !API.TargetHasDebuff(Corruption) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(SeedofCorruption);
                 return;
             }
             //actions+=/seed_of_corruption,if=active_enemies>2&talent.siphon_life.enabled&!dot.seed_of_corruption.ticking&!in_flight&dot.corruption.remains<4
-            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSiphonLife && !API.TargetHasDebuff(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) < 400)
+            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSiphonLife && !API.TargetHasDebuff(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) < 400 && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(SeedofCorruption);
                 return;
             }
             //actions+=/vile_taint,if=(soul_shard>1|active_enemies>2)&cooldown.summon_darkglare.remains>12
-            if (API.CanCast(VileTaint) && TalentVileTaint && (API.PlayerCurrentSoulShards > 1 || API.TargetUnitInRangeCount > 2))
+            if (API.CanCast(VileTaint) && TalentVileTaint && (API.PlayerCurrentSoulShards > 1 || API.TargetUnitInRangeCount > 2) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(VileTaint);
                 return;
@@ -510,7 +510,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/malefic_rapture,if=soul_shard>4
-            if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4)
+            if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4 && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -531,7 +531,7 @@ namespace HyperElk.Core
                 DarkGlarePrep();
             }
             //actions+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
-            if (DsM && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || !API.TargetIsBoss && API.TargetHealthPercent > 30))
+            if (DsM && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || !API.TargetIsBoss && API.TargetHealthPercent > 30) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(DarkSoulMisery);
 
@@ -543,25 +543,25 @@ namespace HyperElk.Core
                 SE();
             }
             //actions+=/malefic_rapture,if=dot.vile_taint.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint)
+            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.impending_catastrophe_dot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(ImpendingCatastrophe))
+            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(ImpendingCatastrophe) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.soul_rot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot))
+            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=talent.phantom_singularity.enabled&(dot.phantom_singularity.ticking|soul_shard>3|time_to_die<cooldown.phantom_singularity.remains)
-            if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (API.TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (API.TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -606,7 +606,7 @@ namespace HyperElk.Core
         private void DarkGlarePrep()
         {
             //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
-            if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200)
+            if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(VileTaint);
                 return;
@@ -646,25 +646,25 @@ namespace HyperElk.Core
         private void Covenant()
         {
             //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
-            if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000))
+            if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(ImpendingCatastrophe);
                 return;
             }
             //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-            if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt))
+            if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(DecimatingBolt);
                 return;
             }
             //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
-            if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000))
+            if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(SoulRot);
                 return;
             }
             //actions.covenant+=/scouring_tithe
-            if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian")
+            if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(ScouringTithe);
                 return;
