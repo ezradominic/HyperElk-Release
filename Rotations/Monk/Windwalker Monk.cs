@@ -294,42 +294,42 @@ namespace HyperElk.Core
             //# Executed every time the actor is available.
             //actions=auto_attack
             //actions+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi.max-chi>=3&(energy.time_to_max<1|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3 && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3) // && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(FistsoftheWhiteTiger);
                 return;
             }
             //actions+=/expel_harm,if=chi.max-chi>=1&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(ExpelHarm) && ChiDeficit >= 1 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && API.CanCast(ExpelHarm) && ChiDeficit >= 1) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(ExpelHarm);
                 return;
             }
             //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(TigerPalm);
                 return;
+            }
+            //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
+            if (API.PlayerHasBuff(WeaponsofOrder) && API.PlayerIsInCombat)
+            {
+                WeaponsOfOrderRotation();
             }
             //actions+=/call_action_list,name=cd_sef,if=!talent.serenity
             if (IsCooldowns && !TalentSerenty && API.PlayerIsInCombat)
             {
                 Cooldowns();
             }
-            //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
-            if (IsCooldowns && TalentSerenty && API.PlayerIsInCombat)
-            {
-                CooldownsSerenty();
-            }
             //actions+=/call_action_list,name=serenity,if=buff.serenity.up
             if (API.PlayerHasBuff(Serenity) && API.PlayerIsInCombat)
             {
                 SerentyRotation();
             }
-            //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
-            if (API.PlayerHasBuff(WeaponsofOrder) && API.PlayerIsInCombat)
+            //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
+            if (IsCooldowns && TalentSerenty && API.PlayerIsInCombat)
             {
-                WeaponsOfOrderRotation();
+                CooldownsSerenty();
             }
 
             //actions+=/call_action_list,name=aoe,if=active_enemies>=3
