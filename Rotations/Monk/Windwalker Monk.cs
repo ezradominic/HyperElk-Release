@@ -78,6 +78,10 @@ namespace HyperElk.Core
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
         int FocusHelper = 0;
+        private bool ToKSmart => (bool)CombatRoutine.GetProperty("ToKSmart");
+        private bool TouchOfKarmaSmartRaid => API.TargetCurrentCastSpellID == 345397 && API.TargetCurrentCastTimeRemaining <= 600 || API.TargetCurrentCastSpellID == 329455 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 325384 || API.TargetCurrentCastSpellID == 337110 || API.TargetCurrentCastSpellID == 332687 || API.TargetCurrentCastSpellID == 331209 || API.TargetCurrentCastSpellID == 332683;
+        private bool TochOfKarmaSmartDungeon => API.TargetCurrentCastSpellID == 322236 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 321247 || API.TargetCurrentCastSpellID == 321828 || API.TargetCurrentCastSpellID == 328125 || API.TargetCurrentCastSpellID == 334625;
+
 
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
@@ -149,6 +153,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
+            CombatRoutine.AddProp("ToKSmart", "Touch of Karma Smart usage", true, "Touch of Karma Smart usage, check the Discord for more Infos", "Class Specific");
 
 
             //Spells
@@ -249,7 +254,12 @@ namespace HyperElk.Core
                 API.CastSpell(LegSweep);
                 return;
             }
-            if (API.PlayerHealthPercent <= TouchofKarmaPercentProc && API.CanCast(TouchofKarma))
+            if (ToKSmart && API.CanCast(TouchofKarma) && (TouchOfKarmaSmartRaid || TochOfKarmaSmartDungeon))
+            {
+                API.CastSpell(TouchofKarma);
+                return;
+            }
+            if (!ToKSmart && API.PlayerHealthPercent <= TouchofKarmaPercentProc && API.CanCast(TouchofKarma))
             {
                 API.CastSpell(TouchofKarma);
                 return;
