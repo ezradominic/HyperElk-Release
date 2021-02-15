@@ -42,7 +42,7 @@ namespace HyperElk.Core
         private int TouchofKarmaPercentProc => numbList[CombatRoutine.GetPropertyInt(TouchofKarma)];
 
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
-        private bool NotCasting => !API.PlayerIsCasting(true);
+        private bool NotCasting => API.PlayerCurrentCastTimeRemaining <= 0;
         bool LastCastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastCastBlackoutkick => API.LastSpellCastInGame == BlackOutKick;
         bool LastCastSpinningCraneKick => API.LastSpellCastInGame == SpinningCraneKick;
@@ -427,7 +427,7 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/flying_serpent_kick,if=buff.bok_proc.down,interrupt=1
                 //actions.aoe+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&(buff.bok_proc.up|talent.hit_combo&prev_gcd.1.tiger_palm&chi=2&cooldown.fists_of_fury.remains<3|chi.max-chi<=1&prev_gcd.1.spinning_crane_kick&energy.time_to_max<3)
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo && API.PlayerCurrentChi >= 2 && API.SpellCDDuration(FistsofFury) < 300 || ChiDeficit <= 1 && EnergyTimeToMax < 300))
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && (API.PlayerHasBuff(BlackOutKickBuff) || TalentHitCombo && API.PlayerCurrentChi >= 2 && API.SpellCDDuration(FistsofFury) < 300 || ChiDeficit <= 1))
                 {
                     API.CastSpell(BlackOutKick);
                     return;
