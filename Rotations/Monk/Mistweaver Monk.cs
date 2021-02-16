@@ -487,26 +487,30 @@ namespace HyperElk.Core
             }
             if (AoEHeal)
             {
-                if (API.CanCast(Revival) && RevivalAoE && !API.PlayerCanAttackTarget && !CurrentCastEssenceFont)
-                {
-                    API.CastSpell(Revival);
-                    return;
-                }
-                if (API.CanCast(RefreshingJadeWind) && TalentRefreshingJadeWind && RefreshingJadeWindAoE && !API.PlayerCanAttackTarget && !CurrentCastEssenceFont)
-                {
-                    API.CastSpell(RefreshingJadeWind);
-                    return;
-                }
-                if (API.CanCast(EssenceFont) && EssenceFontAoE && !API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(EssenceFont);
-                    return;
-                }
-                if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "AOEHeal" && !CurrentCastEssenceFont)
-                {
-                    API.CastSpell(FaelineStomp);
-                    return;
-                }
+                for (int i = 0; i < units.Length; i++)
+                    for (int j = 0; j < raidunits.Length; j++)
+                    {
+                        if (API.CanCast(Revival) && RevivalAoE && !API.PlayerCanAttackTarget && !CurrentCastEssenceFont)
+                        {
+                            API.CastSpell(Revival);
+                            return;
+                        }
+                        if (API.CanCast(RefreshingJadeWind) && TalentRefreshingJadeWind && RefreshingJadeWindAoE && !API.PlayerCanAttackTarget && !CurrentCastEssenceFont && (API.PlayerIsInGroup && API.UnitRange(units[i]) <= 10 || API.PlayerIsInRaid && API.UnitRange(raidunits[j]) <= 10))
+                        {
+                            API.CastSpell(RefreshingJadeWind);
+                            return;
+                        }
+                        if (API.CanCast(EssenceFont) && EssenceFontAoE && !API.PlayerCanAttackTarget && (API.PlayerIsInGroup && API.UnitRange(units[i]) <= 25 || API.PlayerIsInRaid && API.UnitRange(raidunits[j]) <= 25))
+                        {
+                            API.CastSpell(EssenceFont);
+                            return;
+                        }
+                        if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "AOEHeal" && !CurrentCastEssenceFont)
+                        {
+                            API.CastSpell(FaelineStomp);
+                            return;
+                        }
+                    }
             }
             if (API.CanCast(RenewingMist) && !ChannelSoothingMist && !CurrentCastEssenceFont && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal))
             {
@@ -574,6 +578,83 @@ namespace HyperElk.Core
                 return;
             }
 
+            //DPS
+            if (isInterrupt && API.CanCast(LegSweep) && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(LegSweep);
+                return;
+            }
+            if (API.CanCast(TouchOfDeath) && API.TargetHealthPercent <= 15 && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(TouchOfDeath);
+                return;
+            }
+            if (IsCooldowns && API.CanCast(FallenOrder) && !CurrentCastEssenceFont && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "Cooldowns" && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(FallenOrder);
+                return;
+            }
+            if (API.CanCast(FallenOrder) && !CurrentCastEssenceFont && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "always" && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(FallenOrder);
+                return;
+            }
+            if (IsAOE && API.CanCast(FallenOrder) && !CurrentCastEssenceFont && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always") && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(FallenOrder);
+                return;
+            }
+            if (IsCooldowns && API.CanCast(FaelineStomp) && !CurrentCastEssenceFont && IsCooldowns && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "Cooldowns" && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(FaelineStomp);
+                return;
+            }
+            if (IsAOE && API.CanCast(FaelineStomp) && !CurrentCastEssenceFont && PlayerCovenantSettings == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always") && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(FaelineStomp);
+                return;
+            }
+            if (API.CanCast(HealingElixir) && !CurrentCastEssenceFont && TalentHealingElixir && API.PlayerHealthPercent <= HealingElixirPercent && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CanCast(HealingElixir);
+                return;
+            }
+            if (API.CanCast(DampenHarm) && TalentDampenHarm && API.PlayerHealthPercent <= DampenHarmPercent && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CanCast(DampenHarm);
+                return;
+            }
+            if (API.CanCast(ExpelHarm) && API.PlayerHealthPercent <= ExpelHarmtPercent && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(ExpelHarm);
+                return;
+            }
+            if (API.CanCast(BlackoutKick) && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(BlackoutKick);
+                return;
+            }
+            if (API.CanCast(RisingSunKick) && !CurrentCastEssenceFont && API.SpellISOnCooldown(RisingSunKick) && !API.SpellISOnCooldown(ThunderFocusTea) && UseThunderFocusTea == "Rising Sun Kick Cooldown" && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(ThunderFocusTea);
+                return;
+            }
+            if (API.CanCast(RisingSunKick) && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(RisingSunKick);
+                return;
+            }
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 && API.CanCast(SpinningCraneKick) && NotChanneling && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(SpinningCraneKick);
+                return;
+            }
+            if (API.CanCast(TigerPalm) && !CurrentCastEssenceFont && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+            {
+                API.CastSpell(TigerPalm);
+                return;
+            }
+
 
             // Auto Target
             if (IsAutoSwap)
@@ -638,7 +719,7 @@ namespace HyperElk.Core
                             SwapWatch.Restart();
                             return;
                         }
-                        if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored(Assist) && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed) && API.UnitHealthPercent(units[i]) > 0)
+                        if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored(Assist) && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
                         {
                             API.CastSpell(PlayerTargetArray[i]);
                             API.CastSpell(Assist);
@@ -743,81 +824,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (isInterrupt && API.CanCast(LegSweep) && !CurrentCastEssenceFont)
-            {
-                API.CastSpell(LegSweep);
-                return;
-            }
-            if (API.CanCast(TouchOfDeath) && !CurrentCastEssenceFont)
-            {
-                API.CastSpell(TouchOfDeath);
-                return;
-            }
-            if (IsCooldowns && API.CanCast(FallenOrder) && !CurrentCastEssenceFont && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "Cooldowns")
-            {
-                API.CastSpell(FallenOrder);
-                return;
-            }
-            if (API.CanCast(FallenOrder) && !CurrentCastEssenceFont && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "always")
-            {
-                API.CastSpell(FallenOrder);
-                return;
-            }
-            if (IsAOE && API.CanCast(FallenOrder) && !CurrentCastEssenceFont && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
-            {
-                API.CastSpell(FallenOrder);
-                return;
-            }
-            if (IsCooldowns && API.CanCast(FaelineStomp) && !CurrentCastEssenceFont && IsCooldowns && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "Cooldowns")
-            {
-                API.CastSpell(FaelineStomp);
-                return;
-            }
-            if (IsAOE && API.CanCast(FaelineStomp) && !CurrentCastEssenceFont && PlayerCovenantSettings == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
-            {
-                API.CastSpell(FaelineStomp);
-                return;
-            }
-            if (API.CanCast(HealingElixir) && !CurrentCastEssenceFont && TalentHealingElixir && API.PlayerHealthPercent <= HealingElixirPercent)
-            {
-                API.CanCast(HealingElixir);
-                return;
-            }
-            if (API.CanCast(DampenHarm) && TalentDampenHarm && API.PlayerHealthPercent <= DampenHarmPercent && !CurrentCastEssenceFont)
-            {
-                API.CanCast(DampenHarm);
-                return;
-            }
-            if (API.CanCast(ExpelHarm) && API.PlayerHealthPercent <= ExpelHarmtPercent && !CurrentCastEssenceFont)
-            {
-                API.CastSpell(ExpelHarm);
-                return;
-            }
-            if (API.CanCast(BlackoutKick) && !CurrentCastEssenceFont)
-            {
-                API.CastSpell(BlackoutKick);
-                return;
-            }
-            if (API.CanCast(RisingSunKick) && !CurrentCastEssenceFont && API.SpellISOnCooldown(RisingSunKick) && !API.SpellISOnCooldown(ThunderFocusTea) && UseThunderFocusTea == "Rising Sun Kick Cooldown")
-            {
-                API.CastSpell(ThunderFocusTea);
-                return;
-            }
-            if (API.CanCast(RisingSunKick) && !CurrentCastEssenceFont)
-            {
-                API.CastSpell(RisingSunKick);
-                return;
-            }
-            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 && API.CanCast(SpinningCraneKick) && NotChanneling && !CurrentCastEssenceFont)
-            {
-                API.CastSpell(SpinningCraneKick);
-                return;
-            }
-            if (API.CanCast(TigerPalm) && !CurrentCastEssenceFont)
-            {
-                API.CastSpell(TigerPalm);
-                return;
-            }
+ 
         }
         public override void OutOfCombatPulse()
         {
