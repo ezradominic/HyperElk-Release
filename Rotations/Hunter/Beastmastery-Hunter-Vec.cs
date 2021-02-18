@@ -238,7 +238,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            //API.WriteLog("debug: "  + API.SpellCharges(Barbed_Shot) +" " + API.SpellChargeCD(Barbed_Shot)+" " + API.SpellISOnCooldown(Bestial_Wrath));
+            //API.WriteLog("debug: "  + " cancast "+ API.CanCast(Cobra_Shot) + " focus: " + API.PlayerFocus + " CS Condition " + (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1)) + " TTD " + API.TargetTimeToDie);
             //API.WriteLog("MS  " + FocusRegen);
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
@@ -454,7 +454,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //st->add_action("cobra_shot,if=(focus-cost+focus.regen*(cooldown.kill_command.remains-1)>action.kill_command.cost|cooldown.kill_command.remains>1+gcd)|(buff.bestial_wrath.up|buff.nesingwarys_trapping_apparatus.up)&!runeforge.qapla_eredun_war_order|target.time_to_die<3");
-                    else if (API.CanCast(Cobra_Shot) && API.PlayerFocus >= 35 && API.PlayerLevel >= 14 && InRange && (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300)
+                    else if (API.CanCast(Cobra_Shot) && InRange && ((API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1) > 30 || API.SpellCDDuration(Kill_Command) > 100 + gcd) || (PlayerHasBuff(Bestial_Wrath)) || API.TargetTimeToDie < 300))
                     {
                         API.CastSpell(Cobra_Shot);
                         return;
