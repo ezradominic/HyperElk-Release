@@ -238,7 +238,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            //API.WriteLog("debug: "  + " cancast "+ API.CanCast(Cobra_Shot) + " focus: " + API.PlayerFocus + " CS Condition " + (API.PlayerFocus - 35 + RealFocusRegen * (API.SpellCDDuration(Kill_Command) / 100 - 1)) + " TTD " + API.TargetTimeToDie);
+            //API.WriteLog("debug: "  + " cancast "+ API.CanCast(TranquilizingShot) + " settings? " + UseTranqShot + " has buff? " + DispellList);
             //API.WriteLog("MS  " + FocusRegen);
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
@@ -290,7 +290,7 @@ namespace HyperElk.Core
                 API.CastSpell(HuntersMark);
                 return;
             }
-            if (API.CanCast(TranquilizingShot) && DispellList && UseTranqShot && InRange && PlayerLevel >= 18)
+            if (API.CanCast(TranquilizingShot) && DispellList && UseTranqShot && InRange)
             {
                 API.CastSpell(TranquilizingShot);
                 return;
@@ -322,7 +322,7 @@ namespace HyperElk.Core
                         return;
                     }
                     // cds->add_action("berserking,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.berserking.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<13");
-                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && InRange && (API.TargetHasDebuff(WildMark) || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Troll" && InRange && ((API.TargetHasDebuff(WildMark) || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300))
                     {
                         API.CastSpell(RacialSpell1);
                         return;
@@ -336,7 +336,7 @@ namespace HyperElk.Core
 
                     // cds->add_action("blood_fury,if=(buff.wild_spirits.up|!covenant.night_fae&buff.aspect_of_the_wild.up&buff.bestial_wrath.up)&(target.time_to_die>cooldown.blood_fury.duration+duration|(target.health.pct<35|!talent.killer_instinct))|target.time_to_die<16");
 
-                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && InRange && (API.TargetHasDebuff(WildMark) || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1300)
+                    if (API.CanCast(RacialSpell1) && PlayerRaceSettings == "Orc" && InRange && ((API.TargetHasDebuff(WildMark) || PlayerCovenantSettings != "Night Fae" && PlayerHasBuff(Aspect_of_the_Wild) && PlayerHasBuff(Bestial_Wrath)) && (API.TargetTimeToDie > API.SpellCDDuration(RacialSpell1) + 1200 || (API.TargetHealthPercent < 35 || !Talent_KillerInstinct)) || API.TargetTimeToDie < 1600))
                     {
                         API.CastSpell(RacialSpell1);
                         return;
