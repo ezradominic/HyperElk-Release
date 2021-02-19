@@ -219,6 +219,8 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(LightStagger, 124275);
             CombatRoutine.AddDebuff(ModerateStagger, 124274);
             CombatRoutine.AddDebuff(HeavyStagger, 124273);
+            CombatRoutine.AddDebuff(BreathOfFire, 123725);
+            CombatRoutine.AddDebuff(KegSmash, 121253);
             //Debuffs / Detox
             CombatRoutine.AddDebuff("Chilled", 328664);
             CombatRoutine.AddDebuff("Frozen Binds", 320788);
@@ -562,7 +564,7 @@ namespace HyperElk.Core
             //actions+=/spinning_crane_kick,if=buff.charred_passions.up
 
             //actions+=/breath_of_fire,if=buff.blackout_combo.down&(buff.bloodlust.down|(buff.bloodlust.up&dot.breath_of_fire_dot.refreshable))
-            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && !API.PlayerHasBuff(Bloodlust) && !CurrentCastSpinningCraneKick)
+            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && (!API.PlayerHasBuff(Bloodlust) || API.PlayerHasBuff(Bloodlust) && API.TargetDebuffRemainingTime(BreathOfFire) <= 200 && API.TargetHasDebuff(KegSmash)) && !CurrentCastSpinningCraneKick)
             {
                 API.CastSpell(BreathOfFire);
                 return;
