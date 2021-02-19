@@ -309,7 +309,7 @@ namespace HyperElk.Core
                     }
                 }
             }
-            if (API.CanCast(FortifyingBrew) && (CastleNathriaDefensive || DeOtherSideDefensive || PlaguefallDefensive || SanguineDepthsDefensive || SpiresofAscensionDefensive || TheaterofPainDefensive || TheNecroticWakeDefensive))
+            if (API.CanCast(FortifyingBrew) && (CastleNathriaDefensive && API.PlayerIsTargetTarget || DeOtherSideDefensive || PlaguefallDefensive || SanguineDepthsDefensive || SpiresofAscensionDefensive || TheaterofPainDefensive || TheNecroticWakeDefensive))
             {
                 API.CanCast(FortifyingBrew);
                 return;
