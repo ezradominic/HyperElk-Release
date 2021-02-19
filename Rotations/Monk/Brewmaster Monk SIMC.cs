@@ -516,7 +516,7 @@ namespace HyperElk.Core
             }
             //# Celestial Brew priority whenever it took significant damage (adjust the health.max coefficient according to intensity of damage taken), and to dump excess charges before BoB.
             //actions+=/celestial_brew,if=buff.blackout_combo.down&incoming_damage_1999ms>(health.max*0.1+stagger.last_tick_damage_4)&buff.elusive_brawler.stack<2
-            if (!API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27 && (API.PlayerBuffStacks(PurifiedChi) == CelestialBrewStackProc && API.PlayerHealthPercent <= CelestialBrewPercentProc || CBFull && API.PlayerBuffStacks(PurifiedChi) == 10))
+            if (!API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27 && (API.PlayerBuffStacks(PurifiedChi) >= CelestialBrewStackProc && API.PlayerHealthPercent <= CelestialBrewPercentProc || CBFull && API.PlayerBuffStacks(PurifiedChi) == 10))
             {
                 API.WriteLog("PurifiedChi Stacks " + API.PlayerBuffStacks(PurifiedChi));
                 API.WriteLog("Using " + CelestialBrew);
