@@ -23,7 +23,9 @@ namespace HyperElk.Core
         //CBProperties
         private int VivifyLifePercentProc => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
-        private int CelestialBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
+        private int CelestialBrewStackProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
+        private int CelestialBrewPercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
+
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int ChiWaveLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
@@ -76,6 +78,7 @@ namespace HyperElk.Core
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+        int[] CelestialBrewnumbList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         float EnergyRegen => 10f * (1f + API.PlayerGetHaste);
         float TigerPalmMath => API.PlayerEnergy + (EnergyRegen * (API.SpellCDDuration(KegSmash) + API.SpellGCDDuration));
         float CastTigerPalm => TigerPalmMath / 100;
@@ -87,6 +90,8 @@ namespace HyperElk.Core
         {
             return API.PlayerHasDebuff(debuff, false, true);
         }
+        private bool CBFull => (bool)CombatRoutine.GetProperty("CBFull");
+
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
         private string BlackOutKick = "Blackout Kick";
@@ -128,6 +133,7 @@ namespace HyperElk.Core
         private string Bloodlust = "Bloodlust";
         private string GiftOfTheOx = "Gift of the Ox";
         private string Paralyse = "Paralyse";
+        private string PurifiedChi = "Purified Chi";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
@@ -137,7 +143,10 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(ChiWave, "Chi Wave", numbList, "Life percent at which " + ChiWave + " is used, set to 0 to disable", "Healing", 5);
 
             CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 90);
-            CombatRoutine.AddProp(CelestialBrew, "Celestial Brew", numbList, "Life percent at which " + CelestialBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 50);
+            CombatRoutine.AddProp(CelestialBrew, "Celestial Brew", CelestialBrewnumbList, "Purified Chi stacks at which " + CelestialBrew + " is used", "Healing", 5);
+            CombatRoutine.AddProp("CelestialBrew HP", "Celestial Brew HP", numbList, "Life percent at wich " + CelestialBrew + " is used when at " + " Chi Stacks", "Healing", 50);
+            CombatRoutine.AddProp("CBFull", "Celestial Brew 10 stacks", true, "Should the rotation use always use Celestial Brew on 10 Stacks of Purified Chi", "Healing");
+
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
             CombatRoutine.AddProp(HealingElixir, "Healing Elixir", numbList, "Life percent at which " + HealingElixir + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 80);
             CombatRoutine.AddProp("PurifyingBrewStaggerPercentProc", "PurifyingBrew", 9, "Use PurifyingBrew, compared to max life.", "Stagger Management");
@@ -204,6 +213,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(RushingJadeWind, 116847);
             CombatRoutine.AddBuff(Bloodlust, 2825);
             CombatRoutine.AddBuff(GiftOfTheOx, 124507);
+            CombatRoutine.AddBuff(PurifiedChi, 325092);
 
             //Debuffs
             CombatRoutine.AddDebuff(LightStagger, 124275);
@@ -504,8 +514,10 @@ namespace HyperElk.Core
             }
             //# Celestial Brew priority whenever it took significant damage (adjust the health.max coefficient according to intensity of damage taken), and to dump excess charges before BoB.
             //actions+=/celestial_brew,if=buff.blackout_combo.down&incoming_damage_1999ms>(health.max*0.1+stagger.last_tick_damage_4)&buff.elusive_brawler.stack<2
-            if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27)
+            if (!API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27 && (API.PlayerBuffStacks(PurifiedChi) == CelestialBrewStackProc && API.PlayerHealthPercent <= CelestialBrewPercentProc || CBFull && API.PlayerBuffStacks(CelestialBrew) == 10))
             {
+                API.WriteLog("PurifiedChi Stacks " + API.PlayerBuffStacks(PurifiedChi));
+                API.WriteLog("Using " + CelestialBrew);
                 API.CastSpell(CelestialBrew);
                 return;
             }
