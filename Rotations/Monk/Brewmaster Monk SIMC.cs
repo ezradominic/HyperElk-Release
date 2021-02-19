@@ -91,6 +91,17 @@ namespace HyperElk.Core
             return API.PlayerHasDebuff(debuff, false, true);
         }
         private bool CBFull => (bool)CombatRoutine.GetProperty("CBFull");
+        private bool FBSmart => (bool)CombatRoutine.GetProperty("FBSmart");
+        private bool DeOtherSideDefensive => API.TargetCurrentCastSpellID == 321061 || API.TargetCurrentCastSpellID == 327646 || API.TargetCurrentCastSpellID == 322736;
+        //        private bool HallsofAtonementDefensive =>
+        //        private bool MistsofTirnaScitheDefensive =>
+        private bool PlaguefallDefensive => API.TargetCurrentCastSpellID == 325552;
+        private bool SanguineDepthsDefensive => API.TargetCurrentCastSpellID == 319650 || API.TargetCurrentCastSpellID == 325254;
+        private bool SpiresofAscensionDefensive => API.TargetCurrentCastSpellID == 320966;
+        private bool TheaterofPainDefensive => API.TargetCurrentCastSpellID == 323515 || API.TargetCurrentCastSpellID == 320063 || API.TargetCurrentCastSpellID == 320644 || API.TargetCurrentCastSpellID == 324079;
+        private bool TheNecroticWakeDefensive => API.TargetCurrentCastSpellID == 320012 || API.TargetCurrentCastSpellID == 320655;
+        private bool CastleNathriaDefensive => API.TargetCurrentCastSpellID == 329774 || API.TargetCurrentCastSpellID == 334797 || API.TargetCurrentCastSpellID == 334929 || API.TargetCurrentCastSpellID == 342425 || API.TargetCurrentCastSpellID == 329181 || API.TargetCurrentCastSpellID == 328857 || API.TargetCurrentCastSpellID == 343005 || API.TargetCurrentCastSpellID == 341621;
+
 
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
@@ -148,6 +159,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("CBFull", "Celestial Brew 10 stacks", true, "Should the rotation use always use Celestial Brew on 10 Stacks of Purified Chi", "Healing");
 
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
+            CombatRoutine.AddProp("FBSmart", "Fortifying Brew Smart usage", true, "Fortifying Brew Smart usage, check the Discord for more Infos", "Healing");
+
             CombatRoutine.AddProp(HealingElixir, "Healing Elixir", numbList, "Life percent at which " + HealingElixir + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 80);
             CombatRoutine.AddProp("PurifyingBrewStaggerPercentProc", "PurifyingBrew", 9, "Use PurifyingBrew, compared to max life.", "Stagger Management");
             CombatRoutine.AddProp(InvokeNiuzao, "Use " + InvokeNiuzao, InvokeNiuzaoList, "Use " + InvokeNiuzao + "always, with Cooldowns, On AOE", "Cooldowns", 0);
@@ -295,6 +308,11 @@ namespace HyperElk.Core
                         return;
                     }
                 }
+            }
+            if (API.CanCast(FortifyingBrew) && (CastleNathriaDefensive || DeOtherSideDefensive || PlaguefallDefensive || SanguineDepthsDefensive || SpiresofAscensionDefensive || TheaterofPainDefensive || TheNecroticWakeDefensive))
+            {
+                API.CanCast(FortifyingBrew);
+                return;
             }
             if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
             {
