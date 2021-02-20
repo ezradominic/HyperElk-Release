@@ -105,8 +105,14 @@ namespace HyperElk.Core
         private bool Xymox => API.FocusHasDebuff("Glyph of Destruction");
         private bool Shriekwing => API.FocusBuffStacks("Exsanguinated") == 10;
         private bool HungeringDestroyer => API.TargetCurrentCastSpellID == 329774 && API.TargetCurrentCastTimeRemaining <= 0 && !API.PlayerIsTargetTarget;
-        private bool LadyInerva => API.FocusDebuffStacks("Warped Desires") >= 2;
-        private bool AltimortheHuntsman => API.FocusDebuffStacks("Jagged Claws") > 3;
+        private bool LadyInerva => API.FocusDebuffStacks("Warped Desires") >= WarpedDesiresStacks;
+        private bool AltimortheHuntsman => API.FocusDebuffStacks("Jagged Claws") >= JaggedClawsStacks;
+        private bool TheCouncilofBlood => API.FocusDebuffStacks("Duelist's Riposte") >= DuelistsRiposteStacks;
+        private int WarpedDesiresStacks => CombatRoutine.GetPropertyInt("WarpedDesiresStacks");
+        private int JaggedClawsStacks => CombatRoutine.GetPropertyInt("JaggedClawsStacks");
+        private int DuelistsRiposteStacks => CombatRoutine.GetPropertyInt("DuelistsRiposteStacks");
+
+
 
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
@@ -190,6 +196,9 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("OOC", "Out of Combat Healing", true, "Use Vivify Out of Combat", "Out of Combat");
 
+            CombatRoutine.AddProp("WarpedDesiresStacks", "Warped Desires Stacks", 2, "How many Stacks of Warped Desires to Provoke", "Auto Taunt");
+            CombatRoutine.AddProp("JaggedClawsStacks", "Jagged Claws Stacks", 3, "How many Stacks of Jagged Claws to Provoke", "Auto Taunt");
+            CombatRoutine.AddProp("DuelistsRiposte", "Duelists Riposte Stacks", 2, "How many Stacks of Duelists Riposte to Provoke", "Auto Taunt");
 
             //Spells
             CombatRoutine.AddSpell(TigerPalm, 100780,"D1");
@@ -301,6 +310,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Exsanguinating Bite", 328857);
             CombatRoutine.AddDebuff("Jagged Claws", 334971);
             CombatRoutine.AddDebuff("Warped Desires", 325382);
+            CombatRoutine.AddDebuff("Duelist's Riposte", 346690);
 
 
         }
@@ -331,7 +341,7 @@ namespace HyperElk.Core
                 API.CastSpell(Provoke);
                 return;
             }
-            if (Taunt && AltimortheHuntsman)
+            if (Taunt && (AltimortheHuntsman || TheCouncilofBlood))
             {
                 API.CastSpell(Provoke + " Focus Target");
                 return;
