@@ -427,7 +427,7 @@ namespace HyperElk.Core
                 }
             }
             //SINGLE TARGET
-            if (!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber && IsRange && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
+            if ((!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber) && IsRange && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
             {
                 //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
                 if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
@@ -506,7 +506,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/immolate,cycle_targets=1,if=refreshable&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
-                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400 && (!TalentCataclysm | API.SpellISOnCooldown(Cataclysm)))
+                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400)
                 {
                     API.CastSpell(Immolate);
                     return;
