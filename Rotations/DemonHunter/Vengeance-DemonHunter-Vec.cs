@@ -136,8 +136,6 @@ namespace HyperElk.Core
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
-            CombatRoutine.AddMacro(PhialofSerenity, "F11");
-            CombatRoutine.AddMacro(SpiritualHealingPotion, "F12");
             //Buffs
             CombatRoutine.AddBuff("Demon Spikes",203819);
             CombatRoutine.AddBuff("Soul Fragments",203981);
