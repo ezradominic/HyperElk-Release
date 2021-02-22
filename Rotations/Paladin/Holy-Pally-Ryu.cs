@@ -153,7 +153,36 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             }
             return lowest;
         }
-        private string[] raidunit = new string[40];
+        private string LowestParty(string[] units)
+        {
+            string lowest = units[0];
+            int health = 100;
+            foreach (string unit in units)
+            {
+                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40)
+                {
+                    lowest = unit;
+                    health = API.UnitHealthPercent(unit);
+                }
+            }
+            return lowest;
+        }
+        private string LowestRaid(string[] raidunits)
+        {
+            string lowest = raidunits[0];
+            int health = 100;
+            foreach (string raidunit in raidunits)
+            {
+                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40)
+                {
+                    lowest = raidunit;
+                    health = API.UnitHealthPercent(raidunit);
+                }
+            }
+            return lowest;
+        }
+
+       // private string[] raidunit = new string[40];
     string[] units = { "player", "party1", "party2", "party3", "party4" };
         string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
 
@@ -326,8 +355,8 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
         private bool LoDCheck => IsAoEHealing && API.CanCast(LoD) && (IsMouseover || !IsMouseover) && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (LoDAoE || LoDMaxAoE && API.PlayerCurrentHolyPower == 5) && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover) && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool BoVCheck => API.CanCast(BoV) && BeaconofVirtue && InRange && BoVAoE && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool BoVCheckMO => API.CanCast(BoV) && BeaconofVirtue && InMoRange && IsMouseover && BoVAoE && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
-        private bool DTCheck => API.CanCast(DivineToll) && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && InRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
-        private bool DTCheckMO => API.CanCast(DivineToll) && IsMouseover && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && InMoRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool DTCheck => API.CanCast(DivineToll) && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && DTAoE) && NotChanneling && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && InRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool DTCheckMO => API.CanCast(DivineToll) && IsMouseover && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && DTAoE) && NotChanneling && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && InMoRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool HolyPrismCheck => API.CanCast(HolyPrism) && HolyPrismT && InRange && HPAoE && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool HolyPrismCheckMO => API.CanCast(HolyPrism) && HolyPrismT && InMoRange && IsMouseover && HPAoE && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool LoHCheck => API.CanCast(LoH) && InRange && API.TargetHealthPercent <= LoHLifePercent && API.TargetHealthPercent > 0 && (LoHTank && API.TargetRoleSpec == API.TankRole || !LoHTank) && !API.TargetHasBuff(Forbearance) && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetIsIncombat;
@@ -566,9 +595,9 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
 
 
             CombatRoutine.AddProp(AvengingWrath, AvengingWrath + " Life Percent", numbList, "Life percent at which" + AvengingWrath + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Cooldowns", 45);
-            CombatRoutine.AddProp("Avenging Wrath Usage", AvengingWrath + "Usage ", CDUsage, "Use " + AvengingWrath + "On Cooldown with AOE Logic for Healing, With Cooldowns only( you contorl) or not used at all", "Cooldowns", 1);
+            CombatRoutine.AddProp("Avenging Wrath Usage", AvengingWrath + "Usage ", CDUsage, "Use " + AvengingWrath + "On Cooldown with AOE Logic for Healing, With Cooldowns only( you control) or not used at all", "Cooldowns", 1);
             CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 95);
-            CombatRoutine.AddProp(HolyShockHealing, HolyShock, true, "If Holy Shock should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
+            //CombatRoutine.AddProp(HolyShockHealing, HolyShock, true, "If Holy Shock should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
             CombatRoutine.AddProp(BoST, BoS, true, "If BoS should be on tank only, if for everyone, change to false, set to true by default", "Healing");
             CombatRoutine.AddProp(LoHT, LoH, true, "If LoH should be on tank only, if for everyone, change to false, set to true by default", "Healing");
             CombatRoutine.AddProp(WoGTank, WoG, true, "If WoG should be used when tank is low over LoD when AoE Healing is on, if prefer LoD Healing priority above WoG target, change to false, set to true by default", "Healing");
@@ -611,6 +640,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
 
         public override void Pulse()
         {
+
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
@@ -871,12 +901,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(HolyShock + "MO");
                     return;
                 }
-                if (API.CanCast(HolyShock) && !HSHealing && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                if (API.CanCast(HolyShock) && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (API.CanCast(HolyShock) && !API.MacroIsIgnored(HolyShock + "MO") && !HSHealing && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(HolyShock) && !API.MacroIsIgnored(HolyShock + "MO") && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
                 {
                     API.CastSpell(HolyShock + "MO");
                     return;
@@ -997,12 +1027,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(VanqusihersHammer);
                     return;
                 }
-                if (API.CanCast(HammerofWrath) && API.PlayerCanAttackTarget && InRange && (API.TargetHealthPercent <= 20 && Level >= 46 && API.TargetHealthPercent > 0 || Level >= 58 && API.PlayerHasBuff(AvengingWrath) && API.TargetHealthPercent > 0))
+                if (API.CanCast(HammerofWrath) && API.PlayerCanAttackTarget && InRange && (API.TargetHealthPercent <= 20 && Level >= 46 && API.TargetHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.TargetHealthPercent > 0))
                 {
                     API.CastSpell(HammerofWrath);
                     return;
                 }
-                if (API.CanCast(HammerofWrath) && !API.MacroIsIgnored(HammerofWrath + "MO") && InMoRange && IsMouseover && (API.MouseoverHealthPercent <= 20 && Level >= 46 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 || Level >= 58 && API.PlayerHasBuff(AvengingWrath) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0))
+                if (API.CanCast(HammerofWrath) && !API.MacroIsIgnored(HammerofWrath + "MO") && InMoRange && IsMouseover && (API.MouseoverHealthPercent <= 20 && Level >= 46 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0))
                 {
                     API.CastSpell(HammerofWrath + "MO");
                     return;
@@ -1012,12 +1042,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(Cons);
                     return;
                 }
-                if (API.CanCast(SoTR) && API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower > 4 && DPSHealthCheck && IsMelee && API.TargetHealthPercent > 0)
+                if (API.CanCast(SoTR) && API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMelee && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(SoTR);
                     return;
                 }
-                if (API.CanCast(SoTR) && !API.MacroIsIgnored(SoTR + "MO") && IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.PlayerCurrentHolyPower > 4 && DPSHealthCheck && IsMoMelee && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(SoTR) && !API.MacroIsIgnored(SoTR + "MO") && IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMoMelee && API.MouseoverHealthPercent > 0)
                 {
                     API.CastSpell(SoTR + "MO");
                     return;
@@ -1025,7 +1055,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             }
             if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
             {
-                if (API.PlayerIsInGroup && InRange)
+                if (API.PlayerIsInGroup)
                 {
                     for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)
@@ -1035,28 +1065,34 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (API.UnitHealthPercent(units[i]) <= LowestHpPartyUnit() && (PlayerHealth >= LowestHpPartyUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10)
                             {
-                                API.CastSpell(PlayerTargetArray[i]);
+                                API.CastSpell(LowestParty(units));
                                 SwapWatch.Restart();
                                 return;
                             }
+                        //    if (API.UnitHealthPercent(units[i]) <= LowestHpPartyUnit() && (PlayerHealth >= LowestHpPartyUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                          //  {
+                            //    API.CastSpell(PlayerTargetArray[i]);
+                              //  SwapWatch.Restart();
+                              //  return;
+                           // }
                         }
                 }
-                if (API.PlayerIsInRaid && InRange)
+                if (API.PlayerIsInRaid)
                 {
                     //for (int j = 0; j < RaidList.Length; j++)
                     for (int i = 0; i < raidunits.Length; i++)
@@ -1066,22 +1102,22 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                         //     API.CastSpell(RaidTargetArray[i]);
                         //    return;
                         // }
-                        if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                        if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40)
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }
-                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             API.CastSpell("Assist");
                             return;
                         }
-                        if (API.UnitHealthPercent(raidunits[i]) <= LowestHpRaidUnit() && (PlayerHealth >= LowestHpRaidUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                        if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10)
                         {
-                            API.CastSpell(RaidTargetArray[i]);
+                            API.CastSpell(LowestRaid(raidunits));
                             SwapWatch.Restart();
                             return;
                         }
@@ -1134,7 +1170,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
         {
         for (int i = 1; i <= 40; i++)
         {
-            raidunit[i] = "raid" + i;
+           // raidunit[i] = "raid" + i;
         }
             for (int i = 0; i < units.Length; i++)
             {
