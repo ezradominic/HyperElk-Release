@@ -162,6 +162,34 @@ namespace HyperElk.Core
             }
             return lowest;
         }
+        private string LowestParty(string[] units)
+        {
+            string lowest = units[0];
+            int health = 100;
+            foreach (string unit in units)
+            {
+                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40)
+                {
+                    lowest = unit;
+                    health = API.UnitHealthPercent(unit);
+                }
+            }
+            return lowest;
+        }
+        private string LowestRaid(string[] raidunits)
+        {
+            string lowest = raidunits[0];
+            int health = 100;
+            foreach (string raidunit in raidunits)
+            {
+                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40)
+                {
+                    lowest = raidunit;
+                    health = API.UnitHealthPercent(raidunit);
+                }
+            }
+            return lowest;
+        }
         int PlayerHealth => API.TargetHealthPercent;
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
         string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
@@ -963,12 +991,12 @@ namespace HyperElk.Core
                 //Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
-                    if (API.PlayerIsInGroup && InRange)
+                    if (API.PlayerIsInGroup)
                     {
                         for (int i = 0; i < units.Length; i++)
                             for (int j = 0; j < DispellList.Length; j++)
                             {
-                            if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 SwapWatch.Restart();
@@ -994,27 +1022,27 @@ namespace HyperElk.Core
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250) && API.UnitHealthPercent(units[i]) > 0)
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (API.UnitHealthPercent(units[i]) <= LowestHpPartyUnit() && (PlayerHealth >= LowestHpPartyUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
+                                if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10)
+                                {
+                                    API.CastSpell(LowestParty(units));
+                                    SwapWatch.Restart();
+                                    return;
+                                }
 
-                        }
+                            }
                     }
-                    if (API.PlayerIsInRaid && InRange)
+                    if (API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
@@ -1036,16 +1064,16 @@ namespace HyperElk.Core
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) > 0)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 API.CastSpell("Assist");
                                 return;
                             }
-                            if (API.UnitHealthPercent(raidunits[i]) <= LowestHpRaidUnit() && (PlayerHealth >= LowestHpRaidUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10)
                             {
-                                API.CastSpell(RaidTargetArray[i]);
+                                API.CastSpell(LowestRaid(raidunits));
                                 SwapWatch.Restart();
                                 return;
                             }
