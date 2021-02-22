@@ -178,7 +178,7 @@ namespace HyperElk.Core
             int health = 100;
             foreach (string unit in units)
             {
-                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40)
+                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40 && API.UnitHealthPercent(unit) > 0)
                 {
                     lowest = unit;
                     health = API.UnitHealthPercent(unit);
@@ -192,7 +192,7 @@ namespace HyperElk.Core
             int health = 100;
             foreach (string raidunit in raidunits)
             {
-                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40)
+                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40 && API.UnitHealthPercent(raidunit) > 0)
                 {
                     lowest = raidunit;
                     health = API.UnitHealthPercent(raidunit);
