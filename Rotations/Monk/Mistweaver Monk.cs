@@ -163,30 +163,49 @@ namespace HyperElk.Core
         private int AoEDPSRaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoEDPSRaid)];
         private bool RangeCheck => API.TargetRange <= 40;
         private static readonly Stopwatch SwapWatch = new Stopwatch();
-        private int SwapSpeed => CombatRoutine.GetPropertyInt("SwapSpeed");
         private int RangePartyTracking(int Range) => units.Count(p => API.UnitRange(p) <= Range);
         private int RangeRaidTracking(int Range) => raidunits.Count(p => API.UnitRange(p) <= Range);
         private int RangeTracking(int Range) => API.PlayerIsInRaid ? RangeRaidTracking(Range) : RangePartyTracking(Range);
         private bool EssenceFontRange => RangeTracking(25) >= AoENumber;
         private bool RefreshingJadeWindRange => RangeTracking(10) >= AoENumber;
 
-        bool LastCastTargetChangeParty => API.PlayerLastSpell == "player" || API.PlayerLastSpell == "party1" || API.PlayerLastSpell == "party2" || API.PlayerLastSpell == "party3" || API.PlayerLastSpell == "party4";
-        bool LastCastTargetChangeRaid => API.PlayerLastSpell == "raid1" || API.PlayerLastSpell == "raid2" || API.PlayerLastSpell == "raid3" || API.PlayerLastSpell == "raid4" || API.PlayerLastSpell == "raid5" || API.PlayerLastSpell == "raid6" || API.PlayerLastSpell == "raid7" || API.PlayerLastSpell == "raid8" || API.PlayerLastSpell == "raid9" || API.PlayerLastSpell == "raid8" || API.PlayerLastSpell == "raid9" || API.PlayerLastSpell == "raid10" || API.PlayerLastSpell == "raid11" || API.PlayerLastSpell == "raid12" || API.PlayerLastSpell == "raid13" || API.PlayerLastSpell == "raid14" || API.PlayerLastSpell == "raid16" || API.PlayerLastSpell == "raid17" || API.PlayerLastSpell == "raid18" || API.PlayerLastSpell == "raid19" || API.PlayerLastSpell == "raid20" || API.PlayerLastSpell == "raid21" || API.PlayerLastSpell == "raid22" || API.PlayerLastSpell == "raid23" || API.PlayerLastSpell == "raid24" || API.PlayerLastSpell == "raid25" || API.PlayerLastSpell == "raid26" || API.PlayerLastSpell == "raid27" || API.PlayerLastSpell == "raid28" || API.PlayerLastSpell == "raid29" || API.PlayerLastSpell == "raid30" || API.PlayerLastSpell == "raid31" || API.PlayerLastSpell == "raid32" || API.PlayerLastSpell == "raid33" || API.PlayerLastSpell == "raid34" || API.PlayerLastSpell == "raid35" || API.PlayerLastSpell == "raid36" || API.PlayerLastSpell == "raid37" || API.PlayerLastSpell == "raid38" || API.PlayerLastSpell == "raid39" || API.PlayerLastSpell == "raid40";
-        bool LastCastTargetChange => API.PlayerIsInRaid ? LastCastTargetChangeRaid : LastCastTargetChangeParty;
-        bool LastCastEssenceFont => API.LastSpellCastInGame == EssenceFont;
         bool LastCastRenewingMist => API.LastSpellCastInGame == RenewingMist;
         bool LastCastManaTea => API.LastSpellCastInGame == ManaTea;
         bool LastCastSoothingMist => API.LastSpellCastInGame == SoothingMist;
-        bool LastCastVivify => API.LastSpellCastInGame == Vivify;
-        bool LastCastExpelHarm => API.LastSpellCastInGame == ExpelHarm;
-        bool LastCastEnvelopingMist => API.LastSpellCastInGame == EnvelopingMist;
+
         bool CurrentCastEssenceFont => API.CurrentCastSpellID("player") == 191837;
         private int JadeSerpentStatue => API.PlayerTotemPetDuration();
-        public string[] LegendaryList = new string[] { "None", "Ancient Teachings of the Monastery" };
+        public string[] LegendaryList = new string[] { "None" };
+        private int SwapSpeed => CombatRoutine.GetPropertyInt("SwapSpeed");
 
-        private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
-
-
+        private string LowestParty(string[] units)
+        {
+            string lowest = units[0];
+            int health = 100;
+            foreach (string unit in units)
+            {
+                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40 && API.UnitHealthPercent(unit) > 0)
+                {
+                    lowest = unit;
+                    health = API.UnitHealthPercent(unit);
+                }
+            }
+            return lowest;
+        }
+        private string LowestRaid(string[] raidunits)
+        {
+            string lowest = raidunits[0];
+            int health = 99;
+            foreach (string raidunit in raidunits)
+            {
+                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40 && API.UnitHealthPercent(raidunit) > 0)
+                {
+                    lowest = raidunit;
+                    health = API.UnitHealthPercent(raidunit);
+                }
+            }
+            return lowest;
+        }
 
 
         public override void Initialize()
@@ -295,6 +314,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(RenewingMist, 119611);
             CombatRoutine.AddBuff(ThunderFocusTea, 116680);
             CombatRoutine.AddBuff(RefreshingJadeWind, 196725);
+            CombatRoutine.AddBuff(SoothingMist, 198533);
 
             //Debuffs / Detox
             CombatRoutine.AddDebuff("Chilled", 328664);
@@ -396,46 +416,11 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "DPS Heal Raid", 70);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
-            CombatRoutine.AddProp("SwapSpeed", "SwapSpeed", 1500, "SwapSpeed", "Swap Speed");
+            CombatRoutine.AddProp("SwapSpeed", "SwapSpeed", 500, "SwapSpeed", "Swap Speed");
 
         }
         public override void Pulse()
         {
-            for (int i = 0; i < units.Length; i++)
-            {
-                if ((API.PlayerLastSpell == units[i] || LastCastEnvelopingMist || LastCastExpelHarm || LastCastVivify || LastCastRenewingMist) && !CurrentCastEssenceFont && API.PlayerIsInCombat && !API.PlayerIsMounted && !API.PlayerIsMoving)
-                {
-                    API.CastSpell(SoothingMist);
-                    return;
-                }
-            }
-            if (UseLeg == "Ancient Teachings of the Monastery" && LastCastEssenceFont)
-            {
-                for (int i = 0; i < units.Length; i++)
-                {
-                    if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored(Assist) && (API.CanCast(RisingSunKick) || API.CanCast(BlackoutKick) || API.CanCast(TigerPalm) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)))
-                    {
-                        API.CastSpell(PlayerTargetArray[i]);
-                        API.CastSpell(Assist);
-                        return;
-                    }
-                    if (API.CanCast(RisingSunKick) && !CurrentCastEssenceFont)
-                    {
-                        API.CastSpell(RisingSunKick);
-                        return;
-                    }
-                    if (API.SpellISOnCooldown(RisingSunKick) && API.CanCast(BlackoutKick) && !CurrentCastEssenceFont)
-                    {
-                        API.CastSpell(BlackoutKick);
-                        return;
-                    }
-                    if (API.SpellISOnCooldown(RisingSunKick) && API.SpellISOnCooldown(BlackoutKick) && !CurrentCastEssenceFont)
-                    {
-                        API.CastSpell(TigerPalm);
-                        return;
-                    }
-                }
-            }
             if (IsAutoDetox)
             {
                 if (API.CanCast(Detox))
@@ -516,29 +501,25 @@ namespace HyperElk.Core
                 API.CastSpell(RenewingMist);
                 return;
             }
-            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && !CurrentCastEssenceFont && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
-            {
-                API.CastSpell(EnvelopingMist);
-                return;
-            }
-            if (API.CanCast(ExpelHarm) && ChannelSoothingMist && !CurrentCastEssenceFont && API.TargetHealthPercent <= ExpelHarmtPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
-            {
-                API.CastSpell(ExpelHarm);
-                return;
-            }
-            if (API.CanCast(Vivify) && ChannelSoothingMist && !CurrentCastEssenceFont && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
-            {
-                API.CastSpell(Vivify);
-                return;
-            }
-            if (API.CanCast(SoothingMist) && !CurrentCastEssenceFont && NotCasting && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            if (API.CanCast(SoothingMist) && !CurrentCastEssenceFont && !API.TargetHasBuff(SoothingMist) && API.TargetHealthPercent <= SoothingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
             {
                 API.CastSpell(SoothingMist);
                 return;
             }
-            if (API.CanCast(RenewingMist) && !ChannelSoothingMist && !CurrentCastEssenceFont && API.TargetHealthPercent <= RenewingMistPercent && !API.TargetHasBuff(RenewingMist) && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal))
+
+            if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && API.TargetHasBuff(SoothingMist) && !CurrentCastEssenceFont && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
             {
-                API.CastSpell(RenewingMist);
+                API.CastSpell(EnvelopingMist);
+                return;
+            }
+            if (API.CanCast(ExpelHarm) && ChannelSoothingMist && API.TargetHasBuff(SoothingMist) && !CurrentCastEssenceFont && API.TargetHealthPercent <= ExpelHarmtPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            {
+                API.CastSpell(ExpelHarm);
+                return;
+            }
+            if (API.CanCast(Vivify) && ChannelSoothingMist && API.TargetHasBuff(SoothingMist) && !CurrentCastEssenceFont && API.TargetHealthPercent <= VivifyPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal) && RangeCheck)
+            {
+                API.CastSpell(Vivify);
                 return;
             }
             if (API.CanCast(ThunderFocusTea) && !API.SpellISOnCooldown(ThunderFocusTea) && !CurrentCastEssenceFont && !API.PlayerHasBuff(ThunderFocusTea) && API.PlayerMana >= ManaTeaPercent && TalentManaTea && UseThunderFocusTea == "Cooldowns" && IsCooldowns && API.PlayerIsInCombat)
@@ -658,139 +639,48 @@ namespace HyperElk.Core
             // Auto Target
             if (IsAutoSwap)
             {
-                if (API.PlayerIsInGroup && RangeCheck)
+                if (IsAutoSwap && API.PlayerIsInCombat)
                 {
-                    for (int i = 0; i < units.Length; i++)
+                    if (API.PlayerIsInGroup)
                     {
-                        if (API.UnitHealthPercent(units[i]) <= 15 && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-
-                        if (API.UnitHealthPercent(units[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= ExpelHarmtPercent && (PlayerHealth >= ExpelHarmtPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-
-                        if (API.UnitHealthPercent(units[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-
-                        if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40)
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-                        if (API.UnitHealthPercent(units[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            SwapWatch.Restart();
-                            return;
-                        }
-                        if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored(Assist) && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                        {
-                            API.CastSpell(PlayerTargetArray[i]);
-                            API.CastSpell(Assist);
-                            SwapWatch.Restart();
-                            return;
-                        }
-
+                        for (int j = 0; j < DetoxList.Length; j++)
+                            for (int i = 0; i < units.Length; i++)
+                            {
+                                if (CanDetoxTarget(DetoxList[j], units[i]) && IsAutoDetox)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    API.CastSpell("Assist");
+                                    SwapWatch.Restart();
+                                    return;
+                                }
+                                if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)
+                                {
+                                    API.CastSpell(LowestParty(units));
+                                    SwapWatch.Restart();
+                                    return;
+                                }
+                            }
                     }
-
                     if (API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
+                                API.CastSpell("Assist");
                                 return;
                             }
-                            if (API.UnitHealthPercent(raidunits[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
+                            if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)
                             {
-                                API.CastSpell(RaidTargetArray[i]);
+                                API.CastSpell(LowestRaid(raidunits));
                                 SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= ExpelHarmtPercent && (PlayerHealth >= ExpelHarmtPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(raidunits[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed) && API.UnitHealthPercent(raidunits[i]) > 0)
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                API.CastSpell(Assist);
                                 return;
                             }
                         }
@@ -867,7 +757,7 @@ namespace HyperElk.Core
                     API.CastSpell(ExpelHarm);
                     return;
                 }
-                if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && IsChanneling && !LastCastTargetChange && !LastCastRenewingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && RangeCheck)
+                if (API.CanCast(EnvelopingMist) && ChannelSoothingMist && IsChanneling && !LastCastRenewingMist && !API.TargetHasBuff(EnvelopingMist) && API.TargetHealthPercent <= EnvelopingMistPercent && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && RangeCheck)
                 {
                     API.CastSpell(EnvelopingMist);
                     return;
@@ -882,91 +772,22 @@ namespace HyperElk.Core
                     if (API.PlayerIsInGroup)
                     {
                         for (int i = 0; i < units.Length; i++)
-                            for (int j = 0; j < DetoxList.Length; j++)
+                        {
+                            if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)
                             {
-                                if (API.UnitHealthPercent(units[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(units[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(units[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(units[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(units[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(units[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]); ;
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(units[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (CanDetoxTarget(DetoxList[j], units[i]) && IsAutoDetox)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
+                                API.CastSpell(LowestParty(units));
+                                SwapWatch.Restart();
+                                return;
                             }
+                        }
                         if (API.PlayerIsInRaid)
                         {
                             for (int i = 0; i < raidunits.Length; i++)
                             {
-                                if (API.UnitHealthPercent(raidunits[i]) <= 15 && (PlayerHealth >= 15 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
+                                if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)
                                 {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= RenewingMistPercent && (PlayerHealth >= RenewingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= LifeCocoonPercent && (PlayerHealth >= LifeCocoonPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= FleshcraftPercentProc && (PlayerHealth >= FleshcraftPercentProc && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= ChiWavePercent && (PlayerHealth >= ChiWavePercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= EnvelopingMistPercent && (PlayerHealth >= EnvelopingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]); ;
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= VivifyPercent && (PlayerHealth >= VivifyPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitHealthPercent(raidunits[i]) <= SoothingMistPercent && (PlayerHealth >= SoothingMistPercent && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
+                                    API.CastSpell(LowestRaid(raidunits));
+                                    SwapWatch.Restart();
                                     return;
                                 }
                             }
