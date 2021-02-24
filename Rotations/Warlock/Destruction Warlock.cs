@@ -327,7 +327,7 @@ namespace HyperElk.Core
         private void rotation()
         {
 
-            if (API.CanCast(Havoc) && (API.TargetUnitInRangeCount + API.PlayerUnitInMeleeRangeCount == 2))
+            if (API.CanCast(Havoc) && API.PlayerCurrentSoulShards >= 5 && (API.TargetUnitInRangeCount + API.PlayerUnitInMeleeRangeCount == 2))
             {
 
                 API.CastSpell(Havoc);
@@ -479,7 +479,7 @@ namespace HyperElk.Core
                 }
                 //# Executed every time the actor is available.
                 //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
-                if (API.CanCast(Havoc) && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount == 2)
+                if (API.CanCast(Havoc) && API.PlayerCurrentSoulShards >= 5 && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount == 2)
                 {
                     API.CastSpell(Havoc);
                     HavocWatch.Start();
