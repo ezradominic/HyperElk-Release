@@ -358,7 +358,7 @@ namespace HyperElk.Core
                 }
 
                 //actions.aoe+=/channel_demonfire,if=dot.immolate.remains>cast_time
-                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400)
+                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400 && API.SpellISOnCooldown(Cataclysm))
                 {
                     API.CastSpell(Immolate);
                     return;
