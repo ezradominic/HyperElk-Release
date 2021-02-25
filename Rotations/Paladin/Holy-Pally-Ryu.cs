@@ -81,7 +81,7 @@ public class HolyPally : CombatRoutine
         private string WoGTank = "Word of Glory on Tank";
         private string SwapSpeed = "Target Swap Speed";
         private string DivinePurpose = "Divine Purpose";
-
+        private string HealthTank = "Health Tank";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
@@ -113,7 +113,8 @@ public class HolyPally : CombatRoutine
         bool BeaconofVirtue => API.PlayerIsTalentSelected(7, 3);
 
 //Stopwatchs / Int's / Strings
-private static readonly Stopwatch SwapWatch = new Stopwatch();
+        private static readonly Stopwatch SwapWatch = new Stopwatch();
+        private static readonly Stopwatch DPSWatch = new Stopwatch();
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
         int[] SwapSpeedList = new int[] { 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000 };
@@ -159,7 +160,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             int health = 100;
             foreach (string unit in units)
             {
-                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40 && API.UnitHealthPercent(unit) > 0)
+                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40 && API.UnitHealthPercent(unit) > 0 && API.UnitHealthPercent(unit) != 100) 
                 {
                     lowest = unit;
                     health = API.UnitHealthPercent(unit);
@@ -173,7 +174,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             int health = 100;
             foreach (string raidunit in raidunits)
             {
-                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40 && API.UnitHealthPercent(raidunit) > 0)
+                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40 && API.UnitHealthPercent(raidunit) > 0 && API.UnitHealthPercent(raidunit) != 100)
                 {
                     lowest = raidunit;
                     health = API.UnitHealthPercent(raidunit);
@@ -317,6 +318,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int TrinketLifePercent => numbList[CombatRoutine.GetPropertyInt(Trinket)];
         private int SwapSpeedSetting => SwapSpeedList[CombatRoutine.GetPropertyInt(SwapSpeed)];
+        private int TankHealth => numbList[CombatRoutine.GetPropertyInt("Tank Health")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private string UseAV => CDUsage[CombatRoutine.GetPropertyInt("Avenging Wrath Usage")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
@@ -398,6 +400,8 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             CombatRoutine.AddBuff(Quake, 240447);
             CombatRoutine.AddBuff(DivinePurpose, 223819);
             CombatRoutine.AddBuff(HolyAvenger, 105809);
+            CombatRoutine.AddBuff("Gluttonous Miasma", 329298);
+
             //Debuff
             CombatRoutine.AddDebuff(Forbearance, 25771);
             CombatRoutine.AddDebuff(Cons, 26573);
@@ -591,7 +595,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
-
+            CombatRoutine.AddProp("Tank Health", "Tank Health", numbList, "Life percent at which " + "Tank Health" + "needs to be at to target during DPS Targeting", "Targeting", 75);
 
 
             CombatRoutine.AddProp(AvengingWrath, AvengingWrath + " Life Percent", numbList, "Life percent at which" + AvengingWrath + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Cooldowns", 45);
@@ -630,9 +634,9 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
             CombatRoutine.AddProp(AoERaid, "Number of units for AoE Healing in raid ", numbRaidList, " Units for AoE Healing in raid", "Healing", 5);
             CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Healing", 2);
-            CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS in party" + "is used,", "Healing", 80);
+            //CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS in party" + "is used,", "Healing", 80);
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Healing", 4);
-            CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "Healing", 70);
+          //  CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "Healing", 70);
             CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " when AoE Healing Number of units are met should be used, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket 1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket 2 be used", "Trinket", 0);
@@ -640,7 +644,6 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
 
         public override void Pulse()
         {
-
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
@@ -826,7 +829,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(AuraMastery);
                     return;
                 }
-                if (DTCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (DTCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(DivineToll);
                     return;
@@ -836,7 +839,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(DivineToll + "MO");
                     return;
                 }
-                if (BoVCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (BoVCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BoV);
                     return;
@@ -846,7 +849,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(BoV + "MO");
                     return;
                 }
-                if (HolyPrismCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyPrismCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyPrism);
                     return;
@@ -856,7 +859,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(HolyPrism + "MO");
                     return;
                 }
-                if (WoGTankCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (WoGTankCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG);
                     return;
@@ -866,12 +869,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(WoG + "MO");
                     return;
                 }
-                if (LoDCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoDCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoD);
                     return;
                 }
-                if (LoHCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoHCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoH);
                     return;
@@ -891,12 +894,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(BoS + "MO");
                     return;
                 }
-                if (HolyShockCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyShockCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO"))
+                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyShock + "MO");
                     return;
@@ -911,12 +914,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(HolyShock + "MO");
                     return;
                 }
-                if (WoGCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (WoGCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG);
                     return;
                 }
-                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO"))
+                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG + "MO");
                     return;
@@ -941,62 +944,62 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
-                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
+                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
-                {
+                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                { 
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (BFCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (BFCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BF);
                     return;
                 }
-                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO"))
+                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BF + "MO");
                     return;
                 }
-                if (LoTMCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoTMCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoTM);
                     return;
                 }
-                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO"))
+                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoTM + "MO");
                     return;
@@ -1068,28 +1071,45 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                             if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
-                                SwapWatch.Restart();
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(75) >= AoEDPSNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && API.UnitRange(units[i]) <= 4)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10)
-                            {
-                                API.CastSpell(LowestParty(units));
-                                SwapWatch.Restart();
-                                return;
-                            }
-                        //    if (API.UnitHealthPercent(units[i]) <= LowestHpPartyUnit() && (PlayerHealth >= LowestHpPartyUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
-                          //  {
-                            //    API.CastSpell(PlayerTargetArray[i]);
+                          //  if ((!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitAboveHealthPercentParty(AoEDPSHLifePercent) < AoEDPSNumber || API.SpellISOnCooldown(HolyShock) && API.SpellCharges(CrusaderStrike) < 1 || !API.SpellISOnCooldown(HolyShock)))
+                            //{
+                             //   API.CastSpell(LowestParty(units));
                               //  SwapWatch.Restart();
                               //  return;
                            // }
+                            if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= HolyShockLifePercent)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                SwapWatch.Restart();
+                                return;
+                            }
+                            if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                SwapWatch.Restart();
+                                return;
+                            }
+                            if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= 35)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                SwapWatch.Restart();
+                                return;
+                            }
+                            //    if (API.UnitHealthPercent(units[i]) <= LowestHpPartyUnit() && (PlayerHealth >= LowestHpPartyUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            //  {
+                            //    API.CastSpell(PlayerTargetArray[i]);
+                            //  SwapWatch.Restart();
+                            //  return;
+                            // }
                         }
                 }
                 if (API.PlayerIsInRaid)
@@ -1115,9 +1135,21 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                             API.CastSpell("Assist");
                             return;
                         }
-                        if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10)
+                        if (LowestParty(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= HolyShockLifePercent && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
                         {
-                            API.CastSpell(LowestRaid(raidunits));
+                            API.CastSpell(RaidTargetArray[i]);
+                            SwapWatch.Restart();
+                            return;
+                        }
+                        if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth)
+                        {
+                            API.CastSpell(RaidTargetArray[i]);
+                            SwapWatch.Restart();
+                            return;
+                        }
+                        if (LowestParty(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= 35 && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                        {
+                            API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }
