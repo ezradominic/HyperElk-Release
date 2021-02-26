@@ -195,6 +195,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff("Sintouched Anima", 328494);
             CombatRoutine.AddDebuff("Curse of Stone", 319603);
             CombatRoutine.AddDebuff(Quake, 240447);
+            CombatRoutine.AddDebuff(Blizzard, 12486);
 
             //Spell
             CombatRoutine.AddSpell(RoP, 116011, "None");
@@ -538,6 +539,16 @@ namespace HyperElk.Core
             {
                 if ((IsAOE || IsForceAOE) && UseLeg == "Glacial Fragments" && (API.TargetUnitInRangeCount >= 3 || IsForceAOE))
                 {
+                    if (API.CanCast(IV) && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && (IsCooldowns && UseIV == "With Cooldowns" || UseIV == "On Cooldown"))
+                    {
+                        API.CastSpell(IV);
+                        return;
+                    }
+                    if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !CastIV && !PlayerHasBuff(RoP) && !PlayerHasBuff(BrainFreeze) && !PlayerHasBuff(FoF) && !API.TargetHasDebuff(WC) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && API.SpellCDDuration(IV) >= 1200 && (!QuakingRune || QuakingRune && QuakingHelper) && !RuneWatch.IsRunning)
+                    {
+                        API.CastSpell(RoP);
+                        return;
+                    }
                     if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40 && IsFO)
                     {
                         API.CastSpell(FO);
@@ -553,7 +564,7 @@ namespace HyperElk.Core
                         API.CastSpell(Blizzard);
                         return;
                     }
-                    if (API.CanCast(IL) && InRange && API.SpellISOnCooldown(Blizzard))
+                    if (API.CanCast(IL) && InRange && API.TargetHasDebuff(Blizzard))
                     {
                         API.CastSpell(IL);
                         return;
