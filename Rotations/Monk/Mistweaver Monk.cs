@@ -641,7 +641,7 @@ namespace HyperElk.Core
             {
                 if (IsAutoSwap && API.PlayerIsInCombat)
                 {
-                    if (API.PlayerIsInGroup)
+                    if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
                         for (int j = 0; j < DetoxList.Length; j++)
                             for (int i = 0; i < units.Length; i++)
@@ -651,7 +651,7 @@ namespace HyperElk.Core
                                     API.CastSpell(PlayerTargetArray[i]);
                                     return;
                                 }
-                                if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
+                                if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                                 {
                                     API.CastSpell(PlayerTargetArray[i]);
                                     API.CastSpell("Assist");
@@ -670,7 +670,7 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
+                            if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
