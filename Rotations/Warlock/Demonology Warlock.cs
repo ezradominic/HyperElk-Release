@@ -305,7 +305,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/grimoire_felguard,if=cooldown.summon_demonic_tyrant.remains+cooldown.summon_demonic_tyrant.duration>time_to_die|time_to_die<cooldown.summon_demonic_tyrant.remains+15
-                if (API.CanCast(GrimoireFelguard) && TalentGrimoireFelguard && API.SpellCDDuration(SummonDemonicTyrant) + API.SpellCDDuration(SummonDemonicTyrant) > API.TargetTimeToDie || API.TargetTimeToDie < API.SpellCDDuration(SummonDemonicTyrant) + 1500)
+                if (API.CanCast(GrimoireFelguard) && TalentGrimoireFelguard && (API.SpellCDDuration(SummonDemonicTyrant) + API.SpellCDDuration(SummonDemonicTyrant) > API.TargetTimeToDie || API.TargetTimeToDie < API.SpellCDDuration(SummonDemonicTyrant) + 1500))
                 {
                     API.CastSpell(GrimoireFelguard);
                     return;
