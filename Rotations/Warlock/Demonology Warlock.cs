@@ -125,6 +125,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Summon Voidwalker", 697, "NumPad8");
             CombatRoutine.AddSpell("Summon Imp", 688, "NumPad9");
             CombatRoutine.AddSpell(SpellLock, 19647);
+            CombatRoutine.AddSpell(NetherPortal, 267217);
 
 
             //Buffs
@@ -140,7 +141,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("Imp Count " + API.PlayerImpCount);
             if (GrimoireFelguardWatch.IsRunning && GrimoireFelguardWatch.ElapsedMilliseconds >= 17000)
             {
                 GrimoireFelguardWatch.Reset();
@@ -213,6 +213,12 @@ namespace HyperElk.Core
         {
             if (NotMoving && IsRange && NotChanneling && !API.PlayerIsCasting(true))
             {
+                if (ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 8000)
+                {
+                    API.CastSpell(Implosion);
+                    ImpWatch.Reset();
+                    return;
+                }
                 //actions=call_action_list,name=off_gcd
                 //actions+=/run_action_list,name=tyrant_prep,if=cooldown.summon_demonic_tyrant.remains<4&!variable.tyrant_ready
                 if (IsCooldowns && API.SpellCDDuration(SummonDemonicTyrant) < 400)
@@ -271,12 +277,20 @@ namespace HyperElk.Core
                 if (API.CanCast(HandofGuldan) && SoulShards == 5 || API.PlayerHasBuff(NetherPortal))
                 {
                     API.CastSpell(HandofGuldan);
+                    if (!ImpWatch.IsRunning)
+                    {
+                        ImpWatch.Start();
+                    }
                     return;
                 }
                 //actions+=/hand_of_guldan,if=soul_shard>=3&cooldown.summon_demonic_tyrant.remains>20&(cooldown.summon_vilefiend.remains>5|!talent.summon_vilefiend.enabled)&cooldown.call_dreadstalkers.remains>2
                 if (API.CanCast(HandofGuldan) && SoulShards >= 3 && API.SpellCDDuration(SummonDemonicTyrant) > 2000 && (API.SpellCDDuration(SummonVilefiend) > 500 || !TalentSummonVilefiend) && API.SpellCDDuration(CallDreadstalkers) > 200)
                 {
                     API.CastSpell(HandofGuldan);
+                    if (!ImpWatch.IsRunning)
+                    {
+                        ImpWatch.Start();
+                    }
                     return;
                 }
                 //actions+=/call_action_list,name=covenant,if=(covenant.necrolord|covenant.night_fae)&!talent.nether_portal.enabled
@@ -368,6 +382,10 @@ namespace HyperElk.Core
             if (API.CanCast(HandofGuldan) && SoulShards >= 1)
             {
                 API.CastSpell(HandofGuldan);
+                if (!ImpWatch.IsRunning)
+                {
+                    ImpWatch.Start();
+                }
                 return;
             }
 
@@ -378,6 +396,10 @@ namespace HyperElk.Core
             if (API.CanCast(HandofGuldan) && SoulShards == 5)
             {
                 API.CastSpell(HandofGuldan);
+                if (!ImpWatch.IsRunning)
+                {
+                    ImpWatch.Start();
+                }
                 return;
             }
             //actions.summon_tyrant+=/demonbolt,if=buff.demonic_core.up&(talent.demonic_consumption.enabled|buff.nether_portal.down),line_cd=20
@@ -387,11 +409,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions.summon_tyrant+=/shadow_bolt,if=buff.wild_imps.stack+incoming_imps<4&(talent.demonic_consumption.enabled|buff.nether_portal.down),line_cd=20
-            if (API.CanCast(ShadowBolt) && API.PlayerImpCount < 4 && (TalentDemonicConsumption || !API.PlayerHasBuff(NetherPortal)))
-            {
-                API.CastSpell(ShadowBolt);
-                return;
-            }
+//            if (API.CanCast(ShadowBolt) && API.PlayerImpCount < 4 && (TalentDemonicConsumption || !API.PlayerHasBuff(NetherPortal)))
+//            {
+//                API.CastSpell(ShadowBolt);
+//                return;
+//            }
             //actions.summon_tyrant+=/call_dreadstalkers
             if (API.CanCast(CallDreadstalkers) && SoulShards >= 2)
             {
@@ -402,6 +424,10 @@ namespace HyperElk.Core
             if (API.CanCast(HandofGuldan) && SoulShards >= 1)
             {
                 API.CastSpell(HandofGuldan);
+                if (!ImpWatch.IsRunning)
+                {
+                    ImpWatch.Start();
+                }
                 return;
             }
             //actions.summon_tyrant+=/demonbolt,if=buff.demonic_core.up&buff.nether_portal.up&((buff.vilefiend.remains>5|!talent.summon_vilefiend.enabled)&(buff.grimoire_felguard.remains>5|buff.grimoire_felguard.down))
