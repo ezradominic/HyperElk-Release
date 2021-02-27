@@ -24,6 +24,7 @@
 // v3.2 new Signet Logic
 // v3.3 small hotfix for cancel Bladestorm
 // v3.4 small Bladestorm cancel update
+// v3.5 new settings and minor tweaks
 
 using System.Linq;
 
@@ -92,13 +93,13 @@ namespace HyperElk.Core
         private float gcd => API.SpellGCDTotalDuration;
         //actions+=/variable,name=execute_phase,value=talent.massacre&target.health.pct<35|target.health.pct<20|target.health.pct>80&covenant.venthyr
         bool WWup => (API.PlayerHasBuff(Whirlwind) && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber && IsAOE || !IsAOE);
-        bool IsRecklessness => UseRecklessness == "with Cooldowns" && IsCooldowns || UseRecklessness == "always";
-        bool IsSiegebreaker => UseSiegebreaker == "with Cooldowns" && IsCooldowns || UseSiegebreaker == "always";
-        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns and AoE") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
-        bool IsDragonRoar => (UseDragonRoar == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE") && IsCooldowns || UseDragonRoar == "always" || (UseDragonRoar == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
-        bool IsBladestorm => (UseBladestorm == "with Cooldowns" || UseBladestorm == "with Cooldowns and AoE") && IsCooldowns || UseBladestorm == "always" || (UseBladestorm == "on AOE" || UseBladestorm == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber;
-        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
-        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee;
+        bool IsRecklessness => (UseRecklessness == "with Cooldowns" || UseRecklessness == "with Cooldowns and AoE" || UseRecklessness == "on mob Count and Cooldowns") && IsCooldowns || UseRecklessness == "always" || (UseRecklessness == "on AOE" || UseRecklessness == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseRecklessness == "on mob Count and Cooldowns" || UseRecklessness == "on mob Count") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsSiegebreaker => (UseSiegebreaker == "with Cooldowns" || UseSiegebreaker == "with Cooldowns and AoE" || UseSiegebreaker == "on mob Count and Cooldowns") && IsCooldowns || UseSiegebreaker == "always" || (UseSiegebreaker == "on AOE" || UseSiegebreaker == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseSiegebreaker == "on mob Count and Cooldowns" || UseSiegebreaker == "on mob Count") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns and AoE" || UseCovenant == "on mob Count and Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseCovenant == "on mob Count and Cooldowns" || UseCovenant == "on mob Count") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsDragonRoar => (UseDragonRoar == "with Cooldowns" || UseDragonRoar == "with Cooldowns and AoE" || UseDragonRoar == "on mob Count and Cooldowns") && IsCooldowns || UseDragonRoar == "always" || (UseDragonRoar == "on AOE" || UseDragonRoar == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseDragonRoar == "on mob Count and Cooldowns" || UseDragonRoar == "on mob Count") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsBladestorm => (UseBladestorm == "with Cooldowns" || UseBladestorm == "with Cooldowns and AoE" || UseBladestorm == "on mob Count and Cooldowns") && IsCooldowns || UseBladestorm == "always" || (UseBladestorm == "on AOE" || UseBladestorm == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseBladestorm == "on mob Count and Cooldowns" || UseBladestorm == "on mob Count") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns and AoE" || UseTrinket1 == "on mob Count and Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mob Count and Cooldowns" || UseTrinket1 == "on mob Count") && API.PlayerUnitInMeleeRangeCount >= MobCount) && IsMelee;
+        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns and AoE" || UseTrinket2 == "on mob Count and Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns and AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mob Count and Cooldowns" || UseTrinket2 == "on mob Count") && API.PlayerUnitInMeleeRangeCount >= MobCount) && IsMelee;
 
 
         //CBProperties
@@ -126,9 +127,10 @@ namespace HyperElk.Core
 
         private int AoENumber => numbPartyList[CombatRoutine.GetPropertyInt(AoE)];
         private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoERaid)];
+        private int MobCount => numbRaidList[CombatRoutine.GetPropertyInt("MobCount")];
         private int RallyLifePercent => numbList[CombatRoutine.GetPropertyInt(RallyingCry)];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
-        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns and AoE", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns and AoE", "on mob Count", "on mob Count and Cooldowns", "always" };
         string[] heroiclist = new string[] { "Not Used", "when out of melee", "only Mouseover", "both" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseRecklessness => CDUsage[CombatRoutine.GetPropertyInt(Recklessness)];
@@ -146,7 +148,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.4");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.5");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
@@ -228,6 +230,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsage, "Use " + Siegebreaker + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(DragonRoar, "Use " + DragonRoar, CDUsageWithAOE, "Use " + DragonRoar + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Bladestorm, "Use " + Bladestorm, CDUsageWithAOE, "Use " + Bladestorm + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("MobCount", "Mobcount to use ", numbRaidList, " Bladestorm and other AoE abilitys", "Cooldowns", 3);
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, " Lineup Recklessness and Siegebreaker", "Cooldowns");
             CombatRoutine.AddProp("Signet Legendary", "Signet Legendary", false, " Do you have the Signet Legendary?", "Generic");
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", numbList, " Life percent at which" + EnragedRegeneration + " is used, set to 0 to disable", "Defense", 60);
@@ -426,6 +429,25 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(CrushingBlow);
                     return;
+                }
+                if (API.CanCast(Bladestorm) && API.PlayerBuffTimeRemaining(Enrage) > gcd*2.5 && API.PlayerUnitInMeleeRangeCount >= AoENumber && IsAOE && TalentBladestorm && IsBladestorm && BladestormToggle)
+                {
+                    API.CastSpell(Bladestorm);
+                    return;
+                }
+                if (API.PlayerHasBuff(Enrage))
+                {
+                    if (API.CanCast(Condemn, true, false) && WWup && PlayerCovenantSettings == "Venthyr" && !TalentMassacre && !IsMassacre && (API.TargetHealthPercent < 20 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)))
+                    {
+                        API.CastSpell(Condemn);
+                        return;
+                    }
+                    //actions.single_target+=/condemn
+                    if (API.CanCast(MassacreCondemn, true, false) && WWup && PlayerCovenantSettings == "Venthyr" && (TalentMassacre || IsMassacre) && (API.TargetHealthPercent < 35 || API.TargetHealthPercent > 80 || API.PlayerHasBuff(SuddenDeath) || API.PlayerHasBuff(NoLImitCondemn)))
+                    {
+                        API.CastSpell(MassacreCondemn);
+                        return;
+                    }
                 }
                 //actions.single_target+=/siegebreaker,if=spell_targets.whirlwind>1|raid_event.adds.in>15
                 if (API.CanCast(Siegebreaker) && WWup && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
