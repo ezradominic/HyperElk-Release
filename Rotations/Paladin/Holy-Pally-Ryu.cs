@@ -81,7 +81,7 @@ public class HolyPally : CombatRoutine
         private string WoGTank = "Word of Glory on Tank";
         private string SwapSpeed = "Target Swap Speed";
         private string DivinePurpose = "Divine Purpose";
-
+        private string HealthTank = "Health Tank";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
@@ -113,7 +113,8 @@ public class HolyPally : CombatRoutine
         bool BeaconofVirtue => API.PlayerIsTalentSelected(7, 3);
 
 //Stopwatchs / Int's / Strings
-private static readonly Stopwatch SwapWatch = new Stopwatch();
+        private static readonly Stopwatch SwapWatch = new Stopwatch();
+        private static readonly Stopwatch DPSWatch = new Stopwatch();
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
         int[] SwapSpeedList = new int[] { 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000 };
@@ -153,8 +154,37 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             }
             return lowest;
         }
-        private string[] raidunit = new string[40];
-    string[] units = { "player", "party1", "party2", "party3", "party4" };
+        private string LowestParty(string[] units)
+        {
+            string lowest = units[0];
+            int health = 100;
+            foreach (string unit in units)
+            {
+                if (API.UnitHealthPercent(unit) < health && API.UnitRange(unit) <= 40 && API.UnitHealthPercent(unit) > 0 && API.UnitHealthPercent(unit) != 100) 
+                {
+                    lowest = unit;
+                    health = API.UnitHealthPercent(unit);
+                }
+            }
+            return lowest;
+        }
+        private string LowestRaid(string[] raidunits)
+        {
+            string lowest = raidunits[0];
+            int health = 100;
+            foreach (string raidunit in raidunits)
+            {
+                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40 && API.UnitHealthPercent(raidunit) > 0 && API.UnitHealthPercent(raidunit) != 100)
+                {
+                    lowest = raidunit;
+                    health = API.UnitHealthPercent(raidunit);
+                }
+            }
+            return lowest;
+        }
+
+        // private string[] raidunit = new string[40];
+        string[] units = { "player", "party1", "party2", "party3", "party4" };
         string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
 
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
@@ -288,16 +318,18 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int TrinketLifePercent => numbList[CombatRoutine.GetPropertyInt(Trinket)];
         private int SwapSpeedSetting => SwapSpeedList[CombatRoutine.GetPropertyInt(SwapSpeed)];
+        private int TankHealth => numbList[CombatRoutine.GetPropertyInt("Tank Health")];
+        private int UnitHealth => numbList[CombatRoutine.GetPropertyInt("Other Members Health")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private string UseAV => CDUsage[CombatRoutine.GetPropertyInt("Avenging Wrath Usage")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         //Quaking
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingHoly => API.PlayerDebuffRemainingTime(Quake) > HolyLightCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingFlash => API.PlayerDebuffRemainingTime(Quake) > FlashOfLightCastTime && API.PlayerHasDebuff(Quake);
-        private bool QuakingAshen => API.PlayerDebuffRemainingTime(Quake) > AshenCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingHoly => API.PlayerDebuffRemainingTime(Quake) > HolyLightCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingFlash => API.PlayerDebuffRemainingTime(Quake) > FlashOfLightCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingAshen => API.PlayerDebuffRemainingTime(Quake) > AshenCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool WoGTanking => CombatRoutine.GetPropertyBool(WoGTank);
 
         float HolyLightCastTime => 250f / (1f + API.PlayerGetHaste);
@@ -326,8 +358,8 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
         private bool LoDCheck => IsAoEHealing && API.CanCast(LoD) && (IsMouseover || !IsMouseover) && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (LoDAoE || LoDMaxAoE && API.PlayerCurrentHolyPower == 5) && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover) && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool BoVCheck => API.CanCast(BoV) && BeaconofVirtue && InRange && BoVAoE && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool BoVCheckMO => API.CanCast(BoV) && BeaconofVirtue && InMoRange && IsMouseover && BoVAoE && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
-        private bool DTCheck => API.CanCast(DivineToll) && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && InRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
-        private bool DTCheckMO => API.CanCast(DivineToll) && IsMouseover && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && InMoRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool DTCheck => API.CanCast(DivineToll) && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && DTAoE) && NotChanneling && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && InRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool DTCheckMO => API.CanCast(DivineToll) && IsMouseover && DTAoE && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && DTAoE) && NotChanneling && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && InMoRange && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool HolyPrismCheck => API.CanCast(HolyPrism) && HolyPrismT && InRange && HPAoE && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool HolyPrismCheckMO => API.CanCast(HolyPrism) && HolyPrismT && InMoRange && IsMouseover && HPAoE && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool LoHCheck => API.CanCast(LoH) && InRange && API.TargetHealthPercent <= LoHLifePercent && API.TargetHealthPercent > 0 && (LoHTank && API.TargetRoleSpec == API.TankRole || !LoHTank) && !API.TargetHasBuff(Forbearance) && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetIsIncombat;
@@ -353,7 +385,9 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             API.WriteLog("Maunual targeting, Auto Tareting, or Mouseover Supported. You need to create /cast [@mouseover] xxxx where xxx is each of the spells that have MO in the bindings in order for Mouseover to work");
             API.WriteLog("Night Fae Cov is not supported. You can create a /xxx break marco to use those abilties when you would like at this time.");
             API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Assist Target and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it to swap, friendly or enemy. UNDER TESTING : It can swap back to an enemy, but YOU WILL NEED TO ASSIGN YOUR ASSIST TARGET KEY IT WILL NOT WORK IF YOU DONT DO THIS. If you DO NOT want it to do target enemy swapping, please IGNORE Assist Macro in the Spellbook. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
+            API.WriteLog("The settings in the Targeting Section have been tested to work well. Change them at your risk and ONLY if you understand them.");
             API.WriteLog("IF YOU USE THE NPC TOGGLE, IT WILL CHANGE THE ROTATION THE NPC HEALING LOGIC (For Shade and Sun King) IT WILL IGNORE ALL OTHER THINGS EXPECT COOLDOWNS, PLEASE TURN IT OFF ONCE YOU HAVE FINISHED HEALING THE NPC");
+
             //Buff
             CombatRoutine.AddBuff(Infusion, 54149);
             CombatRoutine.AddBuff(AvengingWrath, 31884);
@@ -369,6 +403,8 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             CombatRoutine.AddBuff(Quake, 240447);
             CombatRoutine.AddBuff(DivinePurpose, 223819);
             CombatRoutine.AddBuff(HolyAvenger, 105809);
+            CombatRoutine.AddBuff("Gluttonous Miasma", 329298);
+
             //Debuff
             CombatRoutine.AddDebuff(Forbearance, 25771);
             CombatRoutine.AddDebuff(Cons, 26573);
@@ -551,28 +587,34 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
 
 
             //Prop
-          //  CombatRoutine.AddProp(SwapSpeed, SwapSpeed + "Speed ", SwapSpeedList, "Speed at which to change targets, it is in Milliseconds, to convert to seconds please divide by 1000. If you don't understand, please leave at at default setting", "Targeting", 1250);
             CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(DivineProtection, DivineProtection + " Life Percent", numbList, "Life percent at which" + DivineProtection + "is used, set to 0 to disable", "Defense", 50);
             CombatRoutine.AddProp(Fleshcraft, "Fleshcraft", numbList, "Life percent at which " + Fleshcraft + " is used, set to 0 to disable set 100 to use it everytime", "Defense", 0);
-            CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 0);
-            CombatRoutine.AddProp("Aura Switch", "Auto Aura Switch", false, "Auto Switch Aura between Crusader Aura|Devotion Aura", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+      
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
-            CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
 
-
-
+            CombatRoutine.AddProp("Use Covenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + "On Cooldown, with Cooldowns, On AOE, Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp(AvengingWrath, AvengingWrath + " Life Percent", numbList, "Life percent at which" + AvengingWrath + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Cooldowns", 45);
-            CombatRoutine.AddProp("Avenging Wrath Usage", AvengingWrath + "Usage ", CDUsage, "Use " + AvengingWrath + "On Cooldown with AOE Logic for Healing, With Cooldowns only( you contorl) or not used at all", "Cooldowns", 1);
+            CombatRoutine.AddProp("Avenging Wrath Usage", AvengingWrath + "Usage ", CDUsage, "Use " + AvengingWrath + "On Cooldown with AOE Logic for Healing, With Cooldowns only( you control) or not used at all", "Cooldowns", 1);
+
+            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
+            CombatRoutine.AddProp("Aura Switch", "Auto Aura Switch", false, "Auto Switch Aura between Crusader Aura|Devotion Aura", "Generic");
+
+            CombatRoutine.AddProp("Tank Health", "Tank Health", numbList, "Life percent at which " + "Tank Health" + "needs to be at to target during DPS Targeting", "Targeting", 75);
+            CombatRoutine.AddProp("Other Members Health", "Other Members Health", numbList, "Life percent at which " + "Other Members Health" + "needs to be at to targeted during DPS Targeting", "Targeting", 35);
+            CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Targeting", 2);
+            CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Targeting", 7);
+            CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS and below to return back to Healing", numbList, "Health percent at which DPS in party" + "is used,", "Targeting", 75);
+            CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS and below to return back to Healing in raid", numbList, "Health percent at which DPS" + "is used,", "Targeting", 75);
+
+
             CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 95);
-            CombatRoutine.AddProp(HolyShockHealing, HolyShock, true, "If Holy Shock should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
             CombatRoutine.AddProp(BoST, BoS, true, "If BoS should be on tank only, if for everyone, change to false, set to true by default", "Healing");
             CombatRoutine.AddProp(LoHT, LoH, true, "If LoH should be on tank only, if for everyone, change to false, set to true by default", "Healing");
             CombatRoutine.AddProp(WoGTank, WoG, true, "If WoG should be used when tank is low over LoD when AoE Healing is on, if prefer LoD Healing priority above WoG target, change to false, set to true by default", "Healing");
-            // CombatRoutine.AddProp(HolyShockLeggoSpread, HolyShock, false, "If Shock barrier should should be spread at max health, set to false by default", "Healing");
             CombatRoutine.AddProp(HolyLight, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "is used, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(HolyLightBeacon, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "on your beacon target is used, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(HolyLightIBeacon, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + " with infusion on your beacon target is used, set to 0 to disable", "Healing", 85);
@@ -600,11 +642,8 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             CombatRoutine.AddProp(DivineTollHealing, DivineToll, true, "If Divine Toll should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
             CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
             CombatRoutine.AddProp(AoERaid, "Number of units for AoE Healing in raid ", numbRaidList, " Units for AoE Healing in raid", "Healing", 5);
-            CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Healing", 2);
-            CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS", numbList, "Health percent at which DPS in party" + "is used,", "Healing", 80);
-            CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Healing", 4);
-            CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "Healing", 70);
             CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " when AoE Healing Number of units are met should be used, set to 0 to disable", "Healing", 55);
+
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket 1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket 2 be used", "Trinket", 0);
         }
@@ -661,12 +700,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                         API.CastSpell(HolyShock + "MO");
                         return;
                     }
-                    if (API.CanCast(HolyLight) && API.PlayerCurrentHolyPower < 3 && API.PlayerLastSpell != HolyLight && !API.PlayerCanAttackTarget)
+                    if (API.CanCast(HolyLight) && !API.PlayerIsCasting(true) && API.PlayerCurrentHolyPower < 3 && API.PlayerLastSpell != HolyLight && !API.PlayerCanAttackTarget)
                     {
                         API.CastSpell(HolyLight);
                         return;
                     }
-                    if (API.CanCast(HolyLight) && API.PlayerCurrentHolyPower < 3 && API.PlayerLastSpell != HolyLight && !API.PlayerCanAttackMouseover && IsMouseover)
+                    if (API.CanCast(HolyLight) && !API.PlayerIsCasting(true) && API.PlayerCurrentHolyPower < 3 && API.PlayerLastSpell != HolyLight && !API.PlayerCanAttackMouseover && IsMouseover)
                     {
                         API.CastSpell(HolyLight + "MO");
                         return;
@@ -796,7 +835,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(AuraMastery);
                     return;
                 }
-                if (DTCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (DTCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(DivineToll);
                     return;
@@ -806,7 +845,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(DivineToll + "MO");
                     return;
                 }
-                if (BoVCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (BoVCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BoV);
                     return;
@@ -816,7 +855,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(BoV + "MO");
                     return;
                 }
-                if (HolyPrismCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyPrismCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyPrism);
                     return;
@@ -826,7 +865,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(HolyPrism + "MO");
                     return;
                 }
-                if (WoGTankCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (WoGTankCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG);
                     return;
@@ -836,12 +875,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(WoG + "MO");
                     return;
                 }
-                if (LoDCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoDCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoD);
                     return;
                 }
-                if (LoHCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoHCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoH);
                     return;
@@ -861,32 +900,32 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(BoS + "MO");
                     return;
                 }
-                if (HolyShockCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyShockCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO"))
+                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyShock + "MO");
                     return;
                 }
-                if (API.CanCast(HolyShock) && !HSHealing && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                if (API.CanCast(HolyShock) && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (API.CanCast(HolyShock) && !API.MacroIsIgnored(HolyShock + "MO") && !HSHealing && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(HolyShock) && !API.MacroIsIgnored(HolyShock + "MO") && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
                 {
                     API.CastSpell(HolyShock + "MO");
                     return;
                 }
-                if (WoGCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (WoGCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG);
                     return;
                 }
-                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO"))
+                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG + "MO");
                     return;
@@ -911,62 +950,62 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
-                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
+                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
-                {
+                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                { 
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
+                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (BFCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (BFCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BF);
                     return;
                 }
-                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO"))
+                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BF + "MO");
                     return;
                 }
-                if (LoTMCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoTMCheck && !API.TargetHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoTM);
                     return;
                 }
-                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO"))
+                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoTM + "MO");
                     return;
@@ -997,12 +1036,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(VanqusihersHammer);
                     return;
                 }
-                if (API.CanCast(HammerofWrath) && API.PlayerCanAttackTarget && InRange && (API.TargetHealthPercent <= 20 && Level >= 46 && API.TargetHealthPercent > 0 || Level >= 58 && API.PlayerHasBuff(AvengingWrath) && API.TargetHealthPercent > 0))
+                if (API.CanCast(HammerofWrath) && API.PlayerCanAttackTarget && InRange && (API.TargetHealthPercent <= 20 && Level >= 46 && API.TargetHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.TargetHealthPercent > 0))
                 {
                     API.CastSpell(HammerofWrath);
                     return;
                 }
-                if (API.CanCast(HammerofWrath) && !API.MacroIsIgnored(HammerofWrath + "MO") && InMoRange && IsMouseover && (API.MouseoverHealthPercent <= 20 && Level >= 46 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 || Level >= 58 && API.PlayerHasBuff(AvengingWrath) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0))
+                if (API.CanCast(HammerofWrath) && !API.MacroIsIgnored(HammerofWrath + "MO") && InMoRange && IsMouseover && (API.MouseoverHealthPercent <= 20 && Level >= 46 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0))
                 {
                     API.CastSpell(HammerofWrath + "MO");
                     return;
@@ -1012,12 +1051,12 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                     API.CastSpell(Cons);
                     return;
                 }
-                if (API.CanCast(SoTR) && API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower > 4 && DPSHealthCheck && IsMelee && API.TargetHealthPercent > 0)
+                if (API.CanCast(SoTR) && API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMelee && API.TargetHealthPercent > 0)
                 {
                     API.CastSpell(SoTR);
                     return;
                 }
-                if (API.CanCast(SoTR) && !API.MacroIsIgnored(SoTR + "MO") && IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.PlayerCurrentHolyPower > 4 && DPSHealthCheck && IsMoMelee && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(SoTR) && !API.MacroIsIgnored(SoTR + "MO") && IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMoMelee && API.MouseoverHealthPercent > 0)
                 {
                     API.CastSpell(SoTR + "MO");
                     return;
@@ -1025,7 +1064,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
             }
             if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
             {
-                if (API.PlayerIsInGroup && InRange)
+                if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                 {
                     for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)
@@ -1035,28 +1074,51 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth)
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                SwapWatch.Restart();
+                                return;
+                            }
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && API.UnitRange(units[i]) <= 4)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (API.UnitHealthPercent(units[i]) <= LowestHpPartyUnit() && (PlayerHealth >= LowestHpPartyUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                          //  if ((!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitAboveHealthPercentParty(AoEDPSHLifePercent) < AoEDPSNumber || API.SpellISOnCooldown(HolyShock) && API.SpellCharges(CrusaderStrike) < 1 || !API.SpellISOnCooldown(HolyShock)))
+                            //{
+                             //   API.CastSpell(LowestParty(units));
+                              //  SwapWatch.Restart();
+                              //  return;
+                           // }
+                            if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= HolyShockLifePercent)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
+                            //    if (API.UnitHealthPercent(units[i]) <= LowestHpPartyUnit() && (PlayerHealth >= LowestHpPartyUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                            //  {
+                            //    API.CastSpell(PlayerTargetArray[i]);
+                            //  SwapWatch.Restart();
+                            //  return;
+                            // }
                         }
                 }
-                if (API.PlayerIsInRaid && InRange)
+                if (API.PlayerIsInRaid)
                 {
                     //for (int j = 0; j < RaidList.Length; j++)
                     for (int i = 0; i < raidunits.Length; i++)
@@ -1066,20 +1128,32 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
                         //     API.CastSpell(RaidTargetArray[i]);
                         //    return;
                         // }
-                        if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                        if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40)
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }
-                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                        if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 & !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                        {
+                            API.CastSpell(RaidTargetArray[i]);
+                            SwapWatch.Restart();
+                            return;
+                        }
+                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                        {
+                            API.CastSpell(RaidTargetArray[i]);
+                            SwapWatch.Restart();
+                            return;
+                        }
+                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && API.SpellCharges(CrusaderStrike) > 0 && CrusadersMight || !API.SpellISOnCooldown(Judgment) && JudgementofLight || UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!CrusadersMight && !JudgementofLight || !CrusadersMight && JudgementofLight || CrusadersMight || !JudgementofLight)) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             API.CastSpell("Assist");
                             return;
                         }
-                        if (API.UnitHealthPercent(raidunits[i]) <= LowestHpRaidUnit() && (PlayerHealth >= LowestHpRaidUnit() && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 750))
+                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= HolyShockLifePercent && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
@@ -1134,7 +1208,7 @@ private static readonly Stopwatch SwapWatch = new Stopwatch();
         {
         for (int i = 1; i <= 40; i++)
         {
-            raidunit[i] = "raid" + i;
+           // raidunit[i] = "raid" + i;
         }
             for (int i = 0; i < units.Length; i++)
             {

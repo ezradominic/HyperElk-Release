@@ -25,7 +25,7 @@ namespace HyperElk.Core
         private int VivifyLifePercentProc => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
         private int CelestialBrewStackProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
-        private int CelestialBrewPercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
+        private int CelestialBrewPercentProc => numbList[CombatRoutine.GetPropertyInt("CelestialBrew HP")];
 
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
