@@ -297,19 +297,19 @@ namespace HyperElk.Core
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
         //Quaking
         private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingHS => API.PlayerDebuffRemainingTime(Quake) > HealingSurgeCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingHW => API.PlayerDebuffRemainingTime(Quake) > HealingWaveCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingCH => API.PlayerDebuffRemainingTime(Quake) > ChainHealCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingHR => API.PlayerDebuffRemainingTime(Quake) > HealingRainCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingDownpour => API.PlayerDebuffRemainingTime(Quake) > DownpourCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingWellspring => API.PlayerDebuffRemainingTime(Quake) > WellspringCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingChainHarvest => API.PlayerDebuffRemainingTime(Quake) > ChainHarvestCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingFae => API.PlayerDebuffRemainingTime(Quake) > FaeCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingLightning => API.PlayerDebuffRemainingTime(Quake) > LightningCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingChainLight => API.PlayerDebuffRemainingTime(Quake) > ChainLightningCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingLavaburst => API.PlayerDebuffRemainingTime(Quake) > LavaburstCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingHS => API.PlayerDebuffRemainingTime(Quake) > HealingSurgeCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingHW => API.PlayerDebuffRemainingTime(Quake) > HealingWaveCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingCH => API.PlayerDebuffRemainingTime(Quake) > ChainHealCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingHR => API.PlayerDebuffRemainingTime(Quake) > HealingRainCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingDownpour => API.PlayerDebuffRemainingTime(Quake) > DownpourCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingWellspring => API.PlayerDebuffRemainingTime(Quake) > WellspringCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingChainHarvest => API.PlayerDebuffRemainingTime(Quake) > ChainHarvestCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingFae => API.PlayerDebuffRemainingTime(Quake) > FaeCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingLightning => API.PlayerDebuffRemainingTime(Quake) > LightningCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingChainLight => API.PlayerDebuffRemainingTime(Quake) > ChainLightningCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingLavaburst => API.PlayerDebuffRemainingTime(Quake) > LavaburstCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         float HealingSurgeCastTime => 150f / (1f + API.PlayerGetHaste);
         float HealingWaveCastTime => 250f / (1f + API.PlayerGetHaste);
         float ChainHealCastTime => 250f / (1f + API.PlayerGetHaste);
@@ -882,7 +882,7 @@ namespace HyperElk.Core
                 //Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
-                        if (API.PlayerIsInGroup)
+                        if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                         {
                         for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)

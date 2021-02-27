@@ -325,11 +325,11 @@ public class HolyPally : CombatRoutine
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         //Quaking
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingHoly => API.PlayerDebuffRemainingTime(Quake) > HolyLightCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingFlash => API.PlayerDebuffRemainingTime(Quake) > FlashOfLightCastTime && API.PlayerHasDebuff(Quake);
-        private bool QuakingAshen => API.PlayerDebuffRemainingTime(Quake) > AshenCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingHoly => API.PlayerDebuffRemainingTime(Quake) > HolyLightCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingFlash => API.PlayerDebuffRemainingTime(Quake) > FlashOfLightCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingAshen => API.PlayerDebuffRemainingTime(Quake) > AshenCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool WoGTanking => CombatRoutine.GetPropertyBool(WoGTank);
 
         float HolyLightCastTime => 250f / (1f + API.PlayerGetHaste);
@@ -1064,7 +1064,7 @@ public class HolyPally : CombatRoutine
             }
             if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
             {
-                if (API.PlayerIsInGroup)
+                if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                 {
                     for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)

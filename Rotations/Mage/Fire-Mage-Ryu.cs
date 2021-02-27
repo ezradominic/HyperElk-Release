@@ -91,17 +91,17 @@ namespace HyperElk.Core
 
         //private bool NotCasting => !API.PlayerIsCasting;
         private bool NotChanneling => !API.PlayerIsChanneling;
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingFireBall => API.PlayerDebuffRemainingTime(Quake) > FireballCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingFlamestrike => API.PlayerDebuffRemainingTime(Quake) > FlamestrikeCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingScorch => API.PlayerDebuffRemainingTime(Quake) > ScorchCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingShifting => API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingMirrors => API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingRadiant => API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingDeathborne => API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingFireBall => API.PlayerDebuffRemainingTime(Quake) > FireballCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingFlamestrike => API.PlayerDebuffRemainingTime(Quake) > FlamestrikeCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingScorch => API.PlayerDebuffRemainingTime(Quake) > ScorchCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingShifting => API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingMirrors => API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingRadiant => API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingDeathborne => API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool QuakingPyro => (API.PlayerDebuffRemainingTime(Quake) > PyroBlastCastTime || API.PlayerBuffTimeRemaining(Quake) > PyroBlastCastTime) && (API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
-        private bool QuakingRune => API.PlayerDebuffRemainingTime(Quake) > RuneCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingRune => API.PlayerDebuffRemainingTime(Quake) > RuneCastTime&& (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791 && API.PlayerHasBuff(ShiftingPower);
         bool CastCombustion => API.PlayerLastSpell == "Combustion";
         bool CastingScorch => API.CurrentCastSpellID("player") == 2948;
@@ -629,7 +629,7 @@ namespace HyperElk.Core
                     API.WriteLog("Phoenix Flames for AoE");
                     return;
                 }
-                if (RuneOfPower && API.CanCast("Rune of Power") && !API.PlayerIsCasting(true) && API.TargetRange <= 40 && !CastCombustion && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && API.SpellCDDuration("Combustion") > 1200 && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && (!QuakingRune || QuakingRune && QuakingHelper))
+                if (RuneOfPower && API.CanCast("Rune of Power") && !API.PlayerIsCasting(true) && API.TargetRange <= 40 && !CastCombustion && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && API.SpellCDDuration("Combustion") > 1200 && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && (!QuakingRune || QuakingRune && QuakingHelper) && !RuneWatch.IsRunning)
                 {
                     API.CastSpell("Rune of Power");
                     return;

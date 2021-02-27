@@ -338,15 +338,15 @@ namespace HyperElk.Core
         private string UseHeart => CDUsage[CombatRoutine.GetPropertyInt(HeartoftheWild)];
 
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingWG => API.PlayerDebuffRemainingTime(Quake) > WGCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingRegrowth => API.PlayerDebuffRemainingTime(Quake) > RegrowthCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingConvoke => API.PlayerDebuffRemainingTime(Quake) > ConvokeCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingTranq => API.PlayerDebuffRemainingTime(Quake) > TranqCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingNourish => API.PlayerDebuffRemainingTime(Quake) > NourishCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingWrath => API.PlayerDebuffRemainingTime(Quake) > WrathCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingStar => API.PlayerDebuffRemainingTime(Quake) > StarfireCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingWG => API.PlayerDebuffRemainingTime(Quake) > WGCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingRegrowth => API.PlayerDebuffRemainingTime(Quake) > RegrowthCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingConvoke => API.PlayerDebuffRemainingTime(Quake) > ConvokeCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingTranq => API.PlayerDebuffRemainingTime(Quake) > TranqCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingNourish => API.PlayerDebuffRemainingTime(Quake) > NourishCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingWrath => API.PlayerDebuffRemainingTime(Quake) > WrathCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingStar => API.PlayerDebuffRemainingTime(Quake) > StarfireCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         float WGCastTime => 150f / (1f + API.PlayerGetHaste);
         float RegrowthCastTime => 150f / (1f + API.PlayerGetHaste);
         float ConvokeCastTime => 400f / (1f + API.PlayerGetHaste);
@@ -1001,7 +1001,7 @@ namespace HyperElk.Core
                 //Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
-                    if (API.PlayerIsInGroup)
+                    if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < units.Length; i++)
                             for (int j = 0; j < DispellList.Length; j++)

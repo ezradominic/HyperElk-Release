@@ -208,7 +208,7 @@ namespace HyperElk.Core
         private bool VenthyrCheck => API.CanCast(Mindgames) && PlayerCovenantSettings == "Venthyr" && Mana >= 2 && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingPenance;
 
 
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
@@ -250,16 +250,16 @@ namespace HyperElk.Core
         private int UnitHealth => numbList[CombatRoutine.GetPropertyInt("Other Members Health")];
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
         private bool IsDispell => API.ToggleIsEnabled("Dispel");
-        private bool QuakingMind => API.PlayerDebuffRemainingTime(Quake) > MindCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingSmite => API.PlayerDebuffRemainingTime(Quake) > SmiteCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingBoon => API.PlayerDebuffRemainingTime(Quake) > BoonCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingPowerWordRad => API.PlayerDebuffRemainingTime(Quake) > PowerWordRadCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingHalo => API.PlayerDebuffRemainingTime(Quake) > HaloCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingSchism => API.PlayerDebuffRemainingTime(Quake) > SchismCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingShadow => API.PlayerDebuffRemainingTime(Quake) > ShadowMendCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingPenance => API.PlayerDebuffRemainingTime(Quake) > PenanceCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingMindblast => API.PlayerDebuffRemainingTime(Quake) > MindblastCastTime && PlayerHasDebuff(Quake);
-        private bool QuakingMindSear => API.PlayerDebuffRemainingTime(Quake) > MindSearCastTime && PlayerHasDebuff(Quake);
+        private bool QuakingMind => API.PlayerDebuffRemainingTime(Quake) > MindCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingSmite => API.PlayerDebuffRemainingTime(Quake) > SmiteCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingBoon => API.PlayerDebuffRemainingTime(Quake) > BoonCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingPowerWordRad => API.PlayerDebuffRemainingTime(Quake) > PowerWordRadCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingHalo => API.PlayerDebuffRemainingTime(Quake) > HaloCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingSchism => API.PlayerDebuffRemainingTime(Quake) > SchismCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingShadow => API.PlayerDebuffRemainingTime(Quake) > ShadowMendCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingPenance => API.PlayerDebuffRemainingTime(Quake) > PenanceCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingMindblast => API.PlayerDebuffRemainingTime(Quake) > MindblastCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingMindSear => API.PlayerDebuffRemainingTime(Quake) > MindSearCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         float PowerWordRadCastTime => 200f / (1f + API.PlayerGetHaste);
         float HaloCastTime => 150f / (1f + API.PlayerGetHaste);
         float SchismCastTime => 150f / (1f + API.PlayerGetHaste);
@@ -745,7 +745,7 @@ namespace HyperElk.Core
                 // Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
-                    if (API.PlayerIsInGroup)
+                    if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < units.Length; i++)
                         {
