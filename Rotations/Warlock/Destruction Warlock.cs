@@ -327,7 +327,7 @@ namespace HyperElk.Core
         private void rotation()
         {
 
-            if (API.CanCast(Havoc) && API.PlayerCurrentSoulShards >= 5 && (API.TargetUnitInRangeCount + API.PlayerUnitInMeleeRangeCount == 2))
+            if ((IsAOE || !IsAOE) && API.CanCast(Havoc) && !API.PlayerIsCasting(true) && API.PlayerCurrentSoulShards >= 4 && API.TargetUnitInRangeCount + API.PlayerUnitInMeleeRangeCount == 2)
             {
 
                 API.CastSpell(Havoc);
@@ -337,6 +337,31 @@ namespace HyperElk.Core
                     Thread.Sleep(150);
                     API.CastSpell("Switch Target");
                 }
+                return;
+            }
+            //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
+            if (!API.PlayerIsCasting(true) && API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
+            {
+                API.CastSpell(ChaosBolt);
+                return;
+            }
+            //actions.havoc+=/shadowburn
+            if (!API.PlayerIsCasting(true) && API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
+            {
+                API.CastSpell(ShadowBurn);
+                return;
+            }
+
+            //actions.havoc+=/incinerate,if=cast_time<havoc_remains
+            if (!API.PlayerIsCasting(true) && API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
+            {
+                API.CastSpell(Incinerate);
+                return;
+            }
+            //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
+            if (!API.PlayerIsCasting(true) && API.CanCast(Conflagrate) && HavocWatch.IsRunning && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
+            {
+                API.CastSpell(Conflagrate);
                 return;
             }
             //AOE
@@ -452,45 +477,10 @@ namespace HyperElk.Core
 
                 //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
 
-                //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
-                if (API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions.havoc+=/shadowburn
-                if (API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
-                {
-                    API.CastSpell(ShadowBurn);
-                    return;
-                }
 
-                //actions.havoc+=/incinerate,if=cast_time<havoc_remains
-                if (API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
-                {
-                    API.CastSpell(Incinerate);
-                    return;
-                }
-                //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
-                if (API.CanCast(Conflagrate) && HavocWatch.IsRunning && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
-                {
-                    API.CastSpell(Conflagrate);
-                    return;
-                }
                 //# Executed every time the actor is available.
                 //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
-                if (API.CanCast(Havoc) && API.PlayerCurrentSoulShards >= 5 && !API.SpellISOnCooldown(Havoc) && API.TargetUnitInRangeCount == 2)
-                {
-                    API.CastSpell(Havoc);
-                    HavocWatch.Start();
-                    if (SwitchTarget)
-                    {
-                        Thread.Sleep(150);
-                        API.CastSpell("Switch Target");
-                    }
-                    return;
-                }
-                
+               
                 //actions+=/conflagrate,if=talent.roaring_blaze.enabled&debuff.roaring_blaze.remains<1.5
                 if (API.CanCast(Conflagrate) && !LastCastConflagrate && TalentRoaringBlaze && API.TargetDebuffRemainingTime(RoaringBlaze) <= 150)
                 {
