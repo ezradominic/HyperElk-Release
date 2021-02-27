@@ -174,7 +174,7 @@ namespace HyperElk.Core
         bool LastCastSoothingMist => API.LastSpellCastInGame == SoothingMist;
 
         bool CurrentCastEssenceFont => API.CurrentCastSpellID("player") == 191837;
-        private int JadeSerpentStatue => API.PlayerTotemPetDuration();
+
         public string[] LegendaryList = new string[] { "None" };
         private int SwapSpeed => CombatRoutine.GetPropertyInt("SwapSpeed");
 
@@ -314,7 +314,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(RenewingMist, 119611);
             CombatRoutine.AddBuff(ThunderFocusTea, 116680);
             CombatRoutine.AddBuff(RefreshingJadeWind, 196725);
-            CombatRoutine.AddBuff(SoothingMist, 198533);
+            CombatRoutine.AddBuff(SoothingMist, 115175);
 
             //Debuffs / Detox
             CombatRoutine.AddDebuff("Chilled", 328664);
@@ -468,7 +468,7 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualManaPotion);
                 return;
             }
-            if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && JadeSerpentStatue == 0 && NotCasting && RangeCheck && API.PlayerIsInCombat)
+            if (API.CanCast(SummonJadeSerpentStatue) && TalentSummonJadeSerpentStatue && API.PlayerTotemPetDuration == 0 && NotCasting && RangeCheck && API.PlayerIsInCombat)
             {
                 API.CastSpell(SummonJadeSerpentStatue);
                 return;
@@ -717,11 +717,12 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (!API.MacroIsIgnored("Dismiss Totem") && !API.PlayerIsInCombat && JadeSerpentStatue >= 100 && !API.PlayerIsMounted)
+            if (!API.MacroIsIgnored("Dismiss Totem") && !API.PlayerIsInCombat && API.PlayerTotemPetDuration >= 100 && !API.PlayerIsMounted)
             {
                 API.CastSpell("Dismiss Totem");
                 return;
             }
+
             if (OOC && NotCasting && !API.PlayerIsMounted && !API.PlayerIsMoving)
             {
                 if (AoEHeal)
