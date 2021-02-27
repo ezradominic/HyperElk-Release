@@ -25,6 +25,7 @@
 // v3.3 small hotfix for cancel Bladestorm
 // v3.4 small Bladestorm cancel update
 // v3.5 new settings and minor tweaks
+// v3.55 small hotfix
 
 using System.Linq;
 
@@ -133,8 +134,8 @@ namespace HyperElk.Core
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns and AoE", "on mob Count", "on mob Count and Cooldowns", "always" };
         string[] heroiclist = new string[] { "Not Used", "when out of melee", "only Mouseover", "both" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
-        private string UseRecklessness => CDUsage[CombatRoutine.GetPropertyInt(Recklessness)];
-        private string UseSiegebreaker => CDUsage[CombatRoutine.GetPropertyInt(Siegebreaker)];
+        private string UseRecklessness => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Recklessness)];
+        private string UseSiegebreaker => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Siegebreaker)];
         private string UseDragonRoar => CDUsageWithAOE[CombatRoutine.GetPropertyInt(DragonRoar)];
         private string UseBladestorm => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Bladestorm)];
         private int IgnorePainLifePercent => numbList[CombatRoutine.GetPropertyInt(IgnorePain)];
@@ -148,7 +149,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.5");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.55");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
@@ -226,8 +227,8 @@ namespace HyperElk.Core
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp(HeroicThrow, "Use Heroic Throw", heroiclist, "Use " + HeroicThrow + " ,when out of melee, only Mousover or both", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
-            CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, CDUsage, "Use " + Recklessness + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsage, "Use " + Siegebreaker + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Recklessness, "Use " + Recklessness, CDUsageWithAOE, "Use " + Recklessness + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsageWithAOE, "Use " + Siegebreaker + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(DragonRoar, "Use " + DragonRoar, CDUsageWithAOE, "Use " + DragonRoar + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Bladestorm, "Use " + Bladestorm, CDUsageWithAOE, "Use " + Bladestorm + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("MobCount", "Mobcount to use ", numbRaidList, " Bladestorm and other AoE abilitys", "Cooldowns", 3);
