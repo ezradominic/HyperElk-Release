@@ -154,25 +154,25 @@ namespace HyperElk.Core
 
         public void LowestTargetParty(string Lowest)
         {
-                for (int i = 0; i < units.Length; i++)
-                {
+            for (int i = 0; i < units.Length; i++)
+            {
                 if (API.UnitHealthPercent(units[i]) < API.UnitHealthPercent(units[i]))
-                    {
+                {
                     LowestTargetParty(units[i]);
-                    }
                 }
-            
+            }
+
         }
         private void LowestTargetRaid()
         {
-                for (int j = 0; j < raidunits.Length; j++)
-                {
+            for (int j = 0; j < raidunits.Length; j++)
+            {
                 if (API.UnitHealthPercent(raidunits[j]) < API.UnitHealthPercent(raidunits[j]) && (PlayerHealth >= 15 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[j]) > 0 && API.UnitRange(raidunits[j]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= 1250))
                 {
                     API.CastSpell(raidunits[j]);
-                        SwapWatch.Restart();
-                    }
+                    SwapWatch.Restart();
                 }
+            }
         }
         private string LowestParty(string[] units)
         {
@@ -216,7 +216,7 @@ namespace HyperElk.Core
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(HealthPercent) : UnitBelowHealthPercentParty(HealthPercent);
-        private int UnitBelowManaPercentRaid(int ManaPercent) => raidunits.Count(p => API.UnitManaPercent(p) <= ManaPercent && API.UnitManaPercent(p) > 0);
+        private int UnitBelowManaPercentRaid(int ManaPercent) => raidunits.Count(p => API.UnitManaPercent(p) <= ManaPercent && API.UnitManaPercent(p) > 0 && API.UnitRoleSpec(p) == API.HealerRole);
         private int UnitBelowManaPercentParty(int ManaPercent) => units.Count(p => API.UnitManaPercent(p) <= ManaPercent && API.UnitManaPercent(p) > 0);
         private int UnitBelowManaPercent(int ManaPercent) => API.PlayerIsInRaid ? UnitBelowManaPercentRaid(ManaPercent) : UnitBelowManaPercentParty(ManaPercent);
         private int UnitAboveHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) >= HealthPercent && API.UnitHealthPercent(p) > 0);
@@ -255,7 +255,7 @@ namespace HyperElk.Core
         }
         bool ChannelingFae => API.CurrentCastSpellID("player") == 328923;
         private bool EarthShieldTracking => API.PlayerIsInRaid ? EarthShieldRaidTracking(EarthShield) < 1 : EarthShieldPartyTracking(EarthShield) < 1;
-        private bool ManaAoE => API.PlayerIsInRaid ? UnitBelowManaPercentRaid(ManaPercent) >= AoERaidNumber : API.PlayerMana <= ManaPercent;
+        private bool ManaAoE => API.PlayerIsInRaid ? UnitBelowManaPercentRaid(ManaPercent) >= 3 : API.PlayerMana <= ManaPercent;
         private bool AscendAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AscendanceLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(AscendanceLifePercent) >= AoENumber;
         private bool TrinketAoE => UnitBelowHealthPercent(TrinketLifePercent) >= AoENumber;
         private bool VesperAoE => UnitBelowHealthPercent(VesperTotemLifePercent) >= AoENumber;
@@ -630,7 +630,7 @@ namespace HyperElk.Core
             {
                 DispelWatch.Restart();
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(GhostWolf) && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
             {
 
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
@@ -914,7 +914,7 @@ namespace HyperElk.Core
                                     SwapWatch.Restart();
                                     return;
                                 }
-                                if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
                              {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
@@ -955,7 +955,7 @@ namespace HyperElk.Core
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
                                     SwapWatch.Restart();

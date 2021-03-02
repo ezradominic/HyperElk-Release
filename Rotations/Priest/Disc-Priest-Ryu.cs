@@ -717,7 +717,7 @@ namespace HyperElk.Core
                     API.CastSpell(AscendedBlast);
                     return;
                 }
-                if (API.CanCast(Penance) && InRange && (API.TargetHasDebuff(PurgetheWicked) && PurgetheWickedTalent || !API.TargetHasDebuff(PurgetheWicked) && !PurgetheWickedTalent) && !API.PlayerIsMoving && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && AttonementTracking && (!QuakingPenance || QuakingPenance && QuakingHelper))
+                if (API.CanCast(Penance) && InRange && (API.TargetHasDebuff(PurgetheWicked) && PurgetheWickedTalent || !API.TargetHasDebuff(PurgetheWicked) && !PurgetheWickedTalent) && !API.PlayerIsMoving && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (AttonementTracking || !API.PlayerIsInGroup) && (!QuakingPenance || QuakingPenance && QuakingHelper))
                 {
                     API.CastSpell(Penance);
                     return;
@@ -760,7 +760,7 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (UnitAboveHealthPercentParty(35) == API.CurrentGroupSize && AttonementTracking || BuffPartyTracking(Atonement) >= 5) && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) > 0)
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (UnitAboveHealthPercentParty(35) == API.CurrentGroupSize && AttonementTracking || BuffPartyTracking(Atonement) >= 5) && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
@@ -780,7 +780,7 @@ namespace HyperElk.Core
                                 return;
                             }
 
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
@@ -811,7 +811,7 @@ namespace HyperElk.Core
                             API.CastSpell(RaidTargetArray[i]);
                             return;
                         }
-                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (AttonementTracking || UnitAboveHealthPercentRaid(35) >= API.CurrentGroupSize) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
+                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (AttonementTracking || UnitAboveHealthPercentRaid(35) >= API.CurrentGroupSize) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.PlayerIsInCombat)
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             API.CastSpell("Assist");
@@ -830,7 +830,7 @@ namespace HyperElk.Core
                             SwapWatch.Restart();
                             return;
                         }
-                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && !AttonementTracking && API.UnitHealthPercent(raidunits[i]) > 0)
+                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && !AttonementTracking && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat)
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             API.CastSpell("Assist");
