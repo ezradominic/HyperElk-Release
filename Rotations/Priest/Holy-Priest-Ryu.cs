@@ -743,7 +743,7 @@ namespace HyperElk.Core
                                     SwapWatch.Restart();
                                     return;
                                 }
-                                if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber  && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber  && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat) 
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 API.CastSpell("Assist");
@@ -785,7 +785,7 @@ namespace HyperElk.Core
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber  && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber  && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat)
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();

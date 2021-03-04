@@ -263,17 +263,17 @@ namespace HyperElk.Core
             {
 
 
-                if (Talent_Netherwalk && API.PlayerHealthPercent <= NetherwalkLifePercent)
+                if (API.CanCast(Netherwalk) && API.PlayerHealthPercent <= NetherwalkLifePercent)
                 {
                     API.CastSpell(Netherwalk);
 
                 }
-                if (API.PlayerHealthPercent <= BlurLifePercent && API.PlayerLevel >= 21)
+                if (API.CanCast(Blur) && API.PlayerHealthPercent <= BlurLifePercent)
                 {
                     API.CastSpell(Blur);
 
                 }
-                if (API.PlayerHealthPercent <= DarknessLifePercent && API.PlayerLevel >= 39)
+                if (API.CanCast(Darkness) && API.PlayerHealthPercent <= DarknessLifePercent)
                 {
                     API.CastSpell(Darkness);
 
