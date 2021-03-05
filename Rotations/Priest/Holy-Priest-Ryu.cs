@@ -157,6 +157,7 @@ namespace HyperElk.Core
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
         string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         private static readonly Stopwatch SwapWatch = new Stopwatch();
+        private static readonly Stopwatch DispelWatch = new Stopwatch();
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         string[] DispellList = {"Chilled" ,"Frozen Binds" ,"Clinging Darkness" ,"Rasping Scream" ,"Heaving Retch" ,"Goresplatter" ,"Slime Injection" ,"Gripping Infection" ,"Repulsive Visage" ,"Soul Split" ,"Anima Injection" ,"Bewildering Pollen" ,"Bramblethorn Entanglement" ,"Sinlight Visions" ,"Siphon Life" ,"Turn to Stone" ,"Stony Veins" ,"Cosmic Artifice" ,"Wailing Grief" ,"Shadow Word:  Pain" ,"Anguished Cries" ,"Wrack Soul" ,"Dark Lance" ,"Insidious Venom" ,"Charged Anima" ,"Lost Confidence" ,"Burden of Knowledge" ,"Internal Strife" ,"Forced Confession" ,"Insidious Venom 2","Soul Corruption",
@@ -546,6 +547,13 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            for (int i = 0; i < units.Length; i++)
+            {
+                if (IsDispell && UnitHasDispellAble(units[i], "Frozen Binds"))
+                {
+                    DispelWatch.Restart();
+                }
+            }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
@@ -566,7 +574,7 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (TargetHasDispellAble(DispellList[i]))
+                            if (TargetHasDispellAble(DispellList[i]) && (!TargetHasDispellAble("Frozen Binds") || TargetHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(Purify);
                                 return;
@@ -577,7 +585,7 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (MouseouverHasDispellAble(DispellList[i]))
+                            if (MouseouverHasDispellAble(DispellList[i]) && (!MouseouverHasDispellAble("Frozen Binds") || MouseouverHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(Purify + "MO");
                                 return;
@@ -721,7 +729,7 @@ namespace HyperElk.Core
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell)
+                            if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(Purify))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;

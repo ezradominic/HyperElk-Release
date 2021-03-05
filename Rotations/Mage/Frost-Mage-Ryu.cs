@@ -269,8 +269,11 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (API.PlayerLastSpell == Flurry || API.LastSpellCastInGame == Flurry)
+            if (API.LastSpellCastInGame == Flurry)
             {
+                IceWatch1.Restart();
+                IceWatch2.Restart();
+                FlurryWatch.Stop();
                 FBWatch.Stop();
             }
             if (API.PlayerHasBuff(BrainFreeze))
@@ -471,8 +474,9 @@ namespace HyperElk.Core
             // && API.TargetHasDebuff(WC) && (!PlayerHasBuff(BrainFreeze) || PlayerHasBuff(BrainFreeze)) && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF))
             {
                 // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && (CastFlurry || API.PlayerLastSpell == Trinket1 || API.PlayerLastSpell == Trinket2 || CastRune) && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 2)
+                if (API.CanCast(IL) && Level >= 10 && !CastIL && API.TargetRange <= 40 && IceWatch1.IsRunning && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 2)
                 {
+                    IceWatch1.Stop();
                     API.CastSpell(IL);
                     API.WriteLog("First Ice Lance");
                     return;
@@ -489,11 +493,11 @@ namespace HyperElk.Core
                     API.CastSpell(GS);
                     return;
                 }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && CastIL && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 1 && IceWatch2.IsRunning)
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 2 && IceWatch2.IsRunning)
                 {
-                    API.CastSpell(IL);
-                    API.WriteLog("Secone Ice Lance");
                     IceWatch2.Stop();
+                    API.CastSpell(IL);
+                    API.WriteLog("Second Ice Lance");
                     return;
                 }
             }
@@ -509,17 +513,11 @@ namespace HyperElk.Core
                 if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
                 {
                     API.CastSpell(Flurry);
-                    IceWatch1.Restart();
-                    IceWatch2.Restart();
-                    FlurryWatch.Stop();
                     return;
                 }
                 if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
                 {
                     API.CastSpell(Flurry);
-                    IceWatch1.Restart();
-                    IceWatch2.Restart();
-                    FlurryWatch.Stop();
                     return;
                 }
             }
