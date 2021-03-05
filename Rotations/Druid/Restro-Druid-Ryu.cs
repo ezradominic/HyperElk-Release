@@ -704,7 +704,7 @@ namespace HyperElk.Core
         {
             for (int i = 0; i < units.Length; i++)
             {
-                if (IsDispell && UnitHasDispellAble(units[i], "Frozen Binds"))
+                if (IsDispell && API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitHasDispellAble("Frozen Binds", units[i]))
                 {
                     DispelWatch.Restart();
                 }
@@ -713,6 +713,11 @@ namespace HyperElk.Core
             {
                 API.CastSpell("Stopcast");
                 API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
+                return;
+            }
+            if (API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && (API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber))
+            {
+                API.CastSpell(MoonkinForm);
                 return;
             }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasBuff("Gluttonous Miasma") || IsMouseover && API.MouseoverHasBuff("Gluttonous Miasma")))

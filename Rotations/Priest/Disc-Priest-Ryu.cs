@@ -536,7 +536,7 @@ namespace HyperElk.Core
         {
             for (int i = 0; i < units.Length; i++)
             {
-                if (IsDispell && UnitHasDispellAble(units[i], "Frozen Binds"))
+                if (IsDispell && API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitHasDispellAble("Frozen Binds", units[i]))
                 {
                     DispelWatch.Restart();
                 }
