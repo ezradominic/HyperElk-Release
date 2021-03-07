@@ -42,7 +42,7 @@ namespace HyperElk.Core
         private int TouchofKarmaPercentProc => numbList[CombatRoutine.GetPropertyInt(TouchofKarma)];
 
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
-        private bool NotCasting => !API.PlayerIsCasting(false);
+        private bool NotCasting => !API.PlayerIsCasting(false) && !API.SpellIsOnGCD;
         bool LastCastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastCastBlackoutkick => API.LastSpellCastInGame == BlackOutKick;
         bool LastCastSpinningCraneKick => API.LastSpellCastInGame == SpinningCraneKick;
@@ -81,6 +81,8 @@ namespace HyperElk.Core
         private bool ToKSmart => (bool)CombatRoutine.GetProperty("ToKSmart");
         private bool TouchOfKarmaSmartRaid => API.TargetCurrentCastSpellID == 345397 && API.TargetCurrentCastTimeRemaining <= 600 || API.TargetCurrentCastSpellID == 329455 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 325384 || API.TargetCurrentCastSpellID == 337110 || API.TargetCurrentCastSpellID == 332687 || API.TargetCurrentCastSpellID == 331209 || API.TargetCurrentCastSpellID == 332683;
         private bool TochOfKarmaSmartDungeon => API.TargetCurrentCastSpellID == 322236 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 321247 || API.TargetCurrentCastSpellID == 321828 || API.TargetCurrentCastSpellID == 328125 || API.TargetCurrentCastSpellID == 334625;
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
 
 
         //Spells,Buffs,Debuffs
@@ -127,11 +129,13 @@ namespace HyperElk.Core
         private string Fixate = "Storm,  Earth,  and Fire:  Fixate";
 
         private string LegSweep = "Leg Sweep";
+        private bool MotC => (bool)CombatRoutine.GetProperty("MotC");
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Windwalker Monk @Mufflon12";
             API.WriteLog("Welcome to Windwalker Monk rotation @ Mufflon12");
+            API.WriteLog("Use /cast [@mouseover] Tiger Palm for Marc of the Crane Mouseover Dotting");
 
             CombatRoutine.AddProp(Vivify, "Vivify", numbList, "Life percent at which " + Vivify + " is used, set to 0 to disable", "Healing", 50);
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
@@ -154,6 +158,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
             CombatRoutine.AddProp("ToKSmart", "Touch of Karma Smart usage", true, "Touch of Karma Smart usage, check the Discord for more Infos", "Class Specific");
+            CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("MotC", "Tiger Palm Mouseover", true, "Use Tiger Palm for mouseover Marc of the Crane Dot", "Class Specific");
 
 
             //Spells
@@ -195,6 +201,8 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
             CombatRoutine.AddMacro(Stopcast);
+            CombatRoutine.AddMacro(TigerPalm + "MO");
+
 
 
             //Buffs
@@ -218,6 +226,7 @@ namespace HyperElk.Core
             //Condition
             CombatRoutine.AddConduit(CoordinatedOffensive);
 
+            CombatRoutine.AddToggle("Mouseover");
 
         }
 
@@ -227,6 +236,11 @@ namespace HyperElk.Core
 
         public override void CombatPulse()
         {
+            if (IsMouseover && MotC && API.CanCast(TigerPalm) && ChiDeficit >= 2 && !API.MacroIsIgnored(TigerPalm + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(MarkoftheCrane) <= 100 && API.MouseoverRange <= 2 && !API.PlayerIsChanneling)
+            {
+                API.CastSpell(TigerPalm + "MO");
+                return;
+            }
             if (API.PlayerHasBuff(StormEarthandFire) && API.CanCast(Fixate) &&  FocusHelper == 0 && API.PlayerUnitInMeleeRangeCount == 1)
             {
                 API.CastSpell(Fixate);
@@ -294,19 +308,19 @@ namespace HyperElk.Core
             //# Executed every time the actor is available.
             //actions=auto_attack
             //actions+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi.max-chi>=3&(energy.time_to_max<1|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3) // && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && !API.SpellIsOnGCD && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3) // && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(FistsoftheWhiteTiger);
                 return;
             }
             //actions+=/expel_harm,if=chi.max-chi>=1&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD && API.CanCast(ExpelHarm) && ChiDeficit >= 1) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && API.CanCast(ExpelHarm) && ChiDeficit >= 1) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(ExpelHarm);
                 return;
             }
             //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -333,7 +347,7 @@ namespace HyperElk.Core
             }
 
             //actions+=/call_action_list,name=aoe,if=active_enemies>=3
-            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && NotCasting && IsMelee)
             {
                 if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "AOE")
                 {
@@ -435,7 +449,7 @@ namespace HyperElk.Core
             }
 
             //actions+=/call_action_list,name=st,if=active_enemies<3
-            if ((IsAOE && API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber || !IsAOE) && NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
+            if ((IsAOE && API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber || !IsAOE) && NotCasting && IsMelee)
             {
                 //actions.st=whirling_dragon_punch,if=raid_event.adds.in>cooldown.whirling_dragon_punch.duration*0.8|raid_event.adds.up
                 if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch)
@@ -549,7 +563,7 @@ namespace HyperElk.Core
 
         private void SerentyRotation()
         {
-            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
+            if (NotCasting && IsMelee)
             {
                 //actions.serenity=fists_of_fury,if=buff.serenity.remains<1
                 if (API.CanCast(FistsofFury) && API.PlayerBuffTimeRemaining(Serenity) < 100)
@@ -617,7 +631,7 @@ namespace HyperElk.Core
 
         private void WeaponsOfOrderRotation()
         {
-            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
+            if (NotCasting && IsMelee)
             {
                 //actions.weapons_of_order+=/energizing_elixir,if=chi.max-chi>=2&energy.time_to_max>3
                 if (API.CanCast(EnergizingElixir) && TalentEnergizingElixir && ChiDeficit >= 2 && EnergyTimeToMax > 300)
@@ -719,7 +733,7 @@ namespace HyperElk.Core
 
         private void CooldownsSerenty()
         {
-            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
+            if (NotCasting && IsMelee)
             {
                 //actions.cd_serenity+=/invoke_xuen_the_white_tiger,if=!variable.hold_xuen|fight_remains<25
                 if (API.CanCast(InvokeXuen) && UseInvokeXuen == "with cooldowns")
@@ -811,7 +825,7 @@ namespace HyperElk.Core
         }
         private void Cooldowns()
         {
-            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
+            if (NotCasting && IsMelee)
             {
                 //actions.cd_sef=invoke_xuen_the_white_tiger,if=!variable.hold_xuen|fight_remains<25
                 if (API.CanCast(InvokeXuen) && UseInvokeXuen == "with Cooldowns")
