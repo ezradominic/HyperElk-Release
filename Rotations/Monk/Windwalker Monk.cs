@@ -294,19 +294,19 @@ namespace HyperElk.Core
             //# Executed every time the actor is available.
             //actions=auto_attack
             //actions+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi.max-chi>=3&(energy.time_to_max<1|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3) // && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3) // && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(FistsoftheWhiteTiger);
                 return;
             }
             //actions+=/expel_harm,if=chi.max-chi>=1&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(ExpelHarm) && ChiDeficit >= 1) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD && API.CanCast(ExpelHarm) && ChiDeficit >= 1) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(ExpelHarm);
                 return;
             }
             //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2) // && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -333,7 +333,7 @@ namespace HyperElk.Core
             }
 
             //actions+=/call_action_list,name=aoe,if=active_enemies>=3
-            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && NotCasting && IsMelee)
+            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
             {
                 if (API.CanCast(WeaponsofOrder) && UseWeaponsofOrder == "AOE")
                 {
@@ -435,7 +435,7 @@ namespace HyperElk.Core
             }
 
             //actions+=/call_action_list,name=st,if=active_enemies<3
-            if ((IsAOE && API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber || !IsAOE) && NotCasting && IsMelee)
+            if ((IsAOE && API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber || !IsAOE) && NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
             {
                 //actions.st=whirling_dragon_punch,if=raid_event.adds.in>cooldown.whirling_dragon_punch.duration*0.8|raid_event.adds.up
                 if (API.CanCast(WhirlingDragonPunch) && TalentWhirlingDragonPunch)
@@ -549,7 +549,7 @@ namespace HyperElk.Core
 
         private void SerentyRotation()
         {
-            if (NotCasting && IsMelee)
+            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
             {
                 //actions.serenity=fists_of_fury,if=buff.serenity.remains<1
                 if (API.CanCast(FistsofFury) && API.PlayerBuffTimeRemaining(Serenity) < 100)
@@ -617,7 +617,7 @@ namespace HyperElk.Core
 
         private void WeaponsOfOrderRotation()
         {
-            if (NotCasting && IsMelee)
+            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
             {
                 //actions.weapons_of_order+=/energizing_elixir,if=chi.max-chi>=2&energy.time_to_max>3
                 if (API.CanCast(EnergizingElixir) && TalentEnergizingElixir && ChiDeficit >= 2 && EnergyTimeToMax > 300)
@@ -719,7 +719,7 @@ namespace HyperElk.Core
 
         private void CooldownsSerenty()
         {
-            if (NotCasting && IsMelee)
+            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
             {
                 //actions.cd_serenity+=/invoke_xuen_the_white_tiger,if=!variable.hold_xuen|fight_remains<25
                 if (API.CanCast(InvokeXuen) && UseInvokeXuen == "with cooldowns")
@@ -811,7 +811,7 @@ namespace HyperElk.Core
         }
         private void Cooldowns()
         {
-            if (NotCasting && IsMelee)
+            if (NotCasting && IsMelee && !API.PlayerIsCasting(false) && !API.SpellIsOnGCD)
             {
                 //actions.cd_sef=invoke_xuen_the_white_tiger,if=!variable.hold_xuen|fight_remains<25
                 if (API.CanCast(InvokeXuen) && UseInvokeXuen == "with Cooldowns")
