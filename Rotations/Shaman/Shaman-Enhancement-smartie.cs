@@ -14,6 +14,7 @@
 // v2.2 added option to use Windfury totem while moving
 // v2.3 ghost wolf while moving and nothing else to do
 // v2.35 small ghostwolf change
+// v2.4 earthshield fix
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -127,7 +128,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.35");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.4");
 
             //Spells
             CombatRoutine.AddSpell(LavaLash, 60103, "D3");
@@ -296,7 +297,7 @@ namespace HyperElk.Core
                     API.CastSpell(HealingStreamTotem);
                     return;
                 }
-                if (API.CanCast(LightningShield) && PlayerLevel >= 9 && API.PlayerMana >= 2 && SelfLightningShield && !API.PlayerHasBuff(EarthShield) && !API.PlayerHasBuff(LightningShield) && API.PlayerHealthPercent > 0)
+                if (API.CanCast(LightningShield) && PlayerLevel >= 9 && API.PlayerMana >= 2 && SelfLightningShield && !TalentEarthShield && !API.PlayerHasBuff(EarthShield) && !API.PlayerHasBuff(LightningShield) && API.PlayerHealthPercent > 0)
                 {
                     API.CastSpell(LightningShield);
                     return;
@@ -324,7 +325,7 @@ namespace HyperElk.Core
                 API.CastSpell(GhostWolf);
                 return;
             }
-            if (API.CanCast(LightningShield) && PlayerLevel >= 9 && API.PlayerMana >= 2 && SelfLightningShield && !API.PlayerHasBuff(EarthShield) && !API.PlayerHasBuff(LightningShield) && API.PlayerHealthPercent > 0)
+            if (API.CanCast(LightningShield) && PlayerLevel >= 9 && API.PlayerMana >= 2 && !TalentEarthShield && SelfLightningShield && !API.PlayerHasBuff(EarthShield) && !API.PlayerHasBuff(LightningShield) && API.PlayerHealthPercent > 0)
             {
                 API.CastSpell(LightningShield);
                 return;
