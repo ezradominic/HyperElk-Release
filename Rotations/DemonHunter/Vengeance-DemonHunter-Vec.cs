@@ -180,6 +180,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("SoulFragmentCount", "Use Soul Barrier Soul Fragments Count", 4, "How many Soul Fragments to use Soul Barrier", "Defense");
             CombatRoutine.AddProp(Fiery_Brand, "Use " + Fiery_Brand + " below:", percentListProp, "Life percent at which " + Fiery_Brand + " is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("Trinket1HP", "Trinket 1" + " Life Percent", numbList, " Life percent at which" + "Trinket 1" + " is used, set to 0 to disable", "Trinkets", 40);
             CombatRoutine.AddProp("Trinket2HP", "Trinket 2" + " Life Percent", numbList, " Life percent at which" + "Trinket 2" + " is used, set to 0 to disable", "Trinkets", 40);
         }

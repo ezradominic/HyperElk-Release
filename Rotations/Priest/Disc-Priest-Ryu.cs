@@ -155,6 +155,8 @@ namespace HyperElk.Core
 
         private static readonly Stopwatch SwapWatch = new Stopwatch();
         int PlayerHealth => API.TargetHealthPercent;
+        private static readonly Stopwatch DispelWatch = new Stopwatch();
+
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
         string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
 
@@ -532,7 +534,13 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-
+            for (int i = 0; i < units.Length; i++)
+            {
+                if (IsDispell && API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitHasDispellAble("Frozen Binds", units[i]))
+                {
+                    DispelWatch.Restart();
+                }
+            }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
@@ -558,7 +566,7 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (TargetHasDispellAble(DispellList[i]))
+                            if (TargetHasDispellAble(DispellList[i]) && (!TargetHasDispellAble("Frozen Binds") || TargetHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(Purify);
                                 return;
@@ -569,7 +577,7 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (MouseouverHasDispellAble(DispellList[i]))
+                            if (MouseouverHasDispellAble(DispellList[i]) && (!MouseouverHasDispellAble("Frozen Binds") || MouseouverHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(Purify + "MO");
                                 return;
@@ -748,7 +756,13 @@ namespace HyperElk.Core
                     if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < units.Length; i++)
-                        {
+                        for (int j = 0; j < DispellList.Length; j++)
+                            {
+                            if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(Purify))
+                            {
+                                API.CastSpell(PlayerTargetArray[i]);
+                                return;
+                            }
                             if (IsSpread && !API.UnitHasBuff(Atonement, units[i]) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= ShadowMendCastTime * 10))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);

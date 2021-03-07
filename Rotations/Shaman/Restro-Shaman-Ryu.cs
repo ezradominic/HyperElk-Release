@@ -626,9 +626,12 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (TargetHasDispellAble("Frozen Binds") && IsDispell)
+            for (int i = 0; i < units.Length; i++)
             {
-                DispelWatch.Restart();
+                if (IsDispell && API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitHasDispellAble("Frozen Binds", units[i]))
+                {
+                    DispelWatch.Restart();
+                }
             }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
             {
@@ -651,7 +654,7 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (TargetHasDispellAble(DispellList[i]) && !TargetHasDispellAble("Frozen Binds"))
+                            if (TargetHasDispellAble(DispellList[i]) && (!TargetHasDispellAble("Frozen Binds") || TargetHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(PurifySpirit);
                                 return;
@@ -662,22 +665,12 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (MouseouverHasDispellAble(DispellList[i]) && !MouseouverHasDispellAble("Frozen Binds"))
+                            if (MouseouverHasDispellAble(DispellList[i]) && (!MouseouverHasDispellAble("Frozen Binds") || MouseouverHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(PurifySpirit + "MO");
                                 return;
                             }
                         }
-                    }
-                    if (API.CanCast(PurifySpirit) && !ChannelingFae && NotChanneling && TargetHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000)
-                      {
-                        API.CastSpell(PurifySpirit);
-                        return;
-                      }
-                    if (API.CanCast(PurifySpirit) && IsMouseover && !ChannelingFae && NotChanneling && MouseouverHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000)
-                    {
-                        API.CastSpell(PurifySpirit + "MO");
-                        return;
                     }
                 }
                 #endregion
@@ -887,7 +880,7 @@ namespace HyperElk.Core
                         for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)
                           {
-                             if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell)
+                             if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(PurifySpirit))
                              {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
@@ -897,7 +890,7 @@ namespace HyperElk.Core
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                              }
-                             if (API.UnitRoleSpec(units[i]) == RoleSpec && !API.UnitHasBuff(EarthShield, units[i]) && EarthShieldTracking && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                             if (API.UnitRoleSpec(units[i]) == RoleSpec && !UnitHasBuff(EarthShield, units[i]) && EarthShieldTracking && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
                              {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
@@ -938,7 +931,7 @@ namespace HyperElk.Core
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitRoleSpec(raidunits[i]) == RoleSpec && !API.UnitHasBuff(EarthShield, raidunits[i]) && EarthShieldTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (API.UnitRoleSpec(raidunits[i]) == RoleSpec && !UnitHasBuff(EarthShield, raidunits[i]) && EarthShieldTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
                                 {
                                     API.CastSpell(RaidTargetArray[i]);
                                     return;

@@ -116,6 +116,8 @@ public class HolyPally : CombatRoutine
 //Stopwatchs / Int's / Strings
         private static readonly Stopwatch SwapWatch = new Stopwatch();
         private static readonly Stopwatch DPSWatch = new Stopwatch();
+        private static readonly Stopwatch DispelWatch = new Stopwatch();
+
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] numbPartyList = new int[] { 0, 1, 2, 3, 4, 5, };
         int[] SwapSpeedList = new int[] { 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000 };
@@ -651,6 +653,13 @@ public class HolyPally : CombatRoutine
 
         public override void Pulse()
         {
+            for (int i = 0; i < units.Length; i++)
+            {
+                if (IsDispell && API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitHasDispellAble("Frozen Binds", units[i]))
+                {
+                    DispelWatch.Restart();
+                }
+            }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
@@ -701,12 +710,12 @@ public class HolyPally : CombatRoutine
                         API.CastSpell(HolyShock + "MO");
                         return;
                     }
-                    if (API.CanCast(HolyLight) && !API.PlayerIsCasting(true) && API.PlayerCurrentHolyPower < 3 && API.PlayerLastSpell != HolyLight && !API.PlayerCanAttackTarget)
+                    if (API.CanCast(HolyLight) && !API.PlayerIsCasting(true) && API.PlayerCurrentHolyPower < 3 && (API.PlayerLastSpell != HolyLight || API.LastSpellCastInGame != HolyLight) && !API.PlayerCanAttackTarget)
                     {
                         API.CastSpell(HolyLight);
                         return;
                     }
-                    if (API.CanCast(HolyLight) && !API.PlayerIsCasting(true) && API.PlayerCurrentHolyPower < 3 && API.PlayerLastSpell != HolyLight && !API.PlayerCanAttackMouseover && IsMouseover)
+                    if (API.CanCast(HolyLight) && !API.PlayerIsCasting(true) && API.PlayerCurrentHolyPower < 3 && (API.PlayerLastSpell != HolyLight || API.LastSpellCastInGame != HolyLight) && !API.PlayerCanAttackMouseover && IsMouseover)
                     {
                         API.CastSpell(HolyLight + "MO");
                         return;
@@ -757,7 +766,7 @@ public class HolyPally : CombatRoutine
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (TargetHasDispellAble(DispellList[i]))
+                            if (TargetHasDispellAble(DispellList[i]) && (!TargetHasDispellAble("Frozen Binds") || TargetHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(Cleanse);
                                 return;
@@ -768,7 +777,7 @@ public class HolyPally : CombatRoutine
                     {
                         for (int i = 0; i < DispellList.Length; i++)
                         {
-                            if (MouseouverHasDispellAble(DispellList[i]))
+                            if (MouseouverHasDispellAble(DispellList[i]) && (!MouseouverHasDispellAble("Frozen Binds") || MouseouverHasDispellAble("Frozen Binds") && DispelWatch.ElapsedMilliseconds >= 2000))
                             {
                                 API.CastSpell(Cleanse + "MO");
                                 return;
@@ -1070,7 +1079,7 @@ public class HolyPally : CombatRoutine
                     for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)
                         {
-                            if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell)
+                            if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(Cleanse))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;

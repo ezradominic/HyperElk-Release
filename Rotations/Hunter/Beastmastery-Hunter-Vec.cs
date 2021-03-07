@@ -43,8 +43,12 @@ namespace HyperElk.Core
         private string FlayersMark = "Flayer's Mark";
         private string WildMark = "Wild Mark";
         private string HuntersMark = "Hunter's Mark";
+        private string ConcussiveShot = "Concussive Shot";
 
         private string TranquilizingShot = "Tranquilizing Shot";
+
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool isMOinRange => API.MouseoverRange <= 40;
@@ -106,6 +110,7 @@ namespace HyperElk.Core
         string[] StampedeList = new string[] { "always", "with Cooldowns", "on AOE" };
         string[] BloodshedList = new string[] { "always", "with Cooldowns" };
         string[] combatList = new string[] { "In Combat", "Out Of Combat", "Everytime" };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
 
 
         private int ExhilarationLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Exhilaration)];
@@ -127,6 +132,10 @@ namespace HyperElk.Core
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private bool Use_HuntersMark => CombatRoutine.GetPropertyBool("huntersmark");
         private bool UseTranqShot => CombatRoutine.GetPropertyBool("TranquilizingShot");
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private bool ConcussiveShot_enabled => CombatRoutine.GetPropertyBool(ConcussiveShot);
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Beast Mastery Hunter by Vec";
@@ -167,6 +176,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Death_Chakram, 325028, "F10");
             CombatRoutine.AddSpell(TranquilizingShot, 19801, "C");
             CombatRoutine.AddSpell(HuntersMark, 257284, "F11");
+            CombatRoutine.AddSpell(ConcussiveShot, 5116, "F12");
 
 
             //Macros
@@ -207,6 +217,11 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(WildMark, 328275);
             CombatRoutine.AddDebuff(Resonating_Arrow, 308491);
             CombatRoutine.AddDebuff(HuntersMark, 257284);
+            CombatRoutine.AddDebuff(ConcussiveShot, 5116);
+
+
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Mouseover");
@@ -231,7 +246,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Aspect_of_the_Turtle, "Use " + Aspect_of_the_Turtle + " below:", percentListProp, "Life percent at which " + Aspect_of_the_Turtle + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Feign_Death, "Use " + Feign_Death + " below:", percentListProp, "Life percent at which " + Feign_Death + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(Mend_Pet, "Use " + Mend_Pet + " below:", percentListProp, "Life percent at which " + Mend_Pet + " is used, set to 0 to disable", "Pet", 6);
-
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(ConcussiveShot, ConcussiveShot, false, "Enable if you want to use ConcussiveShot", "Misc");
 
 
         }
@@ -239,7 +256,10 @@ namespace HyperElk.Core
         public override void Pulse()
         {
             //API.WriteLog("debug: "  + " cancast "+ API.CanCast(TranquilizingShot) + " settings? " + UseTranqShot + " has buff? " + DispellList);
-            //API.WriteLog("MS  " + FocusRegen);
+            if (DispellList)
+            {
+                API.WriteLog("dispell!!!  " + DispellList);
+            }
             if (CallPetTimer.ElapsedMilliseconds > 10000)
             {
                 CallPetTimer.Stop();
@@ -263,6 +283,16 @@ namespace HyperElk.Core
                 if (API.CanCast(Mend_Pet) && API.PlayerHasPet && API.PetHealthPercent <= MendPetLifePercent && API.PetHealthPercent >= 1)
                 {
                     API.CastSpell(Mend_Pet);
+                    return;
+                }
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
                     return;
                 }
                 if (API.CanCast(Exhilaration) && ((API.PlayerHealthPercent <= ExhilarationLifePercent && PlayerLevel >= 9) || (API.PetHealthPercent <= PetExhilarationLifePercent && API.PetHealthPercent >= 1 && PlayerLevel >= 44)))
@@ -293,6 +323,11 @@ namespace HyperElk.Core
             if (API.CanCast(TranquilizingShot) && DispellList && UseTranqShot && InRange)
             {
                 API.CastSpell(TranquilizingShot);
+                return;
+            }
+            if (API.CanCast(ConcussiveShot) && ConcussiveShot_enabled && InRange && !API.TargetHasDebuff(ConcussiveShot))
+            {
+                API.CastSpell(ConcussiveShot);
                 return;
             }
             if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !Playeriscasting && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
