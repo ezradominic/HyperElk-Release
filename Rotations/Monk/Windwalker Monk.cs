@@ -42,7 +42,7 @@ namespace HyperElk.Core
         private int TouchofKarmaPercentProc => numbList[CombatRoutine.GetPropertyInt(TouchofKarma)];
 
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
-        private bool NotCasting => !API.PlayerIsCasting(false);
+        private bool NotCasting => !API.PlayerIsCasting(false) && !API.SpellIsOnGCD;
         bool LastCastTigerPalm => API.PlayerLastSpell == TigerPalm;
         bool LastCastBlackoutkick => API.LastSpellCastInGame == BlackOutKick;
         bool LastCastSpinningCraneKick => API.LastSpellCastInGame == SpinningCraneKick;
@@ -305,30 +305,84 @@ namespace HyperElk.Core
                 return;
             }
 
-            
+
             //# Executed every time the actor is available.
             //actions=auto_attack
-            //actions+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi.max-chi>=3&(energy.time_to_max<1|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && !API.SpellIsOnGCD && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3 && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            //actions+=/call_action_list,name=serenity,if=buff.serenity.up
+            if (API.PlayerHasBuff(Serenity) && API.PlayerIsInCombat && NotCasting && IsMelee)
             {
-                API.CastSpell(FistsoftheWhiteTiger);
-                return;
-            }
-            //actions+=/expel_harm,if=chi.max-chi>=1&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(ExpelHarm) && ChiDeficit >= 1 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
-            {
-                API.CastSpell(ExpelHarm);
-                return;
-            }
-            //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (NotCasting && IsMelee && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
-            {
-                API.CastSpell(TigerPalm);
-                return;
+                //actions.serenity=fists_of_fury,if=buff.serenity.remains<1
+                if (API.CanCast(FistsofFury) && API.PlayerBuffTimeRemaining(Serenity) < 250)
+                {
+                    API.CastSpell(FistsofFury);
+                    return;
+                }
+                //actions.serenity+=/spinning_crane_kick,if=combo_strike&(active_enemies>=3|active_enemies>1&!cooldown.rising_sun_kick.up)
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1) && API.SpellISOnCooldown(RisingSunKick))
+                {
+                    API.CastSpell(SpinningCraneKick);
+                    return;
+                }
+                //actions.serenity+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike
+                if (API.CanCast(RisingSunKick) && !LastCastRisingSunKick)
+                {
+                    API.CastSpell(RisingSunKick);
+                    return;
+                }
+                //actions.serenity+=/fists_of_fury,if=active_enemies>=3
+                if (API.CanCast(FistsofFury) && API.PlayerUnitInMeleeRangeCount >= 3)
+                {
+                    API.CastSpell(FistsofFury);
+                    return;
+                }
+                //actions.serenity+=/spinning_crane_kick,if=combo_strike&buff.dance_of_chiji.up
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && API.PlayerHasBuff(DanceofChiJi))
+                {
+                    API.CanCast(SpinningCraneKick);
+                    return;
+                }
+                //actions.serenity+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&buff.weapons_of_order_ww.up&cooldown.rising_sun_kick.remains>2
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && API.PlayerHasBuff(WeaponsofOrder) && API.SpellCDDuration(RisingSunKick) > 200)
+                {
+                    API.CastSpell(BlackOutKick);
+                    return;
+                }
+                //actions.serenity+=/fists_of_fury,interrupt_if=!cooldown.rising_sun_kick.up
+                //actions.serenity+=/spinning_crane_kick,if=combo_strike&debuff.bonedust_brew.up
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && API.TargetHasDebuff(BonedustBrew))
+                {
+                    API.CastSpell(SpinningCraneKick);
+                    return;
+                }
+                //actions.serenity+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi<3
+                if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && API.PlayerCurrentChi < 3)
+                {
+                    API.CastSpell(FistsoftheWhiteTiger);
+                    return;
+                }
+                //actions.serenity+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike|!talent.hit_combo
+                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick)
+                {
+                    API.CastSpell(BlackOutKick);
+                    return;
+                }
+                //actions.serenity+=/spinning_crane_kick
+                if (API.CanCast(SpinningCraneKick) && UseLeg == "none")
+                {
+                    API.CanCast(SpinningCraneKick);
+                    return;
+                }
             }
             //actions+=/call_action_list,name=weapons_of_order,if=buff.weapons_of_order.up
             if (API.PlayerHasBuff(WeaponsofOrder) && API.PlayerIsInCombat && NotCasting && IsMelee)
             {
+                //actions.cd_sef+=/storm_earth_and_fire,if=covenant.kyrian&(buff.weapons_of_order.up|(fight_remains<cooldown.weapons_of_order.remains|cooldown.weapons_of_order.remains>cooldown.storm_earth_and_fire.full_recharge_time)&cooldown.fists_of_fury.remains<=9&chi>=2&cooldown.whirling_dragon_punch.remains<=12)
+                if (API.CanCast(StormEarthandFire) && PlayerCovenantSettings == "Kyrian" && API.PlayerHasBuff(WeaponsofOrder))
+                {
+                    API.CastSpell(StormEarthandFire);
+                    FocusHelper = 0;
+                    return;
+                }
                 //actions.weapons_of_order+=/energizing_elixir,if=chi.max-chi>=2&energy.time_to_max>3
                 if (API.CanCast(EnergizingElixir) && TalentEnergizingElixir && ChiDeficit >= 2 && EnergyTimeToMax > 300)
                 {
@@ -348,7 +402,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.weapons_of_order+=/fists_of_fury,if=active_enemies>=2&buff.weapons_of_order_ww.remains<1
-                if (API.CanCast(FistsofFury) && API.PlayerUnitInMeleeRangeCount >= 2 && API.PlayerBuffTimeRemaining(WeaponsofOrder) < 100)
+                if (API.CanCast(FistsofFury) && API.PlayerUnitInMeleeRangeCount >= 2 && API.PlayerBuffTimeRemaining(WeaponsofOrder) < 250)
                 {
                     API.CastSpell(FistsofFury);
                     return;
@@ -424,6 +478,25 @@ namespace HyperElk.Core
                 }
                 //actions.weapons_of_order+=/flying_serpent_kick,interrupt=1
             }
+            //actions+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi.max-chi>=3&(energy.time_to_max<1|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
+            if (NotCasting && IsMelee && !API.SpellIsOnGCD && API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3 && (EnergyTimeToMax < 100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            {
+                API.CastSpell(FistsoftheWhiteTiger);
+                return;
+            }
+            //actions+=/expel_harm,if=chi.max-chi>=1&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
+            if (NotCasting && IsMelee && API.CanCast(ExpelHarm) && ChiDeficit >= 1 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            {
+                API.CastSpell(ExpelHarm);
+                return;
+            }
+            //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
+            if (NotCasting && IsMelee && API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
+            {
+                API.CastSpell(TigerPalm);
+                return;
+            }
+
             //actions+=/call_action_list,name=cd_sef,if=!talent.serenity
             if (IsCooldowns && !TalentSerenty && API.PlayerIsInCombat && IsMelee && NotCasting)
             {
@@ -483,13 +556,7 @@ namespace HyperElk.Core
                     FocusHelper = 0;
                     return;
                 }
-                //actions.cd_sef+=/storm_earth_and_fire,if=covenant.kyrian&(buff.weapons_of_order.up|(fight_remains<cooldown.weapons_of_order.remains|cooldown.weapons_of_order.remains>cooldown.storm_earth_and_fire.full_recharge_time)&cooldown.fists_of_fury.remains<=9&chi>=2&cooldown.whirling_dragon_punch.remains<=12)
-                if (API.CanCast(StormEarthandFire) && PlayerCovenantSettings == "Kyrian" && API.PlayerHasBuff(WeaponsofOrder))
-                {
-                    API.CastSpell(StormEarthandFire);
-                    FocusHelper = 0;
-                    return;
-                }
+
                 //actions.cd_sef+=/touch_of_karma,if=fight_remains>159|pet.xuen_the_white_tiger.active|variable.hold_xuen
                 //actions.cd_sef+=/blood_fury,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
                 if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
@@ -522,71 +589,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            //actions+=/call_action_list,name=serenity,if=buff.serenity.up
-            if (API.PlayerHasBuff(Serenity) && API.PlayerIsInCombat && NotCasting && IsMelee)
-            {
-                //actions.serenity=fists_of_fury,if=buff.serenity.remains<1
-                if (API.CanCast(FistsofFury) && API.PlayerBuffTimeRemaining(Serenity) < 100)
-                {
-                    API.CastSpell(FistsofFury);
-                    return;
-                }
-                //actions.serenity+=/spinning_crane_kick,if=combo_strike&(active_enemies>=3|active_enemies>1&!cooldown.rising_sun_kick.up)
-                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && (API.PlayerUnitInMeleeRangeCount >= 3 || API.PlayerUnitInMeleeRangeCount > 1) && API.SpellISOnCooldown(RisingSunKick))
-                {
-                    API.CastSpell(SpinningCraneKick);
-                    return;
-                }
-                //actions.serenity+=/rising_sun_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike
-                if (API.CanCast(RisingSunKick) && !LastCastRisingSunKick)
-                {
-                    API.CastSpell(RisingSunKick);
-                    return;
-                }
-                //actions.serenity+=/fists_of_fury,if=active_enemies>=3
-                if (API.CanCast(FistsofFury) && API.PlayerUnitInMeleeRangeCount >= 3)
-                {
-                    API.CastSpell(FistsofFury);
-                    return;
-                }
-                //actions.serenity+=/spinning_crane_kick,if=combo_strike&buff.dance_of_chiji.up
-                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && API.PlayerHasBuff(DanceofChiJi))
-                {
-                    API.CanCast(SpinningCraneKick);
-                    return;
-                }
-                //actions.serenity+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&buff.weapons_of_order_ww.up&cooldown.rising_sun_kick.remains>2
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick && API.PlayerHasBuff(WeaponsofOrder) && API.SpellCDDuration(RisingSunKick) > 200)
-                {
-                    API.CastSpell(BlackOutKick);
-                    return;
-                }
-                //actions.serenity+=/fists_of_fury,interrupt_if=!cooldown.rising_sun_kick.up
-                //actions.serenity+=/spinning_crane_kick,if=combo_strike&debuff.bonedust_brew.up
-                if (API.CanCast(SpinningCraneKick) && UseLeg == "none" && !LastCastSpinningCraneKick && API.TargetHasDebuff(BonedustBrew))
-                {
-                    API.CastSpell(SpinningCraneKick);
-                    return;
-                }
-                //actions.serenity+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi<3
-                if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && API.PlayerCurrentChi < 3)
-                {
-                    API.CastSpell(FistsoftheWhiteTiger);
-                    return;
-                }
-                //actions.serenity+=/blackout_kick,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike|!talent.hit_combo
-                if (API.CanCast(BlackOutKick) && !LastCastBlackoutkick)
-                {
-                    API.CastSpell(BlackOutKick);
-                    return;
-                }
-                //actions.serenity+=/spinning_crane_kick
-                if (API.CanCast(SpinningCraneKick) && UseLeg == "none")
-                {
-                    API.CanCast(SpinningCraneKick);
-                    return;
-                }
-            }
+
             //actions+=/call_action_list,name=cd_serenity,if=talent.serenity
             if (IsCooldowns && TalentSerenty && API.PlayerIsInCombat && IsMelee && NotCasting)
             {
