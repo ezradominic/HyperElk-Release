@@ -88,8 +88,8 @@
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("AURASWITCH");
         private bool IsAvengingWrath => CombatRoutine.GetPropertyBool(AvengingWrath);
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
-        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
-        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private string UseTrinket1 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket2")];
 
         private int LayOnHandsPlayerLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands + "player")];
         private int LayOnHandsFocusLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands + "focus")];
