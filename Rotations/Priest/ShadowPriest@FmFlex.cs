@@ -127,14 +127,14 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(VoidTorrent, 263165, "D1");
             CombatRoutine.AddSpell(SurrendertoMadness, 193223, "D1");
             CombatRoutine.AddSpell(Damnation, 341374, "D1");
-            CombatRoutine.AddSpell(Silence, 15487, "F");
+            CombatRoutine.AddSpell(Silence, 263715, "F");
             CombatRoutine.AddSpell(Mindbender, 123040, "D7");
             CombatRoutine.AddSpell(PowerInfusion, 10060, "0");
             CombatRoutine.AddSpell(VampiricEmbrace, 15286, "E");
             CombatRoutine.AddSpell(DesperatePrayer, 19236, "S");
             CombatRoutine.AddSpell(PWFortitude, 21562, "F6");
             CombatRoutine.AddSpell(PWShield, 17, "F7");
-            CombatRoutine.AddSpell(Mindgames, 323701, "0");
+            CombatRoutine.AddSpell(Mindgames, 323673, "0");
             CombatRoutine.AddSpell(UnholyNova, 324724, "0");
 
             CombatRoutine.AddMacro(SWPain + "MO", "D2");
@@ -340,8 +340,10 @@ namespace HyperElk.Core
                     return;
                 }
             }
+            testlol = "test21";
             if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !API.PlayerIsCasting(true) && PlayerCovenantSettings == "Necrolord" && API.CanCast(UnholyNova))
             {
+                testlol = "test22";
                 API.CastSpell(UnholyNova);
                 return;
             }
