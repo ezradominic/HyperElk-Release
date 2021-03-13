@@ -73,7 +73,7 @@
         private bool Talent_SanctifiedWrath => API.PlayerIsTalentSelected(7, 1);
 
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
-
+        string[] UseListwithHP = new string[] { "never", "With Cooldowns", "On Cooldown", "on AOE", "on HP" };
         //CBProperties
 
 
@@ -88,8 +88,8 @@
         private bool AutoAuraSwitch => CombatRoutine.GetPropertyBool("AURASWITCH");
         private bool IsAvengingWrath => CombatRoutine.GetPropertyBool(AvengingWrath);
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
-        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
-        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private string UseTrinket1 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket2")];
 
         private int LayOnHandsPlayerLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands + "player")];
         private int LayOnHandsFocusLifePercent => percentListProp[CombatRoutine.GetPropertyInt(LayOnHands + "focus")];
@@ -104,7 +104,8 @@
         private int BlessingofSacrificePercent => percentListProp[CombatRoutine.GetPropertyInt(BlessingofSacrifice)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
-
+        private int Trinket1HP => numbList[CombatRoutine.GetPropertyInt("Trinket1HP")];
+        private int Trinket2HP => numbList[CombatRoutine.GetPropertyInt("Trinket2HP")];
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Paladin by Vec";
@@ -134,7 +135,6 @@
             CombatRoutine.AddSpell(HolyAvenger, 105809, "F11");
             CombatRoutine.AddSpell(Seraphim, 152262, "F11");
             CombatRoutine.AddSpell(MomentOfGlory, 327193, "D6");
-            CombatRoutine.AddSpell(SanctifiedWrath, 171648, "F1");
             CombatRoutine.AddSpell(DivineToll, 304971, "F8");
             CombatRoutine.AddSpell(AshenHallow, 316958, "F8");
             CombatRoutine.AddSpell(BlessingofSpring, 328282, "F8");
@@ -195,8 +195,8 @@
             CombatRoutine.AddProp(AvengingWrath, "Use Avenging Wrath", true, "Use Avenging Wrath with cooldowns", "Generic");
             CombatRoutine.AddProp("AOEUnitNumner", "AOE Unit Numner", 2, "How many units around to use AOE rotation", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
-            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", UseListwithHP, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", UseListwithHP, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp(LayOnHands + "player", LayOnHands + " Player" + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
             CombatRoutine.AddProp(LayOnHands + "focus", LayOnHands + " Focus" + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
             CombatRoutine.AddProp(LayOnHands + "mouseover", LayOnHands + " Mouseover" + " Life Percent", percentListProp, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
@@ -210,7 +210,8 @@
             CombatRoutine.AddProp(BlessingofProtection + "focus", BlessingofProtection + " Focus" + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
             CombatRoutine.AddProp(BlessingofProtection + "mouseover", BlessingofProtection + " Mouseover" + " Life Percent", percentListProp, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
             CombatRoutine.AddProp(BlessingofSacrifice, BlessingofSacrifice + " Life Percent", percentListProp, "Life percent at which" + BlessingofSacrifice + "is used, set to 0 to disable", "Defense", 2);
-
+            CombatRoutine.AddProp("Trinket1HP", "Trinket 1" + " Life Percent", numbList, " Life percent at which" + "Trinket 1" + " is used, set to 0 to disable", "Trinkets", 40);
+            CombatRoutine.AddProp("Trinket2HP", "Trinket 2" + " Life Percent", numbList, " Life percent at which" + "Trinket 2" + " is used, set to 0 to disable", "Trinkets", 40);
         }
 
         public override void Pulse()
@@ -384,11 +385,11 @@
             //cds->add_action("use_items,if=buff.seraphim.up|!talent.seraphim.enabled");
             if (PlayerHasBuff(Seraphim) || !Talent_Seraphim)
             {
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket1 == "on HP" && API.PlayerHealthPercent <= Trinket1HP) && IsMelee)
                 {
                     API.CastSpell("Trinket1");
                 }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket2 == "on HP" && API.PlayerHealthPercent <= Trinket2HP) && IsMelee)
                 {
                     API.CastSpell("Trinket2");
                 }

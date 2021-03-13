@@ -201,7 +201,7 @@ namespace HyperElk.Core
         string[] TheaterofPainDispell = { "Soul Corruption", "Spectral Reach", "Death Grasp", "Shadow Vulnerability", "Curse of Desolation" };
         string[] DeOtherSideDispell = { "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust 2", "Hex" };
         string[] SpireofAscensionDispell = { "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom 2" };
-        string[] DispellList = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen", "Bramblethorn Entanglement", "Dying Breath", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Curse of Stone", "Turned to Stone", "Curse of Obliteration", "Anguished Cries", "Wrack Soul", "Sintouched Anima", "Curse of Suppression", "Explosive Anger", "Soul Corruption", "Spectral Reach", "Death Grasp", "Shadow Vulnerability", "Curse of Desolation", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust 2", "Hex", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom 2", "Burst" };
+        string[] DispellList = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Slime Injection", "Gripping Infection", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen", "Bramblethorn Entanglement", "Dying Breath", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Curse of Stone", "Turned to Stone", "Curse of Obliteration", "Anguished Cries", "Wrack Soul", "Sintouched Anima", "Curse of Suppression", "Explosive Anger", "Soul Corruption", "Spectral Reach", "Death Grasp", "Shadow Vulnerability", "Curse of Desolation", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust 2", "Hex", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom 2", "Burst" };
         //  public string[] InstanceList = { "The Necrotic Wake", "De Other Side", "Halls of Atonement", "Mists of Tirna Scithe", "Plaguefall", "Sanguine Depths", "Spires of Ascension", "Theater of Pain" };
         private static readonly Stopwatch player = new Stopwatch();
         private static readonly Stopwatch party1 = new Stopwatch();
@@ -720,7 +720,7 @@ namespace HyperElk.Core
                 API.CastSpell(MoonkinForm);
                 return;
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasBuff("Gluttonous Miasma") || IsMouseover && API.MouseoverHasBuff("Gluttonous Miasma")))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasDebuff("Gluttonous Miasma") || IsMouseover && API.MouseoverHasDebuff("Gluttonous Miasma")))
             {
    
                 #region Dispell
@@ -971,152 +971,164 @@ namespace HyperElk.Core
                     return;
                 }
                 //DPS
-                if (API.CanCast(HeartoftheWild) && HeartoftheWildTalent && !ChannelingCov && !ChannelingTranq && (UseHeart == "With Cooldowns" && IsCooldowns || UseHeart == "On Cooldown"))
+                if (API.PlayerIsInCombat)
                 {
-                    API.CastSpell(HeartoftheWild);
-                    return;
+                    if (API.CanCast(HeartoftheWild) && HeartoftheWildTalent && !ChannelingCov && !ChannelingTranq && (UseHeart == "With Cooldowns" && IsCooldowns || UseHeart == "On Cooldown"))
+                    {
+                        API.CastSpell(HeartoftheWild);
+                        return;
+                    }
+                    if (API.CanCast(MoonkinForm) && !API.PlayerHasBuff(MoonkinForm) && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && InRange && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(MoonkinForm);
+                        return;
+                    }
+                    if (API.CanCast(Starsurge) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && (API.PlayerHasBuff(EclispeLunar) || API.PlayerHasBuff(EclispleSolar)) && InRange && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Starsurge);
+                        return;
+                    }
+                    if (API.CanCast(Starsurge) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && (API.PlayerHasBuff(EclispeLunar) || API.PlayerHasBuff(EclispleSolar)) && InMORange && IsMouseover && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(Starsurge + MO);
+                        return;
+                    }
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingStar || QuakingStar && QuakingHelper))
+                    {
+                        API.CastSpell(Starfire);
+                        return;
+                    }
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingStar || QuakingStar && QuakingHelper))
+                    {
+                        API.CastSpell(Starfire + MO);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    {
+                        API.CastSpell(Wrath);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.MouseoverHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    {
+                        API.CastSpell(Wrath + MO);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    {
+                        API.CastSpell(Wrath);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    {
+                        API.CastSpell(Wrath + MO);
+                        return;
+                    }
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingStar || QuakingStar && QuakingHelper))
+                    {
+                        API.CastSpell(Starfire);
+                        return;
+                    }
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingStar || QuakingStar && QuakingHelper))
+                    {
+                        API.CastSpell(Starfire + MO);
+                        return;
+                    }
+                    if (API.CanCast(Moonfire) && !API.PlayerIsCasting(true) && InRange && !API.TargetHasDebuff(Moonfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Moonfire);
+                        return;
+                    }
+                    if (API.CanCast(Moonfire) && !API.PlayerIsCasting(true) && InMORange && IsMouseover && !API.MouseoverHasDebuff(Moonfire) && API.PlayerCanAttackMouseover && NotChanneling && !ChannelingTranq && !ChannelingCov && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(Moonfire + MO);
+                        return;
+                    }
+                    if (API.CanCast(Sunfire) && !API.PlayerIsCasting(true) && InRange && !API.TargetHasDebuff(Sunfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Sunfire);
+                        return;
+                    }
+                    if (API.CanCast(Sunfire) && !API.PlayerIsCasting(true) && InMORange && IsMouseover && !API.MouseoverHasDebuff(Sunfire) && API.PlayerCanAttackMouseover && NotChanneling && !ChannelingTranq && !ChannelingCov && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(Sunfire + MO);
+                        return;
+                    }
                 }
-                if (API.CanCast(MoonkinForm) && !API.PlayerHasBuff(MoonkinForm) && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && InRange && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(MoonkinForm);
-                    return;
-                }
-                if (API.CanCast(Starsurge) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && (API.PlayerHasBuff(EclispeLunar) || API.PlayerHasBuff(EclispleSolar)) && InRange && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(Starsurge);
-                    return;
-                }
-                if (API.CanCast(Starsurge) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && (API.PlayerHasBuff(EclispeLunar) || API.PlayerHasBuff(EclispleSolar)) && InMORange && IsMouseover && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(Starsurge + MO);
-                    return;
-                }
-                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingStar || QuakingStar && QuakingHelper))
-                {
-                    API.CastSpell(Starfire);
-                    return;
-                }
-                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingStar || QuakingStar && QuakingHelper))
-                {
-                    API.CastSpell(Starfire + MO);
-                    return;
-                }
-                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
-                {
-                    API.CastSpell(Wrath);
-                    return;
-                }
-               if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.MouseoverHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
-                {
-                    API.CastSpell(Wrath + MO);
-                   return;
-                }
-                if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
-                {
-                    API.CastSpell(Wrath);
-                    return;
-                }
-               if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
-                {
-                   API.CastSpell(Wrath + MO);
-                   return;
-                }
-                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingStar || QuakingStar && QuakingHelper))
-                {
-                    API.CastSpell(Starfire);
-                    return;
-                }
-                if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingStar || QuakingStar && QuakingHelper))
-                {
-                    API.CastSpell(Starfire + MO);
-                    return;
-                }
-                if (API.CanCast(Moonfire) && !API.PlayerIsCasting(true) && InRange && !API.TargetHasDebuff(Moonfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(Moonfire);
-                    return;
-                }
-               if (API.CanCast(Moonfire) && !API.PlayerIsCasting(true) && InMORange && IsMouseover && !API.MouseoverHasDebuff(Moonfire) && API.PlayerCanAttackMouseover && NotChanneling && !ChannelingTranq && !ChannelingCov && API.MouseoverHealthPercent > 0)
-                {
-                   API.CastSpell(Moonfire + MO);
-                    return;
-                }
-                if (API.CanCast(Sunfire) && !API.PlayerIsCasting(true) && InRange && !API.TargetHasDebuff(Sunfire) && API.PlayerCanAttackTarget && NotChanneling && !ChannelingTranq && !ChannelingCov && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(Sunfire);
-                    return;
-                }
-                if (API.CanCast(Sunfire) && !API.PlayerIsCasting(true) && InMORange && IsMouseover && !API.MouseoverHasDebuff(Sunfire) && API.PlayerCanAttackMouseover && NotChanneling && !ChannelingTranq && !ChannelingCov && API.MouseoverHealthPercent > 0)
-               {
-                   API.CastSpell(Sunfire + MO);
-                  return;
-              }
                 //Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
+                    if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
+                    {
+                        if (API.PlayerHealthPercent >= UnitHealth)
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
+                    }
                     if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
-                        for (int i = 0; i < units.Length; i++)
-                            for (int j = 0; j < DispellList.Length; j++)
-                            {
-                                if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
+                            for (int i = 0; i < units.Length; i++)
+                                for (int j = 0; j < DispellList.Length; j++)
                                 {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    SwapWatch.Restart();
-                                    return;
-                                }
-                                if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(NaturesCure))
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (UseLife == "Healer" && PhotosynthesisTalent && !API.PlayerHasBuff(Lifebloom) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.PlayerHealthPercent > 0)
-                                {
-                                    API.CastSpell(Player);
-                                    return;
-                                }
-                                if (API.UnitRoleSpec(units[i]) == RoleSpec && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (API.UnitRoleSpec(units[i]) == RoleSpec && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, units[i]) && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    return;
-                                }
-                                if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(Player);
-                                    return;
-                                }
-                                if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    SwapWatch.Restart();
-                                    return;
-                                }
-                                if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    SwapWatch.Restart();
-                                    return;
-                                }
-                                if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    API.CastSpell("Assist");
-                                    SwapWatch.Restart();
-                                    return;
-                                }
-                                if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && IsDPS || !IsDPS))
-                                {
-                                    API.CastSpell(PlayerTargetArray[i]);
-                                    SwapWatch.Restart();
-                                    return;
-                                }
+                                    if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        SwapWatch.Restart();
+                                        return;
+                                    }
+                                    if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(NaturesCure))
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        return;
+                                    }
+                                    if (UseLife == "Healer" && PhotosynthesisTalent && !API.PlayerHasBuff(Lifebloom) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.PlayerHealthPercent > 0)
+                                    {
+                                        API.CastSpell(Player);
+                                        return;
+                                    }
+                                    if (API.UnitRoleSpec(units[i]) == RoleSpec && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        return;
+                                    }
+                                    if (API.UnitRoleSpec(units[i]) == RoleSpec && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, units[i]) && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        return;
+                                    }
+                                    if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                    {
+                                        API.CastSpell(Player);
+                                        return;
+                                    }
+                                    if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0)
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        SwapWatch.Restart();
+                                        return;
+                                    }
+                                    if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth)
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        SwapWatch.Restart();
+                                        return;
+                                    }
+                                    if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        API.CastSpell("Assist");
+                                        SwapWatch.Restart();
+                                        return;
+                                    }
+                                    if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && IsDPS || !IsDPS))
+                                    {
+                                        API.CastSpell(PlayerTargetArray[i]);
+                                        SwapWatch.Restart();
+                                        return;
+                                    }
 
-                            }
+                                }
+                        
                     }
                     if (API.PlayerIsInRaid)
                     {

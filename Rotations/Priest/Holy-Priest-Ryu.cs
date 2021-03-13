@@ -554,7 +554,7 @@ namespace HyperElk.Core
                     DispelWatch.Restart();
                 }
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasDebuff("Gluttonous Miasma") || !API.MouseoverHasDebuff("Gluttonous Miasma") && IsMouseover))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
                 {
@@ -675,49 +675,60 @@ namespace HyperElk.Core
                     return;
                 }
                 //DPS
-                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMind || QuakingMind && QuakingHelper))
+                if (API.PlayerIsInCombat)
                 {
-                    API.CastSpell(Mindgames);
-                    return;
-                }
-                if (API.CanCast(HolyWordChastise) && InRange && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(HolyWordChastise);
-                    return;
-                }
-                if (API.CanCast(HolyFire) && InRange && Mana >= 1 && !ChannelingDivine && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingHolyFire || QuakingHolyFire && QuakingHelper)) 
-                {
-                    API.CastSpell(HolyFire);
-                    return;
-                }
-                if (API.CanCast(ShadowWordPain) && InRange && Mana >= 1 && !API.TargetHasDebuff(ShadowWordPain) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(ShadowWordPain);
-                    return;
-                }
-                if (API.CanCast(HolyNova) && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 12 && !ChannelingDivine && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(HolyNova);
-                    return;
-                }
-                if (API.CanCast(AscendedNova) && PlayerCovenantSettings == "Kyrian" && API.TargetRange <= 8 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(AscendedNova);
-                    return;
-                }
-                if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingBoon || QuakingBoon && QuakingHelper))
-                {
-                    API.CastSpell(AscendedBlast);
-                    return;
-                }
-                if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
-                {
-                    API.CastSpell(Smite);
-                    return;
+                    if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMind || QuakingMind && QuakingHelper))
+                    {
+                        API.CastSpell(Mindgames);
+                        return;
+                    }
+                    if (API.CanCast(HolyWordChastise) && InRange && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+                    {
+                        API.CastSpell(HolyWordChastise);
+                        return;
+                    }
+                    if (API.CanCast(HolyFire) && InRange && Mana >= 1 && !ChannelingDivine && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingHolyFire || QuakingHolyFire && QuakingHelper))
+                    {
+                        API.CastSpell(HolyFire);
+                        return;
+                    }
+                    if (API.CanCast(ShadowWordPain) && InRange && Mana >= 1 && !API.TargetHasDebuff(ShadowWordPain) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingDivine && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+                    {
+                        API.CastSpell(ShadowWordPain);
+                        return;
+                    }
+                    if (API.CanCast(HolyNova) && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 12 && !ChannelingDivine && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+                    {
+                        API.CastSpell(HolyNova);
+                        return;
+                    }
+                    if (API.CanCast(AscendedNova) && PlayerCovenantSettings == "Kyrian" && API.TargetRange <= 8 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(AscendedNova);
+                        return;
+                    }
+                    if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingBoon || QuakingBoon && QuakingHelper))
+                    {
+                        API.CastSpell(AscendedBlast);
+                        return;
+                    }
+                    if (API.CanCast(Smite) && !ChannelingDivine && Mana >= 1 && !ChannelingDivine && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
+                    {
+                        API.CastSpell(Smite);
+                        return;
+                    }
                 }
                 // Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
+                    if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
+                    {
+                        if (API.PlayerHealthPercent >= UnitHealth)
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
+                    }
                     if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < units.Length; i++)

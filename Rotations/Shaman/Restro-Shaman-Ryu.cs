@@ -633,7 +633,7 @@ namespace HyperElk.Core
                     DispelWatch.Restart();
                 }
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && (!API.TargetHasDebuff("Gluttonous Miasma") || !API.MouseoverHasDebuff("Gluttonous Miasma") && IsMouseover))
             {
 
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
@@ -832,50 +832,61 @@ namespace HyperElk.Core
                     return;
                 }
                 //DPS
-                if (API.CanCast(FlameShock) && InRange && (!API.TargetHasDebuff(FlameShock) || API.TargetDebuffRemainingTime(FlameShock) < 600) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                if (API.PlayerIsInCombat)
                 {
-                    API.CastSpell(FlameShock);
-                    return;
-                }
-                if (API.CanCast(FlameShock) && IsMouseover && isMouseoverInCombat && InRange && (!API.MouseoverHasDebuff(FlameShock) || API.MouseoverDebuffRemainingTime(FlameShock) < 600) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(FlameShock + "MO");
-                    return;
-                }
-                if (API.CanCast(LavaBurst) && InRange && API.PlayerCanAttackTarget && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper) && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(LavaBurst);
-                    return;
-                }
-                if (API.CanCast(LavaBurst) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper)  && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(LavaBurst + "MO");
-                    return;
-                }
-                if (API.CanCast(ChainLightning) && InRange && API.PlayerCanAttackTarget && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper) && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(ChainLightning);
-                    return;
-                }
-                if (API.CanCast(ChainLightning) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper) && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(ChainLightning + "MO");
-                    return;
-                }
-                if (API.CanCast(LightningBolt) && InRange && API.PlayerCanAttackTarget && (!QuakingLightning || QuakingLightning && QuakingHelper) && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(LightningBolt);
-                    return;
-                }
-                if (API.CanCast(LightningBolt) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!QuakingLightning || QuakingLightning && QuakingHelper) && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(LightningBolt + "MO");
-                    return;
+                    if (API.CanCast(FlameShock) && InRange && (!API.TargetHasDebuff(FlameShock) || API.TargetDebuffRemainingTime(FlameShock) < 600) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(FlameShock);
+                        return;
+                    }
+                    if (API.CanCast(FlameShock) && IsMouseover && isMouseoverInCombat && InRange && (!API.MouseoverHasDebuff(FlameShock) || API.MouseoverDebuffRemainingTime(FlameShock) < 600) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(FlameShock + "MO");
+                        return;
+                    }
+                    if (API.CanCast(LavaBurst) && InRange && API.PlayerCanAttackTarget && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(LavaBurst);
+                        return;
+                    }
+                    if (API.CanCast(LavaBurst) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper) && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(LavaBurst + "MO");
+                        return;
+                    }
+                    if (API.CanCast(ChainLightning) && InRange && API.PlayerCanAttackTarget && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(ChainLightning);
+                        return;
+                    }
+                    if (API.CanCast(ChainLightning) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper) && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(ChainLightning + "MO");
+                        return;
+                    }
+                    if (API.CanCast(LightningBolt) && InRange && API.PlayerCanAttackTarget && (!QuakingLightning || QuakingLightning && QuakingHelper) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(LightningBolt);
+                        return;
+                    }
+                    if (API.CanCast(LightningBolt) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!QuakingLightning || QuakingLightning && QuakingHelper) && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(LightningBolt + "MO");
+                        return;
+                    }
                 }
                 //Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
-                        if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
+                    if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
+                    {
+                        if (API.PlayerHealthPercent >= UnitHealth)
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
+                    }
+                    if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                         {
                         for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)

@@ -541,7 +541,7 @@ namespace HyperElk.Core
                     DispelWatch.Restart();
                 }
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasBuff("Gluttonous Miasma") || !API.MouseoverHasBuff("Gluttonous Miasma") && IsMouseover))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasDebuff("Gluttonous Miasma") || !API.MouseoverHasDebuff("Gluttonous Miasma") && IsMouseover))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
                 {
@@ -678,81 +678,92 @@ namespace HyperElk.Core
                     API.CastSpell(FaeGuardians);
                     return;
                 }
- 
+
                 //DPS
-                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMind || QuakingMind && QuakingHelper))
+                if (API.PlayerIsInCombat)
                 {
-                    API.CastSpell(Mindgames);
-                    return;
-                }
-                if (API.CanCast(Shadowfiend) && API.PlayerCanAttackTarget && API.PlayerMana <= 65 && InRange && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(Shadowfiend);
-                    return;
-                }
-                if (API.CanCast(Mindbender) && MindbenderTalent && API.PlayerCanAttackTarget && API.PlayerMana <= 80 && InRange && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(Mindbender);
-                    return;
-                }
-                if (API.CanCast(ShadowWordPain) && InRange && Mana >= 1 && !API.TargetHasDebuff(ShadowWordPain) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && !PurgetheWickedTalent)
-                {
-                    API.CastSpell(ShadowWordPain);
-                    return;
-                }
-                if (API.CanCast(PurgetheWicked) && InRange && Mana >= 1 && !API.TargetHasDebuff(PurgetheWicked) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && PurgetheWickedTalent)
-                {
-                    API.CastSpell(PurgetheWicked);
-                    return;
-                }
-                if (SchismCheck && InRange && (!QuakingSchism || QuakingSchism && QuakingHelper))
-                {
-                    API.CastSpell(Schism);
-                    return;
-                }
-                if (API.CanCast(PowerWordSolace) && PowerWordSolaceTalent && AttonementTracking && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(PowerWordSolace);
-                    return;
-                }
-                if (API.CanCast(AscendedNova) && PlayerCovenantSettings == "Kyrian" && API.TargetRange <= 8 && !ChannelingPenance && !ChannelingMindSear && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
-                {
-                    API.CanCast(AscendedNova);
-                    return;
-                }
-                if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingPenance && !ChannelingMindSear && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingBoon || QuakingBoon && QuakingHelper))
-                {
-                    API.CastSpell(AscendedBlast);
-                    return;
-                }
-                if (API.CanCast(Penance) && InRange && (API.TargetHasDebuff(PurgetheWicked) && PurgetheWickedTalent || !API.TargetHasDebuff(PurgetheWicked) && !PurgetheWickedTalent) && !API.PlayerIsMoving && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (AttonementTracking || !API.PlayerIsInGroup) && (!QuakingPenance || QuakingPenance && QuakingHelper))
-                {
-                    API.CastSpell(Penance);
-                    return;
-                }
-                if (API.CanCast(MindBlast) && InRange && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMindblast || QuakingMindblast && QuakingHelper))
-                {
-                    API.CastSpell(MindBlast);
-                    return;
-                }
-                if (API.CanCast(Smite) && !ChannelingPenance && Mana >= 1 && !ChannelingPenance && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
-                {
-                    API.CastSpell(Smite);
-                    return;
-                }
-                if (API.CanCast(HolyNova) && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 12 && !ChannelingPenance && !ChannelingMindSear && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
-                {
-                    API.CastSpell(HolyNova);
-                    return;
-                }
-                if (API.CanCast(MindSear) && InRange && API.TargetUnitInRangeCount >= 3 && !ChannelingPenance && !ChannelingMindSear && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMindSear || QuakingMindSear && QuakingHelper))
-                {
-                    API.CastSpell(MindSear);
-                    return;
+                    if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMind || QuakingMind && QuakingHelper))
+                    {
+                        API.CastSpell(Mindgames);
+                        return;
+                    }
+                    if (API.CanCast(Shadowfiend) && API.PlayerCanAttackTarget && API.PlayerMana <= 65 && InRange && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Shadowfiend);
+                        return;
+                    }
+                    if (API.CanCast(Mindbender) && MindbenderTalent && API.PlayerCanAttackTarget && API.PlayerMana <= 80 && InRange && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Mindbender);
+                        return;
+                    }
+                    if (API.CanCast(ShadowWordPain) && InRange && Mana >= 1 && !API.TargetHasDebuff(ShadowWordPain) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && !PurgetheWickedTalent)
+                    {
+                        API.CastSpell(ShadowWordPain);
+                        return;
+                    }
+                    if (API.CanCast(PurgetheWicked) && InRange && Mana >= 1 && !API.TargetHasDebuff(PurgetheWicked) && (API.PlayerIsMoving || !API.PlayerIsMoving) && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && PurgetheWickedTalent)
+                    {
+                        API.CastSpell(PurgetheWicked);
+                        return;
+                    }
+                    if (SchismCheck && InRange && (!QuakingSchism || QuakingSchism && QuakingHelper))
+                    {
+                        API.CastSpell(Schism);
+                        return;
+                    }
+                    if (API.CanCast(PowerWordSolace) && PowerWordSolaceTalent && AttonementTracking && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(PowerWordSolace);
+                        return;
+                    }
+                    if (API.CanCast(AscendedNova) && PlayerCovenantSettings == "Kyrian" && API.TargetRange <= 8 && !ChannelingPenance && !ChannelingMindSear && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0)
+                    {
+                        API.CanCast(AscendedNova);
+                        return;
+                    }
+                    if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingPenance && !ChannelingMindSear && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingBoon || QuakingBoon && QuakingHelper))
+                    {
+                        API.CastSpell(AscendedBlast);
+                        return;
+                    }
+                    if (API.CanCast(Penance) && InRange && (API.TargetHasDebuff(PurgetheWicked) && PurgetheWickedTalent || !API.TargetHasDebuff(PurgetheWicked) && !PurgetheWickedTalent) && !API.PlayerIsMoving && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (AttonementTracking || !API.PlayerIsInGroup) && (!QuakingPenance || QuakingPenance && QuakingHelper))
+                    {
+                        API.CastSpell(Penance);
+                        return;
+                    }
+                    if (API.CanCast(MindBlast) && InRange && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMindblast || QuakingMindblast && QuakingHelper))
+                    {
+                        API.CastSpell(MindBlast);
+                        return;
+                    }
+                    if (API.CanCast(Smite) && !ChannelingPenance && Mana >= 1 && !ChannelingPenance && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
+                    {
+                        API.CastSpell(Smite);
+                        return;
+                    }
+                    if (API.CanCast(HolyNova) && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 12 && !ChannelingPenance && !ChannelingMindSear && Mana >= 2 && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget)
+                    {
+                        API.CastSpell(HolyNova);
+                        return;
+                    }
+                    if (API.CanCast(MindSear) && InRange && API.TargetUnitInRangeCount >= 3 && !ChannelingPenance && !ChannelingMindSear && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMindSear || QuakingMindSear && QuakingHelper))
+                    {
+                        API.CastSpell(MindSear);
+                        return;
+                    }
                 }
                 // Auto Target
                 if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
                 {
+                    if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
+                    {
+                        if (API.PlayerHealthPercent >= UnitHealth)
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
+                    }
                     if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < units.Length; i++)

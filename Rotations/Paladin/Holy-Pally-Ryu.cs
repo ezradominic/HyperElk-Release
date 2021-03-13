@@ -845,37 +845,37 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(AuraMastery);
                     return;
                 }
-                if (DTCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (DTCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(DivineToll);
                     return;
                 }
-                if (DTCheckMO && !API.MacroIsIgnored(DivineToll + "MO"))
+                if (DTCheckMO && !API.MacroIsIgnored(DivineToll + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(DivineToll + "MO");
                     return;
                 }
-                if (BoVCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (BoVCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BoV);
                     return;
                 }
-                if (BoVCheckMO && !API.MacroIsIgnored(BoV + "MO"))
+                if (BoVCheckMO && !API.MacroIsIgnored(BoV + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BoV + "MO");
                     return;
                 }
-                if (HolyPrismCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (HolyPrismCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyPrism);
                     return;
                 }
-                if (HolyPrismCheckMO && !API.MacroIsIgnored(HolyPrism + "MO"))
+                if (HolyPrismCheckMO && !API.MacroIsIgnored(HolyPrism + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyPrism + "MO");
                     return;
                 }
-                if (WoGTankCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (WoGTankCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG);
                     return;
@@ -885,17 +885,17 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(WoG + "MO");
                     return;
                 }
-                if (LoDCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (LoDCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoD);
                     return;
                 }
-                if (LoHCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (LoHCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoH);
                     return;
                 }
-                if (LoHCheckMO && !API.MacroIsIgnored(LoH + "MO"))
+                if (LoHCheckMO && !API.MacroIsIgnored(LoH + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoH + "MO");
                     return;
@@ -910,170 +910,181 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(BoS + "MO");
                     return;
                 }
-                if (API.CanCast(Judgment) && InRange && API.PlayerCanAttackTarget && (JudgementofLight || !JudgementofLight) && API.TargetHealthPercent > 0)
+                if (API.CanCast(Judgment) && InRange && API.PlayerCanAttackTarget && (JudgementofLight || !JudgementofLight) && API.TargetHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(Judgment);
                     return;
                 }
-                if (API.CanCast(Judgment) && !API.MacroIsIgnored(Judgment + "MO") && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && (JudgementofLight || !JudgementofLight) && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(Judgment) && !API.MacroIsIgnored(Judgment + "MO") && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && (JudgementofLight || !JudgementofLight) && API.MouseoverHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(Judgment + "MO");
                     return;
                 }
-                if (API.CanCast(HammerofWrath) && API.PlayerCanAttackTarget && InRange && (API.TargetHealthPercent <= 20 && Level >= 46 && API.TargetHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.TargetHealthPercent > 0))
+                if (API.CanCast(HammerofWrath) && API.PlayerCanAttackTarget && InRange && (API.TargetHealthPercent <= 20 && Level >= 46 && API.TargetHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.TargetHealthPercent > 0) && API.PlayerIsInCombat)
                 {
                     API.CastSpell(HammerofWrath);
                     return;
                 }
-                if (API.CanCast(HammerofWrath) && !API.MacroIsIgnored(HammerofWrath + "MO") && InMoRange && IsMouseover && (API.MouseoverHealthPercent <= 20 && Level >= 46 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0))
+                if (API.CanCast(HammerofWrath) && !API.MacroIsIgnored(HammerofWrath + "MO") && InMoRange && IsMouseover && (API.MouseoverHealthPercent <= 20 && Level >= 46 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 || Level >= 58 && API.PlayerCurrentHolyPower <= 4 && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0) && API.PlayerIsInCombat)
                 {
                     API.CastSpell(HammerofWrath + "MO");
                     return;
                 }
-                if (HolyShockCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (HolyShockCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyShock + "MO");
                     return;
                 }
-                if (API.CanCast(HolyShock) && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                if (API.CanCast(HolyShock) && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && InRange && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (API.CanCast(HolyShock) && !API.MacroIsIgnored(HolyShock + "MO") && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(HolyShock) && !API.MacroIsIgnored(HolyShock + "MO") && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMouseover && InMoRange && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(HolyShock + "MO");
                     return;
                 }
-                if (WoGCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (WoGCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG);
                     return;
                 }
-                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(WoG + "MO");
                     return;
                 }
-                if (API.CanCast(CrusaderStrike) && CrusadersMight && API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                if (API.CanCast(CrusaderStrike) && CrusadersMight && API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(CrusaderStrike);
                     return;
                 }
-                if (API.CanCast(CrusaderStrike) && !API.MacroIsIgnored(CrusaderStrike + "MO") && IsMouseover && CrusadersMight && API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(CrusaderStrike) && !API.MacroIsIgnored(CrusaderStrike + "MO") && IsMouseover && CrusadersMight && API.SpellISOnCooldown(HolyShock) && API.SpellCDDuration(HolyShock) > 150 && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
-                if (API.CanCast(CrusaderStrike) && Level >= 25 && !CrusadersMight && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
+                if (API.CanCast(CrusaderStrike) && Level >= 25 && !CrusadersMight && IsMelee && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(CrusaderStrike);
                     return;
                 }
-                if (API.CanCast(CrusaderStrike) && !API.MacroIsIgnored(CrusaderStrike + "MO") && IsMouseover && Level >= 25 && !CrusadersMight && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0)
+                if (API.CanCast(CrusaderStrike) && !API.MacroIsIgnored(CrusaderStrike + "MO") && IsMouseover && Level >= 25 && !CrusadersMight && IsMoMelee && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.MouseoverHealthPercent > 0 && API.PlayerIsInCombat)
                 {
                     API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
-                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 { 
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (BFCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (BFCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BF);
                     return;
                 }
-                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(BF + "MO");
                     return;
                 }
-                if (LoTMCheck && !API.TargetHasBuff("Gluttonous Miasma"))
+                if (LoTMCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoTM);
                     return;
                 }
-                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO") && !API.MouseoverHasBuff("Gluttonous Miasma"))
+                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
                 {
                     API.CastSpell(LoTM + "MO");
                     return;
                 }
                 //DPS
-                if (API.CanCast(DivineToll) && !DTHealing && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && API.PlayerCanAttackTarget && InRange && API.TargetHealthPercent > 0)
+                if (API.PlayerIsInCombat)
                 {
-                    API.CastSpell(DivineToll);
-                    return;
-                }
-                if (API.CanCast(DivineToll) && !API.MacroIsIgnored(DivineToll + "MO") && IsMouseover && !DTHealing && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && API.PlayerCanAttackMouseover && InMoRange && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(DivineToll + "MO");
-                    return;
-                }
-                if (API.CanCast(VanqusihersHammer) && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !DPSHealthCheck && InRange && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(VanqusihersHammer);
-                    return;
-                }
-                if (API.CanCast(Cons) && API.PlayerUnitInMeleeRangeCount >= 2 && IsMelee && !API.TargetHasDebuff(Cons) && !API.PlayerIsMoving && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(Cons);
-                    return;
-                }
-                if (API.CanCast(SoTR) && API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMelee && API.TargetHealthPercent > 0)
-                {
-                    API.CastSpell(SoTR);
-                    return;
-                }
-                if (API.CanCast(SoTR) && !API.MacroIsIgnored(SoTR + "MO") && IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMoMelee && API.MouseoverHealthPercent > 0)
-                {
-                    API.CastSpell(SoTR + "MO");
-                    return;
+                    if (API.CanCast(DivineToll) && !DTHealing && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && API.PlayerCanAttackTarget && InRange && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(DivineToll);
+                        return;
+                    }
+                    if (API.CanCast(DivineToll) && !API.MacroIsIgnored(DivineToll + "MO") && IsMouseover && !DTHealing && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && API.PlayerCanAttackMouseover && InMoRange && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(DivineToll + "MO");
+                        return;
+                    }
+                    if (API.CanCast(VanqusihersHammer) && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !DPSHealthCheck && InRange && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(VanqusihersHammer);
+                        return;
+                    }
+                    if (API.CanCast(Cons) && API.PlayerUnitInMeleeRangeCount >= 2 && IsMelee && !API.TargetHasDebuff(Cons) && !API.PlayerIsMoving && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Cons);
+                        return;
+                    }
+                    if (API.CanCast(SoTR) && API.PlayerCanAttackTarget && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMelee && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(SoTR);
+                        return;
+                    }
+                    if (API.CanCast(SoTR) && !API.MacroIsIgnored(SoTR + "MO") && IsMouseover && API.PlayerCanAttackMouseover && API.MouseoverIsIncombat && API.PlayerCurrentHolyPower > 4 && (API.PlayerIsInGroup && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber || !API.PlayerIsInGroup) && IsMoMelee && API.MouseoverHealthPercent > 0)
+                    {
+                        API.CastSpell(SoTR + "MO");
+                        return;
+                    }
                 }
             }
             if (IsAutoSwap && (IsOOC || API.PlayerIsInCombat))
             {
+                if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
+                {
+                    if (API.PlayerHealthPercent >= UnitHealth)
+                    {
+                        API.CastSpell(Player);
+                        return;
+                    }
+                }
                 if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                 {
                     for (int j = 0; j < DispellList.Length; j++)
