@@ -114,6 +114,8 @@ namespace HyperElk.Core
 
             //Add Spell, Buff, Debuffs
 
+            //Add Spell, Buff, Debuffs
+
             //ComboPoint-Generator
             CombatRoutine.AddSpell(Backstab, 53, "D1");
             CombatRoutine.AddSpell(ShurikenStorm, 197835, "D1");
@@ -149,11 +151,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Flagellation, 323654);
             CombatRoutine.AddSpell(Sepsis, 328305);
             CombatRoutine.AddBuff(SliceandDice, 315496);
-            CombatRoutine.AddBuff(ShadowDance, 185313);
+            CombatRoutine.AddBuff(ShadowDance, 185422);
             CombatRoutine.AddBuff(ShadowBlades, 121471);
             CombatRoutine.AddBuff(SymbolsofDeath, 212283);
             CombatRoutine.AddBuff(ShurikenTornado, 277925);
-            CombatRoutine.AddBuff(Stealth, 1784);
+            CombatRoutine.AddBuff(Stealth, 115191);
             CombatRoutine.AddBuff(Vanish, 1856);
             CombatRoutine.AddBuff(EchoingReprimand, 323547);
             CombatRoutine.AddBuff(LeadbyExample, 342156);
@@ -171,6 +173,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Flagellation, 323654);
 
             CombatRoutine.AddConduit(LeadbyExample);
+
 
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             //CB Properties
@@ -319,6 +322,7 @@ namespace HyperElk.Core
                 {
                     //stealthed->add_action(this, "Shadowstrike", "if=(buff.stealth.up|buff.vanish.up)", "If Stealth/vanish are up, use Shadowstrike to benefit from the passive bonus and Find Weakness, even if we are at max CP (from the precombat MfD).");
 
+
                     if (isStealth && API.TargetRange <= 25 && API.CanCast(Shadowstrike) && API.PlayerEnergy >= 40)
                     {
                         API.CastSpell(Shadowstrike);
@@ -349,7 +353,7 @@ namespace HyperElk.Core
                     //TODO
 
                     //stealthed->add_action(this, "Shadowstrike", "cycle_targets=1,if=debuff.find_weakness.remains<1&spell_targets.shuriken_storm<=3&target.time_to_die-remains>6", "Up to 3 targets keep up Find Weakness by cycling Shadowstrike.");
-                    if (IsAOE && API.CanCast(Shadowstrike) && API.PlayerEnergy >= 40 && API.TargetRange <= 25 && API.TargetTimeToDie > 600 && API.TargetDebuffRemainingTime(FindWeakness) < 100 && API.PlayerUnitInMeleeRangeCount <= 3)
+                    if (IsAOE && API.CanCast(Shadowstrike) && API.TargetRange <= 25 &&  API.TargetDebuffRemainingTime(FindWeakness) < 100 && API.PlayerUnitInMeleeRangeCount <= 3)
                     {
                         API.CastSpell(Shadowstrike);
                         return;
@@ -367,7 +371,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //stealthed->add_action(this, "Shadowstrike", "if=debuff.find_weakness.remains<=1|cooldown.symbols_of_death.remains<18&debuff.find_weakness.remains<cooldown.symbols_of_death.remains", "Shadowstrike to refresh Find Weakness and to ensure we can carry over a full FW into the next SoD if possible.");
-                    if (API.CanCast(Shadowstrike) && API.PlayerEnergy >= 40 && API.TargetRange <= 25 && API.TargetDebuffRemainingTime(FindWeakness) <= 100 || API.SpellCDDuration(SymbolsofDeath) < 1800 && API.TargetDebuffRemainingTime(FindWeakness) < API.SpellCDDuration(SymbolsofDeath))
+                    if (API.CanCast(Shadowstrike) && API.TargetRange <= 25 && (API.TargetDebuffRemainingTime(FindWeakness) <= 100) ||( API.SpellCDDuration(SymbolsofDeath) < 1800 && API.TargetDebuffRemainingTime(FindWeakness) < API.SpellCDDuration(SymbolsofDeath)))
                     {
                         API.CastSpell(Shadowstrike);
                         return;
@@ -375,7 +379,7 @@ namespace HyperElk.Core
                     //stealthed->add_talent(this, "Gloomblade", "if=buff.perforated_veins.stack>=5&conduit.perforated_veins.rank>=13");
 
                     // stealthed->add_action(this, "Shadowstrike");
-                    if (API.CanCast(Shadowstrike) && API.PlayerEnergy >= 40 && API.TargetRange <= 25)
+                    if (API.CanCast(Shadowstrike) && API.TargetRange <= 25)
                     {
                         API.CastSpell(Shadowstrike);
                         return;
