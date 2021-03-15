@@ -202,8 +202,8 @@ public class HolyPally : CombatRoutine
         private int UnitAboveHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) >= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitAboveHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) >= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitAboveHealthPercent(int HealthPercent) => API.PlayerIsInRaid ? UnitAboveHealthPercentRaid(HealthPercent) : UnitAboveHealthPercentParty(HealthPercent);
-        private int BuffRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p));
-        private int BuffPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p));
+        private int BuffRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p, true, true));
+        private int BuffPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p, true, true));
         private int BeaconRaidTracking(string buff) => raidunits.Count(p => API.UnitHasBuff(buff, p));
         private int BeaconPartyTracking(string buff) => units.Count(p => API.UnitHasBuff(buff, p));
         private int BuffTracking(string buff) => API.PlayerIsInRaid ? BuffRaidTracking(buff) : BuffPartyTracking(buff);
@@ -230,6 +230,26 @@ public class HolyPally : CombatRoutine
         private static bool PlayerHasDebuff(string buff)
         {
             return API.PlayerHasDebuff(buff, false, false);
+        }
+        private static bool TargetHasBuff(string buff)
+        {
+            return API.TargetHasBuff(buff, true, true);
+        }
+        private static bool MouseoverHasBuff(string buff)
+        {
+            return API.MouseoverHasBuff(buff, true, false);
+        }
+        private static bool TargetHasDebuff(string buff)
+        {
+            return API.TargetHasDebuff(buff, false, true);
+        }
+        private static bool MouseoverHasDebuff(string buff)
+        {
+            return API.MouseoverHasDebuff(buff, false, false);
+        }
+        private static bool UnitHasDebuff(string buff, string unit)
+        {
+            return API.UnitHasDebuff(buff, unit, false, true);
         }
 
         private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
@@ -660,7 +680,7 @@ public class HolyPally : CombatRoutine
                     DispelWatch.Restart();
                 }
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && (!TargetHasDebuff("Gluttonous Miasma") || IsMouseover && !MouseoverHasDebuff("Gluttonous Miasma")))
             {
                 if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
                 {
@@ -830,6 +850,26 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(RuleofLaw);
                     return;
                 }
+                if (LoHCheck)
+                {
+                    API.CastSpell(LoH);
+                    return;
+                }
+                if (LoHCheckMO && !API.MacroIsIgnored(LoH + "MO"))
+                {
+                    API.CastSpell(LoH + "MO");
+                    return;
+                }
+                if (BoSCheck)
+                {
+                    API.CastSpell(BoS);
+                    return;
+                }
+                if (BoSCheckMO && !API.MacroIsIgnored(BoS + "MO"))
+                {
+                    API.CastSpell(BoS + "MO");
+                    return;
+                }
                 if (API.CanCast(LightsHammer) && LightsHammerT && InRange && LHAoE)
                 {
                     API.CastSpell(LightsHammer);
@@ -845,37 +885,37 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(AuraMastery);
                     return;
                 }
-                if (DTCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (DTCheck)
                 {
                     API.CastSpell(DivineToll);
                     return;
                 }
-                if (DTCheckMO && !API.MacroIsIgnored(DivineToll + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (DTCheckMO && !API.MacroIsIgnored(DivineToll + "MO"))
                 {
                     API.CastSpell(DivineToll + "MO");
                     return;
                 }
-                if (BoVCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (BoVCheck)
                 {
                     API.CastSpell(BoV);
                     return;
                 }
-                if (BoVCheckMO && !API.MacroIsIgnored(BoV + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (BoVCheckMO && !API.MacroIsIgnored(BoV + "MO"))
                 {
                     API.CastSpell(BoV + "MO");
                     return;
                 }
-                if (HolyPrismCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyPrismCheck)
                 {
                     API.CastSpell(HolyPrism);
                     return;
                 }
-                if (HolyPrismCheckMO && !API.MacroIsIgnored(HolyPrism + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (HolyPrismCheckMO && !API.MacroIsIgnored(HolyPrism + "MO"))
                 {
                     API.CastSpell(HolyPrism + "MO");
                     return;
                 }
-                if (WoGTankCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (WoGTankCheck)
                 {
                     API.CastSpell(WoG);
                     return;
@@ -885,29 +925,9 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(WoG + "MO");
                     return;
                 }
-                if (LoDCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoDCheck)
                 {
                     API.CastSpell(LoD);
-                    return;
-                }
-                if (LoHCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
-                {
-                    API.CastSpell(LoH);
-                    return;
-                }
-                if (LoHCheckMO && !API.MacroIsIgnored(LoH + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
-                {
-                    API.CastSpell(LoH + "MO");
-                    return;
-                }
-                if (BoSCheck)
-                {
-                    API.CastSpell(BoS);
-                    return;
-                }
-                if (BoSCheckMO && !API.MacroIsIgnored(BoS + "MO"))
-                {
-                    API.CastSpell(BoS + "MO");
                     return;
                 }
                 if (API.CanCast(Judgment) && InRange && API.PlayerCanAttackTarget && (JudgementofLight || !JudgementofLight) && API.TargetHealthPercent > 0 && API.PlayerIsInCombat)
@@ -930,12 +950,12 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(HammerofWrath + "MO");
                     return;
                 }
-                if (HolyShockCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyShockCheck)
                 {
                     API.CastSpell(HolyShock);
                     return;
                 }
-                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (HolyShockCheckMO && !API.MacroIsIgnored(HolyShock + "MO"))
                 {
                     API.CastSpell(HolyShock + "MO");
                     return;
@@ -950,12 +970,12 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(HolyShock + "MO");
                     return;
                 }
-                if (WoGCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (WoGCheck)
                 {
                     API.CastSpell(WoG);
                     return;
                 }
-                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (WoGCheckMO && !API.MacroIsIgnored(WoG + "MO"))
                 {
                     API.CastSpell(WoG + "MO");
                     return;
@@ -980,62 +1000,62 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(CrusaderStrike + "MO");
                     return;
                 }
-                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightInfusionCheck && (!QuakingFlash || QuakingFlash && QuakingHelper))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightInfusionCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
                 {
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyLightInfusionCheck && (!QuakingHoly || QuakingHoly && QuakingHelper))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (HolyLightInfusionCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightCheck && (!QuakingFlash || QuakingFlash && QuakingHelper))
                 {
                     API.CastSpell(FoL);
                     return;
                 }
-                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (FlashofLightCheckMO && !API.MacroIsIgnored(FoL + "MO") && (!QuakingFlash || QuakingFlash && QuakingHelper))
                 { 
                     API.CastSpell(FoL + "MO");
                     return;
                 }
-                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (HolyLightCheck && (!QuakingHoly || QuakingHoly && QuakingHelper))
                 {
                     API.CastSpell(HolyLight);
                     return;
                 }
-                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper) && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (HolyLightCheckMO && !API.MacroIsIgnored(HolyLight + "MO") && (!QuakingHoly || QuakingHoly && QuakingHelper))
                 {
                     API.CastSpell(HolyLight + "MO");
                     return;
                 }
-                if (BFCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (BFCheck)
                 {
                     API.CastSpell(BF);
                     return;
                 }
-                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (BFCheckMO && !API.MacroIsIgnored(BF + "MO"))
                 {
                     API.CastSpell(BF + "MO");
                     return;
                 }
-                if (LoTMCheck && !API.TargetHasDebuff("Gluttonous Miasma"))
+                if (LoTMCheck)
                 {
                     API.CastSpell(LoTM);
                     return;
                 }
-                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO") && !API.MouseoverHasDebuff("Gluttonous Miasma"))
+                if (LoTMCheckMO && !API.MacroIsIgnored(LoTM + "MO"))
                 {
                     API.CastSpell(LoTM + "MO");
                     return;
@@ -1155,13 +1175,13 @@ public class HolyPally : CombatRoutine
                             SwapWatch.Restart();
                             return;
                         }
-                        if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 & !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                        if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 & !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }
-                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
@@ -1174,7 +1194,7 @@ public class HolyPally : CombatRoutine
                             API.CastSpell("Assist");
                             return;
                         }
-                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= HolyShockLifePercent && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= HolyShockLifePercent && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
