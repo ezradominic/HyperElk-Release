@@ -106,6 +106,7 @@ namespace HyperElk.Core
         bool AscendanceTalent => API.PlayerIsTalentSelected(7, 3);
 
         //Stopwatchs/Ints/Strings
+        private static readonly Stopwatch HealingStreamWatch = new Stopwatch();
         private static readonly Stopwatch Vesperwatch = new Stopwatch();
         private static readonly Stopwatch TransfuionWatch = new Stopwatch();
         private static readonly Stopwatch CloudburstWatch = new Stopwatch();
@@ -144,6 +145,28 @@ namespace HyperElk.Core
             return lowest;
         }
         private int LowestHpRaidUnit()
+        {
+            int lowest = 100;
+
+            for (int i = 0; i < raidunits.Length; i++)
+            {
+                if (API.UnitHealthPercent(raidunits[i]) < lowest && API.UnitHealthPercent(raidunits[i]) > 0)
+                    lowest = API.UnitHealthPercent(raidunits[i]);
+            }
+            return lowest;
+        }
+        private int TankHPParty()
+        {
+            int lowest = 100;
+
+            for (int i = 0; i < units.Length; i++)
+            {
+                if (API.UnitRoleSpec(units[i]) == API.TankRole && API.UnitHealthPercent(units[i]) < lowest && API.UnitHealthPercent(units[i]) > 0)
+                    lowest = API.UnitHealthPercent(units[i]);
+            }
+            return lowest;
+        }
+        private int LowestTankInRaid()
         {
             int lowest = 100;
 
@@ -645,6 +668,14 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            if (API.PlayerLastSpell == HealingStreamTotem || API.LastSpellCastInGame == HealingStreamTotem)
+            {
+                HealingStreamWatch.Restart();
+            }
+            if (HealingStreamWatch.ElapsedMilliseconds >= 16000)
+            {
+                HealingStreamWatch.Stop();
+            }
             for (int i = 0; i < units.Length; i++)
             {
                 if (IsDispell && API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitHasDispellAble("Frozen Binds", units[i]))
@@ -758,7 +789,7 @@ namespace HyperElk.Core
                     API.CastSpell(SpiritLinkTotem);
                     return;
                 }
-                if (API.CanCast(HealingStreamTotem) && HealingStreamAoE && InRange && API.TargetHealthPercent > 0 && !CloudburstTotemTalent && API.PlayerTotemPetDuration == 0)
+                if (API.CanCast(HealingStreamTotem) && HealingStreamAoE && InRange && API.TargetHealthPercent > 0 && !CloudburstTotemTalent && (!HealingStreamWatch.IsRunning || HealingStreamWatch.ElapsedMilliseconds >= 15000))
                 {
                     API.CastSpell(HealingStreamTotem);
                     return;
