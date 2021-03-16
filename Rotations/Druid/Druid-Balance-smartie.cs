@@ -36,6 +36,7 @@
 // v4.2 another small tweak
 // v4.3 various little changes
 // v4.4 some small tweaks especially for aoe
+// v4.5 few single target tweaks
 
 using System.Diagnostics;
 
@@ -121,25 +122,27 @@ namespace HyperElk.Core
         private bool isMOinRange => API.MouseoverRange < 45;
         float GCD => API.SpellGCDTotalDuration;
         private bool UseStarlord => (TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) == 0 || TalentStarlord && API.PlayerBuffTimeRemaining(Starlord) > 400 && API.PlayerBuffTimeRemaining(Starlord) != 5000000 || !TalentStarlord);
-        bool IsCovenant => (UseCovenant == "with Cooldowns" && IsCooldowns || UseCovenant == "always" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsIncarnation => (UseIncarnation == "with Cooldowns" && IsCooldowns || UseIncarnation == "always");
-        bool IsCelestialAlignment => (UseCelestialAlignment == "with Cooldowns" && IsCooldowns || UseCelestialAlignment == "always");
-        bool IsWarriorofElune => (UseWarriorofElune == "with Cooldowns" && IsCooldowns || UseWarriorofElune == "always" || UseWarriorofElune == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsForceofNature => (UseForceofNature == "with Cooldowns" && IsCooldowns || UseForceofNature == "always" || UseForceofNature == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsFuryofElune => (UseFuryofElune == "with Cooldowns" && IsCooldowns || UseFuryofElune == "always" || UseFuryofElune == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE);
-        bool IsTrinkets1 => (UseTrinket1 == "with Cooldowns" && IsCooldowns && IncaCelestial || UseTrinket1 == "always" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isinRange;
-        bool IsTrinkets2 => (UseTrinket2 == "with Cooldowns" && IsCooldowns && IncaCelestial || UseTrinket2 == "always" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && isinRange;
+        bool IsIncarnation => (UseIncarnation == "with Cooldowns" || UseIncarnation == "with Cooldowns or AoE" || UseIncarnation == "on mobcount or Cooldowns") && IsCooldowns || UseIncarnation == "always" || (UseIncarnation == "on AOE" || UseIncarnation == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseIncarnation == "on mobcount or Cooldowns" || UseIncarnation == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsCelestialAlignment => (UseCelestialAlignment == "with Cooldowns" || UseCelestialAlignment == "with Cooldowns or AoE" || UseCelestialAlignment == "on mobcount or Cooldowns") && IsCooldowns || UseCelestialAlignment == "always" || (UseCelestialAlignment == "on AOE" || UseCelestialAlignment == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseCelestialAlignment == "on mobcount or Cooldowns" || UseCelestialAlignment == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsWarriorofElune => (UseWarriorofElune == "with Cooldowns" || UseWarriorofElune == "with Cooldowns or AoE" || UseWarriorofElune == "on mobcount or Cooldowns") && IsCooldowns || UseWarriorofElune == "always" || (UseWarriorofElune == "on AOE" || UseWarriorofElune == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseWarriorofElune == "on mobcount or Cooldowns" || UseWarriorofElune == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsForceofNature => (UseForceofNature == "with Cooldowns" || UseForceofNature == "with Cooldowns or AoE" || UseForceofNature == "on mobcount or Cooldowns") && IsCooldowns || UseForceofNature == "always" || (UseForceofNature == "on AOE" || UseForceofNature == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseForceofNature == "on mobcount or Cooldowns" || UseForceofNature == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsFuryofElune => (UseFuryofElune == "with Cooldowns" || UseFuryofElune == "with Cooldowns or AoE" || UseFuryofElune == "on mobcount or Cooldowns") && IsCooldowns || UseFuryofElune == "always" || (UseFuryofElune == "on AOE" || UseFuryofElune == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseFuryofElune == "on mobcount or Cooldowns" || UseFuryofElune == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns or AoE" || UseCovenant == "on mobcount or Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseCovenant == "on mobcount or Cooldowns" || UseCovenant == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isinRange;
+        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isinRange;
 
         //CBProperties
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
-        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "always" };
+        public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns or AoE", "on mobcount", "on mobcount or Cooldowns", "always" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+        int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40 };
+        private int MobCount => numbRaidList[CombatRoutine.GetPropertyInt("MobCount")];
         public string[] Legendary = new string[] { "None", "Balance of all things", "Dreambinder" };
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
-        private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
-        private string UseCelestialAlignment => CDUsage[CombatRoutine.GetPropertyInt(CelestialAlignment)];
+        private string UseIncarnation => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Incarnation)];
+        private string UseCelestialAlignment => CDUsageWithAOE[CombatRoutine.GetPropertyInt(CelestialAlignment)];
         private string UseWarriorofElune => CDUsageWithAOE[CombatRoutine.GetPropertyInt(WarriorofElune)];
         private string UseForceofNature => CDUsageWithAOE[CombatRoutine.GetPropertyInt(ForceofNature)];
         private string UseFuryofElune => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FuryofElune)];
@@ -160,6 +163,7 @@ namespace HyperElk.Core
         private bool IncaCelestial => (PlayerHasBuff(Incarnation) || PlayerHasBuff(CelestialAlignment));
         private bool Eclipses => (API.PlayerBuffTimeRemaining(EclipseLunar) > 100 || API.PlayerBuffTimeRemaining(EclipseSolar) > 100);
         bool BOAT => API.PlayerBuffTimeRemaining(BalanceofallThings) > 100 || API.PlayerBuffTimeRemaining(BalanceofallThings2) > 100;
+        bool BOAT2 => API.PlayerBuffTimeRemaining(BalanceofallThings) > 350 || API.PlayerBuffTimeRemaining(BalanceofallThings2) > 350;
         private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && PlayerHasDebuff(Quake);
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
         private static bool PlayerHasBuff(string buff)
@@ -178,13 +182,14 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v4.4");
-            API.WriteLog("Create the following mouseover macros and assigned to the bind:");
+            API.WriteLog("Welcome to smartie`s Balance Druid v4.5");
+            API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
             API.WriteLog("StellarFlareMO - /cast [@mouseover] Stellar Flare");
-            API.WriteLog("For the Quaking helper you need to make a /stopcasting macro ingame and bind it under Macros");
-            API.WriteLog("/cancelaura Starlord is the correct macro for canceling Starlord");
+            API.WriteLog("Stopcasting - /stopcasting");
+            API.WriteLog("Cancel Starlord - /cancelaura Starlord");
+            API.WriteLog("these macros are required and not having them might break the rota");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D1");
@@ -270,12 +275,13 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Prop
+            CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
-            CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsage, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp(CelestialAlignment, "Use " + CelestialAlignment, CDUsage, "Use " + CelestialAlignment + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsageWithAOE, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(CelestialAlignment, "Use " + CelestialAlignment, CDUsageWithAOE, "Use " + CelestialAlignment + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(WarriorofElune, "Use " + WarriorofElune, CDUsageWithAOE, "Use " + WarriorofElune + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(ForceofNature, "Use " + ForceofNature, CDUsageWithAOE, "Use " + ForceofNature + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(FuryofElune, "Use " + FuryofElune, CDUsageWithAOE, "Use " + FuryofElune + " always, with Cooldowns", "Cooldowns", 0);
@@ -341,7 +347,12 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
+            if (API.PlayerCurrentCastTimeRemaining > 40 && !API.MacroIsIgnored(Stopcast) && QuakingHelper && Quaking)
+            {
+                API.CastSpell(Stopcast);
+                return;
+            }
+            if (BOAT2 && (API.PlayerCurrentCastTimeRemaining > 40 && API.PlayerCurrentCastSpellID != 323764) && !API.MacroIsIgnored(Stopcast) && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE))
             {
                 API.CastSpell(Stopcast);
                 return;
@@ -524,7 +535,7 @@ namespace HyperElk.Core
                     API.CastSpell(AdaptiveSwarm);
                     return;
                 }
-                if (API.CanCast(WarriorofElune) && !PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune && API.PlayerAstral <= 30 && PlayerHasBuff(EclipseLunar))
+                if (API.CanCast(WarriorofElune) && !PlayerHasBuff(WarriorofElune) && TalentWarriorOfElune && IsWarriorofElune && API.PlayerAstral <= 30 && (PlayerHasBuff(EclipseLunar) || API.PlayerUnitInMeleeRangeCount >= 5 && IsAOE))
                 {
                     API.CastSpell(WarriorofElune);
                     return;
@@ -570,6 +581,24 @@ namespace HyperElk.Core
                         if (API.CanCast(Starsurge) && PlayerLevel >= 12 && !SaveAP && IsLegendary == "Balance of all things" && API.PlayerAstral >= 70 && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 500 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 500) && (IncaCelestial || (!IsCelestialAlignment && !TalentIncarnation || !IsIncarnation && TalentIncarnation) || API.SpellCDDuration(Incarnation) > 500 && TalentIncarnation && IsIncarnation || API.SpellCDDuration(CelestialAlignment) > 500 && !TalentIncarnation && IsCelestialAlignment) && UseStarlord)
                         {
                             API.CastSpell(Starsurge);
+                            return;
+                        }
+                    }
+                    if (IsLegendary == "Balance of all things")
+                    {
+                        if (API.CanCast(Moonfire) && PlayerLevel >= 2 && (API.PlayerHasBuff(EclipseSolar) && API.PlayerBuffTimeRemaining(EclipseSolar) < 300 || API.PlayerHasBuff(EclipseLunar) && API.PlayerBuffTimeRemaining(EclipseLunar) < 400) && !DontDOT && API.TargetDebuffRemainingTime(Moonfire) < 700 && API.TargetTimeToDie >= 1350)
+                        {
+                            API.CastSpell(Moonfire);
+                            return;
+                        }
+                        if (API.CanCast(Sunfire) && PlayerLevel >= 23 && (API.PlayerHasBuff(EclipseSolar) && API.PlayerBuffTimeRemaining(EclipseSolar) < 300 || API.PlayerHasBuff(EclipseLunar) && API.PlayerBuffTimeRemaining(EclipseLunar) < 400) && !DontDOT && API.TargetDebuffRemainingTime(Sunfire) < 600 && API.TargetTimeToDie >= 1600)
+                        {
+                            API.CastSpell(Sunfire);
+                            return;
+                        }
+                        if (API.CanCast(StellarFlare) && TalentStellarFlare && (API.PlayerHasBuff(EclipseSolar) && API.PlayerBuffTimeRemaining(EclipseSolar) < 300 || API.PlayerHasBuff(EclipseLunar) && API.PlayerBuffTimeRemaining(EclipseLunar) < 400) && !API.PlayerIsMoving && SaveQuake && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 800 && API.TargetTimeToDie >= 1600 && !(API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347))
+                        {
+                            API.CastSpell(StellarFlare);
                             return;
                         }
                     }
@@ -637,6 +666,11 @@ namespace HyperElk.Core
                         return;
                     }
                     if (API.CanCast(Wrath) && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && SaveQuake && IncaCelestial && API.PlayerBuffTimeRemaining(EclipseSolar) >= 200 && API.PlayerBuffTimeRemaining(EclipseLunar) >= 200)
+                    {
+                        API.CastSpell(Wrath);
+                        return;
+                    }
+                    if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning && (TalentIncarnation && API.SpellCDDuration(Incarnation) < GCD*2 && IsIncarnation || !TalentIncarnation && API.SpellCDDuration(CelestialAlignment) < GCD*2 && IsCelestialAlignment))
                     {
                         API.CastSpell(Wrath);
                         return;
