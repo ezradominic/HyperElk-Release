@@ -10,12 +10,13 @@
 // v1.8 chain lightning with stormkeeper change
 // v1.9 spell ids and alot of other stuff
 // v2.0 Racials and few other small fixes
-// v2.1 Echoes of Great StormElemental fixed
+// v2.1 Echoes of Great Sundering fixed
 // v2.2 Quaking helper added
 // v2.3 Quaking helper fixed
 // v2.4 auto enchant weapon and alot of other small changes
 // v2.5 some love for the ele
 // v2.6 new simc apl and new settings options
+// v2.65 small hotfix for mobcount
 
 using System.Diagnostics;
 
@@ -96,15 +97,15 @@ namespace HyperElk.Core
         private bool IsInRange => API.TargetRange < 41;
         private bool isMOinRange => API.MouseoverRange < 41;
         private bool IsInKickRange => API.TargetRange < 31;
-        bool IsAscendance => (UseAscendance == "with Cooldowns" || UseAscendance == "with Cooldowns or AoE" || UseAscendance == "on mobcount or Cooldowns") && IsCooldowns || UseAscendance == "always" || (UseAscendance == "on AOE" || UseAscendance == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseAscendance == "on mobcount or Cooldowns" || UseAscendance == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
-        bool IsEarthElemental => (UseEarthElemental == "with Cooldowns" || UseEarthElemental == "with Cooldowns or AoE" || UseEarthElemental == "on mobcount or Cooldowns") && IsCooldowns || UseEarthElemental == "always" || (UseEarthElemental == "on AOE" || UseEarthElemental == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseEarthElemental == "on mobcount or Cooldowns" || UseEarthElemental == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
-        bool IsStormElemental => (UseStormElemental == "with Cooldowns" || UseStormElemental == "with Cooldowns or AoE" || UseStormElemental == "on mobcount or Cooldowns") && IsCooldowns || UseStormElemental == "always" || (UseStormElemental == "on AOE" || UseStormElemental == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseStormElemental == "on mobcount or Cooldowns" || UseStormElemental == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
-        bool IsFireElemental => (UseFireElemental == "with Cooldowns" || UseFireElemental == "with Cooldowns or AoE" || UseFireElemental == "on mobcount or Cooldowns") && IsCooldowns || UseFireElemental == "always" || (UseFireElemental == "on AOE" || UseFireElemental == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseFireElemental == "on mobcount or Cooldowns" || UseFireElemental == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
-        bool IsStormkeeper => (UseStormkeeper == "with Cooldowns" || UseStormkeeper == "with Cooldowns or AoE" || UseStormkeeper == "on mobcount or Cooldowns") && IsCooldowns || UseStormkeeper == "always" || (UseStormkeeper == "on AOE" || UseStormkeeper == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseStormkeeper == "on mobcount or Cooldowns" || UseStormkeeper == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsAscendance => (UseAscendance == "with Cooldowns" || UseAscendance == "with Cooldowns or AoE" || UseAscendance == "on mobcount or Cooldowns") && IsCooldowns || UseAscendance == "always" || (UseAscendance == "on AOE" || UseAscendance == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseAscendance == "on mobcount or Cooldowns" || UseAscendance == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
+        bool IsEarthElemental => (UseEarthElemental == "with Cooldowns" || UseEarthElemental == "with Cooldowns or AoE" || UseEarthElemental == "on mobcount or Cooldowns") && IsCooldowns || UseEarthElemental == "always" || (UseEarthElemental == "on AOE" || UseEarthElemental == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseEarthElemental == "on mobcount or Cooldowns" || UseEarthElemental == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
+        bool IsStormElemental => (UseStormElemental == "with Cooldowns" || UseStormElemental == "with Cooldowns or AoE" || UseStormElemental == "on mobcount or Cooldowns") && IsCooldowns || UseStormElemental == "always" || (UseStormElemental == "on AOE" || UseStormElemental == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseStormElemental == "on mobcount or Cooldowns" || UseStormElemental == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
+        bool IsFireElemental => (UseFireElemental == "with Cooldowns" || UseFireElemental == "with Cooldowns or AoE" || UseFireElemental == "on mobcount or Cooldowns") && IsCooldowns || UseFireElemental == "always" || (UseFireElemental == "on AOE" || UseFireElemental == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseFireElemental == "on mobcount or Cooldowns" || UseFireElemental == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
+        bool IsStormkeeper => (UseStormkeeper == "with Cooldowns" || UseStormkeeper == "with Cooldowns or AoE" || UseStormkeeper == "on mobcount or Cooldowns") && IsCooldowns || UseStormkeeper == "always" || (UseStormkeeper == "on AOE" || UseStormkeeper == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseStormkeeper == "on mobcount or Cooldowns" || UseStormkeeper == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
 
-        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns or AoE" || UseCovenant == "on mobcount or Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseCovenant == "on mobcount or Cooldowns" || UseCovenant == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
-        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && IsInRange;
-        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && IsInRange;
+        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns or AoE" || UseCovenant == "on mobcount or Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseCovenant == "on mobcount or Cooldowns" || UseCovenant == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
+        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.TargetUnitInRangeCount >= MobCount) && IsInRange;
+        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.TargetUnitInRangeCount >= MobCount) && IsInRange;
 
         //CBProperties
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
@@ -144,7 +145,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.6");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.65");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
