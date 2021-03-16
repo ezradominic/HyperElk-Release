@@ -232,7 +232,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Siegebreaker, "Use " + Siegebreaker, CDUsageWithAOE, "Use " + Siegebreaker + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(DragonRoar, "Use " + DragonRoar, CDUsageWithAOE, "Use " + DragonRoar + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Bladestorm, "Use " + Bladestorm, CDUsageWithAOE, "Use " + Bladestorm + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp("MobCount", "Mobcount to use ", numbRaidList, " Bladestorm and other AoE abilitys", "Cooldowns", 3);
+            CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
             CombatRoutine.AddProp("LineUp", "LineUp CDS", true, " Lineup Recklessness and Siegebreaker", "Cooldowns");
             CombatRoutine.AddProp("Signet Legendary", "Signet Legendary", false, " Do you have the Signet Legendary?", "Generic");
             CombatRoutine.AddProp(EnragedRegeneration, EnragedRegeneration + " Life Percent", numbList, " Life percent at which" + EnragedRegeneration + " is used, set to 0 to disable", "Defense", 60);

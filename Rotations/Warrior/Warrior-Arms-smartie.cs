@@ -226,7 +226,7 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Prop
-            CombatRoutine.AddProp("MobCount", "Mobcount to use ", numbRaidList, " Bladestorm and other AoE abilitys", "Cooldowns", 3);
+            CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             AddProp("MouseoverInCombat", "Only Mouseover in combat", false, " Only Attack mouseover in combat to avoid stupid pulls", "Generic");
