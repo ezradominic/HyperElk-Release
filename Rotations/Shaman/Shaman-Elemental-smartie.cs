@@ -17,6 +17,7 @@
 // v2.5 some love for the ele
 // v2.6 new simc apl and new settings options
 // v2.65 small hotfix for mobcount
+// v2.7 fix typo
 
 using System.Diagnostics;
 
@@ -34,7 +35,7 @@ namespace HyperElk.Core
         private string LavaBurst = "Lava Burst";
         private string FrostShock = "Frost Shock";
         private string Stormkeeper = "Stormkeeper";
-        private string LiquidManaTotem = "Liquid Mana Totem";
+        private string LiquidMagmaTotem = "Liquid Magma Totem";
         private string ElementalBlast = "Elemental Blast";
         private string EarthShock = "Earth Shock";
         private string EarthElemental = "Earth Elemental";
@@ -74,7 +75,7 @@ namespace HyperElk.Core
         bool TalentEarthShield => API.PlayerIsTalentSelected(3, 2);
         bool TalentMasterofTheElements => API.PlayerIsTalentSelected(4, 1);
         bool TalentStormElemental => API.PlayerIsTalentSelected(4, 2);
-        bool TalentLiquidManaTotem => API.PlayerIsTalentSelected(4, 3);
+        bool TalentLiquidMagmaTotem => API.PlayerIsTalentSelected(4, 3);
         bool TalentPrimalElementalist => API.PlayerIsTalentSelected(6, 2);
         bool TalentIcefury => API.PlayerIsTalentSelected(6, 3);
         bool TalentStormkeeper => API.PlayerIsTalentSelected(7, 2);
@@ -145,7 +146,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.65");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.7");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
@@ -160,7 +161,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(LavaBurst, 51505, "D3");
             CombatRoutine.AddSpell(FrostShock, 196840, "D6");
             CombatRoutine.AddSpell(Stormkeeper, 191634, "NumPad2");
-            CombatRoutine.AddSpell(LiquidManaTotem, 192222, "D1");
+            CombatRoutine.AddSpell(LiquidMagmaTotem, 192222, "D1");
             CombatRoutine.AddSpell(ElementalBlast, 117014, "D8");
             CombatRoutine.AddSpell(EarthShock, 8042, "D4");
             CombatRoutine.AddSpell(EarthElemental, 198103, "D1");
@@ -629,9 +630,9 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.single_target +=/ liquid_magma_totem,if= talent.liquid_magma_totem.enabled
-                        if (API.CanCast(LiquidManaTotem) && TalentLiquidManaTotem)
+                        if (API.CanCast(LiquidMagmaTotem) && TalentLiquidMagmaTotem)
                         {
-                            API.CastSpell(LiquidManaTotem);
+                            API.CastSpell(LiquidMagmaTotem);
                             return;
                         }
                         //actions.single_target +=/ lightning_bolt,if= buff.stormkeeper.up & spell_targets.chain_lightning < 2 & (buff.master_of_the_elements.up)
@@ -780,9 +781,9 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ liquid_magma_totem,if= talent.liquid_magma_totem.enabled
-                    if (API.CanCast(LiquidManaTotem) && TalentLiquidManaTotem)
+                    if (API.CanCast(LiquidMagmaTotem) && TalentLiquidMagmaTotem)
                     {
-                        API.CastSpell(LiquidManaTotem);
+                        API.CastSpell(LiquidMagmaTotem);
                         return;
                     }
                     //actions.aoe +=/ earth_shock,if= runeforge.echoes_of_great_StormElemental.equipped & !buff.echoes_of_great_StormElemental.up
