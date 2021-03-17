@@ -37,6 +37,7 @@
 // v4.3 various little changes
 // v4.4 some small tweaks especially for aoe
 // v4.5 few single target tweaks
+// v4.55 potential racial fix
 
 using System.Diagnostics;
 
@@ -182,7 +183,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v4.5");
+            API.WriteLog("Welcome to smartie`s Balance Druid v4.55");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -458,7 +459,7 @@ namespace HyperElk.Core
             if (isinRange && (PlayerHasBuff(MoonkinForm) || PlayerLevel < 21))
             {
                 //actions+=/berserking,if=(!covenant.night_fae|!cooldown.convoke_the_spirits.up)&buff.ca_inc.up
-                if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && isinRange && (PlayerCovenantSettings != "Night Fae" || API.CanCast(ConvoketheSpirits)) && IncaCelestial)
+                if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && isinRange && (PlayerCovenantSettings != "Night Fae" || API.SpellCDDuration(ConvoketheSpirits) <= GCD) && IncaCelestial)
                 {
                     API.CastSpell(RacialSpell1);
                     return;
