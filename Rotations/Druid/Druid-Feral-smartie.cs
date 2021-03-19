@@ -26,6 +26,7 @@
 // v3.4 owlweave update
 // v3.5 another owlweave update
 // v3.6 some small tweaks and new settings options
+// v3.7 mobcount fix
 
 using System.Diagnostics;
 
@@ -160,12 +161,12 @@ namespace HyperElk.Core
         private bool isMOThrashMelee => (TalentBalanceAffinity && API.MouseoverRange < 11 || !TalentBalanceAffinity && API.MouseoverRange < 9);
         private bool isKickRange => (TalentBalanceAffinity && API.TargetRange < 16 || !TalentBalanceAffinity && API.TargetRange < 14);
         private bool IncaBerserk => (PlayerHasBuff(Incarnation) || PlayerHasBuff(Berserk));
-        bool IsFeralFrenzy => (UseFeralFrenzy == "with Cooldowns" || UseFeralFrenzy == "with Cooldowns or AoE" || UseFeralFrenzy == "on mobcount or Cooldowns") && IsCooldowns || UseFeralFrenzy == "always" || (UseFeralFrenzy == "on AOE" || UseFeralFrenzy == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseFeralFrenzy == "on mobcount or Cooldowns" || UseFeralFrenzy == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
-        bool IsIncarnation => (UseIncarnation == "with Cooldowns" || UseIncarnation == "with Cooldowns or AoE" || UseIncarnation == "on mobcount or Cooldowns") && IsCooldowns || UseIncarnation == "always" || (UseIncarnation == "on AOE" || UseIncarnation == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseIncarnation == "on mobcount or Cooldowns" || UseIncarnation == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
-        bool IsBerserk => (UseBerserk == "with Cooldowns" || UseBerserk == "with Cooldowns or AoE" || UseBerserk == "on mobcount or Cooldowns") && IsCooldowns || UseBerserk == "always" || (UseBerserk == "on AOE" || UseBerserk == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseBerserk == "on mobcount or Cooldowns" || UseBerserk == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
-        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns or AoE" || UseCovenant == "on mobcount or Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseCovenant == "on mobcount or Cooldowns" || UseCovenant == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
-        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.TargetUnitInRangeCount >= MobCount) && isMelee;
-        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.TargetUnitInRangeCount >= MobCount) && isMelee;
+        bool IsFeralFrenzy => (UseFeralFrenzy == "with Cooldowns" || UseFeralFrenzy == "with Cooldowns or AoE" || UseFeralFrenzy == "on mobcount or Cooldowns") && IsCooldowns || UseFeralFrenzy == "always" || (UseFeralFrenzy == "on AOE" || UseFeralFrenzy == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseFeralFrenzy == "on mobcount or Cooldowns" || UseFeralFrenzy == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsIncarnation => (UseIncarnation == "with Cooldowns" || UseIncarnation == "with Cooldowns or AoE" || UseIncarnation == "on mobcount or Cooldowns") && IsCooldowns || UseIncarnation == "always" || (UseIncarnation == "on AOE" || UseIncarnation == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseIncarnation == "on mobcount or Cooldowns" || UseIncarnation == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsBerserk => (UseBerserk == "with Cooldowns" || UseBerserk == "with Cooldowns or AoE" || UseBerserk == "on mobcount or Cooldowns") && IsCooldowns || UseBerserk == "always" || (UseBerserk == "on AOE" || UseBerserk == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseBerserk == "on mobcount or Cooldowns" || UseBerserk == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns or AoE" || UseCovenant == "on mobcount or Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseCovenant == "on mobcount or Cooldowns" || UseCovenant == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
+        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isMelee;
+        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isMelee;
 
 
         //CBProperties
@@ -202,7 +203,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.6");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.7");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
