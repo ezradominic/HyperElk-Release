@@ -206,7 +206,36 @@ namespace HyperElk.Core
             }
             return lowest;
         }
+        private string GetTankParty(string[] units)
+        {
+            string lowest = units[0];
 
+            int Tank = 999;
+            foreach (string unit in units)
+            {
+                if (API.UnitRoleSpec(unit) == Tank && API.UnitRange(unit) <= 40 && API.UnitHealthPercent(unit) > 0)
+                {
+                    Tank = API.UnitRoleSpec(unit);
+                    lowest = unit;
+                }
+            }
+            return lowest;
+        }
+        private string GetTankRaid(string[] raidunits)
+        {
+            string lowest = raidunits[0];
+
+            int Tank = 999;
+            foreach (string raidunit in raidunits)
+            {
+                if (API.UnitRoleSpec(raidunit) == Tank && API.UnitRange(raidunit) <= 10 && API.UnitHealthPercent(raidunit) > 0)
+                {
+                    Tank = API.UnitRoleSpec(raidunit);
+                    lowest = raidunit;
+                }
+            }
+            return lowest;
+        }
 
         public override void Initialize()
         {
@@ -476,10 +505,11 @@ namespace HyperElk.Core
             if (AoEHeal)
             {
                 if (API.CanCast(Revival) && RevivalAoE && !API.PlayerCanAttackTarget && !CurrentCastEssenceFont)
-                {
+                    {
                     API.CastSpell(Revival);
                     return;
                 }
+
                 if (API.CanCast(RefreshingJadeWind) && TalentRefreshingJadeWind && RefreshingJadeWindAoE && !API.PlayerCanAttackTarget && !CurrentCastEssenceFont && RefreshingJadeWindRange)
                 {
                     API.CastSpell(RefreshingJadeWind);
@@ -651,9 +681,9 @@ namespace HyperElk.Core
                                     API.CastSpell(PlayerTargetArray[i]);
                                     return;
                                 }
-                                if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
+                                if (IsDpsHeal && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 4 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                                 {
-                                    API.CastSpell(PlayerTargetArray[i]);
+                                    API.CastSpell(GetTankParty(units));
                                     API.CastSpell("Assist");
                                     SwapWatch.Restart();
                                     return;
@@ -668,21 +698,18 @@ namespace HyperElk.Core
                     }
                     if (API.PlayerIsInRaid)
                     {
-                        for (int i = 0; i < raidunits.Length; i++)
+                        if (IsDpsHeal && !API.PlayerCanAttackTarget && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                         {
-                            if (IsDpsHeal && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 4 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
-                                API.CastSpell("Assist");
-                                return;
-                            }
-                            if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)
-                            {
-                                API.CastSpell(LowestRaid(raidunits));
-                                SwapWatch.Restart();
-                                return;
-                            }
+                            API.CastSpell(GetTankRaid(raidunits));
+                            SwapWatch.Restart();
+                            API.CastSpell("Assist");
+                            return;
+                        }
+                        if (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= SwapSpeed)
+                        {
+                            API.CastSpell(LowestRaid(raidunits));
+                            SwapWatch.Restart();
+                            return;
                         }
                     }
                 }
