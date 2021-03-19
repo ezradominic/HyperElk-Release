@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿//V1.5 - NPC Healing Updated -- Fix for Hungering - Small Adjustments
+using System.Linq;
 using System.Diagnostics;
 
 namespace HyperElk.Core
@@ -194,6 +195,7 @@ namespace HyperElk.Core
         string[] PlayerTargetArray = { "player", "party1", "party2", "party3", "party4" };
         string[] RaidTargetArray = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         string[] NecoritcWakeDispell = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter" };
+        string[] FightSelection = { "Shade on Barghast", "Sun King" };
         string[] PlaugeFallDispell = { "Slime Injection", "Gripping Infection", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm" };
         string[] MistsofTirnaScitheDispell = { "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen", "Bramblethorn Entanglement", "Dying Breath", "Debilitating Poison", };
         string[] HallofAtonementDispell = { "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Curse of Stone", "Turned to Stone", "Curse of Obliteration" };
@@ -215,6 +217,7 @@ namespace HyperElk.Core
 
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
+        private string FightNPC => FightSelection[CombatRoutine.GetPropertyInt("Fight Selection")];
         // private string UseDispell => InstanceList[CombatRoutine.GetPropertyInt("Instance List")];
         private string[] units = { "player", "party1", "party2", "party3", "party4" };
         private string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
@@ -381,6 +384,10 @@ namespace HyperElk.Core
         {
             return API.UnitHasBuff(buff, unit, true, true);
         }
+        private static bool UnitHasDebuff(string buff, string unit)
+        {
+            return API.UnitHasDebuff(buff, unit, false, true);
+        }
         private static bool PlayerHasDebuff(string buff)
         {
             return API.PlayerHasDebuff(buff, false, false);
@@ -393,12 +400,20 @@ namespace HyperElk.Core
         {
            return API.MouseoverHasBuff(buff, true, false);
         }
+        private static bool TargetHasDebuff(string buff)
+        {
+            return API.TargetHasDebuff(buff, false, true);
+        }
+        private static bool MouseoverHasDebuff(string buff)
+        {
+            return API.MouseoverHasDebuff(buff, false, false);
+        }
         //  public bool isInterrupt => CombatRoutine.GetPropertyBool("KICK") && API.TargetCanInterrupted && API.TargetIsCasting && (API.TargetIsChanneling ? API.TargetElapsedCastTime >= interruptDelay : API.TargetCurrentCastTimeRemaining <= interruptDelay);
         //  public int interruptDelay => random.Next((int)(CombatRoutine.GetPropertyInt("KICKTime") * 0.9), (int)(CombatRoutine.GetPropertyInt("KICKTime") * 1.1));
         public override void Initialize()
         {
             CombatRoutine.Name = "Resto Druid by Ryu";
-            API.WriteLog("Welcome to Resto Druid v1.3 by Ryu");
+            API.WriteLog("Welcome to Resto Druid v1.5 by Ryu");
             API.WriteLog("BETA ROTATION : Some things are still missing. Please post feedback in Druid Channel.");
             API.WriteLog("Mouseover Support is added for healing, dispel and Ranged DPS (Moonkin). Please create /cast [@mouseover] xx whereas xx is your Dispell and assign it the bind with MO on it in keybinds.");
             API.WriteLog("For all ground spells, either use @Cursor or when it is time to place it, the Bot will pause until you've placed it. If you'd perfer to use your own logic for them, please place them on ignore in the spellbook.");
@@ -431,6 +446,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(EclispleSolar, 48517);
             CombatRoutine.AddBuff(Quake, 240447);
             CombatRoutine.AddBuff("Gluttonous Miasma", 329298);
+            CombatRoutine.AddBuff(TreeofLife, 33891);
 
             //Debuff
             CombatRoutine.AddDebuff(Sunfire, 164815);
@@ -674,6 +690,9 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
+            CombatRoutine.AddProp("Fight Selection", "Select your NPC Fight", FightSelection, "Select Your NPC Fight", "NPC Rotation");
+
+
             CombatRoutine.AddProp(Rejuvenation, Rejuvenation + " Life Percent", numbList, "Life percent at which " + Rejuvenation + " is used, set to 0 to disable", "Healing", 95);
             CombatRoutine.AddProp(GerminationHoT, GerminationHoT + " Life Percent", numbList, "Life percent at which " + GerminationHoT + " is used, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(Regrowth, Regrowth + " Life Percent", numbList, "Life percent at which " + Regrowth + " is used, set to 0 to disable", "Healing", 85);
@@ -720,7 +739,7 @@ namespace HyperElk.Core
                 API.CastSpell(MoonkinForm);
                 return;
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat) && (!API.TargetHasDebuff("Gluttonous Miasma") || IsMouseover && API.MouseoverHasDebuff("Gluttonous Miasma")))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat) && (!TargetHasDebuff("Gluttonous Miasma") || IsMouseover && !MouseoverHasDebuff("Gluttonous Miasma")))
             {
    
                 #region Dispell
@@ -750,12 +769,85 @@ namespace HyperElk.Core
                     }
                 }
                 #endregion
-                if (API.CanCast(TreeofLife) && TreeofLifeTalent && InRange && ToLAoE)
+                if (API.CanCast(TreeofLife) && TreeofLifeTalent && InRange && ToLAoE && !API.PlayerHasBuff(TreeofLife))
                 {
                     API.CastSpell(TreeofLife); ;
                     return;
                 }
-                if (IsNpC && InRange)
+                if (IsNpC && FightNPC == "Sun King" && InRange)
+                {
+                    if (API.CanCast(Innervate) && InnervateCheck && InRange)
+                    {
+                        API.CastSpell(Innervate);
+                        return;
+                    }
+                    if (OvergrowthTalent && API.CanCast(Overgrowth) && (!TargetHasBuff(Lifebloom) || !TargetHasBuff(WildGrowth) || !TargetHasBuff(Rejuvenation) || !TargetHasBuff(Regrowth)))
+                    {
+                        API.CastSpell(Overgrowth);
+                        return;
+                    }
+                    if (API.CanCast(TreeofLife) && TreeofLifeTalent && !API.PlayerHasBuff(TreeofLife))
+                    {
+                        API.CastSpell(TreeofLife);
+                        return;
+                    }
+                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom))
+                    {
+                        API.CastSpell(Lifebloom);
+                        return;
+                    }
+                    if (API.CanCast(Rejuvenation) && !TargetHasBuff(Rejuvenation))
+                    {
+                        API.CastSpell(Rejuvenation);
+                        return;
+                    }
+                    if (API.CanCast(Regrowth) && !TargetHasBuff(Regrowth))
+                    {
+                        API.CastSpell(Regrowth);
+                        return;
+                    }
+                    if (GerminationTalent && API.CanCast(Rejuvenation) && !TargetHasBuff(GerminationHoT))
+                    {
+                        API.CastSpell(Rejuvenation);
+                        return;
+                    }
+                    if (API.CanCast(WildGrowth))
+                    {
+                        API.CastSpell(WildGrowth);
+                        return;
+                    }
+                    if (API.CanCast(Flourish) && FlourishTalent && TargetHasBuff(Rejuvenation) && TargetHasBuff(Regrowth) && TargetHasBuff(WildGrowth))
+                    {
+                        API.CastSpell(Flourish);
+                        return;
+                    }
+                    if (API.CanCast(Convoke) && PlayerCovenantSettings == "Night Fae")
+                    {
+                        API.CastSpell(Convoke);
+                        return;
+                    }
+                    if (API.CanCast(Ironbark))
+                    {
+                        API.CastSpell(Ironbark);
+                        return;
+                    }
+                    if (API.CanCast(Swiftmend) && API.SpellCharges(Swiftmend) > 0 && (TargetHasBuff(Rejuvenation) || TargetHasBuff(Regrowth)))
+                    {
+                        API.CastSpell(Swiftmend);
+                        return;
+                    }
+                    if (API.CanCast(Regrowth) && (!NourishTalent) || !TargetHasBuff(Regrowth) && NourishTalent)
+                    {
+                        API.CastSpell(Regrowth);
+                        return;
+                    }
+                    if (NourishTalent && API.CanCast(Nourish))
+                    {
+                        API.CastSpell(Nourish);
+                        return;
+                    }
+                }
+                if (IsNpC && FightNPC == "Shade on Barghast" && InRange)
                 {
                     if (API.CanCast(Innervate) && InnervateCheck && InRange)
                     {
@@ -1134,7 +1226,7 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
@@ -1161,7 +1253,7 @@ namespace HyperElk.Core
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
@@ -1174,7 +1266,7 @@ namespace HyperElk.Core
                                 API.CastSpell("Assist");
                                 return;
                             }
-                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && IsDPS || !IsDPS) && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && IsDPS || !IsDPS) && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
