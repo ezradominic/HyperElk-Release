@@ -7,6 +7,7 @@ namespace HyperElk.Core
     {
         private readonly Stopwatch Trueshot_active = new Stopwatch();
         private readonly Stopwatch VolleyWindow = new Stopwatch();
+        private readonly Stopwatch CallPetTimer = new Stopwatch();
 
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         //Spells,Buffs,Debuffs
@@ -41,7 +42,7 @@ namespace HyperElk.Core
         private string Resonating_Arrow = "Resonating Arrow";
         private string Flayed_Shot = "Flayed Shot";
         private string Death_Chakram = "Death Chakram";
-
+        private string Revive_Pet = "Revive Pet";
 
         private string Aspect_of_the_Turtle = "Aspect of the Turtle";
         private string Precise_Shots = "Precise Shots";
@@ -185,7 +186,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Feign_Death, 5384, "F2");
             CombatRoutine.AddSpell(Aspect_of_the_Turtle, 186265, "G");
             CombatRoutine.AddSpell(TranquilizingShot, 19801, "C");
-            CombatRoutine.AddSpell(Mend_Pet, 982, "F5");
+            CombatRoutine.AddSpell(Mend_Pet, 136, "F5");
+            CombatRoutine.AddSpell(Revive_Pet, 982, "F5");
 
             CombatRoutine.AddSpell(Wild_Spirits, 328231, "F10");
             CombatRoutine.AddSpell(Resonating_Arrow, 308491, "F10");
@@ -235,6 +237,7 @@ namespace HyperElk.Core
 
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
+            CombatRoutine.AddMacro("Call Pet", "H");
 
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -277,17 +280,28 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-               // API.WriteLog("debug: " + "Is there a buff from dispell list? " + DispellList );
-
+               // API.WriteLog("debug: " + "mend pet: " + API.CanCast(Mend_Pet));
+            if (CallPetTimer.ElapsedMilliseconds > 10000)
+            {
+                CallPetTimer.Stop();
+                CallPetTimer.Reset();
+            }
         }
         public override void CombatPulse()
         {
-            if (UseCallPet && (!API.PlayerHasPet || API.PetHealthPercent < 1))
+            if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && CallPetTimer.ElapsedMilliseconds > gcd * 20 && UseCallPet && API.CanCast(Revive_Pet))
             {
-                API.CastSpell(Mend_Pet);
+                API.CastSpell(Revive_Pet);
                 return;
             }
-            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= MendPetLifePercent && API.CanCast(Mend_Pet))
+
+            if ((!API.PlayerHasPet || API.PetHealthPercent < 1) && (CallPetTimer.ElapsedMilliseconds <= gcd * 20 || !CallPetTimer.IsRunning) && UseCallPet)
+            {
+                API.CastSpell("Call Pet");
+                CallPetTimer.Start();
+                return;
+            }
+            if (API.CanCast(Mend_Pet) && API.PlayerHasPet && API.PetHealthPercent <= MendPetLifePercent && API.PetHealthPercent >= 1)
             {
                 API.CastSpell(Mend_Pet);
                 return;
