@@ -21,6 +21,7 @@
 // v2.8 Torghast updates
 // v2.9 latest simc apl
 // v3.0 a few quality of life changes
+// v3.05 Battle shout fix
 
 using System.Linq;
 
@@ -152,7 +153,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v3.0");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v3.05");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -255,7 +256,7 @@ namespace HyperElk.Core
         {
             if (!API.PlayerIsMounted)
             {
-                if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
+                if (API.CanCast(BattleShout) && PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
                 {
                     API.CastSpell(BattleShout);
                     return;

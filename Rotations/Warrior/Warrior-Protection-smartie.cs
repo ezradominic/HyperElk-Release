@@ -14,6 +14,7 @@
 // v2.2 Rallying cry added
 // v2.3 Racials and a few other things
 // v2.4 Torghast update
+// v2.45 Battle shout fix
 
 using System.Linq;
 
@@ -117,7 +118,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v2.4");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v2.45");
 
             //Spells
             CombatRoutine.AddSpell(ShieldSlam,23922, "D4");
@@ -204,7 +205,7 @@ namespace HyperElk.Core
         {
             if (!API.PlayerIsMounted)
             {
-                if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
+                if (API.CanCast(BattleShout) && PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
                 {
                     API.CastSpell(BattleShout);
                     return;

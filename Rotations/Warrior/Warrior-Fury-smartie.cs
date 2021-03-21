@@ -27,6 +27,7 @@
 // v3.5 new settings and minor tweaks
 // v3.55 small hotfix
 // v3.6 changed name of options
+// v3.65 Battle shout fix
 
 using System.Linq;
 
@@ -150,7 +151,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.6");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.65");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
@@ -253,7 +254,7 @@ namespace HyperElk.Core
             //API.WriteLog("Condemn: "+ API.CanCast(MassacreCondemn));
             if (!API.PlayerIsMounted)
             {
-                if (PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
+                if (API.CanCast(BattleShout) && PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
                 {
                     API.CastSpell(BattleShout);
                     return;
