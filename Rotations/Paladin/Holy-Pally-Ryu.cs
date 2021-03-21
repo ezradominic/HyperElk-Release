@@ -85,6 +85,7 @@ public class HolyPally : CombatRoutine
         private string HealthTank = "Health Tank";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string WoGOverLoD = "WoG Over LoD";
 
         private string CrusaderAura = "Crusader Aura";
         private string DevotionAura = "Devotion Aura";
@@ -313,6 +314,8 @@ public class HolyPally : CombatRoutine
         private int FoLBeaconILifePercent => numbList[CombatRoutine.GetPropertyInt(FoLIBeacon)];
         private int WoGLifePercent => numbList[CombatRoutine.GetPropertyInt(WoG)];
         private int WoGMaxLifePercent => numbList[CombatRoutine.GetPropertyInt(WOGMax)];
+        private int WoGOverLoDifePercent => numbList[CombatRoutine.GetPropertyInt(WoGOverLoD)];
+
         private int BoSLifePercent => numbList[CombatRoutine.GetPropertyInt(BoS)];
         private int FolILifePercent => numbList[CombatRoutine.GetPropertyInt(FoLI)];
         private int HoLILifePercent => numbList[CombatRoutine.GetPropertyInt(HoLI)];
@@ -343,6 +346,8 @@ public class HolyPally : CombatRoutine
         private int SwapSpeedSetting => SwapSpeedList[CombatRoutine.GetPropertyInt(SwapSpeed)];
         private int TankHealth => numbList[CombatRoutine.GetPropertyInt("Tank Health")];
         private int UnitHealth => numbList[CombatRoutine.GetPropertyInt("Other Members Health")];
+        private int PlayerHP => numbList[CombatRoutine.GetPropertyInt("Player Health")];
+
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Use Covenant")];
         private string UseAV => CDUsage[CombatRoutine.GetPropertyInt("Avenging Wrath Usage")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
@@ -373,6 +378,8 @@ public class HolyPally : CombatRoutine
         private bool FlashofLightInfusionCheck => API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && InRange && ((API.TargetHasBuff(BoF) || API.TargetHasBuff(BoL)) && API.TargetHealthPercent <= FoLBeaconILifePercent || API.TargetHealthPercent <= FolILifePercent) && API.TargetHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackTarget;
         private bool FlashofLightInfusionCheckMO => API.CanCast(FoL) && API.PlayerHasBuff(Infusion) && IsMouseover && InMoRange && ((API.MouseoverHasBuff(BoF) || API.MouseoverHasBuff(BoL)) && API.MouseoverHealthPercent <= FoLBeaconILifePercent || API.MouseoverHealthPercent <= FolILifePercent) && API.MouseoverHealthPercent > 0 && !API.PlayerIsMoving && !API.PlayerCanAttackMouseover;
         private bool WoGCheck => API.CanCast(WoG) && InRange && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.TargetHealthPercent <= WoGLifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool WoGOverLoDCheck => API.CanCast(WoG) && InRange && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && API.TargetHealthPercent <= WoGOverLoDifePercent  && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool WoGOverLoDCheckMO => API.CanCast(WoG) && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && API.MouseoverHealthPercent <= WoGOverLoDifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool WoGCheckMO => API.CanCast(WoG) && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool WoGTankCheck => WoGTanking && API.CanCast(WoG) && API.TargetRoleSpec == API.TankRole && InRange && API.PlayerCurrentHolyPower >= 3 && (API.TargetHealthPercent <= WoGLifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool WoGTankCheckMO => WoGTanking && API.CanCast(WoG) && API.MouseoverRoleSpec == API.TankRole && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
@@ -628,6 +635,7 @@ public class HolyPally : CombatRoutine
 
             CombatRoutine.AddProp("Tank Health", "Tank Health", numbList, "Life percent at which " + "Tank Health" + "needs to be at to target during DPS Targeting", "Targeting", 75);
             CombatRoutine.AddProp("Other Members Health", "Other Members Health", numbList, "Life percent at which " + "Other Members Health" + "needs to be at to targeted during DPS Targeting", "Targeting", 35);
+            CombatRoutine.AddProp("Player Health", "Player Health", numbList, "Life percent at which " + "Player Health" + "needs to be at to targeted above all else", "Targeting", 35);
             CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Targeting", 2);
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Targeting", 7);
             CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS and below to return back to Healing", numbList, "Health percent at which DPS in party" + "is used,", "Targeting", 75);
@@ -651,6 +659,7 @@ public class HolyPally : CombatRoutine
             CombatRoutine.AddProp(FoLI, FoLI + " Life Percent", numbList, "Life percent at which" + FoLI + "is used, set to 0 to disable", "Healing", 90);
             CombatRoutine.AddProp(WoG, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used, set to 0 to disable", "Healing", 80);
             CombatRoutine.AddProp(WOGMax, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used when at max holy power, set to 0 to disable", "Healing", 100);
+            CombatRoutine.AddProp(WoGOverLoD, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used over Light of Dawn for your current target, set to 0 to disable", "Healing", 30);
             CombatRoutine.AddProp(BoS, BoS + " Life Percent", numbList, "Life percent at which" + BoS + "is used, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp(LoH, LoH + " Life Percent", numbList, "Life percent at which" + LoH + "is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(BF, BF + " Life Percent", numbList, "Life percent at which" + BF + "is used, set to 0 to disable", "Healing", 95);
@@ -925,6 +934,16 @@ public class HolyPally : CombatRoutine
                     API.CastSpell(WoG + "MO");
                     return;
                 }
+                if (WoGOverLoDCheck)
+                {
+                    API.CastSpell(WoG);
+                    return;
+                }
+                if (WoGOverLoDCheckMO && !API.MacroIsIgnored(WoG + "MO"))
+                {
+                    API.CastSpell(WoG + "MO");
+                    return;
+                }
                 if (LoDCheck)
                 {
                     API.CastSpell(LoD);
@@ -1099,7 +1118,7 @@ public class HolyPally : CombatRoutine
             {
                 if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
                 {
-                    if (API.PlayerHealthPercent >= UnitHealth)
+                    if (API.PlayerHealthPercent >= PlayerHP)
                     {
                         API.CastSpell(Player);
                         return;
@@ -1110,6 +1129,11 @@ public class HolyPally : CombatRoutine
                     for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)
                         {
+                            if (API.PlayerHealthPercent <= PlayerHP)
+                            {
+                                API.CastSpell(Player);
+                                return;
+                            }
                             if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(Cleanse))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
@@ -1169,6 +1193,11 @@ public class HolyPally : CombatRoutine
                         //     API.CastSpell(RaidTargetArray[i]);
                         //    return;
                         // }
+                        if (API.PlayerHealthPercent <= PlayerHP)
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
                         if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40)
                         {
                             API.CastSpell(RaidTargetArray[i]);

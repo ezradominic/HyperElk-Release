@@ -251,6 +251,8 @@ namespace HyperElk.Core
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
         private int TankHealth => numbList[CombatRoutine.GetPropertyInt("Tank Health")];
         private int UnitHealth => numbList[CombatRoutine.GetPropertyInt("Other Members Health")];
+        private int PlayerHP => numbList[CombatRoutine.GetPropertyInt("Player Health")];
+
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
         private bool IsDispell => API.ToggleIsEnabled("Dispel");
         private bool QuakingMind => API.PlayerDebuffRemainingTime(Quake) > MindCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
@@ -523,6 +525,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("Tank Health", "Tank Health", numbList, "Life percent at which " + "Tank Health" + "needs to be at to target during DPS Targeting", "Targeting", 75);
             CombatRoutine.AddProp("Other Members Health", "Other Members Health", numbList, "Life percent at which " + "Other Members Health" + "needs to be at to targeted during DPS Targeting", "Targeting", 35);
+            CombatRoutine.AddProp("Player Health", "Player Health", numbList, "Life percent at which " + "Player Health" + "needs to be at to targeted above all else", "Targeting", 35);
             CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Targeting", 2);
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Targeting", 7);
             CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS and below to return back to Healing", numbList, "Health percent at which DPS in party" + "is used,", "Targeting", 75);
@@ -775,7 +778,7 @@ namespace HyperElk.Core
                 {
                     if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
-                        if (API.PlayerHealthPercent >= UnitHealth)
+                        if (API.PlayerHealthPercent >= PlayerHP)
                         {
                             API.CastSpell(Player);
                             return;
@@ -786,12 +789,17 @@ namespace HyperElk.Core
                         for (int i = 0; i < units.Length; i++)
                         for (int j = 0; j < DispellList.Length; j++)
                             {
-                            if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(Purify))
+                                if (API.PlayerHealthPercent <= PlayerHP)
+                                {
+                                    API.CastSpell(Player);
+                                    return;
+                                }
+                                if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(Purify))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
                             }
-                            if (IsSpread && !API.UnitHasBuff(Atonement, units[i]) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= ShadowMendCastTime * 10))
+                            if (IsSpread && !UnitHasBuff(Atonement, units[i]) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= ShadowMendCastTime * 10))
                             {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 SwapWatch.Restart();
@@ -842,6 +850,11 @@ namespace HyperElk.Core
                 {
                     for (int i = 0; i < raidunits.Length; i++)
                     {
+                        if (API.PlayerHealthPercent <= PlayerHP)
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
                         if (IsSpread && !API.UnitHasBuff(Atonement, raidunits[i], true, true) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
                         {
                             API.CastSpell(RaidTargetArray[i]);

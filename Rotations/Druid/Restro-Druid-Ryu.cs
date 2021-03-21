@@ -297,6 +297,7 @@ namespace HyperElk.Core
         private int IronfurLifePercent => numbList[CombatRoutine.GetPropertyInt(Ironfur)];
         private int TankHealth => numbList[CombatRoutine.GetPropertyInt("Tank Health")];
         private int UnitHealth => numbList[CombatRoutine.GetPropertyInt("Other Members Health")];
+        private int PlayerHP => numbList[CombatRoutine.GetPropertyInt("Player Health")];
         private int BarkskinLifePercent => numbList[CombatRoutine.GetPropertyInt(Barkskin)];
         private int BearFormLifePercent => numbList[CombatRoutine.GetPropertyInt(BearForm)];
         private int RenewalLifePercent => numbList[CombatRoutine.GetPropertyInt(Renewal)];
@@ -680,6 +681,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("Tank Health", "Tank Health", numbList, "Life percent at which " + "Tank Health" + "needs to be at to target during DPS Targeting", "Targeting", 75);
             CombatRoutine.AddProp("Other Members Health", "Other Members Health", numbList, "Life percent at which " + "Other Members Health" + "needs to be at to targeted during DPS Targeting", "Targeting", 35);
+            CombatRoutine.AddProp("Player Health", "Player Health", numbList, "Life percent at which " + "Player Health" + "needs to be at to targeted above all else", "Targeting", 35);
             CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Targeting", 2);
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Targeting", 4);
             CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS and below to return back to Healing", numbList, "Health percent at which DPS in party" + "is used,", "Targeting", 75);
@@ -781,42 +783,42 @@ namespace HyperElk.Core
                         API.CastSpell(Innervate);
                         return;
                     }
-                    if (OvergrowthTalent && API.CanCast(Overgrowth) && (!TargetHasBuff(Lifebloom) || !TargetHasBuff(WildGrowth) || !TargetHasBuff(Rejuvenation) || !TargetHasBuff(Regrowth)))
+                    if (OvergrowthTalent && API.CanCast(Overgrowth) && (!TargetHasBuff(Lifebloom) || !TargetHasBuff(WildGrowth) || !TargetHasBuff(Rejuvenation) || !TargetHasBuff(Regrowth)) && !ChannelingCov)
                     {
                         API.CastSpell(Overgrowth);
                         return;
                     }
-                    if (API.CanCast(TreeofLife) && TreeofLifeTalent && !API.PlayerHasBuff(TreeofLife))
+                    if (API.CanCast(TreeofLife) && TreeofLifeTalent && !API.PlayerHasBuff(TreeofLife) && !ChannelingCov) 
                     {
                         API.CastSpell(TreeofLife);
                         return;
                     }
-                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom))
+                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom) && !ChannelingCov)
                     {
                         API.CastSpell(Lifebloom);
                         return;
                     }
-                    if (API.CanCast(Rejuvenation) && !TargetHasBuff(Rejuvenation))
+                    if (API.CanCast(Rejuvenation) && !TargetHasBuff(Rejuvenation) && !ChannelingCov)
                     {
                         API.CastSpell(Rejuvenation);
                         return;
                     }
-                    if (API.CanCast(Regrowth) && !TargetHasBuff(Regrowth))
+                    if (API.CanCast(Regrowth) && !TargetHasBuff(Regrowth) && !ChannelingCov)
                     {
                         API.CastSpell(Regrowth);
                         return;
                     }
-                    if (GerminationTalent && API.CanCast(Rejuvenation) && !TargetHasBuff(GerminationHoT))
+                    if (GerminationTalent && API.CanCast(Rejuvenation) && !TargetHasBuff(GerminationHoT) && !ChannelingCov)
                     {
                         API.CastSpell(Rejuvenation);
                         return;
                     }
-                    if (API.CanCast(WildGrowth))
+                    if (API.CanCast(WildGrowth) && !ChannelingCov)
                     {
                         API.CastSpell(WildGrowth);
                         return;
                     }
-                    if (API.CanCast(Flourish) && FlourishTalent && TargetHasBuff(Rejuvenation) && TargetHasBuff(Regrowth) && TargetHasBuff(WildGrowth))
+                    if (API.CanCast(Flourish) && FlourishTalent && TargetHasBuff(Rejuvenation) && TargetHasBuff(Regrowth) && TargetHasBuff(WildGrowth) && !ChannelingCov)
                     {
                         API.CastSpell(Flourish);
                         return;
@@ -826,22 +828,22 @@ namespace HyperElk.Core
                         API.CastSpell(Convoke);
                         return;
                     }
-                    if (API.CanCast(Ironbark))
+                    if (API.CanCast(Ironbark) && !ChannelingCov)
                     {
                         API.CastSpell(Ironbark);
                         return;
                     }
-                    if (API.CanCast(Swiftmend) && API.SpellCharges(Swiftmend) > 0 && (TargetHasBuff(Rejuvenation) || TargetHasBuff(Regrowth)))
+                    if (API.CanCast(Swiftmend) && API.SpellCharges(Swiftmend) > 0 && (TargetHasBuff(Rejuvenation) || TargetHasBuff(Regrowth)) && !ChannelingCov)
                     {
                         API.CastSpell(Swiftmend);
                         return;
                     }
-                    if (API.CanCast(Regrowth) && (!NourishTalent) || !TargetHasBuff(Regrowth) && NourishTalent)
+                    if (API.CanCast(Regrowth) && (!NourishTalent || !TargetHasBuff(Regrowth) && NourishTalent) && !ChannelingCov)
                     {
                         API.CastSpell(Regrowth);
                         return;
                     }
-                    if (NourishTalent && API.CanCast(Nourish))
+                    if (NourishTalent && API.CanCast(Nourish) && !ChannelingCov)
                     {
                         API.CastSpell(Nourish);
                         return;
@@ -854,27 +856,27 @@ namespace HyperElk.Core
                         API.CastSpell(Innervate);
                         return;
                     }
-                    if (OvergrowthTalent && API.CanCast(Overgrowth) && (!TargetHasBuff(Lifebloom) || !TargetHasBuff(WildGrowth) || !TargetHasBuff(Rejuvenation) || !TargetHasBuff(Regrowth)))
+                    if (OvergrowthTalent && API.CanCast(Overgrowth) && (!TargetHasBuff(Lifebloom) || !TargetHasBuff(WildGrowth) || !TargetHasBuff(Rejuvenation) || !TargetHasBuff(Regrowth)) && !ChannelingCov)
                     {
                         API.CastSpell(Overgrowth);
                         return;
                     }
-                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom))
+                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom) && !ChannelingCov)
                     {
                         API.CastSpell(Lifebloom);
                         return;
                     }
-                    if (API.CanCast(Rejuvenation) && !TargetHasBuff(Rejuvenation))
+                    if (API.CanCast(Rejuvenation) && !TargetHasBuff(Rejuvenation) && !ChannelingCov)
                     {
                         API.CastSpell(Rejuvenation);
                         return;
                     }
-                    if (GerminationTalent && API.CanCast(Rejuvenation) && !TargetHasBuff(GerminationHoT))
+                    if (GerminationTalent && API.CanCast(Rejuvenation) && !TargetHasBuff(GerminationHoT) && !ChannelingCov)
                     {
                         API.CastSpell(Rejuvenation);
                         return;
                     }
-                    if (API.CanCast(Swiftmend) && API.SpellCharges(Swiftmend) > 0 && (TargetHasBuff(Rejuvenation) || TargetHasBuff(Regrowth)))
+                    if (API.CanCast(Swiftmend) && API.SpellCharges(Swiftmend) > 0 && (TargetHasBuff(Rejuvenation) || TargetHasBuff(Regrowth)) && !ChannelingCov)
                     {
                         API.CastSpell(Swiftmend);
                         return;
@@ -884,12 +886,12 @@ namespace HyperElk.Core
                         API.CastSpell(Convoke);
                         return;
                     }
-                    if (API.CanCast(Regrowth) && (!NourishTalent) || !TargetHasBuff(Regrowth) && NourishTalent)
+                    if (API.CanCast(Regrowth) && (!NourishTalent || !TargetHasBuff(Regrowth) && NourishTalent) && !ChannelingCov)
                     {
                         API.CastSpell(Regrowth);
                         return;
                     }
-                    if (NourishTalent && API.CanCast(Nourish))
+                    if (NourishTalent && API.CanCast(Nourish) && !ChannelingCov)
                     {
                         API.CastSpell(Nourish);
                         return;
@@ -1151,7 +1153,7 @@ namespace HyperElk.Core
                 {
                     if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
-                        if (API.PlayerHealthPercent >= UnitHealth)
+                        if (API.PlayerHealthPercent >= PlayerHP)
                         {
                             API.CastSpell(Player);
                             return;
@@ -1162,7 +1164,12 @@ namespace HyperElk.Core
                             for (int i = 0; i < units.Length; i++)
                                 for (int j = 0; j < DispellList.Length; j++)
                                 {
-                                    if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
+                                if (API.PlayerHealthPercent <= PlayerHP)
+                                {
+                                    API.CastSpell(Player);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         SwapWatch.Restart();
@@ -1226,6 +1233,11 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
+                            if (API.PlayerHealthPercent <= PlayerHP)
+                            {
+                                API.CastSpell(Player);
+                                return;
+                            }
                             if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                             {
                                 API.CastSpell(RaidTargetArray[i]);

@@ -292,6 +292,14 @@ namespace HyperElk.Core
             {
                 RuneWatch.Stop();
             }
+            if (IceWatch1.ElapsedMilliseconds >= API.SpellGCDTotalDuration *10)
+            {
+                IceWatch1.Stop();
+            }
+            if (IceWatch2.ElapsedMilliseconds >= API.SpellGCDTotalDuration* 20)
+            {
+                IceWatch2.Stop();
+            }
             if (!API.PlayerIsMounted)
             {
                 if (API.CanCast(AI) && Level >= 8 && !API.PlayerHasBuff(AI))
@@ -430,100 +438,11 @@ namespace HyperElk.Core
         {
 
         }
-        public void BrainFreezeRota()
-        {
-            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze))
-            {
-                //actions.st=flurry,if=(remaining_winters_chill=0|debuff.winters_chill.down)&(prev_gcd.1.ebonbolt|buff.brain_freeze.react&(prev_gcd.1.glacial_spike|prev_gcd.1.frostbolt&(!conduit.ire_of_the_ascended|cooldown.radiant_spark.remains|runeforge.freezing_winds)|prev_gcd.1.radiant_spark|buff.fingers_of_frost.react=0&(debuff.mirrors_of_torment.up|buff.freezing_winds.up|buff.expanded_potential.react)))
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && !API.TargetHasDebuff(WC))
-                {
-                    API.CastSpell(Flurry);
-                    return;
-                }
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && !API.TargetHasDebuff(WC) && (CastEB && Ebonbolt || Ebonbolt && API.LastSpellCastInGame == EB))
-                {
-                    API.CastSpell(Flurry);
-                    return;
-                }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 2 && API.TargetDebuffPlayerSrc(WC))
-                {
-                    API.CastSpell(IL);
-                    return;
-                }
-                if (RayofFrost && API.CanCast(RoF) && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 1 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingRoF || QuakingRoF && QuakingHelper))
-                {
-                    API.CastSpell(RoF);
-                    return;
-                }
-                if (GlacialSpike && API.CanCast(GS) && (API.TargetHasDebuff(WC) || API.TargetUnitInRangeCount >= 2) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingGS || QuakingGS && QuakingHelper))
-                {
-                    API.CastSpell(GS);
-                    return;
-                }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetDebuffStacks(WC) == 1 && API.TargetDebuffPlayerSrc(WC))
-                {
-                    API.CastSpell(IL);
-                    return;
-                }
-            }
-        }
-
         private void rotation()
         {
-            if (!ChannelingShift && NotChanneling && !ChannelingRoF)
-            // && API.TargetHasDebuff(WC) && (!PlayerHasBuff(BrainFreeze) || PlayerHasBuff(BrainFreeze)) && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF))
-            {
-                // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
-                if (API.CanCast(IL) && Level >= 10 && !CastIL && API.TargetRange <= 40 && IceWatch1.IsRunning && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 2)
-                {
-                    IceWatch1.Stop();
-                    API.CastSpell(IL);
-                    API.WriteLog("First Ice Lance");
-                    return;
-                }
-                //actions.st+=/ray_of_frost,if=remaining_winters_chill=1&debuff.winters_chill.remains
-                if (RayofFrost && API.CanCast(RoF) && API.TargetDebuffStacks(WC) <= 1 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingRoF || QuakingRoF && QuakingHelper))
-                {
-                    API.CastSpell(RoF);
-                    return;
-                }
-                //actions.st+=/glacial_spike,if=remaining_winters_chill&debuff.winters_chill.remains>cast_time+travel_time //             //actions.st+=/glacial_spike,if=buff.brain_freeze.react
-                if (GlacialSpike && API.CanCast(GS) && (API.TargetHasDebuff(WC) || API.TargetUnitInRangeCount >= 2) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingGS || QuakingGS && QuakingHelper))
-                {
-                    API.CastSpell(GS);
-                    return;
-                }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 2 && IceWatch2.IsRunning)
-                {
-                    IceWatch2.Stop();
-                    API.CastSpell(IL);
-                    API.WriteLog("Second Ice Lance");
-                    return;
-                }
-            }
-            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze) && !API.PlayerSpellonCursor)
-            {
-                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingFB || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry && (API.PlayerLastSpell != Frostbolt || !CastFB) && !CastEB && !API.TargetHasDebuff(WC) && !FBWatch.IsRunning && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)))
-                {
-                    API.CastSpell(Frostbolt);
-                    API.WriteLog("Frostbolt Hard Cast To Start Shatter Combo");
-                    FBWatch.Restart();
-                    return;
-                }
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
-                {
-                    API.CastSpell(Flurry);
-                    return;
-                }
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
-                {
-                    API.CastSpell(Flurry);
-                    return;
-                }
-            }
             if (!ChannelingShift && NotChanneling && !ChannelingRoF && !API.PlayerSpellonCursor)
             {
-                if ((IsAOE || IsForceAOE) && UseLeg == "Glacial Fragments" && (API.TargetUnitInRangeCount >= 3 || IsForceAOE))
+                if (UseLeg == "Glacial Fragments" && (API.TargetUnitInRangeCount >= 3 && IsAOE || IsForceAOE))
                 {
                     if (API.CanCast(IV) && Level >= 29 && !API.PlayerIsMoving && API.TargetRange <= 40 && (IsCooldowns && UseIV == "With Cooldowns" || UseIV == "On Cooldown"))
                     {
@@ -557,6 +476,62 @@ namespace HyperElk.Core
                     }
                 }
             }
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && !API.PlayerSpellonCursor)
+            // && API.TargetHasDebuff(WC) && (!PlayerHasBuff(BrainFreeze) || PlayerHasBuff(BrainFreeze)) && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF))
+            {
+                //actions.st +=/ frozen_orb
+                if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40 && IsFO)
+                {
+                    API.CastSpell(FO);
+                    return;
+                }
+                // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
+                if (API.CanCast(IL) && Level >= 10 && !CastIL && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 2 && !API.PlayerIsCasting(true) && IceWatch1.IsRunning)
+                {
+                    API.CastSpell(IL);
+                    API.WriteLog("First Ice Lance in Shatter Combo");
+                    return;
+                }
+                //actions.st+=/ray_of_frost,if=remaining_winters_chill=1&debuff.winters_chill.remains
+                if (RayofFrost && API.CanCast(RoF) && API.TargetDebuffStacks(WC) <= 1 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingRoF || QuakingRoF && QuakingHelper))
+                {
+                    API.CastSpell(RoF);
+                    return;
+                }
+                //actions.st+=/glacial_spike,if=remaining_winters_chill&debuff.winters_chill.remains>cast_time+travel_time //             //actions.st+=/glacial_spike,if=buff.brain_freeze.react
+                if (GlacialSpike && API.CanCast(GS) && (API.TargetHasDebuff(WC) || API.TargetUnitInRangeCount >= 2) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingGS || QuakingGS && QuakingHelper))
+                {
+                    API.CastSpell(GS);
+                    return;
+                }
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 1 && IceWatch2.IsRunning && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(IL);
+                    IceWatch2.Stop();
+                    API.WriteLog("Second Ice Lance in Shatter Combo");
+                    return;
+                }
+            }
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze) && !API.PlayerSpellonCursor)
+            {
+                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingFB || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry && (API.PlayerLastSpell != Frostbolt || !CastFB) && !CastEB && !API.TargetHasDebuff(WC) && !FBWatch.IsRunning && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)))
+                {
+                    API.CastSpell(Frostbolt);
+                    API.WriteLog("Frostbolt Hard Cast To Start Shatter Combo");
+                    FBWatch.Restart();
+                    return;
+                }
+                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
+                {
+                    API.CastSpell(Flurry);
+                    return;
+                }
+                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
+                {
+                    API.CastSpell(Flurry);
+                    return;
+                }
+            }
                 // actions.st+=/ice_lance,if=buff.fingers_of_frost.react|debuff.frozen.remains>travel_time
                 if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor)
             // && (API.TargetHasDebuff(WC) || !API.TargetHasDebuff(WC))
@@ -564,7 +539,7 @@ namespace HyperElk.Core
                 if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40)
                 {
                     API.CastSpell(IL);
-                    API.WriteLog("Fingers of Frost :" + API.PlayerHasBuff(FoF));
+                    API.WriteLog("Ice Lance w/ FoF Buff");
                     return;
                 }
             }
@@ -588,12 +563,6 @@ namespace HyperElk.Core
                 if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !CastIV && !PlayerHasBuff(RoP) && !PlayerHasBuff(BrainFreeze) && !PlayerHasBuff(FoF) && !API.TargetHasDebuff(WC) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && API.SpellCDDuration(IV) >= 1200 && (!QuakingRune || QuakingRune && QuakingHelper) && !RuneWatch.IsRunning)
                 {
                     API.CastSpell(RoP);
-                    return;
-                }
-                //actions.st +=/ frozen_orb
-                if (API.CanCast(FO) && Level >= 38 && API.TargetRange <= 40 && IsFO)
-                {
-                    API.CastSpell(FO);
                     return;
                 }
                 // actions.st+=/blizzard,if=buff.freezing_rain.up|active_enemies>=2 // actions.aoe+=/blizzard
