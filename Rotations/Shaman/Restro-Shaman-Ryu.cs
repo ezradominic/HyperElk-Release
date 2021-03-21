@@ -395,6 +395,8 @@ namespace HyperElk.Core
         private int AoEDPSNumber => numbPartyList[CombatRoutine.GetPropertyInt(AoEDPS)];
         private int TankHealth => numbList[CombatRoutine.GetPropertyInt("Tank Health")];
         private int UnitHealth => numbList[CombatRoutine.GetPropertyInt("Other Members Health")];
+        private int PlayerHP => numbList[CombatRoutine.GetPropertyInt("Player Health")];
+
         private int AoEDPSRaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoEDPSRaid)];
         private int AoEDPSHRaidLifePercent => numbList[CombatRoutine.GetPropertyInt(AoEDPSHRaid)];
         private int FleshcraftPercentProc => numbList[CombatRoutine.GetPropertyInt(Fleshcraft)];
@@ -628,6 +630,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("Tank Health", "Tank Health", numbList, "Life percent at which " + "Tank Health" + "needs to be at to targeted during DPS Targeting", "Targeting", 75);
             CombatRoutine.AddProp("Other Members Health", "Other Members Health", numbList, "Life percent at which " + "Other Members Health" + "needs to be at to targeted during DPS Targeting", "Targeting", 35);
+            CombatRoutine.AddProp("Player Health", "Player Health", numbList, "Life percent at which " + "Player Health" + "needs to be at to targeted above all else", "Targeting", 35);
             CombatRoutine.AddProp(AoEDPS, "Number of units needed to be above DPS Health Percent to DPS in party ", numbPartyList, " Units above for DPS ", "Targeting", 2);
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "Targeting", 7);
             CombatRoutine.AddProp(AoEDPSH, "Life Percent for units to be above for DPS and below to return back to Healing", numbList, "Health percent at which DPS in party" + "is used,", "Targeting", 75);
@@ -935,7 +938,7 @@ namespace HyperElk.Core
                 {
                     if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
-                        if (API.PlayerHealthPercent >= UnitHealth)
+                        if (API.PlayerHealthPercent >= PlayerHP)
                         {
                             API.CastSpell(Player);
                             return;
@@ -946,7 +949,12 @@ namespace HyperElk.Core
                         for (int j = 0; j < DispellList.Length; j++)
                         for (int i = 0; i < units.Length; i++)
                           {
-                             if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(PurifySpirit))
+                                if (API.PlayerHealthPercent <= PlayerHP)
+                                {
+                                    API.CastSpell(Player);
+                                    return;
+                                }
+                                if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(PurifySpirit))
                              {
                                 API.CastSpell(PlayerTargetArray[i]);
                                 return;
@@ -992,6 +1000,11 @@ namespace HyperElk.Core
                         {
                             for (int i = 0; i < raidunits.Length; i++)
                             {
+                            if (API.PlayerHealthPercent <= PlayerHP)
+                            {
+                                API.CastSpell(Player);
+                                return;
+                            }
                             if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
                             {
                                 API.CastSpell(RaidTargetArray[i]);
