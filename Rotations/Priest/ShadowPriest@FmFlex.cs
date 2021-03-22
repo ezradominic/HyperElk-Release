@@ -135,7 +135,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(VoidTorrent, 263165, "D1");
             CombatRoutine.AddSpell(SurrendertoMadness, 193223, "D1");
             CombatRoutine.AddSpell(Damnation, 341374, "D1");
-            CombatRoutine.AddSpell(Silence, 263715, "F");
+            CombatRoutine.AddSpell(Silence, 15487, "F");
             CombatRoutine.AddSpell(Mindbender, 123040, "D7");
             CombatRoutine.AddSpell(PowerInfusion, 10060, "0");
             CombatRoutine.AddSpell(VampiricEmbrace, 15286, "E");
