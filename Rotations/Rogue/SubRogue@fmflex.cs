@@ -175,7 +175,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Rupture, 1943);
             CombatRoutine.AddDebuff(FindWeakness, 316219);
             CombatRoutine.AddDebuff(Flagellation, 323654);
-            CombatRoutine.AddDebuff(SerratedBoneSpike, 328547);
+            CombatRoutine.AddDebuff(SerratedBoneSpike, 324073);
 
             CombatRoutine.AddConduit(LeadbyExample);
 
