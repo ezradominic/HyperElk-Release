@@ -12,7 +12,6 @@ namespace HyperElk.Core
 
 
         private string HowlingBlast = "Howling Blast";
-        private string DeathCoil = "Death Coil";
         private string FrostStrike = "Frost Strike";
         private string DeathStrike = "Death Strike";
         private string DeathandDecay = "Death and Decay";
@@ -49,7 +48,8 @@ namespace HyperElk.Core
         private string Everfrost = "Everfrost";
         private string EradicatingBlow = "Eradicating Blow";
         private string UnleashedFrenzy = "Unleashed Frenzy";
-
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         //Talent
 
@@ -86,6 +86,8 @@ namespace HyperElk.Core
         }
         private int CurrentRP => API.PlayerRunicPower;
         private bool UseDND => (bool)CombatRoutine.GetProperty("UseDND");
+        private int PhialofSerenityLifePercent => percentListProp[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => percentListProp[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         public override void Initialize()
         {
@@ -95,34 +97,33 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("UseDND", "Use DND", true, "Should the rotation use Death and Decay", "Leveling");
 
-            CombatRoutine.AddSpell(HowlingBlast, "D1", "None");
-            CombatRoutine.AddSpell(DeathCoil, "D2", "None");
-            CombatRoutine.AddSpell(FrostStrike, "D5", "None");
-            CombatRoutine.AddSpell(DeathStrike, "D3", "None");
-            CombatRoutine.AddSpell(DeathandDecay, "D4", "None");
-            CombatRoutine.AddSpell(Obliterate, "D6", "None");
-            CombatRoutine.AddSpell(RemorselessWinter, "D7", "None");
-            CombatRoutine.AddSpell(ChainsofIce, "D8", "None");
-            CombatRoutine.AddSpell(RaiseDead, "F5", "None");
-            CombatRoutine.AddSpell(PillarofFrost, "Q", "None");
-            CombatRoutine.AddSpell(ChillStreak, "D9", "None");
-            CombatRoutine.AddSpell(FrostwyrmsFury, "F6", "None");
-            CombatRoutine.AddSpell(Frostscythe, "D1");
-            CombatRoutine.AddSpell(BreathofSindragosa, "D1");
-            CombatRoutine.AddSpell(GlacialAdvance, "D1");
-            CombatRoutine.AddSpell(HornofWinter, "D1");
-            CombatRoutine.AddSpell(EmpowerRuneWeapon, "D1");
-            CombatRoutine.AddSpell(MindFreeze, "D1");
+            CombatRoutine.AddSpell(HowlingBlast, 49184, "D1", "None");
+            CombatRoutine.AddSpell(FrostStrike, 49143, "D5", "None");
+            CombatRoutine.AddSpell(DeathStrike, 49998, "D3", "None");
+            CombatRoutine.AddSpell(DeathandDecay, 43265, "D4", "None");
+            CombatRoutine.AddSpell(Obliterate, 49020,"D6", "None");
+            CombatRoutine.AddSpell(RemorselessWinter, 196770, "D7", "None");
+            CombatRoutine.AddSpell(ChainsofIce, 45524, "D8", "None");
+            CombatRoutine.AddSpell(RaiseDead, 46585, "F5", "None");
+            CombatRoutine.AddSpell(PillarofFrost, 51271, "Q", "None");
+            CombatRoutine.AddSpell(ChillStreak, 305392, "D9", "None");
+            CombatRoutine.AddSpell(FrostwyrmsFury, 279302, "F6", "None");
+            CombatRoutine.AddSpell(Frostscythe, 207230, "D1");
+            CombatRoutine.AddSpell(BreathofSindragosa, 152279, "D1");
+            CombatRoutine.AddSpell(GlacialAdvance, 194913, "D1");
+            CombatRoutine.AddSpell(HornofWinter, 57330, "D1");
+            CombatRoutine.AddSpell(EmpowerRuneWeapon, 47568, "D1");
+            CombatRoutine.AddSpell(MindFreeze, 47528, "D1");
 
-            CombatRoutine.AddSpell(SwarmingMist, "NumPad2");
-            CombatRoutine.AddSpell(DeathsDue);
-            CombatRoutine.AddSpell(AbominationLimb);
-            CombatRoutine.AddSpell(ShackletheUnworthy);
+            CombatRoutine.AddSpell(SwarmingMist, 311648, "NumPad2");
+            CombatRoutine.AddSpell(DeathsDue,315442);
+            CombatRoutine.AddSpell(AbominationLimb, 315443);
+            CombatRoutine.AddSpell(ShackletheUnworthy, 312202);
 
-            CombatRoutine.AddSpell(IceboundFortitude, "D1");
-            CombatRoutine.AddSpell(AntiMagicShell, "D1");
-            CombatRoutine.AddSpell(Lichborne, "D1");
-            CombatRoutine.AddSpell(SacrificialPact);
+            CombatRoutine.AddSpell(IceboundFortitude, 48792, "D1");
+            CombatRoutine.AddSpell(AntiMagicShell, 48707, "D1");
+            CombatRoutine.AddSpell(Lichborne, 49039,"D1");
+            CombatRoutine.AddSpell(SacrificialPact, 327574);
 
 
             //Conduit
@@ -131,18 +132,23 @@ namespace HyperElk.Core
             CombatRoutine.AddConduit(EradicatingBlow);
             CombatRoutine.AddConduit(UnleashedFrenzy);
 
-            CombatRoutine.AddBuff(ColdHeart);
-            CombatRoutine.AddBuff(DarkSuccor);
-            CombatRoutine.AddBuff(Rime);
-            CombatRoutine.AddBuff(KillingMachine);
-            CombatRoutine.AddBuff(PillarofFrost);
-            CombatRoutine.AddBuff(BreathofSindragosa);
-            CombatRoutine.AddBuff(RemorselessWinter);
-            CombatRoutine.AddBuff(EradicatingBlow);
-            CombatRoutine.AddBuff(UnleashedFrenzy);
+            CombatRoutine.AddBuff(ColdHeart, 281208);
+            CombatRoutine.AddBuff(DarkSuccor, 178819);
+            CombatRoutine.AddBuff(Rime, 59057);
+            CombatRoutine.AddBuff(KillingMachine, 51128);
+            CombatRoutine.AddBuff(PillarofFrost, 51271);
+            CombatRoutine.AddBuff(BreathofSindragosa, 152279);
+            CombatRoutine.AddBuff(RemorselessWinter, 196770);
+            CombatRoutine.AddBuff(EradicatingBlow, 181943);
+            CombatRoutine.AddBuff(UnleashedFrenzy, 182201);
 
-            CombatRoutine.AddDebuff(FrostFever);
+            CombatRoutine.AddDebuff(FrostFever, 49184);
 
+
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", percentListProp, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", percentListProp, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 4);
 
 
 
@@ -177,6 +183,16 @@ namespace HyperElk.Core
             if (API.PlayerHealthPercent <= IceboundFortitudeLifePercent && API.CanCast(IceboundFortitude))
             {
                 API.CastSpell(IceboundFortitude);
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
                 return;
             }
             //Interrupt
