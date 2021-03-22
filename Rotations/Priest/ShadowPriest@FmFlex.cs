@@ -40,6 +40,10 @@ namespace HyperElk.Core
         private string BoonOfTheAscended = "Boon of the Ascended";
         private string DissonantEchoes = "Dissonant Echoes";
         private string UnholyNova = "Unholy Nova";
+        private string FaeGuardians = "Fae Guardians";
+
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
 
         //Talents
         bool TalentTwistOfFate => API.PlayerIsTalentSelected(3, 1);
@@ -67,6 +71,9 @@ namespace HyperElk.Core
         public new string[] CDUsage = new string[] { "Never", "With Cooldowns", "Always" };
         private int Trinket1Usage => CombatRoutine.GetPropertyInt(Trincket1);
         private int Trinket2Usage => CombatRoutine.GetPropertyInt(Trincket2);
+
+        private int PhialofSerenityLifePercent => percentListProp[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => percentListProp[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         //General
         private int PlayerLevel => API.PlayerLevel;
@@ -100,6 +107,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(BoonOfTheAscended, 325013);
             CombatRoutine.AddBuff(PowerInfusion, 10060);
             CombatRoutine.AddBuff(DissonantEchoes, 343144);
+            
             //Debuff
             CombatRoutine.AddDebuff(DevouringPlague, 335467);
             CombatRoutine.AddDebuff(SWPain, 589);
@@ -127,7 +135,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(VoidTorrent, 263165, "D1");
             CombatRoutine.AddSpell(SurrendertoMadness, 193223, "D1");
             CombatRoutine.AddSpell(Damnation, 341374, "D1");
-            CombatRoutine.AddSpell(Silence, 15487, "F");
+            CombatRoutine.AddSpell(Silence, 263715, "F");
             CombatRoutine.AddSpell(Mindbender, 123040, "D7");
             CombatRoutine.AddSpell(PowerInfusion, 10060, "0");
             CombatRoutine.AddSpell(VampiricEmbrace, 15286, "E");
@@ -136,12 +144,16 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(PWShield, 17, "F7");
             CombatRoutine.AddSpell(Mindgames, 323673, "0");
             CombatRoutine.AddSpell(UnholyNova, 324724, "0");
+            CombatRoutine.AddSpell(FaeGuardians, 327661, "0");
 
             CombatRoutine.AddMacro(SWPain + "MO", "D2");
             CombatRoutine.AddMacro(VampiricTouch + "MO", "D6");
             CombatRoutine.AddMacro(Trincket1);
             CombatRoutine.AddMacro(Trincket2);
             CombatRoutine.AddToggle("Mouseover");
+
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Prop
             CombatRoutine.AddProp("SHIELDSPEED", "Use PWS for speed", true, "Use powerword shield for speed boost", "Generic");
@@ -157,6 +169,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Trincket2, "Trinket 2 usage", CDUsage, "When should Trinket 2 be used", "Trinket", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsage, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp("sync", "Sync PI/VF", false, "Sync PI/VF", "Generic");
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", percentListProp, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", percentListProp, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 4);
 
         }
 
@@ -239,7 +253,16 @@ namespace HyperElk.Core
 
             //ascended_blast,if=spell_targets.mind_sear<=3
 
-
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
+                return;
+            }
 
             if (API.CanCast(AscendedBlast))
             {
@@ -337,6 +360,11 @@ namespace HyperElk.Core
                 if (!API.PlayerIsCasting(true) && PlayerCovenantSettings == "Venthyr" && API.CanCast(Mindgames))
                 {
                     API.CastSpell(Mindgames);
+                    return;
+                }
+                if (!API.PlayerIsCasting(true) && PlayerCovenantSettings == "Night Fae" && API.CanCast(FaeGuardians))
+                {
+                    API.CastSpell(FaeGuardians);
                     return;
                 }
             }
