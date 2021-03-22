@@ -123,7 +123,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseCO", "Use Corruption", true, "Use Corruption for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("DumpShards", "Dump Shards", true, "Collect 5 Soul Shards and befor using Malefic Rapture", "Class specific");
-            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             //Spells
             CombatRoutine.AddSpell(ShadowBolt, 686, "D1");
@@ -321,18 +321,195 @@ namespace HyperElk.Core
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&dot.impending_catastrophe_dot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
                 if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && API.TargetHasDebuff(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetDebuffRemainingTime(PhantomSingularity) > 200 || !TalentPhantomSingularity))
                 {
-                    DarkGlarePrep();
+                    //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                    if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/dark_soul
+                    //actions.darkglare_prep+=/potion
+                    //actions.darkglare_prep+=/fireblood
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/blood_fury
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/berserking
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                    if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                    {
+                        //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                        if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ImpendingCatastrophe);
+                            return;
+                        }
+                        //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(DecimatingBolt);
+                            return;
+                        }
+                        //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                        if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(SoulRot);
+                            return;
+                        }
+                        //actions.covenant+=/scouring_tithe
+                        if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ScouringTithe);
+                            return;
+                        }
+                    }
+                    //actions.darkglare_prep+=/summon_darkglare
+                    if (API.CanCast(SummonDarkglare))
+                    {
+                        API.CastSpell(SummonDarkglare);
+                        return;
+                    }
 
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&dot.soul_rot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
                 if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && API.TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
                 {
-                    DarkGlarePrep();
+                    //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                    if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/dark_soul
+                    //actions.darkglare_prep+=/potion
+                    //actions.darkglare_prep+=/fireblood
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/blood_fury
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/berserking
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                    if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                    {
+                        //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                        if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ImpendingCatastrophe);
+                            return;
+                        }
+                        //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(DecimatingBolt);
+                            return;
+                        }
+                        //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                        if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(SoulRot);
+                            return;
+                        }
+                        //actions.covenant+=/scouring_tithe
+                        if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ScouringTithe);
+                            return;
+                        }
+                    }
+                    //actions.darkglare_prep+=/summon_darkglare
+                    if (API.CanCast(SummonDarkglare))
+                    {
+                        API.CastSpell(SummonDarkglare);
+                        return;
+                    }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
                 if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity))
                 {
-                    DarkGlarePrep();
+                    //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                    if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/dark_soul
+                    //actions.darkglare_prep+=/potion
+                    //actions.darkglare_prep+=/fireblood
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/blood_fury
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/berserking
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                    if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                    {
+                        //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                        if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ImpendingCatastrophe);
+                            return;
+                        }
+                        //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(DecimatingBolt);
+                            return;
+                        }
+                        //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                        if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(SoulRot);
+                            return;
+                        }
+                        //actions.covenant+=/scouring_tithe
+                        if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ScouringTithe);
+                            return;
+                        }
+                    }
+                    //actions.darkglare_prep+=/summon_darkglare
+                    if (API.CanCast(SummonDarkglare))
+                    {
+                        API.CastSpell(SummonDarkglare);
+                        return;
+                    }
                 }
                 //actions.aoe+=/seed_of_corruption,if=talent.sow_the_seeds.enabled&can_seed
                 if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !API.TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000) && !API.PlayerIsCasting(true))
@@ -362,22 +539,222 @@ namespace HyperElk.Core
                 //actions.aoe+=/call_action_list,name=covenant,if=!covenant.necrolord
                 if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr")
                 {
-                    Covenant();
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
                 if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
-                    DarkGlarePrep();
+                    //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                    if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/dark_soul
+                    //actions.darkglare_prep+=/potion
+                    //actions.darkglare_prep+=/fireblood
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/blood_fury
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/berserking
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                    if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                    {
+                        //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                        if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ImpendingCatastrophe);
+                            return;
+                        }
+                        //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(DecimatingBolt);
+                            return;
+                        }
+                        //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                        if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(SoulRot);
+                            return;
+                        }
+                        //actions.covenant+=/scouring_tithe
+                        if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ScouringTithe);
+                            return;
+                        }
+                    }
+                    //actions.darkglare_prep+=/summon_darkglare
+                    if (API.CanCast(SummonDarkglare))
+                    {
+                        API.CastSpell(SummonDarkglare);
+                        return;
+                    }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
                 if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
-                    DarkGlarePrep();
+                    //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                    if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/dark_soul
+                    //actions.darkglare_prep+=/potion
+                    //actions.darkglare_prep+=/fireblood
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/blood_fury
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/berserking
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                    if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                    {
+                        //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                        if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ImpendingCatastrophe);
+                            return;
+                        }
+                        //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(DecimatingBolt);
+                            return;
+                        }
+                        //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                        if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(SoulRot);
+                            return;
+                        }
+                        //actions.covenant+=/scouring_tithe
+                        if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ScouringTithe);
+                            return;
+                        }
+                    }
+                    //actions.darkglare_prep+=/summon_darkglare
+                    if (API.CanCast(SummonDarkglare))
+                    {
+                        API.CastSpell(SummonDarkglare);
+                        return;
+                    }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
                 if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
-                    DarkGlarePrep();
+                    //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                    if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(VileTaint);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/dark_soul
+                    //actions.darkglare_prep+=/potion
+                    //actions.darkglare_prep+=/fireblood
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/blood_fury
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/berserking
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                    if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                    {
+                        //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                        if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ImpendingCatastrophe);
+                            return;
+                        }
+                        //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(DecimatingBolt);
+                            return;
+                        }
+                        //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                        if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(SoulRot);
+                            return;
+                        }
+                        //actions.covenant+=/scouring_tithe
+                        if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                        {
+                            API.CastSpell(ScouringTithe);
+                            return;
+                        }
+                    }
+                    //actions.darkglare_prep+=/summon_darkglare
+                    if (API.CanCast(SummonDarkglare))
+                    {
+                        API.CastSpell(SummonDarkglare);
+                        return;
+                    }
                 }
                 //actions.aoe+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
                 if (DsM && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || !API.TargetIsBoss && API.TargetHealthPercent > 30) && !API.PlayerIsCasting(true))
@@ -409,7 +786,30 @@ namespace HyperElk.Core
                 //actions.aoe+=/call_action_list,name=covenant
                 if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr")
                 {
-                    Covenant();
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
                 }
                 //actions.aoe+=/drain_life,if=buff.inevitable_demise.stack>=50|buff.inevitable_demise.up&time_to_die<5|buff.inevitable_demise.stack>=35&dot.soul_rot.ticking
                 if (API.CanCast(DrainLife) && NotChanneling && API.PlayerBuffStacks(InevitableDemise) > 50 || (API.PlayerBuffStacks(InevitableDemise) >= 1 && API.TargetTimeToDie < 500) && !API.PlayerIsCasting(true))
@@ -434,17 +834,194 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&dot.impending_catastrophe_dot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
             if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&dot.soul_rot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
             if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && API.TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
             if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/agony,if=dot.agony.remains<4
             if (API.CanCast(Agony) && !LastCastAgony && API.TargetDebuffRemainingTime(Agony) <= 400)
@@ -462,17 +1039,194 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
             if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&(covenant.necrolord|covenant.kyrian|covenant.none)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
             if (IsCooldowns && API.TargetUnitInRangeCount > 2 && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity)
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
             if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/seed_of_corruption,if=active_enemies>2&talent.sow_the_seeds.enabled&!dot.seed_of_corruption.ticking&!in_flight
             if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSowTheSeeds && !API.TargetHasDebuff(Corruption) && !API.PlayerIsCasting(true))
@@ -508,7 +1262,30 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=covenant,if=!covenant.necrolord
             if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr")
             {
-                Covenant();
+                //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(ImpendingCatastrophe);
+                    return;
+                }
+                //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(DecimatingBolt);
+                    return;
+                }
+                //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(SoulRot);
+                    return;
+                }
+                //actions.covenant+=/scouring_tithe
+                if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
             }
             //actions+=/corruption,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)&dot.corruption.remains<2
             if (API.CanCast(Corruption) && !LastCastCorruption && API.TargetDebuffRemainingTime(Corruption) <= 200)
@@ -532,17 +1309,194 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
             if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
             if (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None" && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
             if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
-                DarkGlarePrep();
+                //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
+                if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(VileTaint);
+                    return;
+                }
+                //actions.darkglare_prep+=/dark_soul
+                //actions.darkglare_prep+=/potion
+                //actions.darkglare_prep+=/fireblood
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/blood_fury
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/berserking
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
+                if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
+                {
+                    //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                    if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ImpendingCatastrophe);
+                        return;
+                    }
+                    //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(DecimatingBolt);
+                        return;
+                    }
+                    //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                    if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(SoulRot);
+                        return;
+                    }
+                    //actions.covenant+=/scouring_tithe
+                    if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                    {
+                        API.CastSpell(ScouringTithe);
+                        return;
+                    }
+                }
+                //actions.darkglare_prep+=/summon_darkglare
+                if (API.CanCast(SummonDarkglare))
+                {
+                    API.CastSpell(SummonDarkglare);
+                    return;
+                }
             }
             //actions+=/dark_soul,if=cooldown.summon_darkglare.remains>time_to_die
             if (DsM && API.CanCast(DarkSoulMisery) && TalentDarkSoulMisery && API.SpellISOnCooldown(SummonDarkglare) && (API.TargetIsBoss && API.TargetHealthPercent >= 10 || !API.TargetIsBoss && API.TargetHealthPercent > 30) && !API.PlayerIsCasting(true))
@@ -552,9 +1506,26 @@ namespace HyperElk.Core
             }
             //actions+=/call_action_list,name=item
             //actions+=/call_action_list,name=se,if=debuff.shadow_embrace.stack<(2-action.shadow_bolt.in_flight)|debuff.shadow_embrace.remains<3
-            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || API.TargetDebuffRemainingTime(ShadowEmbrace) < 300)
+            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || API.TargetDebuffRemainingTime(ShadowEmbrace) < 300 && !API.PlayerIsCasting(true))
             {
-                SE();
+                //actions.se = haunt
+                if (API.CanCast(Haunt) && TalentHaunt)
+                {
+                    API.CastSpell(Haunt);
+                    return;
+                }
+                //actions.se +=/ drain_soul,interrupt_global = 1,interrupt_if = debuff.shadow_embrace.stack >= 3
+                if (API.CanCast(DrainSoul) && TalentDrainSoul)
+                {
+                    API.CastSpell(DrainSoul);
+                    return;
+                }
+                //actions.se +=/ shadow_bolt
+                if (API.CanCast(ShadowBolt) && !TalentDrainSoul)
+                {
+                    API.CastSpell(ShadowBolt);
+                    return;
+                }
             }
             //actions+=/malefic_rapture,if=dot.vile_taint.ticking
             if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
@@ -585,7 +1556,30 @@ namespace HyperElk.Core
             //actions+=/call_action_list,name=covenant
             if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" ||PlayerCovenantSettings == "Venthyr")
             {
-                Covenant();
+                //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
+                if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(ImpendingCatastrophe);
+                    return;
+                }
+                //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
+                if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(DecimatingBolt);
+                    return;
+                }
+                //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
+                if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(SoulRot);
+                    return;
+                }
+                //actions.covenant+=/scouring_tithe
+                if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
             }
             //actions+=/agony,if=refreshable
             if (API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) < 200)
@@ -617,94 +1611,7 @@ namespace HyperElk.Core
                 return;
             }
         }
-        private void DarkGlarePrep()
-        {
-            //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
-            if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
-            {
-                API.CastSpell(VileTaint);
-                return;
-            }
-            //actions.darkglare_prep+=/dark_soul
-            //actions.darkglare_prep+=/potion
-            //actions.darkglare_prep+=/fireblood
-            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.darkglare_prep+=/blood_fury
-            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.darkglare_prep+=/berserking
-            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.darkglare_prep+=/call_action_list,name=covenant,if=!covenant.necrolord&cooldown.summon_darkglare.remains<2
-            if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr" || API.SpellCDDuration(SummonDarkglare) < 200)
-            {
-                Covenant();
-            }
-            //actions.darkglare_prep+=/summon_darkglare
-            if (API.CanCast(SummonDarkglare))
-            {
-                API.CastSpell(SummonDarkglare);
-                return;
-            }
-        }
-        private void Covenant()
-        {
-            //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
-            if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
-            {
-                API.CastSpell(ImpendingCatastrophe);
-                return;
-            }
-            //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-            if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
-            {
-                API.CastSpell(DecimatingBolt);
-                return;
-            }
-            //actions.covenant+=/soul_rot,if=cooldown.summon_darkglare.remains<5|cooldown.summon_darkglare.remains>50|cooldown.summon_darkglare.remains>25&conduit.corrupting_leer.enabled
-            if (!API.SpellISOnCooldown(SoulRot) && PlayerCovenantSettings == "Night Fae" && (API.SpellCDDuration(SummonDarkglare) < 5000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
-            {
-                API.CastSpell(SoulRot);
-                return;
-            }
-            //actions.covenant+=/scouring_tithe
-            if (!API.SpellISOnCooldown(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsCasting(true))
-            {
-                API.CastSpell(ScouringTithe);
-                return;
-            }
-        }
-        private void SE()
-        {
-            //actions.se = haunt
-            if (API.CanCast(Haunt) && TalentHaunt)
-            {
-                API.CastSpell(Haunt);
-                return;
-            }
-            //actions.se +=/ drain_soul,interrupt_global = 1,interrupt_if = debuff.shadow_embrace.stack >= 3
-            if (API.CanCast(DrainSoul) && TalentDrainSoul)
-            {
-                API.CastSpell(DrainSoul);
-                return;
-            }
-            //actions.se +=/ shadow_bolt
-            if (API.CanCast(ShadowBolt) && !TalentDrainSoul)
-            {
-                API.CastSpell(ShadowBolt);
-                return;
-            }
-        }
+
         public override void OutOfCombatPulse()
         {
             if (DumpWatchHigh.IsRunning)
