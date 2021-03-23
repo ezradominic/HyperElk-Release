@@ -1515,7 +1515,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.se +=/ drain_soul,interrupt_global = 1,interrupt_if = debuff.shadow_embrace.stack >= 3
-                if (API.CanCast(DrainSoul) && TalentDrainSoul)
+                if (API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling)
                 {
                     API.CastSpell(DrainSoul);
                     return;
