@@ -101,7 +101,10 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(buff, false, true);
         }
-
+        private static int TargetDebuffRemainingTime(string buff)
+        {
+            return API.TargetDebuffRemainingTime(buff, true);
+        }
         public override void Initialize()
         {
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
@@ -310,19 +313,19 @@ namespace HyperElk.Core
             if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
                 //actions.aoe=phantom_singularity
-                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && !API.PlayerIsCasting(true))
+                if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity)
                 {
                     API.CastSpell(PhantomSingularity);
                     return;
                 }
                 //actions.aoe+=/haunt
-                if (API.CanCast(Haunt) && TalentHaunt && !API.PlayerIsCasting(true))
+                if (API.CanCast(Haunt) && TalentHaunt)
                 {
                     API.CastSpell(Haunt);
                     return;
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&dot.impending_catastrophe_dot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && TargetHasDebuff(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetDebuffRemainingTime(PhantomSingularity) > 200 || !TalentPhantomSingularity))
+                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && TargetHasDebuff(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetDebuffRemainingTime(PhantomSingularity) > 200 || !TalentPhantomSingularity))
                 {
                     //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                     if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -360,7 +363,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                         {
                             API.CastSpell(DecimatingBolt);
                             return;
@@ -425,7 +428,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                         {
                             API.CastSpell(DecimatingBolt);
                             return;
@@ -489,7 +492,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                         {
                             API.CastSpell(DecimatingBolt);
                             return;
@@ -515,7 +518,7 @@ namespace HyperElk.Core
                     }
                 }
                 //actions.aoe+=/seed_of_corruption,if=talent.sow_the_seeds.enabled&can_seed
-                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000) && !API.PlayerIsCasting(true))
+                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !TargetHasDebuff(SeedofCorruption) && (TargetDebuffRemainingTime(Corruption) <= 400 || TargetDebuffRemainingTime(SeedofCorruption) <= 1000) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
@@ -529,7 +532,7 @@ namespace HyperElk.Core
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony<4,target_if=!dot.agony.ticking
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony>=4,target_if=refreshable&dot.agony.ticking
                 //actions.aoe+=/unstable_affliction,if=dot.unstable_affliction.refreshable
-                if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
+                if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetDebuffRemainingTime(UnstableAffliction) < 450)
                 {
                     API.CastSpell(UnstableAffliction);
                 }
@@ -549,7 +552,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -606,7 +609,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                         {
                             API.CastSpell(DecimatingBolt);
                             return;
@@ -670,7 +673,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                         {
                             API.CastSpell(DecimatingBolt);
                             return;
@@ -734,7 +737,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                        if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                         {
                             API.CastSpell(DecimatingBolt);
                             return;
@@ -796,7 +799,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -873,7 +876,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -937,7 +940,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1001,7 +1004,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1027,7 +1030,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/agony,if=dot.agony.remains<4
-            if (API.CanCast(Agony) && !LastCastAgony && API.TargetDebuffRemainingTime(Agony) <= 400)
+            if (API.CanCast(Agony) && !LastCastAgony && TargetDebuffRemainingTime(Agony) <= 450)
             {
                 API.CastSpell(Agony);
                 return;
@@ -1078,7 +1081,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1142,7 +1145,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1206,7 +1209,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1238,7 +1241,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/seed_of_corruption,if=active_enemies>2&talent.siphon_life.enabled&!dot.seed_of_corruption.ticking&!in_flight&dot.corruption.remains<4
-            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSiphonLife && !TargetHasDebuff(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) < 400 && !API.PlayerIsCasting(true))
+            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSiphonLife && !TargetHasDebuff(SeedofCorruption) && TargetDebuffRemainingTime(Corruption) < 400 && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(SeedofCorruption);
                 return;
@@ -1250,13 +1253,13 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/unstable_affliction,if=dot.unstable_affliction.remains<4
-            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetDebuffRemainingTime(UnstableAffliction) < 450)
             {
                 API.CastSpell(UnstableAffliction);
                 return;
             }
             //actions+=/siphon_life,if=dot.siphon_life.remains<4
-            if (API.CanCast(SiphonLife) && !LastCastSiphonLife && TalentSiphonLife && API.TargetDebuffRemainingTime(SiphonLife) < 400)
+            if (API.CanCast(SiphonLife) && !LastCastSiphonLife && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 450)
             {
                 API.CastSpell(SiphonLife);
                 return;
@@ -1272,7 +1275,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(DecimatingBolt);
                     return;
@@ -1291,7 +1294,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/corruption,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)&dot.corruption.remains<2
-            if (API.CanCast(Corruption) && !LastCastCorruption && API.TargetDebuffRemainingTime(Corruption) <= 350)
+            if (API.CanCast(Corruption) && !LastCastCorruption && TargetDebuffRemainingTime(Corruption) <= 450)
             {
                 API.CastSpell(Corruption);
                 return;
@@ -1348,7 +1351,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1412,7 +1415,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1476,7 +1479,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                    if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                     {
                         API.CastSpell(DecimatingBolt);
                         return;
@@ -1509,7 +1512,7 @@ namespace HyperElk.Core
             }
             //actions+=/call_action_list,name=item
             //actions+=/call_action_list,name=se,if=debuff.shadow_embrace.stack<(2-action.shadow_bolt.in_flight)|debuff.shadow_embrace.remains<3
-            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || API.TargetDebuffRemainingTime(ShadowEmbrace) < 350)
+            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || TargetDebuffRemainingTime(ShadowEmbrace) < 350)
             {
                 //actions.se = haunt
                 if (API.CanCast(Haunt) && TalentHaunt)
@@ -1566,7 +1569,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.covenant+=/decimating_bolt,if=cooldown.summon_darkglare.remains>5&(debuff.haunt.remains>4|!talent.haunt.enabled)
-                if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (API.TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
+                if (!API.SpellISOnCooldown(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && API.SpellCDDuration(SummonDarkglare) > 500 && (TargetDebuffRemainingTime(Haunt) > 400 || !TalentHaunt) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(DecimatingBolt);
                     return;
@@ -1585,19 +1588,29 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/agony,if=refreshable
-            if (API.CanCast(Agony) && API.TargetDebuffRemainingTime(Agony) < 200)
+            if (API.CanCast(Agony) && TargetDebuffRemainingTime(Agony) < 450)
             {
                 API.CastSpell(Agony);
                 return;
             }
             //actions+=/agony,cycle_targets=1,if=active_enemies>1,target_if=refreshable
             //actions+=/corruption,if=refreshable&active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)
+            if (API.CanCast(Corruption) && TargetDebuffRemainingTime(Corruption) < 450)
+            {
+                API.CanCast(Corruption);
+                return;
+            }
             //actions+=/unstable_affliction,if=refreshable
-            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetDebuffRemainingTime(UnstableAffliction) < 450)
             {
                 API.CastSpell(UnstableAffliction);
             }
             //actions+=/siphon_life,if=refreshable
+            if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 450)
+            {
+                API.CastSpell(SiphonLife);
+                return;
+            }
             //actions+=/siphon_life,cycle_targets=1,if=active_enemies>1,target_if=refreshable
             //actions+=/corruption,cycle_targets=1,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled),target_if=refreshable
 
