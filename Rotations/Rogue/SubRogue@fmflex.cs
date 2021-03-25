@@ -33,6 +33,8 @@ namespace HyperElk.Core
         private string Feint = "Feint";
         private string Evasion = "Evasion";
         private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string TricksoftheTrade = "Tricks of the Trade";
 
         private string FindWeakness = "Find Weakness";
         private string Premeditation = "Premeditation";
@@ -48,15 +50,15 @@ namespace HyperElk.Core
         private string Soulshape = "Soulshape";
 
         private bool IsSmallCD => API.ToggleIsEnabled("SmallCD");
+        private bool AutoStealth => API.ToggleIsEnabled("Auto Stealth");
 
         //Properties
         private int EvasionLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Evasion)];
         private int CrimsonVialLifePercent => percentListProp[CombatRoutine.GetPropertyInt(CrimsonVial)];
         private int FeintLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Feint)];
-        private bool AutoStealth => CombatRoutine.GetPropertyBool("AUTOSTEALTH");
 
         private int PhialofSerenityLifePercent => percentListProp[CombatRoutine.GetPropertyInt(PhialofSerenity)];
-
+        private int SpiritualHealingPotionLifePercent => percentListProp[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         //Talents
 
         bool TalentWeaponmast => API.PlayerIsTalentSelected(1, 1);
@@ -145,6 +147,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Gloomblade, 200758, "D1");
             CombatRoutine.AddSpell(SecretTechnique, 280719, "D1");
             CombatRoutine.AddSpell(ShurikenTornado, 277925);
+            CombatRoutine.AddSpell(TricksoftheTrade, 57934);
 
             CombatRoutine.AddSpell(EchoingReprimand, 323547);
             CombatRoutine.AddSpell(SerratedBoneSpike, 328547);
@@ -167,25 +170,28 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Subterfuge, 108208);
             CombatRoutine.AddBuff(MasterofShadows, 196976);
             CombatRoutine.AddBuff(Soulshape, 310143);
+            CombatRoutine.AddBuff(TricksoftheTrade, 59628);
 
             CombatRoutine.AddDebuff(Rupture, 1943);
             CombatRoutine.AddDebuff(FindWeakness, 316219);
             CombatRoutine.AddDebuff(Flagellation, 323654);
+            CombatRoutine.AddDebuff(SerratedBoneSpike, 324073);
 
             CombatRoutine.AddConduit(LeadbyExample);
 
 
             CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
             //CB Properties
-
-            CombatRoutine.AddProp("AUTOSTEALTH", "Auto Stealth", true, "Auto Stealth when not in combat", "Generic");
 
             CombatRoutine.AddProp(Evasion, Evasion + " Life Percent", percentListProp, "Life percent at which" + Evasion + "is used, set to 0 to disable", "Defense", 4);
             CombatRoutine.AddProp(CrimsonVial, CrimsonVial + " Life Percent", percentListProp, "Life percent at which" + CrimsonVial + "is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Feint, Feint + " Life Percent", percentListProp, "Life percent at which" + Feint + "is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", percentListProp, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", percentListProp, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", percentListProp, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 4);
 
             CombatRoutine.AddToggle("SmallCD");
+            CombatRoutine.AddToggle("Auto Stealth");
         }
 
 
@@ -196,11 +202,6 @@ namespace HyperElk.Core
                 if (API.PlayerHealthPercent <= CrimsonVialLifePercent && API.CanCast(CrimsonVial) && API.PlayerEnergy >= 20)
                 {
                     API.CastSpell(CrimsonVial);
-                    return;
-                }
-                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
-                {
-                    API.CastSpell(PhialofSerenity);
                     return;
                 }
             }
@@ -225,6 +226,21 @@ namespace HyperElk.Core
                 if (API.PlayerHealthPercent <= FeintLifePercent && API.CanCast(Feint) && API.PlayerEnergy >= 35)
                 {
                     API.CastSpell(Feint);
+                    return;
+                }
+                if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
+                    return;
+                }
+                if (API.CanCast(TricksoftheTrade) && API.FocusRange < 100 && API.FocusHealthPercent != 0 && IsMelee && !API.PlayerHasBuff(TricksoftheTrade, false, false))
+                {
+                    API.CastSpell(TricksoftheTrade);
                     return;
                 }
 

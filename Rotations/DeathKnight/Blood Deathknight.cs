@@ -67,7 +67,10 @@ namespace HyperElk.Core
 
         private string trinket1 = "trinket1";
         private string trinket2 = "trinket2";
-
+        private string PhialofSerenity = "Phial of Serenity";
+        private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private int PhialofSerenityLifePercent => percentListProp[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => percentListProp[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
 
         public override void Initialize()
         {
@@ -141,6 +144,12 @@ namespace HyperElk.Core
 
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
+
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", percentListProp, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", percentListProp, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 4);
+
         }
 
         public override void CombatPulse()
@@ -197,6 +206,16 @@ namespace HyperElk.Core
                         API.CastSpell(IceboundFortitude);
                         return;
                     }
+                    if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                    {
+                        API.CastSpell(PhialofSerenity);
+                        return;
+                    }
+                    if (API.PlayerItemCanUse(SpiritualHealingPotion) && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                    {
+                        API.CastSpell(SpiritualHealingPotion);
+                        return;
+                    }
                     //Vampiric Blood
                     if (API.CanCast(VampiricBlood) && API.PlayerHealthPercent <= VampiricBloodPercentLife && PlayerLevel >= 29)
                     {
@@ -225,6 +244,7 @@ namespace HyperElk.Core
                         API.CastSpell(Tombstone);
                         return;
                     }
+
                 }
                 rotation();
                 return;
