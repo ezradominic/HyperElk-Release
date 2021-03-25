@@ -15,7 +15,7 @@ namespace HyperElk.Core
         private string AvengingWrath = "Avenging Wrath";
         private string HammerofWrath = "Hammer of Wrath";
         private string DivineStorm = "Divine Storm";
-
+        private string FinalVerdict = "Final Verdict";
         private string FinalReckoning = "Final Reckoning";
         private string Seraphim = "Seraphim";
         private string ExecutionSentence = "Execution Sentence";
@@ -98,6 +98,7 @@ namespace HyperElk.Core
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         string[] AlwaysCooldownsList = new string[] { "always", "with Cooldowns", "on AOE" };
+        string[] CDUsagewithAOEandSmallCDs = new string[] { "Not Used", "With Cooldowns", "On Cooldown", "With Small CDs", "on AOE" };
 
         private int FlashofLightLifePercent => numbList[CombatRoutine.GetPropertyInt("FOLOOCPCT")];
         private bool FLashofLightOutofCombat => CombatRoutine.GetPropertyBool("FOLOOC");
@@ -115,11 +116,11 @@ namespace HyperElk.Core
         private int FlashofLightLifePercentProcFocus => numbList[CombatRoutine.GetPropertyInt(FlashofLight + "focus")];
         private int FlashofLightLifePercentProcMouseover => numbList[CombatRoutine.GetPropertyInt(FlashofLight + "mouseover")];
         private int ConsecrationLifePercent => numbList[CombatRoutine.GetPropertyInt(Consecration)];
-        private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
-        private string UseSeraphim => CDUsage[CombatRoutine.GetPropertyInt("UseSeraphim")];
-        private string UseWakeofAshes => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseWakeofAshes")];
-        private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
-        private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private string UseCovenant => CDUsagewithAOEandSmallCDs[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UseSeraphim => CDUsagewithAOEandSmallCDs[CombatRoutine.GetPropertyInt("UseSeraphim")];
+        private string UseWakeofAshes => CDUsagewithAOEandSmallCDs[CombatRoutine.GetPropertyInt("UseWakeofAshes")];
+        private string UseTrinket1 => CDUsagewithAOEandSmallCDs[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => CDUsagewithAOEandSmallCDs[CombatRoutine.GetPropertyInt("Trinket2")];
         private int BlessingofProtectionPlayerPercent => numbList[CombatRoutine.GetPropertyInt(BlessingofProtection + "player")];
         private int BlessingofProtectionFocusPercent => numbList[CombatRoutine.GetPropertyInt(BlessingofProtection + "focus")];
         private int BlessingofProtectionMouseoverPercent => numbList[CombatRoutine.GetPropertyInt(BlessingofProtection + "mouseover")];
@@ -141,6 +142,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(BladeofJustice, 184575, "D1");
             CombatRoutine.AddSpell(Consecration, 26573, "D4");
             CombatRoutine.AddSpell(TemplarsVerdict, 85256, "D3");
+            CombatRoutine.AddSpell(FinalVerdict, 336872, "D3");
             CombatRoutine.AddSpell(DivineStorm, 53385, "D3");
             CombatRoutine.AddSpell(FinalReckoning, 343721, "D3");
             CombatRoutine.AddSpell(Seraphim, 152262, "D3");
@@ -216,33 +218,33 @@ namespace HyperElk.Core
             //CBProperties
             CombatRoutine.AddProp("FOLOOCPCT", "Out of combat Life Percent", numbList, "Life percent at which Flash of Light is used out of combat to heal you between pulls", FlashofLight, 7);
             CombatRoutine.AddProp("FOLOOC", "Out of Combat Healing", true, "Should the bot use Flash of Light out of combat to heal you between pulls", FlashofLight);
-            CombatRoutine.AddProp(FlashofLight + "player", "Selfless Healer Player", numbList, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", "Defense - Flash of Light", 5);
-            CombatRoutine.AddProp(FlashofLight + "focus", "Selfless Healer Focus", numbList, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", "Defense - Flash of Light", 5);
-            CombatRoutine.AddProp(FlashofLight + "mouseover", "Selfless Healer Mouseover", numbList, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", "Defense - Flash of Light", 5);
+            CombatRoutine.AddProp(FlashofLight + "player", "Selfless Healer Player", numbList, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", "Defense - Flash of Light", 50);
+            CombatRoutine.AddProp(FlashofLight + "focus", "Selfless Healer Focus", numbList, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", "Defense - Flash of Light", 50);
+            CombatRoutine.AddProp(FlashofLight + "mouseover", "Selfless Healer Mouseover", numbList, "Life percent at which " + FlashofLight + " is used with selfless healer procs, set to 0 to disable", "Defense - Flash of Light", 50);
 
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
 
-            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
-            CombatRoutine.AddProp("UseSeraphim", "Use " + Seraphim, CDUsage, "Use " + Seraphim + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp("UseWakeofAshes", "Use " + "Wake of Ashes", CDUsageWithAOE, "Use " + WakeofAshes + " always, with Cooldowns", "Cooldowns", 0);
-            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
-            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsagewithAOEandSmallCDs, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 2);
+            CombatRoutine.AddProp("UseSeraphim", "Use " + Seraphim, CDUsagewithAOEandSmallCDs, "Use " + Seraphim + " always, with Cooldowns", "Cooldowns", 2);
+            CombatRoutine.AddProp("UseWakeofAshes", "Use " + "Wake of Ashes", CDUsagewithAOEandSmallCDs, "Use " + WakeofAshes + " always, with Cooldowns", "Cooldowns", 2);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsagewithAOEandSmallCDs, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 2);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsagewithAOEandSmallCDs, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 2);
             CombatRoutine.AddProp("AURASWITCH", "Auto Aura Switch", true, "Auto Switch Aura between Crusader Aura and Devotion Aura", "Generic");
 
-            CombatRoutine.AddProp(LayOnHands + "player", LayOnHands + " Player" + " Life Percent", numbList, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
-            CombatRoutine.AddProp(LayOnHands + "focus", LayOnHands + " Focus" + " Life Percent", numbList, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
-            CombatRoutine.AddProp(LayOnHands + "mouseover", LayOnHands + " Mouseover" + " Life Percent", numbList, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 2);
+            CombatRoutine.AddProp(LayOnHands + "player", LayOnHands + " Player" + " Life Percent", numbList, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 20);
+            CombatRoutine.AddProp(LayOnHands + "focus", LayOnHands + " Focus" + " Life Percent", numbList, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 20);
+            CombatRoutine.AddProp(LayOnHands + "mouseover", LayOnHands + " Mouseover" + " Life Percent", numbList, "Life percent at which" + LayOnHands + "is used, set to 0 to disable", "Defense - Lay on Hands", 20);
             CombatRoutine.AddProp(Consecration, "Consecration | Golden Path" + " Life Percent", numbList, "Life percent at which" + Consecration + "is used, set to 0 to disable", "Defense", 2);
-            CombatRoutine.AddProp(BlessingofProtection + "player", BlessingofProtection + " Player" + " Life Percent", numbList, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
-            CombatRoutine.AddProp(BlessingofProtection + "focus", BlessingofProtection + " Focus" + " Life Percent", numbList, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
-            CombatRoutine.AddProp(BlessingofProtection + "mouseover", BlessingofProtection + " Mouseover" + " Life Percent", numbList, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 2);
+            CombatRoutine.AddProp(BlessingofProtection + "player", BlessingofProtection + " Player" + " Life Percent", numbList, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 20);
+            CombatRoutine.AddProp(BlessingofProtection + "focus", BlessingofProtection + " Focus" + " Life Percent", numbList, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 20);
+            CombatRoutine.AddProp(BlessingofProtection + "mouseover", BlessingofProtection + " Mouseover" + " Life Percent", numbList, "Life percent at which" + BlessingofProtection + "is used, set to 0 to disable", "Defense - Blessing of Protection", 20);
 
-            CombatRoutine.AddProp(ShieldofVengeance, ShieldofVengeance + " Life Percent", numbList, "Life percent at which" + ShieldofVengeance + "is used, set to 0 to disable", "Defense", 6);
-            CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 3);
-            CombatRoutine.AddProp("WOGplayer", WordOfGlory + " Player", numbList, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 5);
-            CombatRoutine.AddProp("WOGfocus", WordOfGlory + " Focus", numbList, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 5);
-            CombatRoutine.AddProp("WOGmouseover", WordOfGlory + " Mouseover", numbList, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 5);
+            CombatRoutine.AddProp(ShieldofVengeance, ShieldofVengeance + " Life Percent", numbList, "Life percent at which" + ShieldofVengeance + "is used, set to 0 to disable", "Defense", 60);
+            CombatRoutine.AddProp(DivineShield, DivineShield + " Life Percent", numbList, "Life percent at which" + DivineShield + "is used, set to 0 to disable", "Defense", 30);
+            CombatRoutine.AddProp("WOGplayer", WordOfGlory + " Player", numbList, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 50);
+            CombatRoutine.AddProp("WOGfocus", WordOfGlory + " Focus", numbList, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 50);
+            CombatRoutine.AddProp("WOGmouseover", WordOfGlory + " Mouseover", numbList, "Life percent at which Word of Glory is used", "Defense - Word of Glory", 50);
 
 
 
@@ -424,23 +426,23 @@ namespace HyperElk.Core
                 return;
             }
             //generators->add_action("divine_toll,if=!debuff.judgment.up&(!raid_event.adds.exists|raid_event.adds.in>30)&(holy_power<=2|holy_power<=4&(cooldown.blade_of_justice.remains>gcd*2|debuff.execution_sentence.up|debuff.final_reckoning.up))&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains>gcd*10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains>gcd*10)");
-            if (API.CanCast(DivineToll) && (holy_power <= 4 - ((Conduit_enabled(RingingClarity) || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) ? 2 : 0)) && (!Conduit_enabled(RingingClarity) || !IsAOE || API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE || (Conduit_enabled(RingingClarity) || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
+            if (API.CanCast(DivineToll) && (holy_power <= 4 - ((Conduit_enabled(RingingClarity) || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) ? 2 : 0)) && (!Conduit_enabled(RingingClarity) || !IsAOE || API.TargetUnitInRangeCount < AOEUnitNumber && IsAOE || (Conduit_enabled(RingingClarity) || API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && holy_power <= 2) && !TargetHasDebuff(Judgment) && (!Talent_ExecutionSentence || TargetHasDebuff(ExecutionSentence)) && PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "With Small CDs" && UseSmallCD || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && API.TargetRange <= 30)
             {
                 API.CastSpell(DivineToll);
                 return;
             }
             //cds->add_action("ashen_hallow");
-            if (API.CanCast(AshenHallow) && !API.PlayerIsMoving && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (API.CanCast(AshenHallow) && !API.PlayerIsMoving && API.TargetRange <= 30 && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "With Small CDs" && UseSmallCD || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell(AshenHallow);
                 return;
             }
-            if (API.CanCast(VanquishersHammer) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (API.CanCast(VanquishersHammer) && API.TargetRange <= 30 && PlayerCovenantSettings == "Necrolord" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "With Small CDs" && UseSmallCD || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell(VanquishersHammer);
                 return;
             }
-            if (PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (PlayerCovenantSettings == "Night Fae" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "With Small CDs" && UseSmallCD || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 if (API.CanCast(BlessingofSpring))
                 {
@@ -463,18 +465,18 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "With Small CDs" && UseSmallCD || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
             {
                 API.CastSpell("Trinket1");
                 return;
             }
-            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "With Small CDs" && UseSmallCD || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE) && IsMelee)
             {
                 API.CastSpell("Trinket2");
                 return;
             }
             //Seraphim if Avenging Wrath / Crusade are active OR remain on cooldown for greater than 25 seconds. &&(!talent.final_reckoning.enabled|cooldown.final_reckoning.remains<10)&(!talent.execution_sentence.enabled|cooldown.execution_sentence.remains<10)
-            if (Talent_Seraphim && !gcd_to_hpg && API.CanCast(Seraphim) && UseSeraphim != "Not Used" && (UseSeraphim == "On Cooldown" || UseSeraphim == "With Cooldowns" && (IsCooldowns || UseSmallCD)) && IsMelee && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 2500) || Buff_or_CDmorethan(Crusade, 2500)) && (!Talent_FinalReckoning || API.SpellCDDuration(FinalReckoning) < 1000) && (!Talent_ExecutionSentence || API.SpellCDDuration(ExecutionSentence) < 100))
+            if (Talent_Seraphim && !gcd_to_hpg && API.CanCast(Seraphim) && UseSeraphim != "Not Used" && (UseSeraphim == "On Cooldown" || UseSeraphim == "With Cooldowns" && IsCooldowns || UseSeraphim == "With Small CDs" && UseSmallCD) && IsMelee && (!IsCooldowns || Buff_or_CDmorethan(AvengingWrath, 2500) || Buff_or_CDmorethan(Crusade, 2500)) && (!Talent_FinalReckoning || API.SpellCDDuration(FinalReckoning) < 1000) && (!Talent_ExecutionSentence || API.SpellCDDuration(ExecutionSentence) < 100))
             {
                 API.CastSpell(Seraphim);
                 return;
@@ -486,21 +488,26 @@ namespace HyperElk.Core
                 return;
             }
             //Templar's Verdict with 5HP.
-            if (API.CanCast(TemplarsVerdict) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && holy_power >= 5 && IsMelee && PlayerLevel >= 10)
+            if ((holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && holy_power >= 5 && IsMelee && PlayerLevel >= 10)
             {
-                if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
+                if (API.CanCast(DivineStorm) && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
                 {
                     API.CastSpell(DivineStorm);
                     return;
                 }
-                else
+                else if (API.CanCast(TemplarsVerdict))
                 {
                     API.CastSpell(TemplarsVerdict);
                     return;
                 }
+                else if (API.CanCast(FinalVerdict))
+                {
+                    API.CastSpell(FinalVerdict);
+                    return;
+                }
             }
             //Wake of Ashes at 0HP OR at 2HP or less if Blade of Justice remains on CD for greater than 2 GCDs. saved for Execution Sentence and/or Final Reckoning.
-            if (API.CanCast(WakeofAshes) && (API.PlayerCurrentHolyPower == 0 || (API.PlayerCurrentHolyPower <= 2 && API.SpellCDDuration(BladeofJustice) > 2 * gcd)) && (!IsCooldowns || (!Talent_FinalReckoning || TargetHasDebuff(FinalReckoning)) && (TargetHasDebuff(ExecutionSentence) || !Talent_ExecutionSentence)) && IsMelee && PlayerLevel >= 39 && (UseWakeofAshes == "With Cooldowns" && (IsCooldowns || UseSmallCD) || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (API.CanCast(WakeofAshes) && (API.PlayerCurrentHolyPower == 0 || (API.PlayerCurrentHolyPower <= 2 && API.SpellCDDuration(BladeofJustice) > 2 * gcd)) && (!IsCooldowns || (!Talent_FinalReckoning || TargetHasDebuff(FinalReckoning)) && (TargetHasDebuff(ExecutionSentence) || !Talent_ExecutionSentence)) && IsMelee && PlayerLevel >= 39 && (UseWakeofAshes == "With Cooldowns" && IsCooldowns || UseWakeofAshes == "With Small CDs" && UseSmallCD || UseWakeofAshes == "On Cooldown" || UseWakeofAshes == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell(WakeofAshes);
                 return;
@@ -524,16 +531,21 @@ namespace HyperElk.Core
                 return;
             }
             //Templar's Verdict if Avenging Wrath/Crusade are active, target is below 20% health, or with a Divine Purpose proc. Divine Storm with Empyrean Power proc.
-            if (API.CanCast(TemplarsVerdict) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && (PlayerHasBuff(AvengingWrath) || PlayerHasBuff(Crusade) || API.TargetHealthPercent < 20 || PlayerHasBuff(DivinePurpose)) && IsMelee && PlayerLevel >= 10)
+            if ((holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && (PlayerHasBuff(AvengingWrath) || PlayerHasBuff(Crusade) || API.TargetHealthPercent < 20 || PlayerHasBuff(DivinePurpose)) && IsMelee && PlayerLevel >= 10)
             {
-                if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
+                if (API.CanCast(DivineStorm) && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
                 {
                     API.CastSpell(DivineStorm);
                     return;
                 }
-                else
+                else if (API.CanCast(TemplarsVerdict))
                 {
                     API.CastSpell(TemplarsVerdict);
+                    return;
+                }
+                else if (API.CanCast(FinalVerdict))
+                {
+                    API.CastSpell(FinalVerdict);
                     return;
                 }
             }
@@ -550,16 +562,21 @@ namespace HyperElk.Core
                 return;
             }
             //Templar's Verdict at 4HP or less.
-            if (API.CanCast(TemplarsVerdict) && (holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && holy_power <= 4 && IsMelee && PlayerLevel >= 10)
+            if ((holy_power >= 3 || PlayerHasBuff(DivinePurpose)) && holy_power <= 4 && IsMelee && PlayerLevel >= 10)
             {
-                if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
+                if (API.CanCast(DivineStorm) && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && API.PlayerLevel >= 23)
                 {
                     API.CastSpell(DivineStorm);
                     return;
                 }
-                else
+                else if (API.CanCast(TemplarsVerdict))
                 {
                     API.CastSpell(TemplarsVerdict);
+                    return;
+                }
+                else if (API.CanCast(FinalVerdict))
+                {
+                    API.CastSpell(FinalVerdict);
                     return;
                 }
             }
