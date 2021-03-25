@@ -526,7 +526,7 @@ namespace HyperElk.Core
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony<4,target_if=!dot.agony.ticking
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony>=4,target_if=refreshable&dot.agony.ticking
                 //actions.aoe+=/unstable_affliction,if=dot.unstable_affliction.refreshable
-                if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 200)
+                if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
                 {
                     API.CastSpell(UnstableAffliction);
                 }
@@ -1247,7 +1247,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/unstable_affliction,if=dot.unstable_affliction.remains<4
-            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 200)
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
             {
                 API.CastSpell(UnstableAffliction);
                 return;
@@ -1506,7 +1506,7 @@ namespace HyperElk.Core
             }
             //actions+=/call_action_list,name=item
             //actions+=/call_action_list,name=se,if=debuff.shadow_embrace.stack<(2-action.shadow_bolt.in_flight)|debuff.shadow_embrace.remains<3
-            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || API.TargetDebuffRemainingTime(ShadowEmbrace) < 300 && !API.PlayerIsCasting(true))
+            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || API.TargetDebuffRemainingTime(ShadowEmbrace) < 350)
             {
                 //actions.se = haunt
                 if (API.CanCast(Haunt) && TalentHaunt)
@@ -1590,7 +1590,7 @@ namespace HyperElk.Core
             //actions+=/agony,cycle_targets=1,if=active_enemies>1,target_if=refreshable
             //actions+=/corruption,if=refreshable&active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)
             //actions+=/unstable_affliction,if=refreshable
-            if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) < 200)
+            if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
             {
                 API.CastSpell(UnstableAffliction);
             }
