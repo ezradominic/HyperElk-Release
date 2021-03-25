@@ -18,6 +18,7 @@
 // v2.6 new simc apl and new settings options
 // v2.65 small hotfix for mobcount
 // v2.7 fix typo
+// v2.8 stopcasting fix
 
 using System.Diagnostics;
 
@@ -146,7 +147,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.7");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.8");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
@@ -291,7 +292,7 @@ namespace HyperElk.Core
                 API.CastSpell(Stopcast);
                 return;
             }
-            if (API.PlayerCurrentCastTimeRemaining > 40 && !API.MacroIsIgnored(Stopcast) && TalentMasterofTheElements && API.PlayerMaelstrom >= 60 && API.PlayerHasBuff(MasteroftheElements) && !API.PlayerHasBuff(Stormkeeper))
+            if ((API.PlayerCurrentCastTimeRemaining > 40 && (API.PlayerCurrentCastSpellID == 188196 || API.PlayerCurrentCastSpellID == 188443) && !API.MacroIsIgnored(Stopcast) && TalentMasterofTheElements && API.PlayerMaelstrom >= 60 && API.PlayerHasBuff(MasteroftheElements) && !API.PlayerHasBuff(Stormkeeper))
             {
                 API.CastSpell(Stopcast);
                 return;
