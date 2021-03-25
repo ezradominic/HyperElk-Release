@@ -73,7 +73,7 @@ namespace HyperElk.Core
 
 
         //CBProperties      
-        bool DotCheck => API.TargetHasDebuff(Corruption) && API.TargetHasDebuff(Agony) && API.TargetHasDebuff(UnstableAffliction) && (API.TargetHasDebuff(SoulRot) || !API.TargetHasDebuff(SoulRot));
+        bool DotCheck => TargetHasDebuff(Corruption) && TargetHasDebuff(Agony) && TargetHasDebuff(UnstableAffliction) && (TargetHasDebuff(SoulRot) || !TargetHasDebuff(SoulRot));
         bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction || API.CurrentCastSpellID("player") == 316099;
         bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe;
         bool LastCastAgony => API.LastSpellCastInGame == Agony;
@@ -97,7 +97,10 @@ namespace HyperElk.Core
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
-
+        private static bool TargetHasDebuff(string buff)
+        {
+            return API.TargetHasDebuff(buff, false, true);
+        }
 
         public override void Initialize()
         {
@@ -224,7 +227,7 @@ namespace HyperElk.Core
                 API.CastSpell(FelDomination);
                 return;
             }
-            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !API.TargetHasDebuff(SeedofCorruption) && IsRange)
+            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
             {
                 API.CastSpell(Corruption + "MO");
                 return;
@@ -289,7 +292,7 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(VileTaint);
                 }
-                if (TalentPhantomSingularity && (API.TargetHasDebuff(PhantomSingularity) || API.SpellISOnCooldown(PhantomSingularity)) || TalentVileTaint && (API.TargetHasDebuff(VileTaint) || API.SpellISOnCooldown(VileTaint)))
+                if (TalentPhantomSingularity && (TargetHasDebuff(PhantomSingularity) || API.SpellISOnCooldown(PhantomSingularity)) || TalentVileTaint && (TargetHasDebuff(VileTaint) || API.SpellISOnCooldown(VileTaint)))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -319,7 +322,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&dot.impending_catastrophe_dot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && API.TargetHasDebuff(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetDebuffRemainingTime(PhantomSingularity) > 200 || !TalentPhantomSingularity))
+                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && TargetHasDebuff(ImpendingCatastrophe) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetDebuffRemainingTime(PhantomSingularity) > 200 || !TalentPhantomSingularity))
                 {
                     //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                     if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -384,7 +387,7 @@ namespace HyperElk.Core
 
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&dot.soul_rot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && API.TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
+                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
                 {
                     //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                     if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -448,7 +451,7 @@ namespace HyperElk.Core
                     }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
-                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity))
+                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && TargetHasDebuff(PhantomSingularity))
                 {
                     //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                     if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -512,13 +515,13 @@ namespace HyperElk.Core
                     }
                 }
                 //actions.aoe+=/seed_of_corruption,if=talent.sow_the_seeds.enabled&can_seed
-                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !API.TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000) && !API.PlayerIsCasting(true))
+                if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && TalentSowTheSeeds && !TargetHasDebuff(SeedofCorruption) && (API.TargetDebuffRemainingTime(Corruption) <= 400 || API.TargetDebuffRemainingTime(SeedofCorruption) <= 1000) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
                 }
                 //actions.aoe+=/seed_of_corruption,if=!talent.sow_the_seeds.enabled&!dot.seed_of_corruption.ticking&!in_flight&dot.corruption.refreshable
-                if (!LastCastSeedOfCorruption && !API.TargetHasDebuff(SeedofCorruption) && !API.TargetHasDebuff(Corruption) && API.CanCast(SeedofCorruption) && IsRange && API.PlayerCurrentSoulShards >= 1 && !API.PlayerIsCasting(true))
+                if (!LastCastSeedOfCorruption && !TargetHasDebuff(SeedofCorruption) && !TargetHasDebuff(Corruption) && API.CanCast(SeedofCorruption) && IsRange && API.PlayerCurrentSoulShards >= 1 && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(SeedofCorruption);
                     return;
@@ -565,7 +568,7 @@ namespace HyperElk.Core
                     }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
                     //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                     if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -629,7 +632,7 @@ namespace HyperElk.Core
                     }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
                     //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                     if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -693,7 +696,7 @@ namespace HyperElk.Core
                     }
                 }
                 //actions.aoe+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+                if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
                 {
                     //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                     if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -764,13 +767,13 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/call_action_list,name=item
                 //actions.aoe+=/malefic_rapture,if=dot.vile_taint.ticking
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
+                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //actions.aoe+=/malefic_rapture,if=dot.soul_rot.ticking&!talent.sow_the_seeds.enabled
-                if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
+                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -832,7 +835,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&dot.impending_catastrophe_dot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -896,7 +899,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&dot.soul_rot.ticking&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-            if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && API.TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
+            if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && TargetHasDebuff(SoulRot) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.SpellCDDuration(PhantomSingularity) > 200 && TalentPhantomSingularity || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -960,7 +963,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&dot.phantom_singularity.ticking&dot.phantom_singularity.remains<2
-            if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+            if (IsCooldowns && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -1037,7 +1040,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
-            if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+            if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || TargetHasDebuff(ImpendingCatastrophe)) && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -1101,7 +1104,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&(covenant.necrolord|covenant.kyrian|covenant.none)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
-            if (IsCooldowns && API.TargetUnitInRangeCount > 2 && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity)
+            if (IsCooldowns && API.TargetUnitInRangeCount > 2 && (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None") && TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity)
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -1165,7 +1168,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=active_enemies>2&covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&(dot.phantom_singularity.ticking|!talent.phantom_singularity.enabled)
-            if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+            if (IsCooldowns && API.TargetUnitInRangeCount > 2 && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || TargetHasDebuff(SoulRot)) && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -1229,13 +1232,13 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/seed_of_corruption,if=active_enemies>2&talent.sow_the_seeds.enabled&!dot.seed_of_corruption.ticking&!in_flight
-            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSowTheSeeds && !API.TargetHasDebuff(Corruption) && !API.PlayerIsCasting(true))
+            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSowTheSeeds && !TargetHasDebuff(Corruption) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(SeedofCorruption);
                 return;
             }
             //actions+=/seed_of_corruption,if=active_enemies>2&talent.siphon_life.enabled&!dot.seed_of_corruption.ticking&!in_flight&dot.corruption.remains<4
-            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSiphonLife && !API.TargetHasDebuff(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) < 400 && !API.PlayerIsCasting(true))
+            if (API.CanCast(SeedofCorruption) && !LastCastSeedOfCorruption && API.TargetUnitInRangeCount > 2 && TalentSiphonLife && !TargetHasDebuff(SeedofCorruption) && API.TargetDebuffRemainingTime(Corruption) < 400 && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(SeedofCorruption);
                 return;
@@ -1288,7 +1291,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/corruption,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)&dot.corruption.remains<2
-            if (API.CanCast(Corruption) && !LastCastCorruption && API.TargetDebuffRemainingTime(Corruption) <= 200)
+            if (API.CanCast(Corruption) && !LastCastCorruption && API.TargetDebuffRemainingTime(Corruption) <= 350)
             {
                 API.CastSpell(Corruption);
                 return;
@@ -1307,7 +1310,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.venthyr&(cooldown.impending_catastrophe.ready|dot.impending_catastrophe_dot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || API.TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && (!API.SpellISOnCooldown(ImpendingCatastrophe) || TargetHasDebuff(ImpendingCatastrophe)) && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -1371,7 +1374,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=(covenant.necrolord|covenant.kyrian|covenant.none)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-            if (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None" && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+            if (PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "None" && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -1435,7 +1438,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/call_action_list,name=darkglare_prep,if=covenant.night_fae&(cooldown.soul_rot.ready|dot.soul_rot.ticking)&cooldown.summon_darkglare.remains<2&(dot.phantom_singularity.remains>2|!talent.phantom_singularity.enabled)
-            if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || API.TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (API.TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
+            if (IsCooldowns && PlayerCovenantSettings == "Night Fae" && (!API.SpellISOnCooldown(SoulRot) || TargetHasDebuff(SoulRot)) && API.SpellCDDuration(SummonDarkglare) < 200 && (TargetHasDebuff(PhantomSingularity) || !TalentPhantomSingularity))
             {
                 //actions.darkglare_prep=vile_taint,if=cooldown.summon_darkglare.remains<2
                 if (API.CanCast(VileTaint) && TalentVileTaint && API.SpellCDDuration(SummonDarkglare) < 200 && !API.PlayerIsCasting(true))
@@ -1528,25 +1531,25 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/malefic_rapture,if=dot.vile_taint.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.impending_catastrophe_dot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(ImpendingCatastrophe) && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(ImpendingCatastrophe) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.soul_rot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && API.TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=talent.phantom_singularity.enabled&(dot.phantom_singularity.ticking|soul_shard>3|time_to_die<cooldown.phantom_singularity.remains)
-            if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (API.TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)) && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)) && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -1590,7 +1593,7 @@ namespace HyperElk.Core
             //actions+=/agony,cycle_targets=1,if=active_enemies>1,target_if=refreshable
             //actions+=/corruption,if=refreshable&active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)
             //actions+=/unstable_affliction,if=refreshable
-            if (API.CanCast(UnstableAffliction) && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && API.TargetDebuffRemainingTime(UnstableAffliction) < 350)
             {
                 API.CastSpell(UnstableAffliction);
             }
