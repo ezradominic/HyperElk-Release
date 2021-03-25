@@ -73,8 +73,10 @@ namespace HyperElk.Core
 
 
         //CBProperties      
-        bool DotCheck => TargetHasDebuff(Corruption) && TargetHasDebuff(Agony) && TargetHasDebuff(UnstableAffliction) && (TargetHasDebuff(SoulRot) || !TargetHasDebuff(SoulRot));
-        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction || API.CurrentCastSpellID("player") == 316099;
+        bool DotCheck => TargetHasDebuff(Corruption) && TargetHasDebuff(Agony) && TargetHasDebuff(UnstableAffliction);
+        bool CurrentCastDrainSoul => API.PlayerCurrentCastSpellID == 198590;
+        bool CurrentCastMaleficRapture => API.PlayerCurrentCastSpellID == 324536;
+        bool LastCastUnstableAffliction => API.LastSpellCastInGame == UnstableAffliction || API.PlayerCurrentCastSpellID == 316099;
         bool LastCastScouringTithe => API.LastSpellCastInGame == ScouringTithe;
         bool LastCastAgony => API.LastSpellCastInGame == Agony;
         bool LastCastCorruption => API.LastSpellCastInGame == Corruption;
@@ -105,6 +107,9 @@ namespace HyperElk.Core
         {
             return API.TargetDebuffRemainingTime(buff, true);
         }
+        float UaTime => 1500 / 1000 / (1f + API.PlayerGetHaste / 1);
+        float HTime => 1500 / 1000 / (1f + API.PlayerGetHaste / 1);
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
@@ -271,6 +276,7 @@ namespace HyperElk.Core
 
         private void rotation()
         {
+            //DOT Refresh
             if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell("Trinket1");
@@ -770,20 +776,20 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/call_action_list,name=item
                 //actions.aoe+=/malefic_rapture,if=dot.vile_taint.ticking
-                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
+                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //actions.aoe+=/malefic_rapture,if=dot.soul_rot.ticking&!talent.sow_the_seeds.enabled
-                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
+                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //actions.aoe+=/malefic_rapture,if=!talent.vile_taint.enabled
                 //actions.aoe+=/malefic_rapture,if=soul_shard>4
-                if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4 && !API.PlayerIsCasting(true))
+                if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -1030,7 +1036,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/agony,if=dot.agony.remains<4
-            if (API.CanCast(Agony) && !LastCastAgony && TargetDebuffRemainingTime(Agony) <= 450)
+            if (API.CanCast(Agony) && !LastCastAgony && TargetDebuffRemainingTime(Agony) < 400)
             {
                 API.CastSpell(Agony);
                 return;
@@ -1253,13 +1259,13 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/unstable_affliction,if=dot.unstable_affliction.remains<4
-            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetDebuffRemainingTime(UnstableAffliction) < 450)
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetDebuffRemainingTime(UnstableAffliction) < 400)
             {
                 API.CastSpell(UnstableAffliction);
                 return;
             }
             //actions+=/siphon_life,if=dot.siphon_life.remains<4
-            if (API.CanCast(SiphonLife) && !LastCastSiphonLife && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 450)
+            if (API.CanCast(SiphonLife) && !LastCastSiphonLife && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 400)
             {
                 API.CastSpell(SiphonLife);
                 return;
@@ -1294,7 +1300,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/corruption,if=active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)&dot.corruption.remains<2
-            if (API.CanCast(Corruption) && !LastCastCorruption && TargetDebuffRemainingTime(Corruption) <= 450)
+            if (API.CanCast(Corruption) && !LastCastCorruption && TargetDebuffRemainingTime(Corruption) < 200)
             {
                 API.CastSpell(Corruption);
                 return;
@@ -1307,7 +1313,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/malefic_rapture,if=soul_shard>4
-            if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4 && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -1512,7 +1518,7 @@ namespace HyperElk.Core
             }
             //actions+=/call_action_list,name=item
             //actions+=/call_action_list,name=se,if=debuff.shadow_embrace.stack<(2-action.shadow_bolt.in_flight)|debuff.shadow_embrace.remains<3
-            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || TargetDebuffRemainingTime(ShadowEmbrace) < 350)
+            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || TargetDebuffRemainingTime(ShadowEmbrace) < 300)
             {
                 //actions.se = haunt
                 if (API.CanCast(Haunt) && TalentHaunt)
@@ -1534,25 +1540,25 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/malefic_rapture,if=dot.vile_taint.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.impending_catastrophe_dot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(ImpendingCatastrophe) && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(ImpendingCatastrophe) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.soul_rot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=talent.phantom_singularity.enabled&(dot.phantom_singularity.ticking|soul_shard>3|time_to_die<cooldown.phantom_singularity.remains)
-            if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)) && !API.PlayerIsCasting(true))
+            if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -1588,25 +1594,25 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/agony,if=refreshable
-            if (API.CanCast(Agony) && TargetDebuffRemainingTime(Agony) < 450)
+            if (API.CanCast(Agony) && TargetDebuffRemainingTime(Agony) < 400)
             {
                 API.CastSpell(Agony);
                 return;
             }
             //actions+=/agony,cycle_targets=1,if=active_enemies>1,target_if=refreshable
             //actions+=/corruption,if=refreshable&active_enemies<4-(talent.sow_the_seeds.enabled|talent.siphon_life.enabled)
-            if (API.CanCast(Corruption) && TargetDebuffRemainingTime(Corruption) < 450)
+            if (API.CanCast(Corruption) && TargetDebuffRemainingTime(Corruption) < 400)
             {
                 API.CanCast(Corruption);
                 return;
             }
             //actions+=/unstable_affliction,if=refreshable
-            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetDebuffRemainingTime(UnstableAffliction) < 450)
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetDebuffRemainingTime(UnstableAffliction) < UaTime + 150)
             {
                 API.CastSpell(UnstableAffliction);
             }
             //actions+=/siphon_life,if=refreshable
-            if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 450)
+            if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 400)
             {
                 API.CastSpell(SiphonLife);
                 return;
