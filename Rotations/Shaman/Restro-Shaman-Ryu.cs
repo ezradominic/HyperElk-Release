@@ -292,6 +292,7 @@ namespace HyperElk.Core
             return API.UnitHasDebuff(buff, unit, false, true);
         }
         bool ChannelingFae => API.CurrentCastSpellID("player") == 328923;
+        bool ChannelingFlesh => API.CurrentCastSpellID("player") == 324631;
         private bool EarthShieldTracking => API.PlayerIsInRaid ? EarthShieldRaidTracking(EarthShield) < 1 : EarthShieldPartyTracking(EarthShield) < 1;
         private bool ManaAoE => API.PlayerIsInRaid ? UnitBelowManaPercentRaid(ManaPercent) >= 3 : API.PlayerMana <= ManaPercent;
         private bool AscendAoE => API.PlayerIsInRaid ? UnitBelowHealthPercentRaid(AscendanceLifePercent) >= AoERaidNumber : UnitBelowHealthPercentParty(AscendanceLifePercent) >= AoENumber;
@@ -435,7 +436,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(EarthShield, 974);
             CombatRoutine.AddBuff(WaterShield, 52127);
             CombatRoutine.AddBuff(SpiritWalkersGrace, 79206);
-            CombatRoutine.AddBuff(PrimordialWave, 326059);
+            CombatRoutine.AddBuff(PrimordialWave, 327164);
             CombatRoutine.AddBuff(VesperTotem, 324386);
             CombatRoutine.AddBuff(UnleashLife, 73685);
             CombatRoutine.AddBuff(Quake, 240447);
@@ -686,7 +687,7 @@ namespace HyperElk.Core
                     DispelWatch.Restart();
                 }
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && (!TargetHasDebuff("Gluttonous Miasma") || !MouseoverHasDebuff("Gluttonous Miasma") && IsMouseover))
+            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && NotChanneling && !ChannelingFlesh && (!TargetHasDebuff("Gluttonous Miasma") || !MouseoverHasDebuff("Gluttonous Miasma") && IsMouseover))
             {
                 if (SpiritWalker && API.CanCast(SpiritWalkersGrace) && API.PlayerIsMoving)
                 {
@@ -698,6 +699,16 @@ namespace HyperElk.Core
                 {
                     API.CastSpell("Stopcast");
                     API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
+                    return;
+                }
+                if (isInterrupt && API.CanCast(WindShear) && Level >= 12 && IsInKickRange)
+                {
+                    API.CastSpell(WindShear);
+                    return;
+                }
+                if (API.CanCast(WindShear) && Level >= 12 && IsInKickRange && CombatRoutine.GetPropertyBool("KICK") && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay))
+                {
+                    API.CastSpell(WindShear + "Focus");
                     return;
                 }
                 if (API.CanCast(Ascendance) && AscendanceTalent && (UseAscend == "With Cooldowns" && IsCooldowns || UseAscend == "On Cooldown" && AscendAoE))
@@ -765,6 +776,16 @@ namespace HyperElk.Core
                 if (NecrolordMOCheck && !API.MacroIsIgnored(PrimordialWave + MO) && IsMouseover && InRange && API.MouseoverHealthPercent > 0)
                 {
                     API.CastSpell(PrimordialWave + "MO");
+                    return;
+                }
+                if (API.PlayerHasBuff(PrimordialWave) && RiptideTracking && API.CanCast(HealingWave) && InRange && !API.PlayerCanAttackTarget && (!QuakingHW || QuakingHW && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                {
+                    API.CastSpell(HealingWave);
+                    return;
+                }
+                if (API.PlayerHasBuff(PrimordialWave) && RiptideTracking && API.CanCast(HealingWave) && !API.MacroIsIgnored(HealingWave + MO) && IsMouseover && InRange && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && (!QuakingHW || QuakingHW && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                {
+                    API.CastSpell(HealingWave + MO);
                     return;
                 }
                 if (API.CanCast(SurgeofEarth) && SurgeofEarthTalent && PlayerHealth <= SurgeofEarthLifePercent && API.TargetHasBuff(EarthShield) && API.TargetBuffStacks(EarthShield) >= 3 && API.TargetHealthPercent > 0)
@@ -1051,16 +1072,6 @@ namespace HyperElk.Core
             if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotChanneling && !API.PlayerIsMoving && SaveQuake)
             {
                 API.CastSpell(Fleshcraft);
-                return;
-            }
-            if (isInterrupt && API.CanCast(WindShear) && Level >= 12 && IsInKickRange)
-            {
-                API.CastSpell(WindShear);
-                return;
-            }
-            if (API.CanCast(WindShear) && Level >= 12 && IsInKickRange && CombatRoutine.GetPropertyBool("KICK") && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay))
-            {
-                API.CastSpell(WindShear + "Focus");
                 return;
             }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)

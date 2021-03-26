@@ -48,6 +48,8 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string FelDomination = "Fel Domination";
         private string InevitableDemise = "Inevitable Demise";
+        private string SpellLock = "Spell Lock";
+
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -155,6 +157,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
             CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
             CombatRoutine.AddSpell(FelDomination, 333889);
+            CombatRoutine.AddSpell(SpellLock, 19647);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -235,21 +238,7 @@ namespace HyperElk.Core
                 API.CastSpell(FelDomination);
                 return;
             }
-            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
-            {
-                API.CastSpell(Corruption + "MO");
-                return;
-            }
-            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
-            {
-                API.CastSpell(Agony + "MO");
-                return;
-            }
-            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
-            {
-                API.CastSpell(SiphonLife + "MO");
-                return;
-            }
+
             if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife))
             {
                 API.CastSpell(DrainLife);
@@ -276,7 +265,11 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            //DOT Refresh
+            if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
+            {
+                API.CastSpell(SpellLock);
+                return;
+            }
             if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell("Trinket1");
@@ -1312,6 +1305,23 @@ namespace HyperElk.Core
                 API.CastSpell(PhantomSingularity);
                 return;
             }
+
+            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
+            {
+                API.CastSpell(Corruption + "MO");
+                return;
+            }
+            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
+            {
+                API.CastSpell(Agony + "MO");
+                return;
+            }
+            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
+            {
+                API.CastSpell(SiphonLife + "MO");
+                return;
+            }
+
             //actions+=/malefic_rapture,if=soul_shard>4
             if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {

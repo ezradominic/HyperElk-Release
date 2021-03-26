@@ -86,6 +86,7 @@ public class HolyPally : CombatRoutine
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string WoGOverLoD = "WoG Over LoD";
+        private string WoGTank2 = "WoG Tank";
 
         private string CrusaderAura = "Crusader Aura";
         private string DevotionAura = "Devotion Aura";
@@ -315,6 +316,8 @@ public class HolyPally : CombatRoutine
         private int WoGLifePercent => numbList[CombatRoutine.GetPropertyInt(WoG)];
         private int WoGMaxLifePercent => numbList[CombatRoutine.GetPropertyInt(WOGMax)];
         private int WoGOverLoDifePercent => numbList[CombatRoutine.GetPropertyInt(WoGOverLoD)];
+        private int WoGTankifePercent => numbList[CombatRoutine.GetPropertyInt(WoGTank2)];
+
 
         private int BoSLifePercent => numbList[CombatRoutine.GetPropertyInt(BoS)];
         private int FolILifePercent => numbList[CombatRoutine.GetPropertyInt(FoLI)];
@@ -381,8 +384,8 @@ public class HolyPally : CombatRoutine
         private bool WoGOverLoDCheck => API.CanCast(WoG) && InRange && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && API.TargetHealthPercent <= WoGOverLoDifePercent  && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool WoGOverLoDCheckMO => API.CanCast(WoG) && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && API.MouseoverHealthPercent <= WoGOverLoDifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool WoGCheckMO => API.CanCast(WoG) && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
-        private bool WoGTankCheck => WoGTanking && API.CanCast(WoG) && API.TargetRoleSpec == API.TankRole && InRange && API.PlayerCurrentHolyPower >= 3 && (API.TargetHealthPercent <= WoGLifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
-        private bool WoGTankCheckMO => WoGTanking && API.CanCast(WoG) && API.MouseoverRoleSpec == API.TankRole && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.MouseoverHealthPercent <= WoGLifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool WoGTankCheck => WoGTanking && API.CanCast(WoG) && API.TargetRoleSpec == API.TankRole && InRange && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.TargetHealthPercent <= WoGTankifePercent || API.TargetHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
+        private bool WoGTankCheckMO => WoGTanking && API.CanCast(WoG) && API.MouseoverRoleSpec == API.TankRole && InMoRange && IsMouseover && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (API.MouseoverHealthPercent <= WoGTankifePercent || API.MouseoverHealthPercent <= WoGMaxLifePercent && API.PlayerCurrentHolyPower == 5) && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool BFCheck => API.CanCast(BF) && BestowFaith && InRange && API.TargetHealthPercent <= BFLifePercent && API.TargetHealthPercent > 0 && !API.PlayerCanAttackTarget && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool BFCheckMO => API.CanCast(BF) && BestowFaith && InMoRange && IsMouseover && API.MouseoverHealthPercent <= BFLifePercent && API.MouseoverHealthPercent > 0 && !API.PlayerCanAttackMouseover && (API.PlayerIsMoving || !API.PlayerIsMoving);
         private bool LoDCheck => IsAoEHealing && API.CanCast(LoD) && (IsMouseover || !IsMouseover) && (API.PlayerHasBuff(DivinePurpose) || API.PlayerCurrentHolyPower >= 3) && (LoDAoE || LoDMaxAoE && API.PlayerCurrentHolyPower == 5) && (API.TargetHealthPercent > 0 || API.MouseoverHealthPercent > 0) && (API.PlayerCanAttackTarget || !API.PlayerCanAttackTarget || API.PlayerCanAttackMouseover || !API.PlayerCanAttackMouseover) && (API.PlayerIsMoving || !API.PlayerIsMoving);
@@ -643,38 +646,41 @@ public class HolyPally : CombatRoutine
 
 
             CombatRoutine.AddProp(HolyShock, HolyShock + " Life Percent", numbList, "Life percent at which" + HolyShock + "is used, set to 0 to disable", "Healing", 95);
-            CombatRoutine.AddProp(BoST, BoS, true, "If BoS should be on tank only, if for everyone, change to false, set to true by default", "Healing");
-            CombatRoutine.AddProp(LoHT, LoH, true, "If LoH should be on tank only, if for everyone, change to false, set to true by default", "Healing");
-            CombatRoutine.AddProp(WoGTank, WoG, true, "If WoG should be used when tank is low over LoD when AoE Healing is on, if prefer LoD Healing priority above WoG target, change to false, set to true by default", "Healing");
+            CombatRoutine.AddProp(BoST, BoST, true, "If BoS should be on tank only, if for everyone, change to false, set to true by default", "Healing");
+            CombatRoutine.AddProp(LoHT, LoHT, true, "If LoH should be on tank only, if for everyone, change to false, set to true by default", "Healing");
+            CombatRoutine.AddProp(WoGTank, WoGTank, true, "If WoG should be used when tank is low over LoD when AoE Healing is on, if prefer LoD Healing priority above WoG target, change to false, set to true by default", "Healing");
             CombatRoutine.AddProp(HolyLight, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "is used, set to 0 to disable", "Healing", 85);
-            CombatRoutine.AddProp(HolyLightBeacon, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + "on your beacon target is used, set to 0 to disable", "Healing", 85);
-            CombatRoutine.AddProp(HolyLightIBeacon, HolyLight + " Life Percent", numbList, "Life percent at which" + HolyLight + " with infusion on your beacon target is used, set to 0 to disable", "Healing", 85);
+            CombatRoutine.AddProp(HolyLightBeacon, HolyLightBeacon + " Life Percent", numbList, "Life percent at which" + HolyLight + "on your beacon target is used, set to 0 to disable", "Healing", 85);
+            CombatRoutine.AddProp(HolyLightIBeacon, HolyLightIBeacon + " Life Percent", numbList, "Life percent at which" + HolyLight + " with infusion on your beacon target is used, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(LoTM, LoTM + " Life Percent", numbList, "Life percent at which" + LoTM + "is used, set to 0 to disable", "Healing", 60);
-            CombatRoutine.AddProp(LoTMH, LoTM + " Player Health Percent", numbList, "Player Health percent at which" + LoTM + "is used, set to 0 to disable", "Healing", 80);
-            CombatRoutine.AddProp(LoTMM, LoTM + " Player Health Percent", numbList, "Target Health percent at which" + LoTM + "is used while moving, set to 0 to disable", "Healing", 85);
+            CombatRoutine.AddProp(LoTMH, LoTMH + " Player Health Percent", numbList, "Player Health percent at which" + LoTM + "is used, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(LoTMM, LoTMM + " Player Health Percent", numbList, "Target Health percent at which" + LoTM + "is used while moving, set to 0 to disable", "Healing", 85);
             CombatRoutine.AddProp(HoLI, HoLI + " Life Percent", numbList, "Life percent at which" + HoLI + "is used, set to 0 to disable", "Healing", 80);
             CombatRoutine.AddProp(FoL, FoL + " Life Percent", numbList, "Life percent at which" + FoL + "is used, set to 0 to disable", "Healing", 75);
-            CombatRoutine.AddProp(FoLBeacon, FoL + " Life Percent", numbList, "Life percent at which" + FoL + "on your beacon target is used, set to 0 to disable", "Healing", 75);
-            CombatRoutine.AddProp(FoLIBeacon, FoL + " Life Percent", numbList, "Life percent at which" + FoL + " with infusion on your beacon target is used, set to 0 to disable", "Healing", 75);
+            CombatRoutine.AddProp(FoLBeacon, FoLBeacon + " Life Percent", numbList, "Life percent at which" + FoL + "on your beacon target is used, set to 0 to disable", "Healing", 75);
+            CombatRoutine.AddProp(FoLIBeacon, FoLIBeacon + " Life Percent", numbList, "Life percent at which" + FoL + " with infusion on your beacon target is used, set to 0 to disable", "Healing", 75);
             CombatRoutine.AddProp(FoLI, FoLI + " Life Percent", numbList, "Life percent at which" + FoLI + "is used, set to 0 to disable", "Healing", 90);
             CombatRoutine.AddProp(WoG, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used, set to 0 to disable", "Healing", 80);
-            CombatRoutine.AddProp(WOGMax, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used when at max holy power, set to 0 to disable", "Healing", 100);
-            CombatRoutine.AddProp(WoGOverLoD, WoG + " Life Percent", numbList, "Life percent at which" + WoG + "is used over Light of Dawn for your current target, set to 0 to disable", "Healing", 30);
+            CombatRoutine.AddProp(WoGTank2, WoGTank2 + " Life Percent", numbList, "Life percent at which" + WoG + "is used, set to 0 to disable", "Healing", 80);
+            CombatRoutine.AddProp(WOGMax, WOGMax + " Life Percent", numbList, "Life percent at which" + WoG + "is used when at max holy power, set to 0 to disable", "Healing", 100);
+            CombatRoutine.AddProp(WoGOverLoD, WoGOverLoD + " Life Percent", numbList, "Life percent at which" + WoG + "is used over Light of Dawn for your current target, set to 0 to disable", "Healing", 30);
             CombatRoutine.AddProp(BoS, BoS + " Life Percent", numbList, "Life percent at which" + BoS + "is used, set to 0 to disable", "Healing", 20);
             CombatRoutine.AddProp(LoH, LoH + " Life Percent", numbList, "Life percent at which" + LoH + "is used, set to 0 to disable", "Healing", 10);
             CombatRoutine.AddProp(BF, BF + " Life Percent", numbList, "Life percent at which" + BF + "is used, set to 0 to disable", "Healing", 95);
-            CombatRoutine.AddProp(LoD, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Healing", 80);
-            CombatRoutine.AddProp(LODMax, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used AoE Healing Number of units are at life percent and you have max holy power, set to 0 to disable", "Healing", 90);
-            CombatRoutine.AddProp(BoV, BoV + " Life Percent", numbList, "Life percent at which" + BoV + "is used AoE Healing Number of units are at life percent, set to 0 to disable", "Healing", 75);
-            CombatRoutine.AddProp(LightsHammer, LightsHammer + " Life Percent", numbList, "Life percent at which" + LightsHammer + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Healing", 75);
-            CombatRoutine.AddProp(AshenHallow, AshenHallow + " Life Percent", numbList, "Life percent at which" + AshenHallow + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Healing", 65);
-            CombatRoutine.AddProp(AuraMastery, AuraMastery + " Life Percent", numbList, "Life percent at which" + AuraMastery + "is used, set to 0 to disable", "Healing", 65);
-            CombatRoutine.AddProp(HolyPrism, HolyPrism + " Life Percent", numbList, "Life percent at which" + HolyPrism + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Healing", 80);
-            CombatRoutine.AddProp(DivineToll, DivineToll + " Life Percent", numbList, "Life percent at which" + DivineToll + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "Healing", 80);
-            CombatRoutine.AddProp(DivineTollHealing, DivineToll, true, "If Divine Toll should be on Healing, if for both, change to false, set to true by default for healing", "Healing");
-            CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "Healing", 3);
-            CombatRoutine.AddProp(AoERaid, "Number of units for AoE Healing in raid ", numbRaidList, " Units for AoE Healing in raid", "Healing", 5);
-            CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " when AoE Healing Number of units are met should be used, set to 0 to disable", "Healing", 55);
+
+
+            CombatRoutine.AddProp(LoD, LoD + " Life Percent", numbList, "Life percent at which" + LoD + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "AOE Healing", 80);
+            CombatRoutine.AddProp(LODMax, LODMax + " Life Percent", numbList, "Life percent at which" + LoD + "is used AoE Healing Number of units are at life percent and you have max holy power, set to 0 to disable", "AOE Healing", 90);
+            CombatRoutine.AddProp(BoV, BoV + " Life Percent", numbList, "Life percent at which" + BoV + "is used AoE Healing Number of units are at life percent, set to 0 to disable", "AOE Healing", 75);
+            CombatRoutine.AddProp(LightsHammer, LightsHammer + " Life Percent", numbList, "Life percent at which" + LightsHammer + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "AOE Healing", 75);
+            CombatRoutine.AddProp(AshenHallow, AshenHallow + " Life Percent", numbList, "Life percent at which" + AshenHallow + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "AOE Healing ", 65);
+            CombatRoutine.AddProp(AuraMastery, AuraMastery + " Life Percent", numbList, "Life percent at which" + AuraMastery + "is used, set to 0 to disable", "AOE Healing ", 65);
+            CombatRoutine.AddProp(HolyPrism, HolyPrism + " Life Percent", numbList, "Life percent at which" + HolyPrism + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "AOE Healing", 80);
+            CombatRoutine.AddProp(DivineToll, DivineToll + " Life Percent", numbList, "Life percent at which" + DivineToll + "is used when AoE Healing Number of units are at life percent, set to 0 to disable", "AOE Healing ", 80);
+            CombatRoutine.AddProp(DivineTollHealing, DivineTollHealing, true, "If Divine Toll should be on Healing, if for both, change to false, set to true by default for healing", "AOE Healing ");
+            CombatRoutine.AddProp(AoE, "Number of units for AoE Healing ", numbPartyList, " Units for AoE Healing", "AOE Healing ", 3);
+            CombatRoutine.AddProp(AoERaid, "Number of units for AoE Healing in raid ", numbRaidList, " Units for AoE Healing in raid", "AOE Healing", 5);
+            CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " when AoE Healing Number of units are met should be used, set to 0 to disable", "AOE Healing", 55);
 
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket 1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket 2 be used", "Trinket", 0);
@@ -1118,7 +1124,7 @@ public class HolyPally : CombatRoutine
             {
                 if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
                 {
-                    if (API.PlayerHealthPercent >= PlayerHP)
+                    if (API.PlayerHealthPercent <= PlayerHP)
                     {
                         API.CastSpell(Player);
                         return;

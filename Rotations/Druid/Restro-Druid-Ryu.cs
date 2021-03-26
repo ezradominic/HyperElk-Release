@@ -280,8 +280,8 @@ namespace HyperElk.Core
        private bool LifeBloomMOCheck => API.MouseoverHealthPercent <= LifebloomLifePercent && UseLeg != "The Dark Titan's Lesson" && !API.PlayerCanAttackMouseover && !TargetHasBuff(Lifebloom) && (!PhotosynthesisTalent && API.MouseoverRoleSpec == RoleSpec || PhotosynthesisTalent && (API.MouseoverRoleSpec == API.HealerRole || API.MouseoverRoleSpec == RoleSpec)) && LifeBloomTracking && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
 
         private bool LifeBloom2Check => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !TargetHasBuff(Lifebloom) && (UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole) || PhotosynthesisTalent && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole && !TargetHasBuff(Lifebloom)) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
-        private bool LifeBloomLegCheck => (API.TargetHealthPercent <= LifebloomLifePercent || IsAutoSwap && API.TargetHealthPercent <= 100) && !API.PlayerCanAttackTarget && !TargetHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == RoleSpec);
-        private bool LifeBloomLegMOCheck => API.MouseoverHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !MouseoverHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.MouseoverRoleSpec == API.HealerRole || API.MouseoverRoleSpec == RoleSpec);
+        private bool LifeBloomLegCheck => (API.TargetHealthPercent <= LifebloomLifePercent || IsAutoSwap && API.TargetHealthPercent <= 100) && !API.PlayerCanAttackTarget && !TargetHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == RoleSpec) && !ChannelingCov;
+        private bool LifeBloomLegMOCheck => API.MouseoverHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !MouseoverHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.MouseoverRoleSpec == API.HealerRole || API.MouseoverRoleSpec == RoleSpec) && !ChannelingCov;
         private bool FloruishCheck => (FloruishRejTracking && FlourishLifeTracking && FlourishRegTracking || FlourishWGTracking && FlourishTranqTracking) && !API.PlayerCanAttackTarget && FloruishAoE && FlourishTalent;
         private bool KyrianCheck => PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingTranq;
         private bool NightFaeCheck => PlayerCovenantSettings == "Night Fae" && ConvokeAoE;
@@ -908,7 +908,7 @@ namespace HyperElk.Core
                     API.CastSpell(Soothe + MO);
                     return;
                 }
-                if (API.CanCast(Efflor) && API.PlayerIsInCombat && API.PlayerTotemPetDuration == 0)
+                if (API.CanCast(Efflor) && API.PlayerIsInCombat && API.PlayerTotemPetDuration == 0 && !ChannelingCov)
                 {
                     API.CastSpell(Efflor);
                     return;
@@ -934,7 +934,7 @@ namespace HyperElk.Core
                     API.CastSpell(RavenousFrenzy);
                     return;
                 }
-                if (API.CanCast(Innervate) && InnervateCheck && InRange)
+                if (API.CanCast(Innervate) && InnervateCheck && InRange && !ChannelingCov)
                 {
                     API.CastSpell(Innervate);
                     return;
@@ -952,6 +952,16 @@ namespace HyperElk.Core
                 if (API.CanCast(Natureswiftness) && NatureSwiftCheck && InRange)
                 {
                     API.CastSpell(Natureswiftness);
+                    return;
+                }
+                if (API.CanCast(Ironbark) && InRange && IBCheck)
+                {
+                    API.CastSpell(Ironbark);
+                    return;
+                }
+                if (API.CanCast(Ironbark) && InMORange && IBMOCheck && IsMouseover)
+                {
+                    API.CastSpell(Ironbark + MO);
                     return;
                 }
                 if (API.CanCast(Lifebloom) && InRange && LifeBloomCheck)
@@ -992,16 +1002,6 @@ namespace HyperElk.Core
                 if (API.CanCast(Flourish) && InRange && FloruishCheck)
                 {
                     API.CastSpell(Flourish);
-                    return;
-                }
-                if (API.CanCast(Ironbark) && InRange && IBCheck)
-                {
-                    API.CastSpell(Ironbark);
-                    return;
-                }
-               if (API.CanCast(Ironbark) && InMORange && IBMOCheck && IsMouseover)
-                {
-                    API.CastSpell(Ironbark + MO);
                     return;
                 }
                 if (API.CanCast(CenarionWard) && InRange && CWCheck)
