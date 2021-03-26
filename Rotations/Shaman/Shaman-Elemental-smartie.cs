@@ -292,7 +292,7 @@ namespace HyperElk.Core
                 API.CastSpell(Stopcast);
                 return;
             }
-            if ((API.PlayerCurrentCastTimeRemaining > 40 && (API.PlayerCurrentCastSpellID == 188196 || API.PlayerCurrentCastSpellID == 188443) && !API.MacroIsIgnored(Stopcast) && TalentMasterofTheElements && API.PlayerMaelstrom >= 60 && API.PlayerHasBuff(MasteroftheElements) && !API.PlayerHasBuff(Stormkeeper))
+            if ((API.PlayerCurrentCastTimeRemaining > 40 && (API.PlayerCurrentCastSpellID == 188196 || API.PlayerCurrentCastSpellID == 188443)) && !API.MacroIsIgnored(Stopcast) && TalentMasterofTheElements && API.PlayerMaelstrom >= 60 && API.PlayerHasBuff(MasteroftheElements) && !API.PlayerHasBuff(Stormkeeper))
             {
                 API.CastSpell(Stopcast);
                 return;
