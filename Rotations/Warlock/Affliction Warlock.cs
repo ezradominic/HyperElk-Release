@@ -48,6 +48,8 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string FelDomination = "Fel Domination";
         private string InevitableDemise = "Inevitable Demise";
+        private string SpellLock = "Spell Lock";
+
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -155,6 +157,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ImpendingCatastrophe, 321792, "F1");
             CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
             CombatRoutine.AddSpell(FelDomination, 333889);
+            CombatRoutine.AddSpell(SpellLock, 19647);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -276,7 +279,11 @@ namespace HyperElk.Core
 
         private void rotation()
         {
-            //DOT Refresh
+            if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
+            {
+                API.CastSpell(SpellLock);
+                return;
+            }
             if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
             {
                 API.CastSpell("Trinket1");
