@@ -238,21 +238,7 @@ namespace HyperElk.Core
                 API.CastSpell(FelDomination);
                 return;
             }
-            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
-            {
-                API.CastSpell(Corruption + "MO");
-                return;
-            }
-            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
-            {
-                API.CastSpell(Agony + "MO");
-                return;
-            }
-            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
-            {
-                API.CastSpell(SiphonLife + "MO");
-                return;
-            }
+
             if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife))
             {
                 API.CastSpell(DrainLife);
@@ -1319,6 +1305,23 @@ namespace HyperElk.Core
                 API.CastSpell(PhantomSingularity);
                 return;
             }
+
+            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
+            {
+                API.CastSpell(Corruption + "MO");
+                return;
+            }
+            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
+            {
+                API.CastSpell(Agony + "MO");
+                return;
+            }
+            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
+            {
+                API.CastSpell(SiphonLife + "MO");
+                return;
+            }
+
             //actions+=/malefic_rapture,if=soul_shard>4
             if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
