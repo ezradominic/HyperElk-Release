@@ -1,5 +1,6 @@
 ﻿// Changelog
 // v1.0 First release
+// v1.1 small adjustments
 
 
 using System.Diagnostics;
@@ -11,7 +12,7 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool IsAutoStealth => API.ToggleIsEnabled("Auto Stealth");
         //Spell,Auras
-        private string Garrot = "Garrot";
+        private string Garrote = "Garrote";
         private string FanofKnives = "Fan of Knives";
         private string PoisonedKnife = "Poisoned Knife";
         private string Envenom = "Envenom";
@@ -48,6 +49,8 @@ namespace HyperElk.Core
         private string Subterfuge = "Subterfuge";
         private string HiddenBlades = "Hidden Blades";
         private string MasterAssassin = "Master Assassin";
+        private string WoundPoison = "Wound Poison";
+        private string NumbingPoison = "Numbing Poison";
 
 
         //Talents
@@ -87,7 +90,8 @@ namespace HyperElk.Core
         //CBProperties
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
-        public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
+        public string[] Poison1 = new string[] { "Not Used", "Deadly Poison", "Wound Poison"};
+        public string[] Poison2 = new string[] { "Not Used", "Crippling Poison", "Numbing Poison"};
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns or AoE", "on mobcount", "on mobcount or Cooldowns", "always" };
         public string[] Legendary = new string[] { "No Legendary", "Doomblade", "Deathly Shadows" };
         public string[] Starter = new string[] { "Manual", "Ambush", "Cheap Shot" };
@@ -95,6 +99,8 @@ namespace HyperElk.Core
         int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40 };
         private int MobCount => numbRaidList[CombatRoutine.GetPropertyInt("MobCount")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private string UsePoison1 => Poison1[CombatRoutine.GetPropertyInt("First Poison")];
+        private string UsePoison2 => Poison2[CombatRoutine.GetPropertyInt("Second Poison")];
 
         private string UseVendetta => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Vendetta)];
         private string UseExsanguinate => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Exsanguinate)];
@@ -110,8 +116,8 @@ namespace HyperElk.Core
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         bool dotrupturerefreshable => (API.TargetDebuffRemainingTime(Rupture) < 720 && !TalentDeeperStratagem || API.TargetDebuffRemainingTime(Rupture) < 840 && TalentDeeperStratagem);
         bool dotrupturerefreshableMO => (API.MouseoverDebuffRemainingTime(Rupture) < 720 && !TalentDeeperStratagem || API.MouseoverDebuffRemainingTime(Rupture) < 840 && TalentDeeperStratagem);
-        bool dotgarroterefreshable => API.TargetDebuffRemainingTime(Garrot) < 540;
-        bool dotgarroterefreshableMO => API.MouseoverDebuffRemainingTime(Garrot) < 540;
+        bool dotGarroteerefreshable => API.TargetDebuffRemainingTime(Garrote) < 540;
+        bool dotGarroteerefreshableMO => API.MouseoverDebuffRemainingTime(Garrote) < 540;
         bool dotcrimsontempestrefreshable => (API.TargetDebuffRemainingTime(CrimsonTempest) < 360 && !TalentDeeperStratagem || API.TargetDebuffRemainingTime(CrimsonTempest) < 420 && TalentDeeperStratagem);
         bool dotenvenomerefreshable => (API.TargetDebuffRemainingTime(Envenom) < 180 && !TalentDeeperStratagem || API.TargetDebuffRemainingTime(Envenom) < 210 && TalentDeeperStratagem);
         bool dotsliceanddiceerefreshable => (API.PlayerBuffTimeRemaining(SliceandDice) < 1080 && !TalentDeeperStratagem || API.PlayerBuffTimeRemaining(SliceandDice) < 1260 && TalentDeeperStratagem);
@@ -124,16 +130,16 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Assassination Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.0");
+            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.1");
             API.WriteLog("You need the following macros:");
-            API.WriteLog("GarrotMO - /cast [@mouseover] Garrot");
+            API.WriteLog("GarroteMO - /cast [@mouseover] Garrote");
             API.WriteLog("RuptureMO - /cast [@mouseover] Rupture");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
 
 
             //Spells
-            CombatRoutine.AddSpell(Garrot, 703);
+            CombatRoutine.AddSpell(Garrote, 703);
             CombatRoutine.AddSpell(FanofKnives, 51723);
             CombatRoutine.AddSpell(PoisonedKnife, 185565);
             CombatRoutine.AddSpell(Envenom, 32645);
@@ -157,6 +163,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(CheapShot, 1833);
             CombatRoutine.AddSpell(CripplingPoison, 3408);
             CombatRoutine.AddSpell(DeadlyPoison, 2823);
+            CombatRoutine.AddSpell(WoundPoison, 8679);
+            CombatRoutine.AddSpell(NumbingPoison, 5761);
             CombatRoutine.AddSpell(MarkedforDeath, 137619);
             CombatRoutine.AddSpell(CrimsonTempest, 121411);
             CombatRoutine.AddSpell(Sepsis, 328305);
@@ -164,15 +172,12 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(EchoingReprimand, 323547);
             CombatRoutine.AddSpell(Flagellation, 323654);
 
-
-
             //Macros
-            CombatRoutine.AddMacro(Garrot + "MO");
+            CombatRoutine.AddMacro(Garrote + "MO");
             CombatRoutine.AddMacro(Rupture + "MO");
             CombatRoutine.AddMacro(SerratedBoneSpike + "MO");
             CombatRoutine.AddMacro("Trinket1");
             CombatRoutine.AddMacro("Trinket2");
-
 
             //Buffs
             CombatRoutine.AddBuff(Stealth, 1784);
@@ -187,7 +192,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(HiddenBlades, 270070);
             CombatRoutine.AddBuff(MasterAssassin, 256735);
             CombatRoutine.AddBuff(Subterfuge, 115192);
-
+            CombatRoutine.AddBuff(WoundPoison, 8679);
+            CombatRoutine.AddBuff(NumbingPoison, 5761);
 
             //Debuff
             CombatRoutine.AddDebuff(SerratedBoneSpike, 324073);
@@ -196,11 +202,10 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(MarkedforDeath, 137619);
             CombatRoutine.AddDebuff(DeadlyPoison, 2818);
             CombatRoutine.AddDebuff(Vendetta, 79140);
-            CombatRoutine.AddDebuff(Garrot, 703);
+            CombatRoutine.AddDebuff(Garrote, 703);
             CombatRoutine.AddDebuff(Rupture, 1943);
             CombatRoutine.AddDebuff(Shiv, 319504);
             CombatRoutine.AddDebuff(CrimsonTempest, 121411);
-
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
@@ -228,10 +233,12 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(CrimsonVial, CrimsonVial + " Life Percent", numbList, "Life percent at which" + CrimsonVial + "is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(Evasion, Evasion + " Life Percent", numbList, "Life percent at which" + Evasion + "is used, set to 0 to disable", "Defense", 10);
             CombatRoutine.AddProp(Feint, Feint + " Life Percent", numbList, "Life percent at which" + Feint + "is used, set to 0 to disable", "Defense", 60);
+            CombatRoutine.AddProp("First Poison", "First Poison", Poison1," Choose your first Poison", "Poisons", 0);
+            CombatRoutine.AddProp("Second Poison", "Second Poison", Poison2, " Choose your second Poison", "Poisons", 0);
         }
         public override void Pulse()
         {
-            //API.WriteLog("Conduit: " + API.PlayerIsConduitSelected(TasteforBlood));
+            //API.WriteLog("Conduit: " + API.PlayerIsConduitSelected());
         }
         public override void OutOfCombatPulse()
         {
@@ -239,19 +246,34 @@ namespace HyperElk.Core
                 return;
             if (!API.PlayerIsMounted)
             {
-                if (API.CanCast(CripplingPoison) && API.PlayerBuffTimeRemaining(CripplingPoison) < 30000 && !API.PlayerIsMoving && !(API.LastSpellCastInGame == CripplingPoison || API.PlayerCurrentCastSpellID == 3408))
+                if (API.CanCast(CripplingPoison) && UsePoison2 == "Crippling Poison" && API.PlayerBuffTimeRemaining(CripplingPoison) < 30000 && !API.PlayerIsMoving && API.LastSpellCastInGame != CripplingPoison && API.PlayerCurrentCastSpellID != 3408)
                 {
                     API.CastSpell(CripplingPoison);
                     return;
                 }
-                if (API.CanCast(DeadlyPoison) && API.PlayerBuffTimeRemaining(DeadlyPoison) < 30000 && !API.PlayerIsMoving && !(API.LastSpellCastInGame == DeadlyPoison || API.PlayerCurrentCastSpellID == 2823))
+                if (API.CanCast(DeadlyPoison) && UsePoison1 == "Deadly Poison" && API.PlayerBuffTimeRemaining(DeadlyPoison) < 30000 && !API.PlayerIsMoving && API.LastSpellCastInGame != DeadlyPoison && API.PlayerCurrentCastSpellID != 2823 && API.PlayerCurrentCastSpellID != 315584)
                 {
                     API.CastSpell(DeadlyPoison);
+                    return;
+                }
+                if (API.CanCast(NumbingPoison) && UsePoison2 == "Numbing Poison" && API.PlayerBuffTimeRemaining(NumbingPoison) < 30000 && !API.PlayerIsMoving && API.LastSpellCastInGame != NumbingPoison && API.PlayerCurrentCastSpellID != 5761)
+                {
+                    API.CastSpell(NumbingPoison);
+                    return;
+                }
+                if (API.CanCast(WoundPoison) && UsePoison1 == "Wound Poison" && API.PlayerBuffTimeRemaining(WoundPoison) < 30000 && !API.PlayerIsMoving && API.LastSpellCastInGame != WoundPoison && API.PlayerCurrentCastSpellID != 8679)
+                {
+                    API.CastSpell(WoundPoison);
                     return;
                 }
                 if (API.CanCast(Stealth) && !IsStealth && IsAutoStealth)
                 {
                     API.CastSpell(Stealth);
+                    return;
+                }
+                if (API.PlayerHealthPercent <= CrimsonVialLifePercent && API.CanCast(CrimsonVial) && API.PlayerEnergy >= 20)
+                {
+                    API.CastSpell(CrimsonVial);
                     return;
                 }
             }
@@ -262,62 +284,69 @@ namespace HyperElk.Core
                 return;
             if (!API.PlayerIsMounted)
             {
-                if (!IsStealth)
+                if (isInterrupt && API.CanCast(Kick) && isMelee)
                 {
-                    if (isInterrupt && API.CanCast(Kick) && isMelee)
-                    {
-                        API.CastSpell(Kick);
-                        return;
-                    }
-                    if (API.CanCast(KidneyShot) && isInterrupt && isMelee && API.SpellISOnCooldown(Kick))
-                    {
-                        API.CastSpell(KidneyShot);
-                        return;
-                    }
-                    if (API.CanCast(Blind) && isInterrupt && isMelee && API.SpellISOnCooldown(Kick))
-                    {
-                        API.CastSpell(Blind);
-                        return;
-                    }
-                    if (API.PlayerHealthPercent <= CloakofShadowsLifePercent && API.CanCast(CloakofShadows))
-                    {
-                        API.CastSpell(CloakofShadows);
-                        return;
-                    }
-                    if (API.PlayerHealthPercent <= CrimsonVialLifePercent && API.CanCast(CrimsonVial) && API.PlayerEnergy >= 20)
-                    {
-                        API.CastSpell(CrimsonVial);
-                        return;
-                    }
-                    if (API.PlayerHealthPercent <= EvasionLifePercent && API.CanCast(Evasion))
-                    {
-                        API.CastSpell(Evasion);
-                        return;
-                    }
-                    if (API.PlayerHealthPercent <= FeintLifePercent && API.CanCast(Feint) && !PlayerHasBuff(Feint) && API.PlayerEnergy >= 35)
-                    {
-                        API.CastSpell(Feint);
-                        return;
-                    }
-                    if (API.PlayerItemCanUse(PhialofSerenity) && !API.MacroIsIgnored(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
-                    {
-                        API.CastSpell(PhialofSerenity);
-                        return;
-                    }
-                    if (API.PlayerItemCanUse(SpiritualHealingPotion) && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
-                    {
-                        API.CastSpell(SpiritualHealingPotion);
-                        return;
-                    }
+                    API.CastSpell(Kick);
+                    return;
                 }
-                if (API.CanCast(CripplingPoison) && API.PlayerBuffTimeRemaining(CripplingPoison) < 3000 && !API.PlayerIsMoving && !(API.LastSpellCastInGame == CripplingPoison || API.PlayerCurrentCastSpellID == 3408))
+                if (API.CanCast(KidneyShot) && isInterrupt && isMelee && API.SpellISOnCooldown(Kick))
+                {
+                    API.CastSpell(KidneyShot);
+                    return;
+                }
+                if (API.CanCast(Blind) && isInterrupt && isMelee && API.SpellISOnCooldown(Kick))
+                {
+                    API.CastSpell(Blind);
+                    return;
+                }
+                if (API.PlayerHealthPercent <= CloakofShadowsLifePercent && API.CanCast(CloakofShadows))
+                {
+                    API.CastSpell(CloakofShadows);
+                    return;
+                }
+                if (API.PlayerHealthPercent <= CrimsonVialLifePercent && API.CanCast(CrimsonVial) && API.PlayerEnergy >= 20)
+                {
+                    API.CastSpell(CrimsonVial);
+                    return;
+                }
+                if (API.PlayerHealthPercent <= EvasionLifePercent && API.CanCast(Evasion))
+                {
+                    API.CastSpell(Evasion);
+                    return;
+                }
+                if (API.PlayerHealthPercent <= FeintLifePercent && API.CanCast(Feint) && !PlayerHasBuff(Feint) && API.PlayerEnergy >= 35)
+                {
+                    API.CastSpell(Feint);
+                    return;
+                }
+                if (API.PlayerItemCanUse(PhialofSerenity) && !API.MacroIsIgnored(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+                {
+                    API.CastSpell(PhialofSerenity);
+                    return;
+                }
+                if (API.PlayerItemCanUse(SpiritualHealingPotion) && !API.MacroIsIgnored(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+                {
+                    API.CastSpell(SpiritualHealingPotion);
+                    return;
+                }
+                if (API.CanCast(CripplingPoison) && UsePoison2 == "Crippling Poison" && API.PlayerBuffTimeRemaining(CripplingPoison) < 3000 && !API.PlayerIsMoving && API.LastSpellCastInGame != CripplingPoison && API.PlayerCurrentCastSpellID != 3408)
                 {
                     API.CastSpell(CripplingPoison);
                     return;
                 }
-                if (API.CanCast(DeadlyPoison) && API.PlayerBuffTimeRemaining(DeadlyPoison) < 3000 && !API.PlayerIsMoving && !(API.LastSpellCastInGame == DeadlyPoison || API.PlayerCurrentCastSpellID == 2823))
+                if (API.CanCast(DeadlyPoison) && UsePoison1 == "Deadly Poison" && API.PlayerBuffTimeRemaining(DeadlyPoison) < 3000 && !API.PlayerIsMoving && API.LastSpellCastInGame != DeadlyPoison && API.PlayerCurrentCastSpellID != 2823 && API.PlayerCurrentCastSpellID != 315584)
                 {
                     API.CastSpell(DeadlyPoison);
+                    return;
+                }
+                if (API.CanCast(NumbingPoison) && UsePoison2 == "Numbing Poison" && API.PlayerBuffTimeRemaining(NumbingPoison) < 3000 && !API.PlayerIsMoving && API.LastSpellCastInGame != NumbingPoison && API.PlayerCurrentCastSpellID != 5761)
+                {
+                    API.CastSpell(NumbingPoison);
+                    return;
+                }
+                if (API.CanCast(WoundPoison) && UsePoison1 == "Wound Poison" && API.PlayerBuffTimeRemaining(WoundPoison) < 3000 && !API.PlayerIsMoving && API.LastSpellCastInGame != WoundPoison && API.PlayerCurrentCastSpellID != 8679)
+                {
+                    API.CastSpell(WoundPoison);
                     return;
                 }
                 //Focus
@@ -349,16 +378,16 @@ namespace HyperElk.Core
                         API.CastSpell(Rupture);
                         return;
                     }
-                    //actions.stealthed+=/garrote,target_if=min:remains,if=talent.subterfuge.enabled&(remains<12|pmultiplier<=1)&target.time_to_die-remains>2
-                    if (API.CanCast(Garrot) && TalentSubterfuge && API.TargetDebuffRemainingTime(Garrot) < 1200 && API.PlayerEnergy >= 45)
+                    //actions.stealthed+=/Garrotee,target_if=min:remains,if=talent.subterfuge.enabled&(remains<12|pmultiplier<=1)&target.time_to_die-remains>2
+                    if (API.CanCast(Garrote) && TalentSubterfuge && API.TargetDebuffRemainingTime(Garrote) < 1200 && API.PlayerEnergy >= 45)
                     {
-                        API.CastSpell(Garrot);
+                        API.CastSpell(Garrote);
                         return;
                     }
-                    //actions.stealthed+=/garrote,if=talent.subterfuge.enabled&talent.exsanguinate.enabled&active_enemies=1&buff.subterfuge.remains<1.3
-                    if (API.CanCast(Garrot) && TalentSubterfuge && TalentExsanguinate && (API.PlayerUnitInMeleeRangeCount == 1 || !IsAOE) && API.PlayerBuffTimeRemaining(Subterfuge) < 130 && API.PlayerEnergy >= 45)
+                    //actions.stealthed+=/Garrotee,if=talent.subterfuge.enabled&talent.exsanguinate.enabled&active_enemies=1&buff.subterfuge.remains<1.3
+                    if (API.CanCast(Garrote) && TalentSubterfuge && TalentExsanguinate && (API.PlayerUnitInMeleeRangeCount == 1 || !IsAOE) && API.PlayerBuffTimeRemaining(Subterfuge) < 130 && API.PlayerEnergy >= 45)
                     {
-                        API.CastSpell(Garrot);
+                        API.CastSpell(Garrote);
                         return;
                     }
                     //actions.stealthed+=/mutilate,if=talent.subterfuge.enabled&combo_points<=3
@@ -380,8 +409,8 @@ namespace HyperElk.Core
                 }
                 if (!IsStealth || IsStarter == "Manual")
                 {
-                    //actions+=/call_action_list,name=cds,if=(!talent.master_assassin.enabled|dot.garrote.ticking)
-                    if (!TalentMasterAssassin || TargetHasDebuff(Garrot))
+                    //actions+=/call_action_list,name=cds,if=(!talent.master_assassin.enabled|dot.Garrotee.ticking)
+                    if (!TalentMasterAssassin || TargetHasDebuff(Garrote))
                     {
                         //actions.cds+=/marked_for_death,if=raid_event.adds.in>30-raid_event.adds.duration&combo_points.deficit>=cp_max_spend
                         if (API.CanCast(MarkedforDeath) && TalentMarkedforDeath && API.PlayerComboPoints == 0)
@@ -407,8 +436,8 @@ namespace HyperElk.Core
                             API.CastSpell(Vendetta);
                             return;
                         }
-                        //actions.cds+=/exsanguinate,if=!stealthed.rogue&(!dot.garrote.refreshable&dot.rupture.remains>4+4*cp_max_spend|dot.rupture.remains*0.5>target.time_to_die)&target.time_to_die>4
-                        if (API.CanCast(Exsanguinate) && IsExsanguinate && !PlayerHasBuff(Stealth) && (!dotgarroterefreshable && API.PlayerDebuffRemainingTime(Rupture) > 400) && API.PlayerEnergy >= 25)
+                        //actions.cds+=/exsanguinate,if=!stealthed.rogue&(!dot.Garrotee.refreshable&dot.rupture.remains>4+4*cp_max_spend|dot.rupture.remains*0.5>target.time_to_die)&target.time_to_die>4
+                        if (API.CanCast(Exsanguinate) && IsExsanguinate && !PlayerHasBuff(Stealth) && (!dotGarroteerefreshable && API.PlayerDebuffRemainingTime(Rupture) > 400) && API.PlayerEnergy >= 25)
                         {
                             API.CastSpell(Exsanguinate);
                             return;
@@ -458,14 +487,14 @@ namespace HyperElk.Core
                                 API.CastSpell(Vanish);
                                 return;
                             }
-                            //actions.vanish+=/vanish,if=talent.subterfuge.enabled&cooldown.garrote.up&(dot.garrote.refreshable|debuff.vendetta.up&dot.garrote.pmultiplier<=1)&combo_points.deficit>=(spell_targets.fan_of_knives>?4)&raid_event.adds.in>12
-                            if (API.CanCast(Vanish) && TalentSubterfuge && API.SpellCDDuration(Garrot) <= GCD && (TargetHasDebuff(Garrot) && dotgarroterefreshable || TargetHasDebuff(Vendetta)) && API.PlayerComboPoints < 5)
+                            //actions.vanish+=/vanish,if=talent.subterfuge.enabled&cooldown.Garrotee.up&(dot.Garrotee.refreshable|debuff.vendetta.up&dot.Garrotee.pmultiplier<=1)&combo_points.deficit>=(spell_targets.fan_of_knives>?4)&raid_event.adds.in>12
+                            if (API.CanCast(Vanish) && TalentSubterfuge && API.SpellCDDuration(Garrote) <= GCD && (TargetHasDebuff(Garrote) && dotGarroteerefreshable || TargetHasDebuff(Vendetta)) && API.PlayerComboPoints < 5)
                             {
                                 API.CastSpell(Vanish);
                                 return;
                             }
-                            //actions.vanish+=/vanish,if=(talent.master_assassin.enabled|runeforge.mark_of_the_master_assassin)&!dot.rupture.refreshable&dot.garrote.remains>3&debuff.vendetta.up&(debuff.shiv.up|debuff.vendetta.remains<4|dot.sepsis.ticking)&dot.sepsis.remains<3
-                            if (API.CanCast(Vanish) && TalentMasterAssassin && !dotrupturerefreshable && API.TargetDebuffRemainingTime(Garrot) > 300 && TargetHasDebuff(Vendetta) && (TargetHasDebuff(Shiv) || API.TargetDebuffRemainingTime(Vendetta) < 400 || TargetHasDebuff(Sepsis)) && API.TargetDebuffRemainingTime(Sepsis) < 300)
+                            //actions.vanish+=/vanish,if=(talent.master_assassin.enabled|runeforge.mark_of_the_master_assassin)&!dot.rupture.refreshable&dot.Garrotee.remains>3&debuff.vendetta.up&(debuff.shiv.up|debuff.vendetta.remains<4|dot.sepsis.ticking)&dot.sepsis.remains<3
+                            if (API.CanCast(Vanish) && TalentMasterAssassin && !dotrupturerefreshable && API.TargetDebuffRemainingTime(Garrote) > 300 && TargetHasDebuff(Vendetta) && (TargetHasDebuff(Shiv) || API.TargetDebuffRemainingTime(Vendetta) < 400 || TargetHasDebuff(Sepsis)) && API.TargetDebuffRemainingTime(Sepsis) < 300)
                             {
                                 API.CastSpell(Vanish);
                                 return;
@@ -497,10 +526,10 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions+=/call_action_list,name=dot
-                    //actions.dot+=/garrote,if=talent.exsanguinate.enabled&!exsanguinated.garrote&dot.garrote.pmultiplier<=1&cooldown.exsanguinate.remains<2&spell_targets.fan_of_knives=1&raid_event.adds.in>6&dot.garrote.remains*0.5<target.time_to_die
-                    if (API.CanCast(Garrot) && TalentExsanguinate && API.SpellCDDuration(Exsanguinate) < 200 && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && dotgarroterefreshable && API.PlayerEnergy >= 45)
+                    //actions.dot+=/Garrotee,if=talent.exsanguinate.enabled&!exsanguinated.Garrotee&dot.Garrotee.pmultiplier<=1&cooldown.exsanguinate.remains<2&spell_targets.fan_of_knives=1&raid_event.adds.in>6&dot.Garrotee.remains*0.5<target.time_to_die
+                    if (API.CanCast(Garrote) && TalentExsanguinate && API.SpellCDDuration(Exsanguinate) < 200 && (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && dotGarroteerefreshable && API.PlayerEnergy >= 45)
                     {
-                        API.CastSpell(Garrot);
+                        API.CastSpell(Garrote);
                         return;
                     }
                     //actions.dot+=/rupture,if=talent.exsanguinate.enabled&(effective_combo_points>=cp_max_spend&cooldown.exsanguinate.remains<1&dot.rupture.remains*0.5<target.time_to_die)
@@ -509,10 +538,10 @@ namespace HyperElk.Core
                         API.CastSpell(Rupture);
                         return;
                     }
-                    //actions.dot+=/garrote,if=refreshable&combo_points.deficit>=1&(pmultiplier<=1|remains<=tick_time&spell_targets.fan_of_knives>=3)&(!exsanguinated|remains<=tick_time*2&spell_targets.fan_of_knives>=3)&(target.time_to_die-remains)>4&master_assassin_remains=0
-                    if (API.CanCast(Garrot) && dotgarroterefreshable && (API.PlayerComboPoints < 5 && !TalentDeeperStratagem || API.PlayerComboPoints < 6 && TalentDeeperStratagem) && API.PlayerEnergy >= 45)
+                    //actions.dot+=/Garrotee,if=refreshable&combo_points.deficit>=1&(pmultiplier<=1|remains<=tick_time&spell_targets.fan_of_knives>=3)&(!exsanguinated|remains<=tick_time*2&spell_targets.fan_of_knives>=3)&(target.time_to_die-remains)>4&master_assassin_remains=0
+                    if (API.CanCast(Garrote) && dotGarroteerefreshable && (API.PlayerComboPoints < 5 && !TalentDeeperStratagem || API.PlayerComboPoints < 6 && TalentDeeperStratagem) && API.PlayerEnergy >= 45)
                     {
-                        API.CastSpell(Garrot);
+                        API.CastSpell(Garrote);
                         return;
                     }
                     //actions.dot+=/crimson_tempest,if=spell_targets>=2&remains<2+(spell_targets>=5)&effective_combo_points>=4
@@ -529,9 +558,9 @@ namespace HyperElk.Core
                     }
                     if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                     {
-                        if (API.CanCast(Garrot) && dotgarroterefreshableMO && API.MouseoverRange < 6 && (API.PlayerComboPoints < 5 && !TalentDeeperStratagem || API.PlayerComboPoints < 6 && TalentDeeperStratagem) && API.PlayerEnergy >= 45)
+                        if (API.CanCast(Garrote) && dotGarroteerefreshableMO && API.MouseoverRange < 6 && (API.PlayerComboPoints < 5 && !TalentDeeperStratagem || API.PlayerComboPoints < 6 && TalentDeeperStratagem) && API.PlayerEnergy >= 45)
                         {
-                            API.CastSpell(Garrot + "MO");
+                            API.CastSpell(Garrote + "MO");
                             return;
                         }
                         if (API.CanCast(Rupture) && API.PlayerComboPoints >= 4 && API.MouseoverRange < 6 && dotrupturerefreshableMO && API.PlayerEnergy >= 25)
@@ -539,7 +568,7 @@ namespace HyperElk.Core
                             API.CastSpell(Rupture + "MO");
                             return;
                         }
-                        if (API.CanCast(SerratedBoneSpike) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && !PlayerHasBuff(MasterAssassin) && (PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                        if (API.CanCast(SerratedBoneSpike) && !API.MacroIsIgnored(SerratedBoneSpike + "MO") && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && !PlayerHasBuff(MasterAssassin) && (PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
                         {
                             API.CastSpell(SerratedBoneSpike + "MO");
                             return;
