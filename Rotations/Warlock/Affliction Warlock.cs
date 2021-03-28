@@ -109,7 +109,7 @@ namespace HyperElk.Core
         {
             return API.TargetDebuffRemainingTime(buff, true);
         }
-        float UaTime => 1500 / 1000 / (1f + API.PlayerGetHaste / 1);
+        float UaTime => 15 / (1f + API.PlayerGetHaste / 10);
         float HTime => 1500 / 1000 / (1f + API.PlayerGetHaste / 1);
 
         public override void Initialize()
@@ -265,6 +265,26 @@ namespace HyperElk.Core
 
         private void rotation()
         {
+            if (API.CanCast(Agony) && TargetHasDebuff(Agony) && TargetDebuffRemainingTime(Agony) < 200)
+            {
+                API.CanCast(Agony);
+                return;
+            }
+            if (API.CanCast(Corruption) && TargetHasDebuff(Corruption) && TargetDebuffRemainingTime(Corruption) < 200)
+            {
+                API.CanCast(Corruption);
+                return;
+            }
+            if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetHasDebuff(SiphonLife) && TargetDebuffRemainingTime(SiphonLife) < 200)
+            {
+                API.CastSpell(SiphonLife);
+                return;
+            }
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetHasDebuff(UnstableAffliction) && TargetDebuffRemainingTime(UnstableAffliction) < UaTime + 100)
+            {
+                API.CastSpell(UnstableAffliction);
+                return;
+            }
             if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
             {
                 API.CastSpell(SpellLock);
@@ -1528,27 +1548,7 @@ namespace HyperElk.Core
             }
             //actions+=/call_action_list,name=item
             //actions+=/call_action_list,name=se,if=debuff.shadow_embrace.stack<(2-action.shadow_bolt.in_flight)|debuff.shadow_embrace.remains<3
-            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || TargetDebuffRemainingTime(ShadowEmbrace) < 300)
-            {
-                //actions.se = haunt
-                if (API.CanCast(Haunt) && TalentHaunt)
-                {
-                    API.CastSpell(Haunt);
-                    return;
-                }
-                //actions.se +=/ drain_soul,interrupt_global = 1,interrupt_if = debuff.shadow_embrace.stack >= 3
-                if (API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling)
-                {
-                    API.CastSpell(DrainSoul);
-                    return;
-                }
-                //actions.se +=/ shadow_bolt
-                if (API.CanCast(ShadowBolt) && !TalentDrainSoul)
-                {
-                    API.CastSpell(ShadowBolt);
-                    return;
-                }
-            }
+
             //actions+=/malefic_rapture,if=dot.vile_taint.ticking
             if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
@@ -1576,7 +1576,7 @@ namespace HyperElk.Core
             //actions+=/malefic_rapture,if=talent.sow_the_seeds.enabled
             //actions+=/drain_life,if=buff.inevitable_demise.stack>40|buff.inevitable_demise.up&time_to_die<4
             //actions+=/call_action_list,name=covenant
-            if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" ||PlayerCovenantSettings == "Venthyr")
+            if (PlayerCovenantSettings == "Kyrian" || PlayerCovenantSettings == "Necrolord" || PlayerCovenantSettings == "Night Fae" || PlayerCovenantSettings == "Venthyr")
             {
                 //actions.covenant=impending_catastrophe,if=cooldown.summon_darkglare.remains<10|cooldown.summon_darkglare.remains>50
                 if (!API.SpellISOnCooldown(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (API.SpellCDDuration(SummonDarkglare) < 1000 || API.SpellCDDuration(SummonDarkglare) > 5000) && !API.PlayerIsCasting(true))
