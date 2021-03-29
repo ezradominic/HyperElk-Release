@@ -49,7 +49,7 @@ namespace HyperElk.Core
         private string FelDomination = "Fel Domination";
         private string InevitableDemise = "Inevitable Demise";
         private string SpellLock = "Spell Lock";
-
+        private string UnendingResolve = "Unending Resolve";
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -62,8 +62,6 @@ namespace HyperElk.Core
         private bool TalentSowTheSeeds => API.PlayerIsTalentSelected(4, 1);
         private bool TalentMortalCoil => API.PlayerIsTalentSelected(5, 2);
         //Misc
-        private static readonly Stopwatch DumpWatchLow = new Stopwatch();
-        private static readonly Stopwatch DumpWatchHigh = new Stopwatch();
 
 
         private bool IsRange => API.TargetRange < 40;
@@ -95,7 +93,7 @@ namespace HyperElk.Core
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
         private bool UseCO => (bool)CombatRoutine.GetProperty("UseCO");
         private bool UseSL => (bool)CombatRoutine.GetProperty("UseSL");
-        private bool DumpShards => (bool)CombatRoutine.GetProperty("DumpShards");
+        private bool UseUnendingResolve => (bool)CombatRoutine.GetProperty("UseUnendingResolve");
 
         private int DarkPactPercentProc => numbList[CombatRoutine.GetPropertyInt(DarkPact)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
@@ -105,12 +103,22 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(buff, false, true);
         }
+        private static bool MouseoverHasDebuff(string buff)
+        {
+            return API.MouseoverHasDebuff(buff, false, true);
+        }
         private static int TargetDebuffRemainingTime(string buff)
         {
             return API.TargetDebuffRemainingTime(buff, true);
         }
+        private static int MouseoverDebuffRemainingTime(string buff)
+        {
+            return API.MouseoverDebuffRemainingTime(buff, true);
+        }
         float UaTime => 15 / (1f + API.PlayerGetHaste / 10);
         float HTime => 1500 / 1000 / (1f + API.PlayerGetHaste / 1);
+        private bool UnendingResolveRaid => API.TargetCurrentCastSpellID == 345397 && API.TargetCurrentCastTimeRemaining <= 600 || API.TargetCurrentCastSpellID == 329455 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 325384 || API.TargetCurrentCastSpellID == 337110 || API.TargetCurrentCastSpellID == 332687 || API.TargetCurrentCastSpellID == 331209 || API.TargetCurrentCastSpellID == 332683;
+        private bool UnendingResolveDungeon => API.TargetCurrentCastSpellID == 322236 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 321247 || API.TargetCurrentCastSpellID == 321828 || API.TargetCurrentCastSpellID == 328125 || API.TargetCurrentCastSpellID == 334625;
 
         public override void Initialize()
         {
@@ -135,9 +143,11 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseAG", "Use Agony", true, "Use Agony for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseCO", "Use Corruption", true, "Use Corruption for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
-            CombatRoutine.AddProp("DumpShards", "Dump Shards", true, "Collect 5 Soul Shards and befor using Malefic Rapture", "Class specific");
-            CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+
+            CombatRoutine.AddProp("UseUnendingResolve", "Use Unending Resolve", true, "Use Unending Resolve to block High DMG Raid Encounters", "Defensive");
+
             //Spells
             CombatRoutine.AddSpell(ShadowBolt, 686, "D1");
             CombatRoutine.AddSpell(DrainSoul, 198590, "D1");
@@ -158,6 +168,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DecimatingBolt, 325289, "F1");
             CombatRoutine.AddSpell(FelDomination, 333889);
             CombatRoutine.AddSpell(SpellLock, 19647);
+            CombatRoutine.AddSpell(UnendingResolve, 104773);
 
             //Macro
             CombatRoutine.AddMacro(trinket1);
@@ -206,6 +217,43 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            if (API.PlayerIsInCombat && API.TargetIsIncombat)
+            {
+                if (API.CanCast(Corruption) && TargetHasDebuff(Corruption) && TargetDebuffRemainingTime(Corruption) < 400)
+                {
+                    API.CanCast(Corruption);
+                    return;
+                }
+                if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetHasDebuff(SiphonLife) && TargetDebuffRemainingTime(SiphonLife) < 400)
+                {
+                    API.CastSpell(SiphonLife);
+                    return;
+                }
+                if (API.CanCast(Agony) && TargetHasDebuff(Agony) && TargetDebuffRemainingTime(Agony) < 400)
+                {
+                    API.CanCast(Agony);
+                    return;
+                }
+
+
+
+                if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverHasDebuff(Corruption) && MouseoverDebuffRemainingTime(Corruption) < 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
+                {
+                    API.CastSpell(Corruption + "MO");
+                    return;
+                }
+                if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverHasDebuff(SiphonLife) && MouseoverDebuffRemainingTime(SiphonLife) < 400 && IsRange)
+                {
+                    API.CastSpell(SiphonLife + "MO");
+                    return;
+                }
+                if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverHasDebuff(Agony) && MouseoverDebuffRemainingTime(Agony) < 00 && IsRange)
+                {
+                    API.CastSpell(Agony + "MO");
+                    return;
+                }
+
+            }
         }
         public override void CombatPulse()
         {
@@ -259,28 +307,20 @@ namespace HyperElk.Core
                 API.CastSpell(MortalCoil);
                 return;
             }
+            if (UseUnendingResolve && API.CanCast(UnendingResolve) && (UnendingResolveRaid || UnendingResolveDungeon))
+            {
+                API.CastSpell(UnendingResolve);
+                return;
+            }
             rotation();
             return;
         }
 
         private void rotation()
         {
-            if (API.CanCast(Agony) && TargetHasDebuff(Agony) && TargetDebuffRemainingTime(Agony) < 200)
-            {
-                API.CanCast(Agony);
-                return;
-            }
-            if (API.CanCast(Corruption) && TargetHasDebuff(Corruption) && TargetDebuffRemainingTime(Corruption) < 200)
-            {
-                API.CanCast(Corruption);
-                return;
-            }
-            if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetHasDebuff(SiphonLife) && TargetDebuffRemainingTime(SiphonLife) < 200)
-            {
-                API.CastSpell(SiphonLife);
-                return;
-            }
-            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetHasDebuff(UnstableAffliction) && TargetDebuffRemainingTime(UnstableAffliction) < UaTime + 100)
+
+
+            if (API.CanCast(UnstableAffliction) && !LastCastUnstableAffliction && TargetHasDebuff(UnstableAffliction) && TargetDebuffRemainingTime(UnstableAffliction) < UaTime + 200)
             {
                 API.CastSpell(UnstableAffliction);
                 return;
@@ -300,32 +340,7 @@ namespace HyperElk.Core
                 API.CastSpell("Trinket2");
                 return;
             }
-            if (DumpShards && DumpWatchHigh.IsRunning && API.PlayerCurrentSoulShards <= 0)
-            {
-                DumpWatchHigh.Reset();
-            }
-            if (DumpShards && DumpWatchHigh.IsRunning && API.CanCast(MaleficRapture) && DotCheck && IsRange)
-            {
-                if (!API.SpellISOnCooldown(PhantomSingularity) && TalentPhantomSingularity)
-                {
-                    API.CastSpell(PhantomSingularity);
-                }
-                if (!API.SpellISOnCooldown(VileTaint) && TalentVileTaint)
-                {
-                    API.CastSpell(VileTaint);
-                }
-                if (TalentPhantomSingularity && (TargetHasDebuff(PhantomSingularity) || API.SpellISOnCooldown(PhantomSingularity)) || TalentVileTaint && (TargetHasDebuff(VileTaint) || API.SpellISOnCooldown(VileTaint)))
-                {
-                    API.CastSpell(MaleficRapture);
-                    return;
-                }
 
-            }
-            if (API.CanCast(MaleficRapture) && API.TargetDebuffStacks(ShadowEmbrace) == 3 && DotCheck && IsRange && API.PlayerCurrentSoulShards >= 5)
-            {
-                DumpWatchHigh.Start();
-                return;
-            }
 
             //# Executed every time the actor is available.
             //actions=call_action_list,name=aoe,if=active_enemies>3
@@ -789,20 +804,20 @@ namespace HyperElk.Core
                 }
                 //actions.aoe+=/call_action_list,name=item
                 //actions.aoe+=/malefic_rapture,if=dot.vile_taint.ticking
-                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+                if (API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //actions.aoe+=/malefic_rapture,if=dot.soul_rot.ticking&!talent.sow_the_seeds.enabled
-                if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+                if (API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
                 }
                 //actions.aoe+=/malefic_rapture,if=!talent.vile_taint.enabled
                 //actions.aoe+=/malefic_rapture,if=soul_shard>4
-                if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+                if (API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards >= 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
                 {
                     API.CastSpell(MaleficRapture);
                     return;
@@ -851,7 +866,7 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/phantom_singularity,if=time>30
-            if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && !DumpShards && API.PlayerTimeInCombat > 30000 && !API.PlayerIsCasting(true))
+            if (API.CanCast(PhantomSingularity) && TalentPhantomSingularity && API.PlayerTimeInCombat > 30000 && !API.PlayerIsCasting(true))
             {
                 API.CastSpell(PhantomSingularity);
                 return;
@@ -1326,24 +1341,24 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
+            if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
             {
                 API.CastSpell(Corruption + "MO");
                 return;
             }
-            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
+            if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
             {
                 API.CastSpell(Agony + "MO");
                 return;
             }
-            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
+            if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
             {
                 API.CastSpell(SiphonLife + "MO");
                 return;
             }
 
             //actions+=/malefic_rapture,if=soul_shard>4
-            if (!DumpShards && API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+            if (API.CanCast(MaleficRapture) && DotCheck && API.PlayerCurrentSoulShards > 4 && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -1548,27 +1563,48 @@ namespace HyperElk.Core
             }
             //actions+=/call_action_list,name=item
             //actions+=/call_action_list,name=se,if=debuff.shadow_embrace.stack<(2-action.shadow_bolt.in_flight)|debuff.shadow_embrace.remains<3
+            if (API.TargetDebuffStacks(ShadowEmbrace) < 3 || TargetDebuffRemainingTime(ShadowEmbrace) < 300)
+            {
+                //actions.se = haunt
+                if (API.CanCast(Haunt) && TalentHaunt)
+                {
+                    API.CastSpell(Haunt);
+                    return;
+                }
+                //actions.se +=/ drain_soul,interrupt_global = 1,interrupt_if = debuff.shadow_embrace.stack >= 3
+                if (API.CanCast(DrainSoul) && TalentDrainSoul && NotChanneling)
+                {
+                    API.CastSpell(DrainSoul);
+                    return;
+                }
+                //actions.se +=/ shadow_bolt
+                if (API.CanCast(ShadowBolt) && !TalentDrainSoul && NotChanneling)
+                {
+                    API.CastSpell(ShadowBolt);
+                    return;
+                }
+            }
 
             //actions+=/malefic_rapture,if=dot.vile_taint.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+            if (API.CanCast(MaleficRapture) && TargetHasDebuff(VileTaint) && TalentVileTaint && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.impending_catastrophe_dot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(ImpendingCatastrophe) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+            if (API.CanCast(MaleficRapture) && TargetHasDebuff(ImpendingCatastrophe) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=dot.soul_rot.ticking
-            if (!DumpShards && API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+            if (API.CanCast(MaleficRapture) && TargetHasDebuff(SoulRot) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
             }
             //actions+=/malefic_rapture,if=talent.phantom_singularity.enabled&(dot.phantom_singularity.ticking|soul_shard>3|time_to_die<cooldown.phantom_singularity.remains)
-            if (!DumpShards && API.CanCast(MaleficRapture) && TalentPhantomSingularity && (TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
+            if (API.CanCast(MaleficRapture) && TalentPhantomSingularity && (TargetHasDebuff(PhantomSingularity) || API.PlayerCurrentSoulShards > 3 || API.TargetTimeToDie < API.SpellCDDuration(PhantomSingularity)) && !CurrentCastMaleficRapture && (CurrentCastDrainSoul || !CurrentCastDrainSoul))
             {
                 API.CastSpell(MaleficRapture);
                 return;
@@ -1646,10 +1682,6 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
-            if (DumpWatchHigh.IsRunning)
-            {
-                DumpWatchHigh.Reset();
-            }
             //Grimoire Of Sacrifice
             if (API.PlayerHasPet && TalentGrimoireOfSacrifice && API.PlayerHasBuff("Grimoire Of Sacrifice"))
             {
