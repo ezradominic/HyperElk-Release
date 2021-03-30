@@ -36,7 +36,6 @@ namespace HyperElk.Core
         private string GrimoireOfSacrifice = "Grimoire Of Sacrifice";
         private string ScouringTithe = "Scouring Tithe";
         private string Misdirection = "Misdirection";
-        private string CovenantAbility = "Covenant Ability";
         private string SoulRot = "Soul Rot";
         private string ImpendingCatastrophe = "Impending Catastrophe";
         private string trinket1 = "trinket1";
@@ -99,6 +98,8 @@ namespace HyperElk.Core
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
+        private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private static bool TargetHasDebuff(string buff)
         {
             return API.TargetHasDebuff(buff, false, true);
@@ -117,7 +118,7 @@ namespace HyperElk.Core
         }
         float UaTime => 15 / (1f + API.PlayerGetHaste / 10);
         float HTime => 1500 / 1000 / (1f + API.PlayerGetHaste / 1);
-        private bool UnendingResolveRaid => API.TargetCurrentCastSpellID == 345397 && API.TargetCurrentCastTimeRemaining <= 600 || API.TargetCurrentCastSpellID == 329455 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 325384 || API.TargetCurrentCastSpellID == 337110 || API.TargetCurrentCastSpellID == 332687 || API.TargetCurrentCastSpellID == 331209 || API.TargetCurrentCastSpellID == 332683;
+        private bool UnendingResolveRaid => API.TargetCurrentCastSpellID == 345397 && API.TargetCurrentCastTimeRemaining <= 600 || API.TargetCurrentCastSpellID == 329455 || API.TargetCurrentCastSpellID == 325384 || API.TargetCurrentCastSpellID == 337110 || API.TargetCurrentCastSpellID == 332687 || API.TargetCurrentCastSpellID == 331209 || API.TargetCurrentCastSpellID == 332683;
         private bool UnendingResolveDungeon => API.TargetCurrentCastSpellID == 322236 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 321247 || API.TargetCurrentCastSpellID == 321828 || API.TargetCurrentCastSpellID == 328125 || API.TargetCurrentCastSpellID == 334625;
 
         public override void Initialize()
@@ -145,6 +146,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
 
             CombatRoutine.AddProp("UseUnendingResolve", "Use Unending Resolve", true, "Use Unending Resolve to block High DMG Raid Encounters", "Defensive");
 
@@ -212,6 +215,8 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("DarkSoul");
 
+            CombatRoutine.AddItem(PhialofSerenity, 177278);
+            CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
         }
 
 
@@ -220,33 +225,33 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving)
+            if ((!API.PlayerHasPet || API.PlayerHasPet && API.PetHealthPercent <= 0) && (isMisdirection == "Felhunter" || isMisdirection == "Succubus" || isMisdirection == "Voidwalker" || isMisdirection == "Imp") && API.CanCast(FelDomination))
+            {
+                API.CastSpell(FelDomination);
+                return;
+            }
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && !API.PlayerIsCasting(false))
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonImp);
                 return;
             }
-            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving)
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonVoidwalker) && !API.PlayerHasPet && (isMisdirection == "Voidwalker") && NotMoving && !API.PlayerIsCasting(false))
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonVoidwalker);
                 return;
             }
-            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving)
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonSuccubus) && !API.PlayerHasPet && (isMisdirection == "Succubus") && NotMoving && !API.PlayerIsCasting(false))
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonSuccubus);
                 return;
             }
-            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving)
+            if (API.PlayerHasBuff(FelDomination) && !TalentGrimoireOfSacrifice && API.CanCast(SummonFelhunter) && !API.PlayerHasPet && (isMisdirection == "Felhunter") && NotMoving && !API.PlayerIsCasting(false))
             {
                 API.WriteLog("We are in Combat , use Fel Domination summon");
                 API.CastSpell(SummonFelhunter);
-                return;
-            }
-            if (!API.PlayerHasPet && (isMisdirection == "Felhunter" || isMisdirection == "Succubus" || isMisdirection == "Voidwalker" || isMisdirection == "Imp") && API.CanCast(FelDomination))
-            {
-                API.CastSpell(FelDomination);
                 return;
             }
 
@@ -285,6 +290,16 @@ namespace HyperElk.Core
             if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
             {
                 API.CastSpell(SpellLock);
+                return;
+            }
+            if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
+            {
+                API.CastSpell(PhialofSerenity);
+                return;
+            }
+            if (API.PlayerItemCanUse(SpiritualHealingPotion) && API.PlayerItemRemainingCD(SpiritualHealingPotion) == 0 && API.PlayerHealthPercent <= SpiritualHealingPotionLifePercent)
+            {
+                API.CastSpell(SpiritualHealingPotion);
                 return;
             }
             if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
@@ -1151,6 +1166,11 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/agony,cycle_targets=1,target_if=dot.agony.remains<4
+            if (API.CanCast(Agony) && TargetDebuffRemainingTime(Agony) < 400)
+            {
+                API.CastSpell(Agony);
+                return;
+            }
             if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
             {
                 API.CastSpell(Agony + "MO");
@@ -1188,6 +1208,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/siphon_life,cycle_targets=1,target_if=dot.siphon_life.remains<4
+            if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 400)
+            {
+                API.CastSpell(SiphonLife);
+                return;
+            }
             if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
             {
                 API.CastSpell(SiphonLife + "MO");
@@ -1236,6 +1261,11 @@ namespace HyperElk.Core
             }
             //# Apply Corruption manually on 1-2 targets, or on 3 with Absolute Corruption
             //actions+=/corruption,cycle_targets=1,if=active_enemies<4-(talent.sow_the_seeds|talent.siphon_life),target_if=dot.corruption.remains<2
+            if (API.CanCast(Corruption) && TargetDebuffRemainingTime(Corruption) < 400)
+            {
+                API.CastSpell(Corruption);
+                return;
+            }
             if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
             {
                 API.CastSpell(Corruption + "MO");
@@ -1553,6 +1583,11 @@ namespace HyperElk.Core
             }
             //actions+=/call_action_list,name=covenant
             //actions+=/agony,cycle_targets=1,target_if=refreshable
+            if (API.CanCast(Agony) && TargetDebuffRemainingTime(Agony) < 400)
+            {
+                API.CastSpell(Agony);
+                return;
+            }
             if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
             {
                 API.CastSpell(Agony + "MO");
@@ -1564,12 +1599,22 @@ namespace HyperElk.Core
                 API.CastSpell(UnstableAffliction);
             }
             //actions+=/siphon_life,cycle_targets=1,target_if=refreshable
+            if (API.CanCast(SiphonLife) && TalentSiphonLife && TargetDebuffRemainingTime(SiphonLife) < 400)
+            {
+                API.CastSpell(SiphonLife);
+                return;
+            }
             if (IsMouseover && UseSL && !LastCastSiphonLife && API.CanCast(SiphonLife) && !API.MacroIsIgnored(SiphonLife + "MO") && API.PlayerCanAttackMouseover && TalentSiphonLife && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(SiphonLife) <= 400 && IsRange)
             {
                 API.CastSpell(SiphonLife + "MO");
                 return;
             }
             //actions+=/corruption,cycle_targets=1,if=active_enemies<4-(talent.sow_the_seeds|talent.siphon_life),target_if=refreshable
+            if (API.CanCast(Corruption) && TargetDebuffRemainingTime(Corruption) < 400)
+            {
+                API.CastSpell(Corruption);
+                return;
+            }
             if (IsMouseover && UseCO && !LastCastCorruption && API.CanCast(Corruption) && !API.MacroIsIgnored(Corruption + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Corruption) <= 400 && !TargetHasDebuff(SeedofCorruption) && IsRange)
             {
                 API.CastSpell(Corruption + "MO");
