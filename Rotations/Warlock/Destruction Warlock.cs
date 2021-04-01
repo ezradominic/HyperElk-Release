@@ -77,6 +77,7 @@ namespace HyperElk.Core
         float DBTime => 2500 / 1000 / (1f + API.PlayerGetHaste / 1);
         float SCTime => 2 / (1f + API.PlayerGetHaste / 1);
         float IncinerateTime => 2 / (1f + API.PlayerGetHaste / 1);
+        float DemonfireTime => 3 / (1f + API.PlayerGetHaste / 1);
 
         float HavocTime => 10 - (HavocWatch.ElapsedMilliseconds / 1000);
 
@@ -95,6 +96,7 @@ namespace HyperElk.Core
         private int PlayerLevel => API.PlayerLevel;
         private bool NotMoving => !API.PlayerIsMoving;
         private bool NotChanneling => !API.PlayerIsChanneling;
+        private bool NotCasting => !API.PlayerIsCasting(true);
         bool LastCastImmolate => API.LastSpellCastInGame == Immolate || API.LastSpellCastInGame == Immolate || API.PlayerCurrentCastSpellID == 348;
         bool LastCastConflagrate => API.PlayerLastSpell == Conflagrate || API.LastSpellCastInGame == Conflagrate || API.PlayerCurrentCastSpellID == 17962;
         bool LastCastSummonVoidwalker => API.PlayerLastSpell == SummonVoidwalker || API.LastSpellCastInGame == SummonVoidwalker;
@@ -104,11 +106,15 @@ namespace HyperElk.Core
         bool LastCastShadowBurn => API.PlayerLastSpell == ShadowBurn || API.LastSpellCastInGame == ShadowBurn;
         private string UseCovenantAbility => CovenantAbilityList[CombatRoutine.GetPropertyInt(CovenantAbility)];
         string[] CovenantAbilityList = new string[] { "always", "Cooldowns", "AOE" };
-        private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
-        string[] TrinketList1 = new string[] { "always", "Cooldowns", "never" };
+        string[] UseListwithHP = new string[] { "never", "With Cooldowns", "On Cooldown", "on AOE", "on HP" };
+        private string UseTrinket1 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket2")];
+        private int Trinket1HP => numbList[CombatRoutine.GetPropertyInt("Trinket1HP")];
+        private int Trinket2HP => numbList[CombatRoutine.GetPropertyInt("Trinket2HP")];
+        private bool IsLeadByExample => CombatRoutine.GetPropertyBool("LeadByExample");
+        private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
 
-        private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
-        string[] TrinketList2 = new string[] { "always", "Cooldowns", "never" };
+        private bool UseImmolateMO => (bool)CombatRoutine.GetProperty("ImmolateMO");
 
         public override void Initialize()
         {
@@ -117,6 +123,7 @@ namespace HyperElk.Core
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("Use /cast [@cursor] Rain of Fire");
             API.WriteLog("Use /cast [@cursor] Cataclysm");
+            API.WriteLog("Use /cast [@mouseover] Immolate");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
             API.WriteLog("--------------------------------------------------------------------------------------------------------------------------");
 
@@ -131,8 +138,13 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
 
-            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket");
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket");
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", UseListwithHP, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", UseListwithHP, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket1HP", "Trinket 1" + " Life Percent", numbList, " Life percent at which" + "Trinket 1" + " is used, set to 0 to disable", "Trinkets", 40);
+            CombatRoutine.AddProp("Trinket2HP", "Trinket 2" + " Life Percent", numbList, " Life percent at which" + "Trinket 2" + " is used, set to 0 to disable", "Trinkets", 40);
+
+            CombatRoutine.AddProp("Lead By Example", "Lead By Example", false, " Activate with Lead By Example Soulbind", "Soulbinds");
+            CombatRoutine.AddProp("ImmolateMO", "Use Immolate", true, "Use Immolate mouseover ", "Mouseover");
 
 
             //Spells
@@ -185,11 +197,22 @@ namespace HyperElk.Core
 
             CombatRoutine.AddMacro(trinket1);
             CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Immolate + "MO");
+
+            CombatRoutine.AddToggle("Mouseover");
 
         }
 
         public override void Pulse()
         {
+            if (API.LastSpellCastInGame == Havoc && !HavocWatch.IsRunning)
+            {
+                HavocWatch.Start();
+            }
+            if (API.LastSpellCastInGame == SummonInfernal && !InfernalWatch.IsRunning)
+            {
+                InfernalWatch.Start();
+            }
             //Summon Imp
             if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
             {
@@ -218,7 +241,7 @@ namespace HyperElk.Core
                 API.CastSpell(SummonFelhunter);
                 return;
             }
-            if (!API.PlayerHasPet && API.PlayerIsInCombat && API.CanCast(FelDomination))
+            if ((!API.PlayerHasPet || API.PlayerHasPet && API.PetHealthPercent == 0) && API.PlayerIsInCombat && API.CanCast(FelDomination))
             {
                 API.CastSpell(FelDomination);
                 return;
@@ -232,18 +255,13 @@ namespace HyperElk.Core
                 API.CastSpell(SpellLock);
                 return;
             }
-            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
-                API.CastSpell(trinket1);
-            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
-                API.CastSpell(trinket2);
-            if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
-                API.CastSpell(trinket1);
-            if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
-                API.CastSpell(trinket2);
-            if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket1 == "on HP" && API.PlayerHealthPercent <= Trinket1HP))
             {
-                API.CastSpell("Healthstone");
-                return;
+                API.CastSpell("Trinket1");
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket2 == "on HP" && API.PlayerHealthPercent <= Trinket2HP))
+            {
+                API.CastSpell("Trinket2");
             }
             if (API.PlayerItemCanUse(PhialofSerenity) && API.PlayerItemRemainingCD(PhialofSerenity) == 0 && API.PlayerHealthPercent <= PhialofSerenityLifePercent)
             {
@@ -255,69 +273,26 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            if (!API.PlayerIsInCombat && InfernalWatch.IsRunning)
-            {
-                InfernalWatch.Stop();
-                InfernalWatch.Reset();
-                return;
-            }
-            if (!API.PlayerIsInCombat && HavocWatch.IsRunning)
-            {
-                HavocWatch.Stop();
-                HavocWatch.Reset();
-                return;
-            }
             if (InfernalWatch.IsRunning && InfernalWatch.ElapsedMilliseconds >= 30000)
             {
-                InfernalWatch.Stop();
                 InfernalWatch.Reset();
                 return;
             }
             if (HavocWatch.IsRunning && HavocWatch.ElapsedMilliseconds >= 10000)
             {
-                HavocWatch.Stop();
                 HavocWatch.Reset();
                 return;
             }
-            //Cooldowns
-            if (IsCooldowns)
-            {
-                //actions.cds=summon_infernal
-                if (API.CanCast(SummonInfernal))
-                {
-                    API.CastSpell(SummonInfernal);
-                    InfernalWatch.Start();
-                    return;
-                }
-                //actions.cds+=/dark_soul_instability
-                if (API.CanCast(darkSoulInstability) && TalentDarkSoulInstability)
-                {
-                    API.CastSpell(darkSoulInstability);
-                    return;
-                }
-            }
             // Drain Life
-            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && PlayerLevel >= 9)
+            if (API.PlayerHealthPercent <= DrainLifePercentProc && API.CanCast(DrainLife) && NotChanneling)
             {
                 API.CastSpell(DrainLife);
                 return;
             }
             // Health Funnel
-            if (HealthFunnelWatch.IsRunning && API.PetHealthPercent >= 70)
-            {
-                HealthFunnelWatch.Stop();
-                HealthFunnelWatch.Reset();
-                return;
-            }
-            if (HealthFunnelWatch.IsRunning && API.CanCast(HealthFunnel))
+            if (API.CanCast(HealthFunnel) && API.PlayerHasPet && API.PetHealthPercent > 0 && API.PetHealthPercent <= HealthFunnelPercentProc && NotChanneling)
             {
                 API.CastSpell(HealthFunnel);
-                return;
-            }
-            // Health Funnel
-            if (API.PlayerHasPet && API.PetHealthPercent >= 1 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel) && PlayerLevel >= 8)
-            {
-                HealthFunnelWatch.Start();
                 return;
             }
             rotation();
@@ -327,11 +302,11 @@ namespace HyperElk.Core
         private void rotation()
         {
 
-            if ((IsAOE || !IsAOE) && API.CanCast(Havoc) && !API.PlayerIsCasting(true) && API.PlayerCurrentSoulShards >= 4 && API.TargetUnitInRangeCount + API.PlayerUnitInMeleeRangeCount == 2)
+            //# Executed every time the actor is available.
+            if (API.CanCast(Havoc) && NotCasting && API.PlayerCurrentSoulShards >= 4 && API.TargetUnitInRangeCount + API.PlayerUnitInMeleeRangeCount == 2)
             {
 
                 API.CastSpell(Havoc);
-                HavocWatch.Start();
                 if (SwitchTarget)
                 {
                     Thread.Sleep(150);
@@ -339,107 +314,172 @@ namespace HyperElk.Core
                 }
                 return;
             }
-            //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
-            if (!API.PlayerIsCasting(true) && API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
+            //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
+            if (HavocWatch.IsRunning && NotCasting)
             {
-                API.CastSpell(ChaosBolt);
-                return;
-            }
-            //actions.havoc+=/shadowburn
-            if (!API.PlayerIsCasting(true) && API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
-            {
-                API.CastSpell(ShadowBurn);
-                return;
-            }
+                //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
+                if (API.CanCast(Conflagrate) && HavocWatch.IsRunning && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
+                {
+                    API.CastSpell(Conflagrate);
+                    return;
+                }
+                //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
+                if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
+                {
+                    API.CastSpell(SoulFire);
+                    return;
+                }
+                //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
+                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && HavocWatch.IsRunning && DBTime <= HavocTime)
+                {
+                    API.CanCast(DecimatingBolt);
+                    return;
+                }
+                //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
+                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && HavocWatch.IsRunning && SCTime <= HavocTime)
+                {
+                    API.CastSpell(ScouringTithe);
+                    return;
+                }
+                //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
+                //actions.havoc+=/chaos_bolt,if=cast_time<havoc_remains
+                if (API.CanCast(ChaosBolt) && HavocWatch.IsRunning && CBTime <= HavocTime)
+                {
+                    API.CastSpell(ChaosBolt);
+                    return;
+                }
+                //actions.havoc+=/shadowburn
+                if (API.CanCast(ShadowBurn) && HavocWatch.IsRunning && HavocWatch.IsRunning)
+                {
+                    API.CastSpell(ShadowBurn);
+                    return;
+                }
 
-            //actions.havoc+=/incinerate,if=cast_time<havoc_remains
-            if (!API.PlayerIsCasting(true) && API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
-            {
-                API.CastSpell(Incinerate);
-                return;
+                //actions.havoc+=/incinerate,if=cast_time<havoc_remains
+                if (API.CanCast(Incinerate) && HavocWatch.IsRunning && IncinerateTime <= HavocTime)
+                {
+                    API.CastSpell(Incinerate);
+                    return;
+                }
             }
-            //actions.havoc=conflagrate,if=buff.backdraft.down&soul_shard>=1&soul_shard<=4
-            if (!API.PlayerIsCasting(true) && API.CanCast(Conflagrate) && HavocWatch.IsRunning && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && API.PlayerCurrentSoulShards <= 4)
+            //actions+=/conflagrate,if=talent.roaring_blaze.enabled&debuff.roaring_blaze.remains<1.5
+            if (API.CanCast(Conflagrate) && NotCasting && !LastCastConflagrate && TalentRoaringBlaze && API.TargetDebuffRemainingTime(RoaringBlaze) <= 150)
             {
                 API.CastSpell(Conflagrate);
                 return;
             }
-            //AOE
+            //actions+=/cataclysm,if=!(pet.infernal.active&dot.immolate.remains+1>pet.infernal.remains)|spell_targets.cataclysm>1
+
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
-            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
+            if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && NotCasting)
             {
                 //actions.aoe=rain_of_fire,if=pet.infernal.active&(!cooldown.havoc.ready|active_enemies>3)
-                // if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && InfernalWatch.IsRunning && API.SpellISOnCooldown(Havoc) || API.TargetUnitInRangeCount > 3)
-                // {
-                //     API.CastSpell(RainOfFire);
-                //     return;
-                // }
-
+                if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && InfernalWatch.IsRunning && (API.SpellISOnCooldown(Havoc) || API.TargetUnitInRangeCount > 3))
+                {
+                    API.CastSpell(RainOfFire);
+                    return;
+                }
                 //actions.aoe+=/soul_rot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE"))
+                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns))
                 {
                     API.CastSpell(SoulRot);
                     return;
                 }
-
                 //actions.aoe+=/channel_demonfire,if=dot.immolate.remains>cast_time
-                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400 && API.SpellISOnCooldown(Cataclysm))
+                if (API.CanCast(ChannelDemonFire) && API.TargetDebuffRemainingTime(Immolate) > DemonfireTime)
                 {
-                    API.CastSpell(Immolate);
+                    API.CastSpell(ChannelDemonFire);
                     return;
                 }
                 //actions.aoe+=/immolate,cycle_targets=1,if=remains<5&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
-                if (API.CanCast(Cataclysm) && TalentCataclysm)
+                if (IsMouseover && (TalentCataclysm && !API.CanCast(Cataclysm) || !TalentCataclysm) && !API.MacroIsIgnored(Immolate + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.MouseoverDebuffRemainingTime(Immolate) <= 200)
                 {
-                    API.CastSpell(Cataclysm);
+                    API.CastSpell(Immolate + "MO");
                     return;
                 }
+                //actions.aoe+=/call_action_list,name=cds
+                if (IsCooldowns)
+                {
+                    //actions.cds=summon_infernal
+                    if (API.CanCast(SummonInfernal))
+                    {
+                        API.CastSpell(SummonInfernal);
+                        return;
+                    }
+                    //actions.cds+=/dark_soul_instability
+                    if (API.CanCast(darkSoulInstability) && TalentDarkSoulInstability)
+                    {
+                        API.CastSpell(darkSoulInstability);
+                        return;
+                    }
+                    //actions.cds+=/potion,if=pet.infernal.active
+                    //actions.cds+=/berserking,if=pet.infernal.active
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.cds+=/blood_fury,if=pet.infernal.active
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.cds+=/fireblood,if=pet.infernal.active
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+                    {
+                        API.CastSpell(RacialSpell1);
+                        return;
+                    }
+                    //actions.cds+=/use_items,if=pet.infernal.active|target.time_to_die<20
+                }
+                //actions.aoe+=/call_action_list,name=essences
+                //actions.aoe+=/havoc,cycle_targets=1,if=!(target=self.target)&active_enemies<4
                 //actions.aoe+=/rain_of_fire
-                if (API.CanCast(RainOfFire) && API.PlayerCurrentSoulShards >= 3 && API.TargetUnitInRangeCount >= 3)
+                if (API.CanCast(RainOfFire) && NotCasting && API.PlayerCurrentSoulShards >= 3 && API.TargetUnitInRangeCount >= 3)
                 {
                     API.CastSpell(RainOfFire);
                     return;
                 }
                 //actions.aoe+=/havoc,cycle_targets=1,if=!(self.target=target)
-
                 //actions.aoe+=/decimating_bolt,if=(soulbind.lead_by_example.enabled|!talent.fire_and_brimstone.enabled)
-                if (API.CanCast(DecimatingBolt) && !TalentFireandBrimstone && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns"))
+                if (API.CanCast(DecimatingBolt) && NotCasting && (IsLeadByExample || !TalentFireandBrimstone) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns))
                 {
                     API.CastSpell(DecimatingBolt);
                     return;
                 }
                 //actions.aoe+=/incinerate,if=talent.fire_and_brimstone.enabled&buff.backdraft.up&soul_shard<5-0.2*active_enemies
-                if (API.CanCast(Incinerate) && TalentFireandBrimstone && API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards <= 5)
+                if (API.CanCast(Incinerate) && NotCasting && TalentFireandBrimstone && API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards <= 5)
                 {
                     API.CastSpell(Incinerate);
                     return;
                 }
                 //actions.aoe+=/soul_fire
-                if (API.CanCast(SoulFire) && TalentSoulFire)
+                if (API.CanCast(SoulFire) && NotCasting && TalentSoulFire)
                 {
                     API.CastSpell(SoulFire);
                     return;
                 }
                 //actions.aoe+=/conflagrate,if=buff.backdraft.down
-                if (API.CanCast(Conflagrate) && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft))
+                if (API.CanCast(Conflagrate) && NotCasting && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft))
                 {
                     API.CastSpell(Conflagrate);
                     return;
                 }
                 //actions.aoe+=/shadowburn,if=target.health.pct<20
-                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.TargetHealthPercent <= 20)
+                if (API.CanCast(ShadowBurn) && NotCasting && !LastCastShadowBurn && TalentShadowBurn && API.TargetHealthPercent < 20)
                 {
                     API.CastSpell(ShadowBurn);
                     return;
                 }
                 //actions.aoe+=/scouring_tithe,if=!(talent.fire_and_brimstone.enabled|talent.inferno.enabled)
-                if (API.CanCast(ScouringTithe) && (TalentFireandBrimstone || TalentInferno) && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns"))
+                if (API.CanCast(ScouringTithe) && NotCasting && (!TalentFireandBrimstone || !TalentInferno) && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns))
                 {
                     API.CastSpell(ScouringTithe);
                     return;
                 }
                 //actions.aoe+=/impending_catastrophe,if=!(talent.fire_and_brimstone.enabled|talent.inferno.enabled)
-                if (API.CanCast(ImpendingCatastrophe) && (TalentFireandBrimstone || TalentInferno) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns"))
+                if (API.CanCast(ImpendingCatastrophe) && NotCasting && (!TalentFireandBrimstone || !TalentInferno) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns))
                 {
                     API.CastSpell(ImpendingCatastrophe);
                     return;
@@ -451,149 +491,150 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            //SINGLE TARGET
-            if ((!IsAOE || IsAOE && API.TargetUnitInRangeCount <= AOEUnitNumber) && IsRange && !HealthFunnelWatch.IsRunning && !API.PlayerIsCasting(true))
+            //actions+=/soul_fire,cycle_targets=1,if=refreshable&soul_shard<=4&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
+            if (API.CanCast(SoulFire) && NotCasting && TalentSoulFire && API.PlayerCurrentSoulShards <= 4 && (!TalentCataclysm || API.SpellISOnCooldown(Cataclysm)))
             {
-                //actions.havoc+=/soul_fire,if=cast_time<havoc_remains
-                if (TalentSoulFire && API.CanCast(SoulFire) && HavocWatch.IsRunning && SFTime <= HavocTime)
+                API.CastSpell(SoulFire);
+                return;
+            }
+            //actions+=/immolate,cycle_targets=1,if=refreshable&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
+            if (API.CanCast(Immolate) && NotCasting && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) < 250)
+            {
+                API.CastSpell(Immolate);
+                return;
+            }
+            //actions+=/immolate,if=talent.internal_combustion.enabled&action.chaos_bolt.in_flight&remains<duration*0.5
+            //actions+=/call_action_list,name=cds
+            if (IsCooldowns && NotCasting)
+            {
+                //actions.cds=summon_infernal
+                if (API.CanCast(SummonInfernal))
                 {
-                    API.CastSpell(SoulFire);
+                    API.CastSpell(SummonInfernal);
                     return;
                 }
-
-                //actions.havoc+=/decimating_bolt,if=cast_time<havoc_remains&soulbind.lead_by_example.enabled
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && HavocWatch.IsRunning && DBTime <= HavocTime)
+                //actions.cds+=/dark_soul_instability
+                if (API.CanCast(darkSoulInstability) && TalentDarkSoulInstability)
                 {
-                    API.CanCast(DecimatingBolt);
+                    API.CastSpell(darkSoulInstability);
                     return;
                 }
-
-                //actions.havoc+=/scouring_tithe,if=cast_time<havoc_remains
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && HavocWatch.IsRunning && SCTime <= HavocTime)
+                //actions.cds+=/potion,if=pet.infernal.active
+                //actions.cds+=/berserking,if=pet.infernal.active
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
                 {
-                    API.CastSpell(ScouringTithe);
+                    API.CastSpell(RacialSpell1);
                     return;
                 }
-
-                //actions.havoc+=/immolate,if=talent.internal_combustion.enabled&remains<duration*0.5|!talent.internal_combustion.enabled&refreshable
-
-
-                //# Executed every time the actor is available.
-                //actions=call_action_list,name=havoc,if=havoc_active&active_enemies>1&active_enemies<5-talent.inferno.enabled+(talent.inferno.enabled&talent.internal_combustion.enabled)
-               
-                //actions+=/conflagrate,if=talent.roaring_blaze.enabled&debuff.roaring_blaze.remains<1.5
-                if (API.CanCast(Conflagrate) && !LastCastConflagrate && TalentRoaringBlaze && API.TargetDebuffRemainingTime(RoaringBlaze) <= 150)
+                //actions.cds+=/blood_fury,if=pet.infernal.active
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
                 {
-                    API.CastSpell(Conflagrate);
+                    API.CastSpell(RacialSpell1);
                     return;
                 }
-                //actions+=/cataclysm,if=!(pet.infernal.active&dot.immolate.remains+1>pet.infernal.remains)|spell_targets.cataclysm>1
-
-                //actions+=/soul_fire,cycle_targets=1,if=refreshable&soul_shard<=4&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
-                if (API.CanCast(SoulFire) && TalentSoulFire && API.PlayerCurrentSoulShards <= 4 && (!TalentCataclysm || API.SpellISOnCooldown(Cataclysm)))
+                //actions.cds+=/fireblood,if=pet.infernal.active
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
                 {
-                    API.CastSpell(SoulFire);
+                    API.CastSpell(RacialSpell1);
                     return;
                 }
-                //actions+=/immolate,cycle_targets=1,if=refreshable&(!talent.cataclysm.enabled|cooldown.cataclysm.remains>remains)
-                if (API.CanCast(Immolate) && !LastCastImmolate && API.TargetDebuffRemainingTime(Immolate) <= 400)
-                {
-                    API.CastSpell(Immolate);
-                    return;
-                }
-                //actions+=/immolate,if=talent.internal_combustion.enabled&action.chaos_bolt.in_flight&remains<duration*0.5
-                if (API.CanCast(ChaosBolt) && API.PlayerCurrentSoulShards >= 2 && TalentInternalCombustion && API.TargetDebuffRemainingTime(Immolate) >= 500 && API.TargetTimeToDie >= 5000)
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions+=/channel_demonfire
-                if (API.CanCast(ChannelDemonFire) && TalentChannelDemonFire && NotChanneling)
-                {
-                    API.CastSpell(ChannelDemonFire);
-                    return;
-                }
-                //actions+=/scouring_tithe
-                if (API.CanCast(ScouringTithe) && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(ScouringTithe);
-                    return;
-                }
-                //actions+=/decimating_bolt
-                if (API.CanCast(DecimatingBolt) && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(DecimatingBolt);
-                    return;
-                }
-                //actions+=/havoc,cycle_targets=1,if=!(target=self.target)&(dot.immolate.remains>dot.immolate.duration*0.5|!talent.internal_combustion.enabled)
-
-
-                //actions+=/impending_catastrophe
-                if (API.CanCast(ImpendingCatastrophe) && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(ImpendingCatastrophe);
-                    return;
-                }
-                //actions+=/soul_rot
-                if (API.CanCast(SoulRot) && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(SoulRot);
-                    return;
-                }
-                //actions+=/havoc,if=runeforge.odr_shawl_of_the_ymirjar.equipped
-                //actions+=/variable,name=pool_soul_shards,value=active_enemies>1&cooldown.havoc.remains<=10|cooldown.summon_infernal.remains<=15&talent.dark_soul_instability.enabled&cooldown.dark_soul_instability.remains<=15|talent.dark_soul_instability.enabled&cooldown.dark_soul_instability.remains<=15&(cooldown.summon_infernal.remains>target.time_to_die|cooldown.summon_infernal.remains+cooldown.summon_infernal.duration>target.time_to_die)
-                //actions+=/conflagrate,if=buff.backdraft.down&soul_shard>=1.5-0.3*talent.flashover.enabled&!variable.pool_soul_shards
-                if (API.CanCast(Conflagrate) && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && TalentFlashover)
-                {
-                    API.CastSpell(Conflagrate);
-                    return;
-                }
-                //actions+=/chaos_bolt,if=buff.dark_soul_instability.up
-                if (API.CanCast(ChaosBolt) && API.PlayerHasBuff(darkSoulInstability) && API.PlayerCurrentSoulShards >= 2)
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions+=/chaos_bolt,if=buff.backdraft.up&!variable.pool_soul_shards&!talent.eradication.enabled
-                if (API.CanCast(ChaosBolt) && API.PlayerHasBuff(Backdraft) && !TalentEradication && API.PlayerCurrentSoulShards >= 2)
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions+=/chaos_bolt,if=!variable.pool_soul_shards&talent.eradication.enabled&(debuff.eradication.remains<cast_time|buff.backdraft.up)
-                if (API.CanCast(ChaosBolt) && API.PlayerCurrentSoulShards >= 2 && TalentEradication && API.TargetDebuffRemainingTime(Eradication) < API.PlayerCurrentCastTimeRemaining | API.PlayerHasBuff(Backdraft))
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions+=/shadowburn,if=!variable.pool_soul_shards|soul_shard>=4.5
-                if (API.CanCast(ShadowBurn) && !LastCastShadowBurn && TalentShadowBurn && API.PlayerCurrentSoulShards >= 1)
-                {
-                    API.CastSpell(ShadowBurn);
-                    return;
-                }
-                //actions+=/chaos_bolt,if=(soul_shard>=4.5-0.2*active_enemies)
-                if (API.CanCast(ChaosBolt) && API.PlayerCurrentSoulShards >= 4)
-                {
-                    API.CastSpell(ChaosBolt);
-                    return;
-                }
-                //actions+=/conflagrate,if=charges>1
-                if (API.CanCast(Conflagrate) && !LastCastConflagrate && API.SpellCharges(Conflagrate) >= 1)
-                {
-                    API.CastSpell(Conflagrate);
-                    return;
-                }
-                //actions+=/incinerate
-                if (API.CanCast(Incinerate))
-                {
-                    API.CastSpell(Incinerate);
-                    return;
-                }       
+                //actions.cds+=/use_items,if=pet.infernal.active|target.time_to_die<20
+            }
+            //actions+=/call_action_list,name=essences
+            //actions+=/channel_demonfire
+            if (API.CanCast(ChannelDemonFire) && NotCasting)
+            {
+                API.CastSpell(ChannelDemonFire);
+                return;
+            }
+            //actions+=/scouring_tithe
+            if (API.CanCast(ScouringTithe) && NotCasting && PlayerCovenantSettings == "Kyrian" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns) && NotCasting)
+            {
+                API.CastSpell(ScouringTithe);
+                return;
+            }
+            //actions+=/decimating_bolt
+            if (API.CanCast(DecimatingBolt) && NotCasting && PlayerCovenantSettings == "Necrolord" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns) && NotCasting)
+            {
+                API.CastSpell(DecimatingBolt);
+                return;
+            }
+            //actions+=/havoc,cycle_targets=1,if=!(target=self.target)&(dot.immolate.remains>dot.immolate.duration*0.5|!talent.internal_combustion.enabled)
+            //actions+=/impending_catastrophe
+            if (API.CanCast(ImpendingCatastrophe) && NotCasting && PlayerCovenantSettings == "Venthyr" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns) && NotCasting)
+            {
+                API.CastSpell(ImpendingCatastrophe);
+                return;
+            }
+            //actions+=/soul_rot
+            if (API.CanCast(SoulRot) && NotCasting && PlayerCovenantSettings == "Night Fae" && (UseCovenantAbility == "always" || UseCovenantAbility == "AOE" && IsAOE || UseCovenantAbility == "Cooldowns" && IsCooldowns) && NotCasting)
+            {
+                API.CastSpell(SoulRot);
+                return;
+            }
+            //actions+=/havoc,if=runeforge.odr_shawl_of_the_ymirjar.equipped
+            //actions+=/variable,name=pool_soul_shards,value=active_enemies>1&cooldown.havoc.remains<=10|cooldown.summon_infernal.remains<=15&talent.dark_soul_instability.enabled&cooldown.dark_soul_instability.remains<=15|talent.dark_soul_instability.enabled&cooldown.dark_soul_instability.remains<=15&(cooldown.summon_infernal.remains>target.time_to_die|cooldown.summon_infernal.remains+cooldown.summon_infernal.duration>target.time_to_die)
+            //actions+=/conflagrate,if=buff.backdraft.down&soul_shard>=1.5-0.3*talent.flashover.enabled&!variable.pool_soul_shards
+            if (API.CanCast(Conflagrate) && NotCasting && !LastCastConflagrate && !API.PlayerHasBuff(Backdraft) && API.PlayerCurrentSoulShards >= 1 && TalentFlashover)
+            {
+                API.CastSpell(Conflagrate);
+                return;
+            }
+            //actions+=/chaos_bolt,if=buff.dark_soul_instability.up
+            if (API.CanCast(ChaosBolt) && NotCasting && API.PlayerHasBuff(darkSoulInstability) && API.PlayerCurrentSoulShards >= 2)
+            {
+                API.CastSpell(ChaosBolt);
+                return;
+            }
+            //actions+=/chaos_bolt,if=buff.backdraft.up&!variable.pool_soul_shards&!talent.eradication.enabled
+            if (API.CanCast(ChaosBolt) && NotCasting && API.PlayerHasBuff(Backdraft) && !TalentEradication && API.PlayerCurrentSoulShards >= 2)
+            {
+                API.CastSpell(ChaosBolt);
+                return;
+            }
+            //actions+=/chaos_bolt,if=!variable.pool_soul_shards&talent.eradication.enabled&(debuff.eradication.remains<cast_time|buff.backdraft.up)
+            if (API.CanCast(ChaosBolt) && NotCasting && API.PlayerCurrentSoulShards >= 2 && TalentEradication && API.TargetDebuffRemainingTime(Eradication) < API.PlayerCurrentCastTimeRemaining | API.PlayerHasBuff(Backdraft))
+            {
+                API.CastSpell(ChaosBolt);
+                return;
+            }
+            //actions+=/shadowburn,if=!variable.pool_soul_shards|soul_shard>=4.5
+            if (API.CanCast(ShadowBurn) && NotCasting && !LastCastShadowBurn && TalentShadowBurn && API.PlayerCurrentSoulShards >= 4 && NotCasting)
+            {
+                API.CastSpell(ShadowBurn);
+                return;
+            }
+            //actions+=/chaos_bolt,if=(soul_shard>=4.5-0.2*active_enemies)
+            if (API.CanCast(ChaosBolt) && NotCasting && API.PlayerCurrentSoulShards >= 4 && NotCasting)
+            {
+                API.CastSpell(ChaosBolt);
+                return;
+            }
+            //actions+=/conflagrate,if=charges>1
+            if (API.CanCast(Conflagrate) && NotCasting && !LastCastConflagrate && API.SpellCharges(Conflagrate) > 1 && NotCasting)
+            {
+                API.CastSpell(Conflagrate);
+                return;
+            }
+            //actions+=/incinerate
+            if (API.CanCast(Incinerate) && NotCasting)
+            {
+                API.CastSpell(Incinerate);
+                return;
             }
         }
         public override void OutOfCombatPulse()
         {
+            if (InfernalWatch.IsRunning)
+            {
+                InfernalWatch.Reset();
+                return;
+            }
+            if (HavocWatch.IsRunning)
+            {
+                HavocWatch.Reset();
+                return;
+            }
             if (API.PlayerHasPet && TalentGrimoireOfSacrifice && !API.PlayerHasBuff("Grimoire Of Sacrifice"))
             {
                 API.CastSpell(GrimoireOfSacrifice);
