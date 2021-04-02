@@ -369,6 +369,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/cataclysm,if=!(pet.infernal.active&dot.immolate.remains+1>pet.infernal.remains)|spell_targets.cataclysm>1
+            if (API.CanCast(Cataclysm) && TalentCataclysm)
+            {
+                API.CastSpell(Cataclysm);
+                return;
+            }
 
             //actions+=/call_action_list,name=aoe,if=active_enemies>2
             if (IsAOE && API.TargetUnitInRangeCount >= AOEUnitNumber && NotCasting)
