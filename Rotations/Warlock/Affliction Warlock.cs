@@ -92,7 +92,6 @@ namespace HyperElk.Core
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
         private bool UseCO => (bool)CombatRoutine.GetProperty("UseCO");
         private bool UseSL => (bool)CombatRoutine.GetProperty("UseSL");
-        private bool UseUnendingResolve => (bool)CombatRoutine.GetProperty("UseUnendingResolve");
 
         private int DarkPactPercentProc => numbList[CombatRoutine.GetPropertyInt(DarkPact)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
@@ -117,10 +116,21 @@ namespace HyperElk.Core
             return API.MouseoverDebuffRemainingTime(buff, true);
         }
         float UaTime => 15 / (1f + API.PlayerGetHaste / 10);
-        float HTime => 1500 / 1000 / (1f + API.PlayerGetHaste / 1);
-        private bool UnendingResolveRaid => API.TargetCurrentCastSpellID == 345397 && API.TargetCurrentCastTimeRemaining <= 600 || API.TargetCurrentCastSpellID == 329455 || API.TargetCurrentCastSpellID == 325384 || API.TargetCurrentCastSpellID == 337110 || API.TargetCurrentCastSpellID == 332687 || API.TargetCurrentCastSpellID == 331209 || API.TargetCurrentCastSpellID == 332683;
-        private bool UnendingResolveDungeon => API.TargetCurrentCastSpellID == 322236 && API.TargetCurrentCastTimeRemaining <= 200 || API.TargetCurrentCastSpellID == 321247 || API.TargetCurrentCastSpellID == 321828 || API.TargetCurrentCastSpellID == 328125 || API.TargetCurrentCastSpellID == 334625;
-
+        int[] UnendingResolveList =
+        {
+            345397,
+            329455,
+            325384,
+            337110,
+            332687,
+            331209,
+            332683,
+            322236,
+            321247,
+            321828,
+            328125,
+            334625,
+        };
         public override void Initialize()
         {
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
@@ -148,8 +158,6 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
-
-            CombatRoutine.AddProp("UseUnendingResolve", "Use Unending Resolve", true, "Use Unending Resolve to block High DMG Raid Encounters", "Defensive");
 
             //Spells
             CombatRoutine.AddSpell(ShadowBolt, 686, "D1");
@@ -260,7 +268,7 @@ namespace HyperElk.Core
                 API.CastSpell(DrainLife);
                 return;
             }
-            if (API.PlayerHasPet && API.PetHealthPercent >= 0 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel))
+            if (API.PlayerHasPet && API.PetHealthPercent > 0 && API.PetHealthPercent <= HealthFunnelPercentProc && API.CanCast(HealthFunnel))
             {
                 API.CastSpell(HealthFunnel);
                 return;
@@ -275,7 +283,7 @@ namespace HyperElk.Core
                 API.CastSpell(MortalCoil);
                 return;
             }
-            if (UseUnendingResolve && API.CanCast(UnendingResolve) && (UnendingResolveRaid || UnendingResolveDungeon))
+            if (UnendingResolveList.Contains(API.TargetCurrentCastSpellID))
             {
                 API.CastSpell(UnendingResolve);
                 return;
