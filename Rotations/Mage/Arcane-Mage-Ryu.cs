@@ -92,14 +92,14 @@ namespace HyperElk.Core
         bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns && API.PlayerHasBuff("Arcane Power") && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket2 == "On Cooldown" && (!API.PlayerHasBuff(SoulIgnite) || API.PlayerHasBuff(SoulIgnite) && API.PlayerBuffTimeRemaining(SoulIgnite) <= 800) || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= 2 && IsAOE);
         private bool BLDebuffs => !API.PlayerHasDebuff(Temp) || !API.PlayerHasDebuff(Exhaustion) || !API.PlayerHasDebuff(Fatigued);
         private bool BLBuFfs => !API.PlayerHasBuff(BL) || !API.PlayerHasBuff(AH) || !API.PlayerHasBuff(TimeWarp) || !API.PlayerHasBuff(TW);
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool Quaking => (API.PlayerIsCasting(false) || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 110 && PlayerHasDebuff(Quake);
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingAB => API.PlayerDebuffRemainingTime(Quake) > ABCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingAM => API.PlayerDebuffRemainingTime(Quake) > AMCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingToTM => API.PlayerDebuffRemainingTime(Quake) > ToTMCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingEvo => API.PlayerDebuffRemainingTime(Quake) > EvoCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingRune => API.PlayerDebuffRemainingTime(Quake) > RuneCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingShifting => API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingAB => (API.PlayerDebuffRemainingTime(Quake) > ABCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingAM => (API.PlayerDebuffRemainingTime(Quake) > AMCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingToTM => (API.PlayerDebuffRemainingTime(Quake) > ToTMCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingEvo => (API.PlayerDebuffRemainingTime(Quake) > EvoCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingRune => (API.PlayerDebuffRemainingTime(Quake) > RuneCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingShifting => (API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
         private bool QuakingMirrors => API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool QuakingRadiant => API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool QuakingDeathborne => API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
@@ -405,22 +405,22 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Power");
                 return;
             }
-            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 13 && InRange && (API.PlayerHasBuff("Clearcasting") && Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving) && (!QuakingAM || QuakingAM && QuakingHelper))
+            if (API.CanCast("Arcane Missiles") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 13 && InRange && (API.PlayerHasBuff("Clearcasting") && Mana < 95 || API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho) && (Burn || Conserve) && (API.PlayerIsMoving && Slipstream || !API.PlayerIsMoving) && (!QuakingHelper || QuakingAM && QuakingHelper))
             {
                 API.CastSpell("Arcane Missiles");
                 return;
             }
-            if (RuneofPower && API.CanCast("Rune of Power") && Mana > 15 && API.SpellCDDuration("Arcane Power") > 1200 && !CastArcanePower && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && (!QuakingRune || QuakingRune && QuakingHelper))
+            if (RuneofPower && API.CanCast("Rune of Power") && Mana > 15 && API.SpellCDDuration("Arcane Power") > 1200 && !CastArcanePower && Burn && API.TargetRange <= 40 && !API.PlayerHasBuff("Rune of Power") && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && (!QuakingHelper || QuakingRune && QuakingHelper))
             {
                 API.CastSpell("Rune of Power");
                 return;
             }
-            if (API.CanCast(ShiftingPower) && !API.PlayerHasBuff("Clearcasting") && !CastRoP && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Arcane Power") && API.SpellISOnCooldown("Touch of the Magi") && NotChanneling && !ChannelingEvo && !ChannelingMissile && !API.PlayerHasBuff("Evocation") && (RuneofPower && API.SpellISOnCooldown("Rune of Power") && !API.PlayerHasBuff(RoP) || !RuneofPower) && !API.PlayerHasBuff("Arcane Power") && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE) && (!QuakingShifting || QuakingShifting && QuakingHelper))
+            if (API.CanCast(ShiftingPower) && !API.PlayerHasBuff("Clearcasting") && !CastRoP && InRange && PlayerCovenantSettings == "Night Fae" && API.SpellISOnCooldown("Arcane Power") && API.SpellISOnCooldown("Touch of the Magi") && NotChanneling && !ChannelingEvo && !ChannelingMissile && !API.PlayerHasBuff("Evocation") && (RuneofPower && API.SpellISOnCooldown("Rune of Power") && !API.PlayerHasBuff(RoP) || !RuneofPower) && !API.PlayerHasBuff("Arcane Power") && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE) && (!QuakingHelper || QuakingShifting && QuakingHelper))
             {
                 API.CastSpell(ShiftingPower);
                 return;
             }
-            if (API.CanCast("Touch of the Magi") && Level >= 33 && (Burn || Conserve) && (API.PlayerCurrentArcaneCharges <= 0 || !API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho && API.PlayerCurrentArcaneCharges <= 0) && InRange && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && SaveQuake)
+            if (API.CanCast("Touch of the Magi") && Level >= 33 && (Burn || Conserve) && (API.PlayerCurrentArcaneCharges <= 0 || !API.TargetHasDebuff("Touch of the Magi") && ArcaneEcho && API.PlayerCurrentArcaneCharges <= 0) && InRange && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && (!QuakingHelper || QuakingToTM && QuakingHelper))
             {
                 API.CastSpell("Touch of the Magi");
                 return;
@@ -460,12 +460,12 @@ namespace HyperElk.Core
                 API.CastSpell("Arcane Barrage");
                 return;
             }
-            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (Burn || Conserve) && (RuleofThrees && (API.PlayerHasBuff("Rule of Threes") || !API.PlayerHasBuff("Rule of Threes")) || !RuleofThrees) && !API.PlayerIsMoving && (!QuakingAB || QuakingAB && QuakingHelper))
+            if (API.CanCast("Arcane Blast") && NotChanneling && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && Level >= 10 && InRange && (Burn || Conserve) && (RuleofThrees && (API.PlayerHasBuff("Rule of Threes") || !API.PlayerHasBuff("Rule of Threes")) || !RuleofThrees) && !API.PlayerIsMoving && (!QuakingHelper || QuakingAB && QuakingHelper))
             {
                 API.CastSpell("Arcane Blast");
                 return;
             }
-            if (API.CanCast("Evocation") && NotChanneling && !ChannelingShift && !ChannelingMissile && Level >= 27 && Mana <= 10 && (API.PlayerIsMoving && Slipstream|| !API.PlayerIsMoving) && (!QuakingEvo || QuakingEvo && QuakingHelper))
+            if (API.CanCast("Evocation") && NotChanneling && !ChannelingShift && !ChannelingMissile && Level >= 27 && Mana <= 10 && (API.PlayerIsMoving && Slipstream|| !API.PlayerIsMoving) && (!QuakingHelper || QuakingEvo && QuakingHelper))
             {
                 API.CastSpell("Evocation");
                 return;

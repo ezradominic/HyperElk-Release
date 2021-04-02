@@ -119,18 +119,18 @@ namespace HyperElk.Core
 
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
         bool ChannelingRoF => API.CurrentCastSpellID("player") == 205021;
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool Quaking => (API.PlayerIsCasting(false) || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 110 && PlayerHasDebuff(Quake);
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingFB => API.PlayerDebuffRemainingTime(Quake) > FBCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingEB => API.PlayerDebuffRemainingTime(Quake) > EBCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingRoF => API.PlayerDebuffRemainingTime(Quake) > RoFCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingGS => API.PlayerDebuffRemainingTime(Quake) > GSCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingBlizzard => API.PlayerDebuffRemainingTime(Quake) > BlizzardCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingRune => API.PlayerDebuffRemainingTime(Quake) > RuneCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingShifting => API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingMirrors => API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingRadiant => API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingDeathborne => API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingFB => (API.PlayerDebuffRemainingTime(Quake) > FBCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingEB => (API.PlayerDebuffRemainingTime(Quake) > EBCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingRoF => (API.PlayerDebuffRemainingTime(Quake) > RoFCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingGS => (API.PlayerDebuffRemainingTime(Quake) > GSCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingBlizzard => (API.PlayerDebuffRemainingTime(Quake) > BlizzardCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingRune => (API.PlayerDebuffRemainingTime(Quake) > RuneCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingShifting => (API.PlayerDebuffRemainingTime(Quake) > ShiftingPowerCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingMirrors => (API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingRadiant => (API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingDeathborne => (API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
         private bool InRange => API.TargetRange <= 40;
         float FBCastTime => 200f / (1f + API.PlayerGetHaste);
         float EBCastTime => 250f / (1f + API.PlayerGetHaste);
@@ -261,7 +261,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
 
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
+            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket2 be used", "Trinket", 0);
 
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
@@ -269,7 +269,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            if (API.LastSpellCastInGame == Flurry)
+            if (API.LastSpellCastInGame == Flurry || API.PlayerLastSpell == Flurry)
             {
                 IceWatch1.Restart();
                 IceWatch2.Restart();
@@ -378,11 +378,11 @@ namespace HyperElk.Core
                         }
                     }
                 }
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1 && !IceWatch1.IsRunning && !IceWatch2.IsRunning)
                 {
                     API.CastSpell("Trinket1");
                 }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2 && !IceWatch1.IsRunning && !IceWatch2.IsRunning)
                 {
                     API.CastSpell("Trinket2");
                 }
@@ -438,6 +438,10 @@ namespace HyperElk.Core
         {
 
         }
+        private void FlurryCombo()
+        {
+
+        }
         private void rotation()
         {
             if (!ChannelingShift && NotChanneling && !ChannelingRoF && !API.PlayerSpellonCursor)
@@ -459,12 +463,12 @@ namespace HyperElk.Core
                         API.CastSpell(FO);
                         return;
                     }
-                    if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && (!QuakingBlizzard || QuakingBlizzard && QuakingHelper))
+                    if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && (!QuakingHelper || QuakingBlizzard && QuakingHelper))
                     {
                         API.CastSpell(Blizzard);
                         return;
                     }
-                    if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && PlayerHasBuff(IF) && API.PlayerIsMoving && (!QuakingBlizzard || QuakingBlizzard && QuakingHelper))
+                    if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && PlayerHasBuff(IF) && API.PlayerIsMoving && (!QuakingHelper || QuakingBlizzard && QuakingHelper))
                     {
                         API.CastSpell(Blizzard);
                         return;
@@ -486,27 +490,28 @@ namespace HyperElk.Core
                     return;
                 }
                 // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
-                if (API.CanCast(IL) && Level >= 10 && !CastIL && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 2 && !API.PlayerIsCasting(true) && IceWatch1.IsRunning)
+                if (API.CanCast(IL) && Level >= 10 && !CastIL && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && !API.PlayerIsCasting(true) && IceWatch1.IsRunning)
                 {
                     API.CastSpell(IL);
                     API.WriteLog("First Ice Lance in Shatter Combo");
                     return;
                 }
                 //actions.st+=/ray_of_frost,if=remaining_winters_chill=1&debuff.winters_chill.remains
-                if (RayofFrost && API.CanCast(RoF) && API.TargetDebuffStacks(WC) <= 1 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingRoF || QuakingRoF && QuakingHelper))
+                if (RayofFrost && API.CanCast(RoF) && API.TargetDebuffStacks(WC) <= 1 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingHelper || QuakingRoF && QuakingHelper))
                 {
                     API.CastSpell(RoF);
                     return;
                 }
                 //actions.st+=/glacial_spike,if=remaining_winters_chill&debuff.winters_chill.remains>cast_time+travel_time //             //actions.st+=/glacial_spike,if=buff.brain_freeze.react
-                if (GlacialSpike && API.CanCast(GS) && (API.TargetHasDebuff(WC) || API.TargetUnitInRangeCount >= 2) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingGS || QuakingGS && QuakingHelper))
+                if (GlacialSpike && API.CanCast(GS) && (API.TargetHasDebuff(WC) || API.TargetUnitInRangeCount >= 2) && API.TargetRange <= 40 && API.PlayerBuffStacks(Icicles) > 4 && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingHelper || QuakingGS && QuakingHelper))
                 {
                     API.CastSpell(GS);
                     return;
                 }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && API.TargetDebuffStacks(WC) <= 1 && IceWatch2.IsRunning && !API.PlayerIsCasting(true))
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && IceWatch2.IsRunning && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(IL);
+                    IceWatch1.Stop();
                     IceWatch2.Stop();
                     API.WriteLog("Second Ice Lance in Shatter Combo");
                     return;
@@ -514,19 +519,19 @@ namespace HyperElk.Core
             }
             if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze) && !API.PlayerSpellonCursor)
             {
-                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingFB || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry && (API.PlayerLastSpell != Frostbolt || !CastFB) && !CastEB && !API.TargetHasDebuff(WC) && !FBWatch.IsRunning && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)))
+                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingHelper || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry && (API.PlayerLastSpell != Frostbolt || !CastFB) && !CastEB && !API.TargetHasDebuff(WC) && !FBWatch.IsRunning && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)))
                 {
                     API.CastSpell(Frostbolt);
                     API.WriteLog("Frostbolt Hard Cast To Start Shatter Combo");
                     FBWatch.Restart();
                     return;
                 }
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
+                if (API.CanCast(Flurry) && !API.PlayerIsCasting(true) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
                 {
                     API.CastSpell(Flurry);
                     return;
                 }
-                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
+                if (API.CanCast(Flurry) && !API.PlayerIsCasting(true) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
                 {
                     API.CastSpell(Flurry);
                     return;
@@ -560,18 +565,18 @@ namespace HyperElk.Core
                     API.CastSpell(IV);
                     return;
                 }
-                if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !CastIV && !PlayerHasBuff(RoP) && !PlayerHasBuff(BrainFreeze) && !PlayerHasBuff(FoF) && !API.TargetHasDebuff(WC) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && API.SpellCDDuration(IV) >= 1200 && (!QuakingRune || QuakingRune && QuakingHelper) && !RuneWatch.IsRunning)
+                if (RuneOfPower && API.CanCast(RoP) && API.TargetRange <= 40 && !CastIV && !PlayerHasBuff(RoP) && !PlayerHasBuff(BrainFreeze) && !PlayerHasBuff(FoF) && !API.TargetHasDebuff(WC) && !API.PlayerIsMoving && (IsCooldowns && UseROP == "With Cooldowns" || UseROP == "On Cooldown") && API.SpellCDDuration(IV) >= 1200 && (!QuakingHelper || QuakingRune && QuakingHelper) && !RuneWatch.IsRunning)
                 {
                     API.CastSpell(RoP);
                     return;
                 }
                 // actions.st+=/blizzard,if=buff.freezing_rain.up|active_enemies>=2 // actions.aoe+=/blizzard
-                if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && (IsAOE || IsForceAOE) || FreezingRain && PlayerHasBuff(FR)) && (!QuakingBlizzard || QuakingBlizzard && QuakingHelper))
+                if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && !API.PlayerIsMoving && ((API.TargetUnitInRangeCount >= 2 || IsForceAOE) && (IsAOE || IsForceAOE) || FreezingRain && PlayerHasBuff(FR)) && (!QuakingHelper || QuakingBlizzard && QuakingHelper))
                 {
                     API.CastSpell(Blizzard);
                     return;
                 }
-                if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && PlayerHasBuff(IF) && API.PlayerIsMoving && (API.TargetUnitInRangeCount >= AOEUnitNumber || IsForceAOE) && (IsAOE || IsForceAOE) && SaveQuake)
+                if (API.CanCast(Blizzard) && Level >= 14 && API.TargetRange <= 40 && PlayerHasBuff(IF) && API.PlayerIsMoving && (API.TargetUnitInRangeCount >= AOEUnitNumber || IsForceAOE) && (IsAOE || IsForceAOE) && (!QuakingHelper || QuakingBlizzard && QuakingHelper))
                 {
                     API.CastSpell(Blizzard);
                     return;
@@ -590,7 +595,7 @@ namespace HyperElk.Core
                 }
                 //actions.st+=/radiant_spark,if=buff.freezing_winds.up&active_enemies=1
                 //actions.st+=/ebonbolt
-                if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !PlayerHasBuff(BrainFreeze) && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingEB || QuakingEB && QuakingHelper))
+                if (Ebonbolt && API.CanCast(EB) && API.TargetRange <= 40 && !PlayerHasBuff(BrainFreeze) && (!API.PlayerIsMoving || PlayerHasBuff(IF) && API.PlayerIsMoving) && (!QuakingHelper || QuakingEB && QuakingHelper))
                 {
                     API.CastSpell(EB);
                     return;
@@ -602,18 +607,18 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/mirrors_of_torment
-                if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingMirrors || QuakingMirrors && QuakingHelper))
+                if (API.CanCast(MirrorsofTorment) && InRange && PlayerCovenantSettings == "Venthyr" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingHelper || QuakingMirrors && QuakingHelper))
                 {
                     API.CastSpell(MirrorsofTorment);
                     return;
                 }
                 //actions.st+=/shifting_power,if=buff.rune_of_power.down&(soulbind.grove_invigoration|soulbind.field_of_blossoms|active_enemies>=2)
-                if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && (API.SpellISOnCooldown(RoP) || !RuneOfPower) && API.SpellISOnCooldown(IV) && !PlayerHasBuff(IV) && !PlayerHasBuff(RoP) && !PlayerHasBuff(BrainFreeze) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingShifting || QuakingShifting && QuakingHelper) && !API.PlayerIsMoving)
+                if (API.CanCast(ShiftingPower) && InRange && PlayerCovenantSettings == "Night Fae" && (API.SpellISOnCooldown(RoP) || !RuneOfPower) && API.SpellISOnCooldown(IV) && !PlayerHasBuff(IV) && !PlayerHasBuff(RoP) && !PlayerHasBuff(BrainFreeze) && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && (!QuakingHelper || QuakingShifting && QuakingHelper) && !API.PlayerIsMoving)
                 {
                     API.CastSpell(ShiftingPower);
                     return;
                 }
-                if (API.CanCast(ShiftingPower) && API.TargetRange <= 15 && InRange && PlayerCovenantSettings == "Night Fae" && !PlayerHasBuff(BrainFreeze) &&  UseCovenant == "on AOE" && (IsAOE || IsForceAOE) && (API.TargetUnitInRangeCount >= 3 || IsForceAOE) && (!QuakingShifting || QuakingShifting && QuakingHelper) && !API.PlayerIsMoving)
+                if (API.CanCast(ShiftingPower) && API.TargetRange <= 15 && InRange && PlayerCovenantSettings == "Night Fae" && !PlayerHasBuff(BrainFreeze) &&  UseCovenant == "on AOE" && (IsAOE || IsForceAOE) && (API.TargetUnitInRangeCount >= 3 || IsForceAOE) && (!QuakingHelper || QuakingShifting && QuakingHelper) && !API.PlayerIsMoving)
                 {
                     API.CastSpell(ShiftingPower);
                     return;
@@ -630,7 +635,7 @@ namespace HyperElk.Core
                     API.CastSpell(CoC);
                     return;
                 }
-                if (API.CanCast(Frostbolt)  && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && !PlayerHasBuff(FoF) && !PlayerHasBuff(BrainFreeze) && !API.TargetHasDebuff(WC) && (!QuakingFB || QuakingFB && QuakingHelper) && (API.PlayerLastSpell != Flurry || API.LastSpellCastInGame != Flurry))
+                if (API.CanCast(Frostbolt)  && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && !PlayerHasBuff(FoF) && !PlayerHasBuff(BrainFreeze) && !API.TargetHasDebuff(WC) && (!QuakingHelper || QuakingFB && QuakingHelper) && (API.PlayerLastSpell != Flurry || API.LastSpellCastInGame != Flurry))
                 {
                     API.CastSpell(Frostbolt);
                     return;
