@@ -322,6 +322,11 @@ namespace HyperElk.Core
             }
 
             //# Executed every time the actor is available.
+            if (API.CanCast(Haunt) && TalentHaunt && TargetDebuffRemainingTime(Haunt) < 200)
+            {
+                API.CastSpell(Haunt);
+                return;
+            }
             //actions=call_action_list,name=aoe,if=active_enemies>3
             if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE && IsRange)
             {
