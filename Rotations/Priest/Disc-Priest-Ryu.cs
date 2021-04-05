@@ -211,7 +211,6 @@ namespace HyperElk.Core
         private bool VenthyrCheck => API.CanCast(Mindgames) && PlayerCovenantSettings == "Venthyr" && Mana >= 2 && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && (!API.PlayerIsMoving || API.PlayerIsMoving) && !ChannelingPenance;
 
 
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
@@ -255,16 +254,17 @@ namespace HyperElk.Core
 
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
         private bool IsDispell => API.ToggleIsEnabled("Dispel");
-        private bool QuakingMind => API.PlayerDebuffRemainingTime(Quake) > MindCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingSmite => API.PlayerDebuffRemainingTime(Quake) > SmiteCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingBoon => API.PlayerDebuffRemainingTime(Quake) > BoonCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingPowerWordRad => API.PlayerDebuffRemainingTime(Quake) > PowerWordRadCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingHalo => API.PlayerDebuffRemainingTime(Quake) > HaloCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingSchism => API.PlayerDebuffRemainingTime(Quake) > SchismCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingShadow => API.PlayerDebuffRemainingTime(Quake) > ShadowMendCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingPenance => API.PlayerDebuffRemainingTime(Quake) > PenanceCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingMindblast => API.PlayerDebuffRemainingTime(Quake) > MindblastCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingMindSear => API.PlayerDebuffRemainingTime(Quake) > MindSearCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool Quaking => (API.PlayerIsCasting(false) || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 110 && PlayerHasDebuff(Quake);
+        private bool QuakingMind => (API.PlayerDebuffRemainingTime(Quake) > MindCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingSmite => (API.PlayerDebuffRemainingTime(Quake) > SmiteCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingBoon => (API.PlayerDebuffRemainingTime(Quake) > BoonCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingPowerWordRad => (API.PlayerDebuffRemainingTime(Quake) > PowerWordRadCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingHalo => (API.PlayerDebuffRemainingTime(Quake) > HaloCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingSchism => (API.PlayerDebuffRemainingTime(Quake) > SchismCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingShadow => (API.PlayerDebuffRemainingTime(Quake) > ShadowMendCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingPenance => (API.PlayerDebuffRemainingTime(Quake) > PenanceCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingMindblast => (API.PlayerDebuffRemainingTime(Quake) > MindblastCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingMindSear => (API.PlayerDebuffRemainingTime(Quake) > MindSearCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
         float PowerWordRadCastTime => 200f / (1f + API.PlayerGetHaste);
         float HaloCastTime => 150f / (1f + API.PlayerGetHaste);
         float SchismCastTime => 150f / (1f + API.PlayerGetHaste);
@@ -612,12 +612,12 @@ namespace HyperElk.Core
                 #endregion
                 if (IsSpread)
                 {
-                            if (API.CanCast(PowerWordRadiance) && API.SpellCharges(PowerWordRadiance) == 2 && (API.PlayerIsInGroup && BuffPartyTracking(Atonement) < 5 || API.PlayerIsInRaid && BuffRaidTracking(Atonement) < 12) && InRange && !API.PlayerCanAttackTarget && (!QuakingPowerWordRad || QuakingPowerWordRad && QuakingHelper))
+                            if (API.CanCast(PowerWordRadiance) && API.SpellCharges(PowerWordRadiance) == 2 && (API.PlayerIsInGroup && BuffPartyTracking(Atonement) < 5 || API.PlayerIsInRaid && BuffRaidTracking(Atonement) < 12) && InRange && !API.PlayerCanAttackTarget && (!QuakingHelper || QuakingPowerWordRad && QuakingHelper))
                             {
                                 API.CastSpell(PowerWordRadiance);
                                 return;
                             }
-                            if (API.CanCast(PowerWordRadiance) && API.SpellCharges(PowerWordRadiance) == 1 && InRange && (API.PlayerIsInGroup && BuffPartyTracking(Atonement) < 5 || API.PlayerIsInRaid && BuffRaidTracking(Atonement) < 12) && !API.PlayerCanAttackTarget && (!QuakingPowerWordRad || QuakingPowerWordRad && QuakingHelper))
+                            if (API.CanCast(PowerWordRadiance) && API.SpellCharges(PowerWordRadiance) == 1 && InRange && (API.PlayerIsInGroup && BuffPartyTracking(Atonement) < 5 || API.PlayerIsInRaid && BuffRaidTracking(Atonement) < 12) && !API.PlayerCanAttackTarget && (!QuakingHelper || QuakingPowerWordRad && QuakingHelper))
                             {
                             API.CastSpell(PowerWordRadiance);
                             return;
@@ -627,13 +627,13 @@ namespace HyperElk.Core
                                 API.CastSpell(PowerWordShield);
                                 return;
                             }
-                            if (API.CanCast(Shadowmend) && !TargetHasBuff(Atonement) && !API.PlayerIsMoving && (!QuakingShadow || QuakingShadow && QuakingHelper))
+                            if (API.CanCast(Shadowmend) && !TargetHasBuff(Atonement) && !API.PlayerIsMoving && (!QuakingHelper || QuakingShadow && QuakingHelper))
                             {
                             API.CastSpell(Shadowmend);
                             return;
                             }
                 }
-                if (PWRCheck && InRange && (!QuakingPowerWordRad || QuakingPowerWordRad && QuakingHelper) && API.PlayerLastSpell != PowerWordRadiance)
+                if (PWRCheck && InRange && (!QuakingHelper || QuakingPowerWordRad && QuakingHelper) && API.PlayerLastSpell != PowerWordRadiance)
                 {
                     API.CastSpell(PowerWordRadiance);
                     return;
@@ -663,7 +663,7 @@ namespace HyperElk.Core
                     API.CastSpell(PainSupression);
                     return;
                 }
-                if (HaloCheck && InRange && (!QuakingHalo || QuakingHalo && QuakingHelper))
+                if (HaloCheck && InRange && (!QuakingHelper || QuakingHalo && QuakingHelper))
                 {
                     API.CastSpell(Halo);
                     return;
@@ -678,7 +678,7 @@ namespace HyperElk.Core
                     API.CastSpell(PowerWordShield);
                     return;
                 }
-                if (ShadowMendCheck && InRange && (!QuakingShadow || QuakingShadow && QuakingHelper))
+                if (ShadowMendCheck && InRange && (!QuakingHelper || QuakingShadow && QuakingHelper))
                 {
                     API.CastSpell(Shadowmend);
                     return;
@@ -702,7 +702,7 @@ namespace HyperElk.Core
                 //DPS
                 if (API.PlayerIsInCombat)
                 {
-                    if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMind || QuakingMind && QuakingHelper))
+                    if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingHelper || QuakingMind && QuakingHelper))
                     {
                         API.CastSpell(Mindgames);
                         return;
@@ -727,7 +727,7 @@ namespace HyperElk.Core
                         API.CastSpell(PurgetheWicked);
                         return;
                     }
-                    if (SchismCheck && InRange && (!QuakingSchism || QuakingSchism && QuakingHelper))
+                    if (SchismCheck && InRange && (!QuakingHelper || QuakingSchism && QuakingHelper))
                     {
                         API.CastSpell(Schism);
                         return;
@@ -742,22 +742,22 @@ namespace HyperElk.Core
                         API.CanCast(AscendedNova);
                         return;
                     }
-                    if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingPenance && !ChannelingMindSear && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingBoon || QuakingBoon && QuakingHelper))
+                    if (API.CanCast(AscendedBlast) && PlayerCovenantSettings == "Kyrian" && !ChannelingPenance && !ChannelingMindSear && (API.PlayerIsMoving || !API.PlayerIsMoving) && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingHelper || QuakingBoon && QuakingHelper))
                     {
                         API.CastSpell(AscendedBlast);
                         return;
                     }
-                    if (API.CanCast(Penance) && InRange && (API.TargetHasDebuff(PurgetheWicked) && PurgetheWickedTalent || !API.TargetHasDebuff(PurgetheWicked) && !PurgetheWickedTalent) && !API.PlayerIsMoving && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (AttonementTracking || !API.PlayerIsInGroup) && (!QuakingPenance || QuakingPenance && QuakingHelper))
+                    if (API.CanCast(Penance) && InRange && (API.TargetHasDebuff(PurgetheWicked) && PurgetheWickedTalent || !API.TargetHasDebuff(PurgetheWicked) && !PurgetheWickedTalent) && !API.PlayerIsMoving && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (AttonementTracking || !API.PlayerIsInGroup) && (!QuakingHelper || QuakingPenance && QuakingHelper))
                     {
                         API.CastSpell(Penance);
                         return;
                     }
-                    if (API.CanCast(MindBlast) && InRange && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMindblast || QuakingMindblast && QuakingHelper))
+                    if (API.CanCast(MindBlast) && InRange && !API.PlayerIsMoving && !ChannelingPenance && !ChannelingMindSear && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingHelper || QuakingMindblast && QuakingHelper))
                     {
                         API.CastSpell(MindBlast);
                         return;
                     }
-                    if (API.CanCast(Smite) && !ChannelingPenance && Mana >= 1 && !ChannelingPenance && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingSmite || QuakingSmite && QuakingHelper))
+                    if (API.CanCast(Smite) && !ChannelingPenance && Mana >= 1 && !ChannelingPenance && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingHelper || QuakingSmite && QuakingHelper))
                     {
                         API.CastSpell(Smite);
                         return;
@@ -767,7 +767,7 @@ namespace HyperElk.Core
                         API.CastSpell(HolyNova);
                         return;
                     }
-                    if (API.CanCast(MindSear) && InRange && API.TargetUnitInRangeCount >= 3 && !ChannelingPenance && !ChannelingMindSear && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingMindSear || QuakingMindSear && QuakingHelper))
+                    if (API.CanCast(MindSear) && InRange && API.TargetUnitInRangeCount >= 3 && !ChannelingPenance && !ChannelingMindSear && !API.PlayerIsMoving && API.TargetHealthPercent > 0 && API.PlayerCanAttackTarget && (!QuakingHelper || QuakingMindSear && QuakingHelper))
                     {
                         API.CastSpell(MindSear);
                         return;
@@ -787,114 +787,102 @@ namespace HyperElk.Core
                     if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
                         for (int i = 0; i < units.Length; i++)
-                        for (int j = 0; j < DispellList.Length; j++)
+                            for (int j = 0; j < DispellList.Length; j++)
                             {
-                                if (API.PlayerHealthPercent <= PlayerHP)
+                                if (API.PlayerHealthPercent <= PlayerHP && API.TargetIsUnit() != "player")
                                 {
                                     API.CastSpell(Player);
                                     return;
                                 }
                                 if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(Purify))
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                return;
-                            }
-                            if (IsSpread && !UnitHasBuff(Atonement, units[i]) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= ShadowMendCastTime * 10))
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                return;
-                            }
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (UnitAboveHealthPercentParty(35) == API.CurrentGroupSize && AttonementTracking || BuffPartyTracking(Atonement) >= 5) && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                API.CastSpell("Assist");
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                            if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (IsSpread && !UnitHasBuff(Atonement, units[i]) && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= ShadowMendCastTime * 10) && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    SwapWatch.Restart();
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= 10 && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (UnitAboveHealthPercentParty(35) == API.CurrentGroupSize && AttonementTracking || BuffPartyTracking(Atonement) >= 5) && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    API.CastSpell("Assist");
+                                    SwapWatch.Restart();
+                                    return;
+                                }
+                                if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0 && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    SwapWatch.Restart();
+                                    return;
+                                }
+                                if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    SwapWatch.Restart();
+                                    return;
+                                }
 
-                            if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                API.CastSpell("Assist");
-                                SwapWatch.Restart();
-                                return;
+                                if (!API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    API.CastSpell("Assist");
+                                    SwapWatch.Restart();
+                                    return;
+                                }
                             }
-                            if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && !AttonementTracking)
-                            {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                SwapWatch.Restart();
-                                return;
-                            }
-                        }
                     }
                 }
                 if (API.PlayerIsInRaid)
                 {
                     for (int i = 0; i < raidunits.Length; i++)
                     {
-                        if (API.PlayerHealthPercent <= PlayerHP)
+                        if (API.PlayerHealthPercent <= PlayerHP && API.TargetIsUnit() != "player")
                         {
                             API.CastSpell(Player);
                             return;
                         }
-                        if (IsSpread && !API.UnitHasBuff(Atonement, raidunits[i], true, true) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10))
+                        if (IsSpread && !API.UnitHasBuff(Atonement, raidunits[i], true, true) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(units[i]) <= 40 && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.TargetIsUnit() != raidunits[i])
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }
-                        if (API.UnitHealthPercent(raidunits[i]) <= 15 && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                        if (API.UnitHealthPercent(raidunits[i]) <= 15 && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             return;
                         }
-                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (AttonementTracking || UnitAboveHealthPercentRaid(35) >= API.CurrentGroupSize) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.PlayerIsInCombat)
+                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && (AttonementTracking || UnitAboveHealthPercentRaid(35) >= API.CurrentGroupSize) && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.PlayerIsInCombat && API.TargetIsUnit() != raidunits[i])
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             API.CastSpell("Assist");
                             SwapWatch.Restart();
                             return;
                         }
-                        if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 & !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                        if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 & !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }
-                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]))
+                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !API.UnitHasBuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }
-                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && !AttonementTracking && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat)
+                        if (!API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && !AttonementTracking && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat && API.TargetIsUnit() != raidunits[i])
                         {
                             API.CastSpell(RaidTargetArray[i]);
                             API.CastSpell("Assist");
-                            SwapWatch.Restart();
-                            return;
-                        }
-                        if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && !AttonementTracking && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
-                        {
-                            API.CastSpell(RaidTargetArray[i]);
                             SwapWatch.Restart();
                             return;
                         }

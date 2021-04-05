@@ -44,6 +44,9 @@ namespace HyperElk.Core
         private string WildMark = "Wild Mark";
         private string HuntersMark = "Hunter's Mark";
         private string ConcussiveShot = "Concussive Shot";
+        private string Intimidation = "Intimidation";
+        private string EnduranceTraining = "Endurance Training";
+        private string SurvivaloftheFittest = "Survival of the Fittest";
 
         private string TranquilizingShot = "Tranquilizing Shot";
 
@@ -126,6 +129,7 @@ namespace HyperElk.Core
         private string UseBloodshed => BloodshedList[CombatRoutine.GetPropertyInt(Bloodshed)];
         private bool BarbedShotPetInRange => CombatRoutine.GetPropertyBool("BarbedShot");
         private bool UseCallPet => CombatRoutine.GetPropertyBool("CallPet");
+        private bool UseIntimidation => CombatRoutine.GetPropertyBool(Intimidation);
         private string UseRevivePet => combatList[CombatRoutine.GetPropertyInt(Revive_Pet)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
@@ -134,6 +138,7 @@ namespace HyperElk.Core
         private bool UseTranqShot => CombatRoutine.GetPropertyBool("TranquilizingShot");
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        private int SurvivaloftheSfittestLifePercent => numbList[CombatRoutine.GetPropertyInt(SurvivaloftheFittest)];
         private bool ConcussiveShot_enabled => CombatRoutine.GetPropertyBool(ConcussiveShot);
 
         public override void Initialize()
@@ -158,6 +163,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Multi_Shot, 2643, "D4");
 
             CombatRoutine.AddSpell(Counter_Shot, 147362, "D0");
+            CombatRoutine.AddSpell(Intimidation, 19577, "D0");
             CombatRoutine.AddSpell(Exhilaration, 109304, "NumPad9");
             CombatRoutine.AddSpell(Misdirection, 34477, "Q");
 
@@ -177,7 +183,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TranquilizingShot, 19801, "C");
             CombatRoutine.AddSpell(HuntersMark, 257284, "F11");
             CombatRoutine.AddSpell(ConcussiveShot, 5116, "F12");
-
+            CombatRoutine.AddSpell(SurvivaloftheFittest, 272679, "F12");
 
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
@@ -197,6 +203,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Bestial_Wrath, 19574);
             CombatRoutine.AddBuff(Feign_Death, 5384);
             CombatRoutine.AddBuff(FlayersMark, 324156);
+           
 
             CombatRoutine.AddBuff("Raging", 132117);
             CombatRoutine.AddBuff("Unholy Frenzy", 136224);
@@ -212,6 +219,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
             CombatRoutine.AddBuff("Seething Rage", 136225);
             CombatRoutine.AddBuff("Dark Shroud", 2576096);
+           
             //Debuffs
 
             CombatRoutine.AddDebuff(WildMark, 328275);
@@ -237,6 +245,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("TranquilizingShot", "Tranquilizing Shot", false, "Enable if you want to use Tranquilizing Shot", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("huntersmark", "Hunter's Mark", false, "Enable if you want to let the rotation use Hunter's Mark", "Generic");
+            CombatRoutine.AddProp(Intimidation, Intimidation, false, "Enable if you want to let the rotation use Intimidation", "Generic");
             CombatRoutine.AddProp("BarbedShot", "Barbed Shot", false, "Use Barbed Shot with pet in range", "Pet");
             CombatRoutine.AddProp("CallPet", "Call/Ressurect Pet", true, "Should the rotation try to ressurect/call your Pet", "Pet");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
@@ -248,6 +257,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Mend_Pet, "Use " + Mend_Pet + " below:", percentListProp, "Life percent at which " + Mend_Pet + " is used, set to 0 to disable", "Pet", 6);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp(SurvivaloftheFittest, SurvivaloftheFittest + " Life Percent", numbList, " Life percent at which" + SurvivaloftheFittest + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(ConcussiveShot, ConcussiveShot, false, "Enable if you want to use ConcussiveShot", "Misc");
 
 
@@ -255,7 +265,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            //API.WriteLog("debug: "  + " cancast "+ API.CanCast(TranquilizingShot) + " settings? " + UseTranqShot + " has buff? " + DispellList);
+           // API.WriteLog("debug: "  + API.CanCast(SurvivaloftheFittest) );
             if (DispellList)
             {
                 API.WriteLog("dispell!!!  " + DispellList);
@@ -310,6 +320,11 @@ namespace HyperElk.Core
                     API.CastSpell(Feign_Death);
                     return;
                 }
+                if (API.CanCast(SurvivaloftheFittest) && API.PlayerHealthPercent <= SurvivaloftheSfittestLifePercent)
+                {
+                    API.CastSpell(SurvivaloftheFittest);
+                    return;
+                }
             }
         }
 
@@ -337,9 +352,14 @@ namespace HyperElk.Core
                     API.CastSpell(Misdirection);
                     return;
                 }
-                if (API.CanCast(Counter_Shot) && isInterrupt && InRange && PlayerLevel >= 18)
+                if (API.CanCast(Counter_Shot) && isInterrupt && InRange)
                 {
                     API.CastSpell(Counter_Shot);
+                    return;
+                }
+                if (API.CanCast(Intimidation) && !API.CanCast(Counter_Shot) && UseIntimidation && isInterrupt && InRange)
+                {
+                    API.CastSpell(Intimidation);
                     return;
                 }
                 if (isRacial && IsCooldowns)

@@ -133,39 +133,6 @@ namespace HyperElk.Core
                 return 999;
             }
         }
-        private int LowestHpPartyUnit()
-        {
-            int lowest = 100;
-
-            for (int i = 0; i < units.Length; i++)
-            {
-                if (API.UnitHealthPercent(units[i]) < lowest && API.UnitHealthPercent(units[i]) > 0)
-                    lowest = API.UnitHealthPercent(units[i]);
-            }
-            return lowest;
-        }
-        private int LowestHpRaidUnit()
-        {
-            int lowest = 100;
-
-            for (int i = 0; i < raidunits.Length; i++)
-            {
-                if (API.UnitHealthPercent(raidunits[i]) < lowest && API.UnitHealthPercent(raidunits[i]) > 0)
-                    lowest = API.UnitHealthPercent(raidunits[i]);
-            }
-            return lowest;
-        }
-        private int TankHPParty()
-        {
-            int lowest = 100;
-
-            for (int i = 0; i < units.Length; i++)
-            {
-                if (API.UnitRoleSpec(units[i]) == API.TankRole && API.UnitHealthPercent(units[i]) < lowest && API.UnitHealthPercent(units[i]) > 0)
-                    lowest = API.UnitHealthPercent(units[i]);
-            }
-            return lowest;
-        }
         private int LowestTankInRaid()
         {
             int lowest = 100;
@@ -176,18 +143,6 @@ namespace HyperElk.Core
                     lowest = API.UnitHealthPercent(raidunits[i]);
             }
             return lowest;
-        }
-
-        public void LowestTargetParty(string Lowest)
-        {
-            for (int i = 0; i < units.Length; i++)
-            {
-                if (API.UnitHealthPercent(units[i]) < API.UnitHealthPercent(units[i]))
-                {
-                    LowestTargetParty(units[i]);
-                }
-            }
-
         }
         private void LowestTargetRaid()
         {
@@ -221,6 +176,44 @@ namespace HyperElk.Core
             foreach (string raidunit in raidunits)
             {
                 if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40 && API.UnitHealthPercent(raidunit) > 0 && API.UnitHealthPercent(raidunit) != 100)
+                {
+                    lowest = raidunit;
+                    health = API.UnitHealthPercent(raidunit);
+                }
+            }
+            return lowest;
+        }
+        private string GetTankParty(string[] units)
+        {
+            string tank = units[0];
+            foreach (string unit in units)
+            {
+                if (API.UnitRoleSpec(unit) == API.TankRole)
+                {
+                    tank = unit;
+                }
+            }
+            return tank;
+        }
+        private string GetTankRaid(string[] raidunits)
+        {
+            string tank = raidunits[0];
+            foreach (string raidunit in raidunits)
+            {
+                if (API.UnitRoleSpec(raidunit) == API.TankRole)
+                {
+                    tank = raidunit;
+                }
+            }
+            return tank;
+        }
+        private string LowestRaidTank(string[] raidunits)
+        {
+            string lowest = raidunits[0];
+            int health = 100;
+            foreach (string raidunit in raidunits)
+            {
+                if (API.UnitHealthPercent(raidunit) < health && API.UnitRange(raidunit) <= 40 && API.UnitHealthPercent(raidunit) > 0 && API.UnitHealthPercent(raidunit) != 100 && API.UnitRoleSpec(raidunit) == API.TankRole)
                 {
                     lowest = raidunit;
                     health = API.UnitHealthPercent(raidunit);
@@ -338,19 +331,19 @@ namespace HyperElk.Core
         private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
         private bool SpiritWalker => CombatRoutine.GetPropertyBool(SpiritWalkersGrace);
 
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool Quaking => (API.PlayerIsCasting(false) || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 110 && PlayerHasDebuff(Quake);
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingHS => API.PlayerDebuffRemainingTime(Quake) > HealingSurgeCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingHW => API.PlayerDebuffRemainingTime(Quake) > HealingWaveCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingCH => API.PlayerDebuffRemainingTime(Quake) > ChainHealCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingHR => API.PlayerDebuffRemainingTime(Quake) > HealingRainCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingDownpour => API.PlayerDebuffRemainingTime(Quake) > DownpourCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingWellspring => API.PlayerDebuffRemainingTime(Quake) > WellspringCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingChainHarvest => API.PlayerDebuffRemainingTime(Quake) > ChainHarvestCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingFae => API.PlayerDebuffRemainingTime(Quake) > FaeCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingLightning => API.PlayerDebuffRemainingTime(Quake) > LightningCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingChainLight => API.PlayerDebuffRemainingTime(Quake) > ChainLightningCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingLavaburst => API.PlayerDebuffRemainingTime(Quake) > LavaburstCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingHS => (API.PlayerDebuffRemainingTime(Quake) > HealingSurgeCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingHW => (API.PlayerDebuffRemainingTime(Quake) > HealingWaveCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingCH => (API.PlayerDebuffRemainingTime(Quake) > ChainHealCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingHR => (API.PlayerDebuffRemainingTime(Quake) > HealingRainCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingDownpour => (API.PlayerDebuffRemainingTime(Quake) > DownpourCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingWellspring => (API.PlayerDebuffRemainingTime(Quake) > WellspringCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingChainHarvest => (API.PlayerDebuffRemainingTime(Quake) > ChainHarvestCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake)); 
+        private bool QuakingFae => (API.PlayerDebuffRemainingTime(Quake) > FaeCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingLightning => (API.PlayerDebuffRemainingTime(Quake) > LightningCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingChainLight => (API.PlayerDebuffRemainingTime(Quake) > ChainLightningCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingLavaburst => (API.PlayerDebuffRemainingTime(Quake) > LavaburstCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
         float HealingSurgeCastTime => 150f / (1f + API.PlayerGetHaste);
         float HealingWaveCastTime => 250f / (1f + API.PlayerGetHaste);
         float ChainHealCastTime => 250f / (1f + API.PlayerGetHaste);
@@ -672,6 +665,12 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
+            {
+                API.CastSpell("Stopcast");
+                API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
+                return;
+            }
             if (API.PlayerLastSpell == HealingStreamTotem || API.LastSpellCastInGame == HealingStreamTotem)
             {
                 HealingStreamWatch.Restart();
@@ -692,13 +691,6 @@ namespace HyperElk.Core
                 if (SpiritWalker && API.CanCast(SpiritWalkersGrace) && API.PlayerIsMoving)
                 {
                     API.CastSpell(SpiritWalkersGrace);
-                    return;
-                }
-
-                if (API.PlayerCurrentCastTimeRemaining > 40 && QuakingHelper && Quaking)
-                {
-                    API.CastSpell("Stopcast");
-                    API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                     return;
                 }
                 if (isInterrupt && API.CanCast(WindShear) && Level >= 12 && IsInKickRange)
@@ -778,12 +770,12 @@ namespace HyperElk.Core
                     API.CastSpell(PrimordialWave + "MO");
                     return;
                 }
-                if (API.PlayerHasBuff(PrimordialWave) && RiptideTracking && API.CanCast(HealingWave) && InRange && !API.PlayerCanAttackTarget && (!QuakingHW || QuakingHW && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.PlayerHasBuff(PrimordialWave) && RiptideTracking && API.CanCast(HealingWave) && InRange && !API.PlayerCanAttackTarget && (!QuakingHelper || QuakingHW && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(HealingWave);
                     return;
                 }
-                if (API.PlayerHasBuff(PrimordialWave) && RiptideTracking && API.CanCast(HealingWave) && !API.MacroIsIgnored(HealingWave + MO) && IsMouseover && InRange && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && (!QuakingHW || QuakingHW && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.PlayerHasBuff(PrimordialWave) && RiptideTracking && API.CanCast(HealingWave) && !API.MacroIsIgnored(HealingWave + MO) && IsMouseover && InRange && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && (!QuakingHelper || QuakingHW && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(HealingWave + MO);
                     return;
@@ -803,7 +795,7 @@ namespace HyperElk.Core
                     API.CastSpell(WaterShield);
                     return;
                 }
-                if (API.CanCast(HealingRain) && IsHealingRain && HealingRainAoE && InRange && API.TargetHealthPercent > 0 && (!QuakingHR || QuakingHR && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(HealingRain) && IsHealingRain && HealingRainAoE && InRange && API.TargetHealthPercent > 0 && (!QuakingHelper || QuakingHR && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(HealingRain);
                     return;
@@ -840,7 +832,7 @@ namespace HyperElk.Core
                     API.CastSpell(VesperTotem);
                     return;
                 }
-                if (NightFaeCheck && InRange && API.TargetHealthPercent > 0 && (!QuakingFae || QuakingFae && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (NightFaeCheck && InRange && API.TargetHealthPercent > 0 && (!QuakingHelper || QuakingFae && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(FaeTransfusion);
                     return;
@@ -855,57 +847,57 @@ namespace HyperElk.Core
                     API.CastSpell(UnleashLife + MO);
                     return;
                 }
-                if (API.CanCast(Downpour) && API.TargetHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackTarget && (!QuakingDownpour || QuakingDownpour && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(Downpour) && API.TargetHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackTarget && (!QuakingHelper || QuakingDownpour && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(Downpour);
                     return;
                 }
-                if (API.CanCast(Downpour) && !API.MacroIsIgnored(Downpour + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackMouseover && (!QuakingDownpour || QuakingDownpour && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(Downpour) && !API.MacroIsIgnored(Downpour + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && DownpourAoE && DownpourTalent && InRange && !API.PlayerCanAttackMouseover && (!QuakingHelper || QuakingDownpour && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(Downpour + MO);
                     return;
                 }
-                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && (!QuakingChainHarvest || QuakingChainHarvest && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (VenthyrCheck && InRange && API.TargetHealthPercent > 0 && (!QuakingHelper || QuakingChainHarvest && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(ChainHarvest);
                     return;
                 }
-                if (VenthyrMOCheck && !API.MacroIsIgnored(ChainHarvest + MO) && IsMouseover && InRange && API.MouseoverHealthPercent > 0 && (!QuakingChainHarvest || QuakingChainHarvest && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (VenthyrMOCheck && !API.MacroIsIgnored(ChainHarvest + MO) && IsMouseover && InRange && API.MouseoverHealthPercent > 0 && (!QuakingHelper || QuakingChainHarvest && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(ChainHarvest + MO);
                     return;
                 }
-                if (API.CanCast(ChainHeal) && API.TargetHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.TargetHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(ChainHeal) && API.TargetHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.TargetHasBuff(Riptide)) && (!QuakingHelper || QuakingCH && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(ChainHeal);
                     return;
                 }
-                if (API.CanCast(ChainHeal) && !API.MacroIsIgnored(ChainHeal + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.MouseoverHasBuff(Riptide)) && (!QuakingCH || QuakingCH && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(ChainHeal) && !API.MacroIsIgnored(ChainHeal + MO) && IsMouseover && API.MouseoverHealthPercent > 0 && (ChainHealAoE || API.PlayerHasBuff(UnleashLife) && UnitBelowHealthPercent(85) >= 2 && API.MouseoverHasBuff(Riptide)) && (!QuakingHelper || QuakingCH && QuakingHelper) && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(ChainHeal + MO);
                     return;
                 }
-                if (API.CanCast(Wellspring) && WellspringTalent && WellSpringAoE && (!QuakingWellspring || QuakingWellspring && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(Wellspring) && WellspringTalent && WellSpringAoE && (!QuakingHelper || QuakingWellspring && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(Wellspring);
                     return;
                 }
-                if (API.CanCast(HealingSurge) && API.TargetHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackTarget && (!QuakingHS || QuakingHS && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(HealingSurge) && API.TargetHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackTarget && (!QuakingHelper || QuakingHS && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(HealingSurge);
                     return;
                 }
-                if (API.CanCast(HealingSurge) && !API.MacroIsIgnored(HealingSurge + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackMouseover && (!QuakingHS || QuakingHS && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(HealingSurge) && !API.MacroIsIgnored(HealingSurge + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingSurgeLifePercent && InRange && !API.PlayerCanAttackMouseover && (!QuakingHelper || QuakingHS && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(HealingSurge + MO);
                     return;
                 }
-                if (API.CanCast(HealingWave) && API.TargetHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackTarget && (!QuakingHW || QuakingHW && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(HealingWave) && API.TargetHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackTarget && (!QuakingHelper || QuakingHW && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(HealingWave);
                     return;
                 }
-                if (API.CanCast(HealingWave) && !API.MacroIsIgnored(HealingWave + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackMouseover && (!QuakingHW || QuakingHW && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                if (API.CanCast(HealingWave) && !API.MacroIsIgnored(HealingWave + MO) && IsMouseover && API.MouseoverHealthPercent <= HealingWaveLifePercent && InRange && !API.PlayerCanAttackMouseover && (!QuakingHelper || QuakingHW && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                 {
                     API.CastSpell(HealingWave + MO);
                     return;
@@ -923,32 +915,32 @@ namespace HyperElk.Core
                         API.CastSpell(FlameShock + "MO");
                         return;
                     }
-                    if (API.CanCast(LavaBurst) && InRange && API.PlayerCanAttackTarget && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                    if (API.CanCast(LavaBurst) && InRange && API.PlayerCanAttackTarget && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingHelper || QuakingLavaburst && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                     {
                         API.CastSpell(LavaBurst);
                         return;
                     }
-                    if (API.CanCast(LavaBurst) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingLavaburst || QuakingLavaburst && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                    if (API.CanCast(LavaBurst) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!API.PlayerHasBuff(LavaSurge) || API.PlayerHasBuff(LavaSurge)) && (!QuakingHelper || QuakingLavaburst && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                     {
                         API.CastSpell(LavaBurst + "MO");
                         return;
                     }
-                    if (API.CanCast(ChainLightning) && InRange && API.PlayerCanAttackTarget && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                    if (API.CanCast(ChainLightning) && InRange && API.PlayerCanAttackTarget && API.TargetUnitInRangeCount >= 3 && (!QuakingHelper || QuakingChainLight && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                     {
                         API.CastSpell(ChainLightning);
                         return;
                     }
-                    if (API.CanCast(ChainLightning) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && API.TargetUnitInRangeCount >= 3 && (!QuakingChainLight || QuakingChainLight && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                    if (API.CanCast(ChainLightning) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && API.TargetUnitInRangeCount >= 3 && (!QuakingHelper || QuakingChainLight && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                     {
                         API.CastSpell(ChainLightning + "MO");
                         return;
                     }
-                    if (API.CanCast(LightningBolt) && InRange && API.PlayerCanAttackTarget && (!QuakingLightning || QuakingLightning && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                    if (API.CanCast(LightningBolt) && InRange && API.PlayerCanAttackTarget && (!QuakingHelper || QuakingLightning && QuakingHelper) && API.TargetHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                     {
                         API.CastSpell(LightningBolt);
                         return;
                     }
-                    if (API.CanCast(LightningBolt) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!QuakingLightning || QuakingLightning && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
+                    if (API.CanCast(LightningBolt) && IsMouseover && isMouseoverInCombat && InRange && API.PlayerCanAttackMouseover && (!QuakingHelper || QuakingLightning && QuakingHelper) && API.MouseoverHealthPercent > 0 && (!API.PlayerIsMoving || API.PlayerIsMoving && API.PlayerHasBuff(SpiritWalkersGrace)))
                     {
                         API.CastSpell(LightningBolt + "MO");
                         return;
@@ -967,109 +959,96 @@ namespace HyperElk.Core
                     }
                     if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                         {
-                        for (int j = 0; j < DispellList.Length; j++)
-                        for (int i = 0; i < units.Length; i++)
-                          {
-                                if (API.PlayerHealthPercent <= PlayerHP)
+                            for (int j = 0; j < DispellList.Length; j++)
+                            for (int i = 0; i < units.Length; i++)
+                            {
+                                if (API.PlayerHealthPercent <= PlayerHP && API.TargetIsUnit() != "player")
                                 {
                                     API.CastSpell(Player);
                                     return;
                                 }
-                                if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(PurifySpirit))
-                             {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                return;
-                             }
-                             if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
-                             {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                return;
-                             }
-                             if (API.UnitRoleSpec(units[i]) == RoleSpec && !UnitHasBuff(EarthShield, units[i]) && EarthShieldTracking && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
-                             {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                return;
-                             }
-                                if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0)
+                                if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(PurifySpirit) && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitHealthPercent(units[i]) <= 10 && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitRoleSpec(units[i]) == RoleSpec && !UnitHasBuff(EarthShield, units[i]) && EarthShieldTracking && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.TargetIsUnit() != units[i])
+                                {
+                                    API.CastSpell(PlayerTargetArray[i]);
+                                    return;
+                                }
+                                if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0 && API.TargetIsUnit() != units[i])
                                 {
                                     API.CastSpell(PlayerTargetArray[i]);
                                     SwapWatch.Restart();
                                     return;
                                 }
-                                if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth)
+                                if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth && API.TargetIsUnit() != units[i])
                                 {
                                     API.CastSpell(PlayerTargetArray[i]);
                                     SwapWatch.Restart();
                                     return;
                                 }
-                                if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
-                             {
-                                API.CastSpell(PlayerTargetArray[i]);
-                                API.CastSpell("Assist");
-                                return;
-                             }
-                                if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && IsDPS || !IsDPS))
+                                if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat && API.TargetIsUnit() != units[i])
                                 {
                                     API.CastSpell(PlayerTargetArray[i]);
-                                    SwapWatch.Restart();
+                                    API.CastSpell("Assist");
                                     return;
                                 }
-
                             }
                         }
-                        if (API.PlayerIsInRaid)
+                    if (API.PlayerIsInRaid)
+                    {
+                        for (int i = 0; i < raidunits.Length; i++)
                         {
-                            for (int i = 0; i < raidunits.Length; i++)
-                            {
                             if (API.PlayerHealthPercent <= PlayerHP)
                             {
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitRoleSpec(raidunits[i]) == RoleSpec && !UnitHasBuff(EarthShield, raidunits[i]) && EarthShieldTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    return;
-                                }
-                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 & !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                            if (API.UnitRoleSpec(raidunits[i]) == RoleSpec && !UnitHasBuff(EarthShield, raidunits[i]) && EarthShieldTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0 && API.TargetIsUnit() != raidunits[i])
+                            {
+                                API.CastSpell(RaidTargetArray[i]);
+                                return;
+                            }
+                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 & !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat)
-                                {
-                                    API.CastSpell(RaidTargetArray[i]);
-                                    SwapWatch.Restart();
-                                    API.CastSpell("Assist");
-                                    return;
-                                }
-                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && IsDPS || !IsDPS) && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
+                                API.CastSpell("Assist");
                                 return;
                             }
 
-                         }
                         }
+                    }
                 }
             }
         }
         public override void CombatPulse()
         {
-            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotChanneling && !API.PlayerIsMoving && SaveQuake)
+            if (API.CanCast(Fleshcraft) && PlayerCovenantSettings == "Necrolord" && API.PlayerHealthPercent <= FleshcraftPercentProc && NotChanneling && !API.PlayerIsMoving)
             {
                 API.CastSpell(Fleshcraft);
                 return;

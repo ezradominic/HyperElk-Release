@@ -280,7 +280,7 @@ namespace HyperElk.Core
        private bool LifeBloomMOCheck => API.MouseoverHealthPercent <= LifebloomLifePercent && UseLeg != "The Dark Titan's Lesson" && !API.PlayerCanAttackMouseover && !TargetHasBuff(Lifebloom) && (!PhotosynthesisTalent && API.MouseoverRoleSpec == RoleSpec || PhotosynthesisTalent && (API.MouseoverRoleSpec == API.HealerRole || API.MouseoverRoleSpec == RoleSpec)) && LifeBloomTracking && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
 
         private bool LifeBloom2Check => API.TargetHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !TargetHasBuff(Lifebloom) && (UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole) || PhotosynthesisTalent && (!LifeBloomwatch.IsRunning || LifeBloomwatch.ElapsedMilliseconds >= 15000) && API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == API.TankRole && !TargetHasBuff(Lifebloom)) && NotChanneling && !ChannelingCov && !ChannelingTranq && (!API.PlayerIsMoving || API.PlayerIsMoving);
-        private bool LifeBloomLegCheck => (API.TargetHealthPercent <= LifebloomLifePercent || IsAutoSwap && API.TargetHealthPercent <= 100) && !API.PlayerCanAttackTarget && !TargetHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole || API.TargetRoleSpec == RoleSpec) && !ChannelingCov;
+        private bool LifeBloomLegCheck => (API.TargetHealthPercent <= LifebloomLifePercent || IsAutoSwap && API.TargetHealthPercent <= 100) && !API.PlayerCanAttackTarget && !TargetHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.TargetRoleSpec == API.HealerRole && API.PlayerIsTargetTarget || API.TargetRoleSpec == RoleSpec) && !ChannelingCov;
         private bool LifeBloomLegMOCheck => API.MouseoverHealthPercent <= LifebloomLifePercent && !API.PlayerCanAttackTarget && !MouseoverHasBuff(LifebloomL) && LifeBloomLTracking && UseLeg == "The Dark Titan's Lesson" && (API.MouseoverRoleSpec == API.HealerRole || API.MouseoverRoleSpec == RoleSpec) && !ChannelingCov;
         private bool FloruishCheck => (FloruishRejTracking && FlourishLifeTracking && FlourishRegTracking || FlourishWGTracking && FlourishTranqTracking) && !API.PlayerCanAttackTarget && FloruishAoE && FlourishTalent;
         private bool KyrianCheck => PlayerCovenantSettings == "Kyrian" && (UseCovenant == "With Cooldowns" && IsCooldowns || UseCovenant == "On Cooldown" || UseCovenant == "on AOE" && IsAOE) && NotChanneling && !API.PlayerCanAttackTarget && !API.PlayerIsMoving && !ChannelingTranq;
@@ -338,15 +338,15 @@ namespace HyperElk.Core
         private string UseHeart => CDUsage[CombatRoutine.GetPropertyInt(HeartoftheWild)];
 
         //private int AoERaidNumber => numbRaidList[CombatRoutine.GetPropertyInt(AoER)];
-        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool Quaking => (API.PlayerIsCasting(false) || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 110 && PlayerHasDebuff(Quake);
         private bool SaveQuake => (PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) > 200 && QuakingHelper || !PlayerHasDebuff(Quake) || !QuakingHelper);
-        private bool QuakingWG => API.PlayerDebuffRemainingTime(Quake) > WGCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingRegrowth => API.PlayerDebuffRemainingTime(Quake) > RegrowthCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingConvoke => API.PlayerDebuffRemainingTime(Quake) > ConvokeCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingTranq => API.PlayerDebuffRemainingTime(Quake) > TranqCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingNourish => API.PlayerDebuffRemainingTime(Quake) > NourishCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingWrath => API.PlayerDebuffRemainingTime(Quake) > WrathCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
-        private bool QuakingStar => API.PlayerDebuffRemainingTime(Quake) > StarfireCastTime && (PlayerHasDebuff(Quake) || API.PlayerHasDebuff(Quake));
+        private bool QuakingWG => (API.PlayerDebuffRemainingTime(Quake) > WGCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingRegrowth => (API.PlayerDebuffRemainingTime(Quake) > RegrowthCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingConvoke => (API.PlayerDebuffRemainingTime(Quake) > ConvokeCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingTranq => (API.PlayerDebuffRemainingTime(Quake) > TranqCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingNourish => (API.PlayerDebuffRemainingTime(Quake) > NourishCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingWrath => (API.PlayerDebuffRemainingTime(Quake) > WrathCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
+        private bool QuakingStar => (API.PlayerDebuffRemainingTime(Quake) > StarfireCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
         float WGCastTime => 150f / (1f + API.PlayerGetHaste);
         float RegrowthCastTime => 150f / (1f + API.PlayerGetHaste);
         float ConvokeCastTime => 400f / (1f + API.PlayerGetHaste);
@@ -741,7 +741,7 @@ namespace HyperElk.Core
                 API.CastSpell(MoonkinForm);
                 return;
             }
-            if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat) && (!TargetHasDebuff("Gluttonous Miasma") || IsMouseover && !MouseoverHasDebuff("Gluttonous Miasma")))
+            if (!ChannelingCov && !ChannelingTranq && NotChanneling && !API.PlayerIsMounted && !API.PlayerSpellonCursor && !API.PlayerHasBuff(TravelForm) && !API.PlayerHasBuff(BearForm) && !API.PlayerHasBuff(CatForm) && !API.PlayerHasBuff(Soulshape) && (IsOOC || API.PlayerIsInCombat) && (!TargetHasDebuff("Gluttonous Miasma") || IsMouseover && !MouseoverHasDebuff("Gluttonous Miasma")))
             {
    
                 #region Dispell
@@ -793,9 +793,14 @@ namespace HyperElk.Core
                         API.CastSpell(TreeofLife);
                         return;
                     }
-                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom) && !ChannelingCov)
+                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom) && UseLeg != "The Dark Titan's Lesson" && !ChannelingCov)
                     {
                         API.CastSpell(Lifebloom);
+                        return;
+                    }
+                    if (API.CanCast(LifebloomL) && !TargetHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && !ChannelingCov)
+                    {
+                        API.CastSpell(LifebloomL);
                         return;
                     }
                     if (API.CanCast(Rejuvenation) && !TargetHasBuff(Rejuvenation) && !ChannelingCov)
@@ -861,9 +866,14 @@ namespace HyperElk.Core
                         API.CastSpell(Overgrowth);
                         return;
                     }
-                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom) && !ChannelingCov)
+                    if (API.CanCast(Lifebloom) && !TargetHasBuff(Lifebloom) && UseLeg != "The Dark Titan's Lesson" && !ChannelingCov)
                     {
                         API.CastSpell(Lifebloom);
+                        return;
+                    }
+                    if (API.CanCast(LifebloomL) && !TargetHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && !ChannelingCov)
+                    {
+                        API.CastSpell(LifebloomL);
                         return;
                     }
                     if (API.CanCast(Rejuvenation) && !TargetHasBuff(Rejuvenation) && !ChannelingCov)
@@ -908,13 +918,13 @@ namespace HyperElk.Core
                     API.CastSpell(Soothe + MO);
                     return;
                 }
-                if (API.CanCast(Efflor) && API.PlayerIsInCombat && API.PlayerTotemPetDuration == 0 && !ChannelingCov)
+                if (API.CanCast(Efflor) && API.PlayerIsInCombat && API.PlayerTotemPetDuration == 0 && !ChannelingCov && !API.PlayerHasBuff(MoonkinForm))
                 {
                     API.CastSpell(Efflor);
                     return;
                 }
 
-                if (API.CanCast(Convoke) && NightFaeCheck && InRange && (!QuakingConvoke || QuakingConvoke && QuakingHelper))
+                if (API.CanCast(Convoke) && NightFaeCheck && InRange && (!QuakingHelper || QuakingConvoke && QuakingHelper))
                 {
                     API.CastSpell(Convoke);
                     return;
@@ -984,17 +994,17 @@ namespace HyperElk.Core
                     API.CastSpell(LifebloomL + MO);
                     return;
                 }
-                if (API.CanCast(WildGrowth) && InRange && WGAoE || SouloftheForestTalent && API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InRange && (!QuakingWG || QuakingWG && QuakingHelper))
+                if (API.CanCast(WildGrowth) && InRange && WGAoE || SouloftheForestTalent && API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InRange && (!QuakingHelper || QuakingWG && QuakingHelper))
                 {
                     API.CastSpell(WildGrowth);
                     return;
                 }
-                if (API.CanCast(WildGrowth) && InMORange && IsMouseover && WGAoE && (!QuakingWG || QuakingWG && QuakingHelper) || SouloftheForestTalent && API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InMORange && IsMouseover && (!QuakingWG || QuakingWG && QuakingHelper))
+                if (API.CanCast(WildGrowth) && InMORange && IsMouseover && WGAoE && (!QuakingWG || QuakingWG && QuakingHelper) || SouloftheForestTalent && API.CanCast(WildGrowth) && API.PlayerHasBuff(SouloftheForest) && UnitBelowHealthPercent(65) >= 3 && InMORange && IsMouseover && (!QuakingHelper || QuakingWG && QuakingHelper))
                 {
                     API.CastSpell(WildGrowth + MO);
                     return;
                 }
-                if (API.CanCast(Tranquility) && InRange && TranqAoE && (!QuakingTranq || QuakingTranq && QuakingHelper))
+                if (API.CanCast(Tranquility) && InRange && TranqAoE && (!QuakingHelper || QuakingTranq && QuakingHelper))
                 {
                     API.CastSpell(Tranquility);
                     return;
@@ -1044,22 +1054,22 @@ namespace HyperElk.Core
                    API.CastSpell(Rejuvenation + MO);
                  return;
                 }
-                if (API.CanCast(Regrowth) && InRange && RegrowthCheck && (!QuakingRegrowth || QuakingRegrowth && QuakingHelper))
+                if (API.CanCast(Regrowth) && InRange && RegrowthCheck && (!QuakingHelper || QuakingRegrowth && QuakingHelper))
                 {
                     API.CastSpell(Regrowth);
                     return;
                 }
-                if (API.CanCast(Regrowth) && InMORange && RegrowthMOCheck && (!QuakingRegrowth || QuakingRegrowth && QuakingHelper) && IsMouseover)
+                if (API.CanCast(Regrowth) && InMORange && RegrowthMOCheck && (!QuakingHelper || QuakingRegrowth && QuakingHelper) && IsMouseover)
                 {
                    API.CastSpell(Regrowth + MO);
                    return;
                 }
-                if (API.CanCast(Nourish) && InRange && NourishCheck && (!QuakingNourish || QuakingNourish && QuakingHelper))
+                if (API.CanCast(Nourish) && InRange && NourishCheck && (!QuakingHelper || QuakingNourish && QuakingHelper))
                 {
                     API.CastSpell(Nourish);
                     return;
                 }
-                if (API.CanCast(Nourish) && InMORange && NourishMOCheck && (!QuakingNourish || QuakingNourish && QuakingHelper) && IsMouseover)
+                if (API.CanCast(Nourish) && InMORange && NourishMOCheck && (!QuakingHelper || QuakingNourish && QuakingHelper) && IsMouseover)
                 {
                     API.CastSpell(Nourish + MO);
                     return;
@@ -1072,7 +1082,7 @@ namespace HyperElk.Core
                         API.CastSpell(HeartoftheWild);
                         return;
                     }
-                    if (API.CanCast(MoonkinForm) && !API.PlayerHasBuff(MoonkinForm) && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && InRange && API.TargetHealthPercent > 0)
+                    if (API.CanCast(MoonkinForm) && BalanceAffinity && !API.PlayerHasBuff(MoonkinForm) && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && InRange && API.TargetHealthPercent > 0)
                     {
                         API.CastSpell(MoonkinForm);
                         return;
@@ -1087,42 +1097,42 @@ namespace HyperElk.Core
                         API.CastSpell(Starsurge + MO);
                         return;
                     }
-                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingStar || QuakingStar && QuakingHelper))
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingHelper || QuakingStar && QuakingHelper))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingStar || QuakingStar && QuakingHelper))
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.PlayerHasBuff(EclispeLunar) && (!QuakingHelper || QuakingStar && QuakingHelper))
                     {
                         API.CastSpell(Starfire + MO);
                         return;
                     }
-                    if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.TargetHealthPercent > 0 && (!QuakingHelper || QuakingWrath && QuakingHelper))
                     {
                         API.CastSpell(Wrath);
                         return;
                     }
-                    if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.MouseoverHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.PlayerHasBuff(EclispleSolar) && API.MouseoverHealthPercent > 0 && (!QuakingHelper || QuakingWrath && QuakingHelper))
                     {
                         API.CastSpell(Wrath + MO);
                         return;
                     }
-                    if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    if (API.CanCast(Wrath) && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && (!QuakingHelper || QuakingWrath && QuakingHelper))
                     {
                         API.CastSpell(Wrath);
                         return;
                     }
-                    if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && (!QuakingWrath || QuakingWrath && QuakingHelper))
+                    if (API.CanCast(Wrath) && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && (!QuakingHelper || QuakingWrath && QuakingHelper))
                     {
                         API.CastSpell(Wrath + MO);
                         return;
                     }
-                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingStar || QuakingStar && QuakingHelper))
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InRange && API.PlayerCanAttackTarget && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.TargetHasDebuff(Sunfire) && API.TargetHasDebuff(Moonfire) && API.TargetHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingHelper || QuakingStar && QuakingHelper))
                     {
                         API.CastSpell(Starfire);
                         return;
                     }
-                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingStar || QuakingStar && QuakingHelper))
+                    if (API.CanCast(Starfire) && API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && InMORange && IsMouseover && API.PlayerCanAttackMouseover && !ChannelingCov && !ChannelingTranq && !API.PlayerIsMoving && API.MouseoverHasDebuff(Sunfire) && API.MouseoverHasDebuff(Moonfire) && API.MouseoverHealthPercent > 0 && API.TargetUnitInRangeCount >= 3 && (!QuakingHelper || QuakingStar && QuakingHelper))
                     {
                         API.CastSpell(Starfire + MO);
                         return;
@@ -1153,7 +1163,7 @@ namespace HyperElk.Core
                 {
                     if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
-                        if (API.PlayerHealthPercent >= PlayerHP)
+                        if (API.PlayerHealthPercent <= PlayerHP)
                         {
                             API.CastSpell(Player);
                             return;
@@ -1164,68 +1174,61 @@ namespace HyperElk.Core
                             for (int i = 0; i < units.Length; i++)
                                 for (int j = 0; j < DispellList.Length; j++)
                                 {
-                                if (API.PlayerHealthPercent <= PlayerHP)
+                                if (API.PlayerHealthPercent <= PlayerHP && API.TargetIsUnit() != "player")
                                 {
                                     API.CastSpell(Player);
                                     return;
                                 }
-                                if (API.UnitHealthPercent(units[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(units[i]) > 0 && API.UnitHealthPercent(units[i]) < 100 && API.UnitRange(units[i]) <= 40)
+                                if (API.UnitHealthPercent(units[i]) <= 10 && API.UnitHealthPercent(units[i]) > 0  && API.UnitRange(units[i]) <= 40 && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         SwapWatch.Restart();
                                         return;
                                     }
-                                    if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(NaturesCure))
+                                    if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(NaturesCure) && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         return;
                                     }
-                                    if (UseLife == "Healer" && PhotosynthesisTalent && !API.PlayerHasBuff(Lifebloom) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.PlayerHealthPercent > 0)
+                                    if (UseLife == "Healer" && PhotosynthesisTalent && !API.PlayerHasBuff(Lifebloom) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.PlayerHealthPercent > 0 && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(Player);
                                         return;
                                     }
-                                    if (API.UnitRoleSpec(units[i]) == RoleSpec && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                    if (API.UnitRoleSpec(units[i]) == RoleSpec && !API.UnitHasBuff(Lifebloom, units[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         return;
                                     }
-                                    if (API.UnitRoleSpec(units[i]) == RoleSpec && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, units[i]) && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                    if (API.UnitRoleSpec(units[i]) == RoleSpec && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, units[i]) && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         return;
                                     }
-                                    if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0)
+                                    if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(Player);
                                         return;
                                     }
-                                    if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0)
+                                    if (API.UnitRoleSpec(units[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= TankHealth && API.UnitHealthPercent(units[i]) > 0 && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         SwapWatch.Restart();
                                         return;
                                     }
-                                    if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth)
+                                    if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(units[i]) <= UnitHealth && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         SwapWatch.Restart();
                                         return;
                                     }
-                                    if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat)
+                                    if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRoleSpec(units[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && API.UnitRange(units[i]) <= 40 && API.UnitHealthPercent(units[i]) > 0 && API.PlayerIsInCombat && API.TargetIsUnit() != units[i])
                                     {
                                         API.CastSpell(PlayerTargetArray[i]);
                                         API.CastSpell("Assist");
                                         SwapWatch.Restart();
                                         return;
                                     }
-                                    if (LowestParty(units) == units[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber && IsDPS || !IsDPS))
-                                    {
-                                        API.CastSpell(PlayerTargetArray[i]);
-                                        SwapWatch.Restart();
-                                        return;
-                                    }
-
                                 }
                         
                     }
@@ -1233,55 +1236,49 @@ namespace HyperElk.Core
                     {
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (API.PlayerHealthPercent <= PlayerHP)
+                            if (API.PlayerHealthPercent <= PlayerHP && API.TargetIsUnit() != "player")
                             {
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && (PlayerHealth >= 10 && !API.PlayerCanAttackTarget || API.PlayerCanAttackTarget) && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitHealthPercent(raidunits[i]) < 100 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                            if (API.UnitHealthPercent(raidunits[i]) <= 10 && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
                             }
-                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && !UnitHasBuff(Lifebloom, raidunits[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && !UnitHasBuff(Lifebloom, raidunits[i]) && LifeBloomTracking && UseLeg != "The Dark Titan's Lesson" && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, raidunits[i]) && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && UseLeg == "The Dark Titan's Lesson" && !UnitHasBuff(LifebloomL, raidunits[i]) && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 return;
                             }
-                            if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (!API.PlayerHasBuff(LifebloomL) && UseLeg == "The Dark Titan's Lesson" && LifebloomRaidLTracking && API.UnitRange(raidunits[i]) <= 40 && API.UnitHealthPercent(raidunits[i]) > 0 && PlayerHasDebuff("Gluttonous Miasma") && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(Player);
                                 return;
                             }
-                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0)
+                            if (API.UnitRoleSpec(raidunits[i]) == API.TankRole && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= TankHealth && API.UnitHealthPercent(raidunits[i]) > 0 && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
+                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && API.UnitHealthPercent(raidunits[i]) <= UnitHealth && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 return;
                             }
-                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat)
+                            if (IsDPS && !API.PlayerCanAttackTarget && API.UnitRange(raidunits[i]) <= 40 && API.UnitRoleSpec(raidunits[i]) == API.TankRole && !API.MacroIsIgnored("Assist") && UnitAboveHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && API.UnitHealthPercent(raidunits[i]) > 0 && API.PlayerIsInCombat && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
                                 SwapWatch.Restart();
                                 API.CastSpell("Assist");
-                                return;
-                            }
-                            if (LowestRaid(raidunits) == raidunits[i] && (!SwapWatch.IsRunning || SwapWatch.ElapsedMilliseconds >= API.SpellGCDTotalDuration * 10) && (UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber && IsDPS || !IsDPS) && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]))
-                            {
-                                API.CastSpell(RaidTargetArray[i]);
-                                SwapWatch.Restart();
                                 return;
                             }
                         }
