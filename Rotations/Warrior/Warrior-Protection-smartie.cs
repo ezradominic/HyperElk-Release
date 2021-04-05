@@ -16,6 +16,7 @@
 // v2.4 Torghast update
 // v2.45 Battle shout fix
 // v2.5 rewrite
+// v2.6 intervene problem solved and rage dump fixed
 
 using System.Linq;
 
@@ -132,7 +133,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v2.5");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v2.6");
             API.WriteLog("You need the following macros");
             API.WriteLog("Heroic ThrowMO: /cast [@mouseover] Heroic Throw");
             API.WriteLog("InterveneMO: /cast [@mouseover,exists,help] Intervene");
@@ -209,7 +210,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Avatar, "Use " + Avatar, CDUsageWithAOE, "Use " + Avatar + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Ravager, "Use " + Ravager, CDUsageWithAOE, "Use " + Ravager + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
-            CombatRoutine.AddProp("Ragedumping", "Rage dumping", RageDump, "How much Rage before we spend it", "Generic", 70);
+            CombatRoutine.AddProp("Ragedumping", "Rage dumping", RageDump, "How much Rage before we spend it", "Generic", 5);
             CombatRoutine.AddProp("TrinketLife", "Trinket" + " Life Percent", numbList, "Life percent at which" + "Trinkets" + " will be used, set to 0 to disable", "Defense", 0);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
@@ -227,7 +228,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("I am the Target?: "+ API.PlayerIsTargetTarget);
+            //API.WriteLog("Mouseover?: "+ API.MouseoverIsUnitIndex);
             if (!API.PlayerIsMounted)
             {
                 if (API.CanCast(BattleShout) && PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
@@ -354,7 +355,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && !API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && API.MouseoverRange <= 25)
+            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && !API.PlayerCanAttackMouseover && (API.MouseoverIsUnitIndex != 0 && API.MouseoverIsUnitIndex != 41) && API.MouseoverHealthPercent > 0 && API.MouseoverRange <= 25)
             {
                 if (API.CanCast(Intervene) && !API.MacroIsIgnored(Intervene + "MO") && UseIntervene)
                 {
