@@ -28,6 +28,7 @@
 // v3.6 some small tweaks and new settings options
 // v3.7 mobcount fix
 // v3.8 auto break roots
+// v3.85 root break adjustment
 
 using System.Diagnostics;
 
@@ -205,7 +206,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.8");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.85");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -309,6 +310,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Sunfire, 164815);
             CombatRoutine.AddDebuff(EntanglingRoots, 339);
             CombatRoutine.AddDebuff(MassEntanglement, 102359);
+            CombatRoutine.AddDebuff("Frozen Binds", 320788);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
@@ -519,7 +521,7 @@ namespace HyperElk.Core
                     API.CastSpell(EntanglingRoots);
                     return;
                 }
-                if (API.CanCast(CatForm) && API.PlayerIsCC(CCList.ROOT) && IsAutoForm && rootbreaker)
+                if (API.CanCast(CatForm) && API.PlayerIsCC(CCList.ROOT) && !API.PlayerHasDebuff("Frozen Binds") && IsAutoForm && rootbreaker)
                 {
                     API.CastSpell(CatForm);
                     return;

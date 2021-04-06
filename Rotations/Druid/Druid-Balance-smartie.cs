@@ -40,6 +40,7 @@
 // v4.55 potential racial fix
 // v4.6 stopcasting bug fixed
 // v4.7 auto break roots
+// v4.75 root break adjustment
 
 using System.Diagnostics;
 
@@ -193,7 +194,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v4.7");
+            API.WriteLog("Welcome to smartie`s Balance Druid v4.75");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -275,6 +276,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Thrash, 192090);
             CombatRoutine.AddDebuff(AdaptiveSwarm, 325727);
             CombatRoutine.AddDebuff(Quake, 240447);
+            CombatRoutine.AddDebuff("Frozen Binds", 320788);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
@@ -428,7 +430,7 @@ namespace HyperElk.Core
                     API.CastSpell(BearForm);
                     return;
                 }
-                if (API.CanCast(MoonkinForm) && API.PlayerIsCC(CCList.ROOT) && AutoForm && rootbreaker)
+                if (API.CanCast(MoonkinForm) && API.PlayerIsCC(CCList.ROOT) && !API.PlayerHasDebuff("Frozen Binds") && AutoForm && rootbreaker)
                 {
                     API.CastSpell(MoonkinForm);
                     return;

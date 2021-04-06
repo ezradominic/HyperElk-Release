@@ -109,7 +109,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.3");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.35");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -164,6 +164,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Thrash, 192090);
             CombatRoutine.AddDebuff(Moonfire, 164812);
             CombatRoutine.AddDebuff(AdaptiveSwarm, 325727);
+            CombatRoutine.AddDebuff("Frozen Binds", 320788);
 
             //Macros
             CombatRoutine.AddMacro(Moonfire + "MO", "NumPad7");
@@ -277,7 +278,7 @@ namespace HyperElk.Core
                     API.CastSpell(SpiritualHealingPotion);
                     return;
                 }
-                if (API.CanCast(BearForm) && API.PlayerIsCC(CCList.ROOT) && AutoForm && rootbreaker)
+                if (API.CanCast(BearForm) && API.PlayerIsCC(CCList.ROOT) && !API.PlayerHasDebuff("Frozen Binds") && AutoForm && rootbreaker)
                 {
                     API.CastSpell(BearForm);
                     return;
