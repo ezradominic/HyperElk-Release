@@ -39,6 +39,7 @@
 // v4.5 few single target tweaks
 // v4.55 potential racial fix
 // v4.6 stopcasting bug fixed
+// v4.7 auto break roots
 
 using System.Diagnostics;
 
@@ -149,6 +150,7 @@ namespace HyperElk.Core
         private string UseForceofNature => CDUsageWithAOE[CombatRoutine.GetPropertyInt(ForceofNature)];
         private string UseFuryofElune => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FuryofElune)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
         private string IsLegendary => Legendary[CombatRoutine.GetPropertyInt("Legendary")];
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool SpamDots => CombatRoutine.GetPropertyBool("SpamDots");
@@ -191,7 +193,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v4.6");
+            API.WriteLog("Welcome to smartie`s Balance Druid v4.7");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -287,14 +289,15 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("Rootbreaker", "Break roots", false, "Break roots with shapeshift", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsageWithAOE, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(CelestialAlignment, "Use " + CelestialAlignment, CDUsageWithAOE, "Use " + CelestialAlignment + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(WarriorofElune, "Use " + WarriorofElune, CDUsageWithAOE, "Use " + WarriorofElune + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(ForceofNature, "Use " + ForceofNature, CDUsageWithAOE, "Use " + ForceofNature + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(FuryofElune, "Use " + FuryofElune, CDUsageWithAOE, "Use " + FuryofElune + " always, with Cooldowns", "Cooldowns", 0);
-            AddProp("Legendary", "Choose " + "Legendary", Legendary, "Choose your Legendary", "Legendary");
+            CombatRoutine.AddProp("Legendary", "Choose " + "Legendary", Legendary, "Choose your Legendary", "Legendary");
             CombatRoutine.AddProp("SpamDots", "SpamDots", true, "Will spam Dots while moving", "Generic");
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
@@ -423,6 +426,11 @@ namespace HyperElk.Core
                 if (API.PlayerHealthPercent <= BearFormLifePercent && PlayerLevel >= 8 && AutoForm && API.CanCast(BearForm) && !PlayerHasBuff(BearForm))
                 {
                     API.CastSpell(BearForm);
+                    return;
+                }
+                if (API.CanCast(MoonkinForm) && API.PlayerIsCC(CCList.ROOT) && AutoForm && rootbreaker)
+                {
+                    API.CastSpell(MoonkinForm);
                     return;
                 }
                 if (API.PlayerHealthPercent > BearFormLifePercent && BearFormLifePercent != 0 && API.CanCast(MoonkinForm) && PlayerHasBuff(BearForm) && AutoForm)

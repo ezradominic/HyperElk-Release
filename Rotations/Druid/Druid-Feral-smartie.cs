@@ -27,6 +27,7 @@
 // v3.5 another owlweave update
 // v3.6 some small tweaks and new settings options
 // v3.7 mobcount fix
+// v3.8 auto break roots
 
 using System.Diagnostics;
 
@@ -199,11 +200,12 @@ namespace HyperElk.Core
         private int KittyFormLifePercent => numbList[CombatRoutine.GetPropertyInt(CatForm)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.7");
+            API.WriteLog("Welcome to smartie`s Feral Druid v3.8");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -321,10 +323,11 @@ namespace HyperElk.Core
             CombatRoutine.AddConduit(TasteforBlood);
 
             //Prop
+            CombatRoutine.AddProp("Rootbreaker", "Break roots", false, "Break roots with shapeshift", "Generic");
             CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(FeralFrenzy, "Use " + FeralFrenzy, CDUsageWithAOE, "Use " + FeralFrenzy + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsageWithAOE, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
@@ -514,6 +517,11 @@ namespace HyperElk.Core
                 if (API.CanCast(EntanglingRoots) && RootsTorghast && !TargetHasDebuff(MassEntanglement) && !TargetHasDebuff(EntanglingRoots) && PlayerHasBuff(PredatorySwiftness) && API.TargetRange < 35)
                 {
                     API.CastSpell(EntanglingRoots);
+                    return;
+                }
+                if (API.CanCast(CatForm) && API.PlayerIsCC(CCList.ROOT) && IsAutoForm && rootbreaker)
+                {
+                    API.CastSpell(CatForm);
                     return;
                 }
                 rotation();

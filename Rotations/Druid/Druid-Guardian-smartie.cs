@@ -12,6 +12,7 @@
 // v2.0 Growl added for torghast anima power
 // v2.1 convoke update
 // v2.2 convoke/berserk fix
+// v2.3 auto break roots
 
 namespace HyperElk.Core
 {
@@ -104,10 +105,11 @@ namespace HyperElk.Core
         private int LoneProtectionLifePercent => numbList[CombatRoutine.GetPropertyInt(LoneProtection)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+        public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.2");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.3");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -174,7 +176,8 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("Mouseover");
 
             //Prop
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("Rootbreaker", "Break roots", false, "Break roots with shapeshift", "Generic");
+            CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
@@ -274,6 +277,11 @@ namespace HyperElk.Core
                     API.CastSpell(SpiritualHealingPotion);
                     return;
                 }
+                if (API.CanCast(BearForm) && API.PlayerIsCC(CCList.ROOT) && AutoForm && rootbreaker)
+                {
+                    API.CastSpell(BearForm);
+                    return;
+                }
                 rotation();
                 return;
             }
@@ -331,13 +339,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.bear+=/berserk_bear,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
-                if (API.CanCast(Berserk) && !TalentIncarnation && (PlayerCovenantSettings != "Night Fae" || PlayerCovenantSettings == "Night Fae" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) >= 200 || !IsCovenant) && isMelee && IsBerserk)
+                if (API.CanCast(Berserk) && !TalentIncarnation && API.SpellGCDDuration == 0 && isMelee && IsBerserk)
                 {
                     API.CastSpell(Berserk);
                     return;
                 }
                 //actions.bear+=/incarnation,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
-                if (API.CanCast(Incarnation) && TalentIncarnation && isMelee && IsIncarnation)
+                if (API.CanCast(Incarnation) && TalentIncarnation && API.SpellGCDDuration == 0 && isMelee && IsIncarnation)
                 {
                     API.CastSpell(Incarnation);
                     return;
