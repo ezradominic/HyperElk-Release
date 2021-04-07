@@ -122,7 +122,7 @@ namespace HyperElk.Core
         {
             get
             {
-                if (BladeDanceWithChaosTheory >0 || BladeDanceWithChaosTheory >0)
+                if (BladeDanceWithChaosTheory >0 || BladeDanceWithoutChaosTheory >0)
                     return true;
                 return false;
             }
