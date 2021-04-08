@@ -38,8 +38,8 @@ namespace HyperElk.Core
         private string Misdirection = "Misdirection";
         private string SoulRot = "Soul Rot";
         private string ImpendingCatastrophe = "Impending Catastrophe";
-        private string trinket1 = "trinket1";
-        private string trinket2 = "trinket2";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
 
         private string MortalCoil = "Mortal Coil";
         private string DecimatingBolt = "Decimating Bolt";
@@ -190,8 +190,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(UnendingResolve, 104773);
 
             //Macro
-            CombatRoutine.AddMacro(trinket1);
-            CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro(Agony + "MO", "F1");
             CombatRoutine.AddMacro(Corruption + "MO", "F2");
             CombatRoutine.AddMacro(SiphonLife + "MO", "F3");
@@ -318,11 +318,11 @@ namespace HyperElk.Core
             }
             if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket1 == "on HP" && API.PlayerHealthPercent <= Trinket1HP))
             {
-                API.CastSpell("Trinket1");
+                API.CastSpell(Trinket1);
             }
             if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket2 == "on HP" && API.PlayerHealthPercent <= Trinket2HP))
             {
-                API.CastSpell("Trinket2");
+                API.CastSpell(Trinket2);
             }
 
             //# Executed every time the actor is available.
