@@ -50,6 +50,7 @@ namespace HyperElk.Core
         private string InevitableDemise = "Inevitable Demise";
         private string SpellLock = "Spell Lock";
         private string UnendingResolve = "Unending Resolve";
+        private string CurseofWeakness = "Curse of Weakness";
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -93,6 +94,7 @@ namespace HyperElk.Core
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
         private bool UseCO => (bool)CombatRoutine.GetProperty("UseCO");
         private bool UseSL => (bool)CombatRoutine.GetProperty("UseSL");
+        private bool UseCoWMO => (bool)CombatRoutine.GetProperty("UseCoWMO");
 
         private int DarkPactPercentProc => numbList[CombatRoutine.GetPropertyInt(DarkPact)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
@@ -136,6 +138,7 @@ namespace HyperElk.Core
             328125,
             334625,
         };
+        bool CasterMob;
         public override void Initialize()
         {
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
@@ -159,6 +162,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseAG", "Use Agony", true, "Use Agony for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseCO", "Use Corruption", true, "Use Corruption for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
+            CombatRoutine.AddProp("UseCoWMO", "Curse of Weakness", true, "Curse of Weakness for mouseover Multidots", "MultiDOTS");
+
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", TrinketList, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", TrinketList, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket1HP", "Trinket 1" + " Life Percent", numbList, " Life percent at which" + "Trinket 1" + " is used, set to 0 to disable", "Trinkets", 40);
@@ -188,6 +193,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FelDomination, 333889);
             CombatRoutine.AddSpell(SpellLock, 19647);
             CombatRoutine.AddSpell(UnendingResolve, 104773);
+            CombatRoutine.AddSpell(CurseofWeakness, 702);
 
             //Macro
             CombatRoutine.AddMacro(Trinket1);
@@ -195,6 +201,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(Agony + "MO", "F1");
             CombatRoutine.AddMacro(Corruption + "MO", "F2");
             CombatRoutine.AddMacro(SiphonLife + "MO", "F3");
+            CombatRoutine.AddMacro(CurseofWeakness + "MO", "F3");
 
 
 
@@ -225,6 +232,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Haunt, 48181);
             CombatRoutine.AddDebuff(SoulRot, 325640);
             CombatRoutine.AddDebuff(ShadowEmbrace, 32390);
+            CombatRoutine.AddDebuff(CurseofWeakness, 702);
 
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("DarkSoul");
@@ -602,15 +610,25 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony<4,target_if=!dot.agony.ticking
-                if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
+                if (API.CanCast(Agony) && TargetDebuffRemainingTime(Agony) < 400)
                 {
-                    API.CastSpell(Agony + "MO");
+                    API.CastSpell(Agony);
                     return;
                 }
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony>=4,target_if=refreshable&dot.agony.ticking
                 if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
                 {
                     API.CastSpell(Agony + "MO");
+                    return;
+                }
+                if (API.CanCast(CurseofWeakness) && TargetDebuffRemainingTime(CurseofWeakness) < 400)
+                {
+                    API.CastSpell(CurseofWeakness);
+                    return;
+                }
+                if (IsMouseover && UseCoWMO && API.CanCast(CurseofWeakness) && !API.MacroIsIgnored(CurseofWeakness + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(CurseofWeakness) <= 400 && IsRange)
+                {
+                    API.CastSpell(CurseofWeakness + "MO");
                     return;
                 }
                 //actions.aoe+=/unstable_affliction,if=dot.unstable_affliction.refreshable
@@ -1654,6 +1672,7 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
+            CasterMob = false;
             //Grimoire Of Sacrifice
             if (API.PlayerHasPet && TalentGrimoireOfSacrifice && API.PlayerHasBuff("Grimoire Of Sacrifice"))
             {
