@@ -89,6 +89,7 @@ namespace HyperElk.Core
         private string UseTrinket1 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket2")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private bool UseFieryBrand => CombatRoutine.GetPropertyBool("FieryBrandUsage");
         private string UseMetamorphosis => MetamorphosisList[CombatRoutine.GetPropertyInt(Metamorphosis)];
         private string UseThrowGlaive => Throw_GlaiveList[CombatRoutine.GetPropertyInt(Throw_Glaive)];
         private string UseSigilofFlame => SigilofFlameList[CombatRoutine.GetPropertyInt(Sigil_of_Flame)];
@@ -170,6 +171,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Bulk_Extraction, "Use " + Bulk_Extraction, BulkExtractionList, "Use " + Bulk_Extraction + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(SigilofSilence, SigilofSilence, true, "Enable if you want to let the rotation use" + SigilofSilence, "Generic");
             CombatRoutine.AddProp(SigilofMisery, SigilofMisery, true, "Enable if you want to let the rotation use" + SigilofMisery, "Generic");
+            CombatRoutine.AddProp("FieryBrandUsage", Fiery_Brand, true, "Fiery Brand Rotation: Use Fiery Brand" + Fiery_Brand, "Generic");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", UseListwithHP, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", UseListwithHP, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
@@ -246,7 +248,7 @@ namespace HyperElk.Core
                 if (brand_build)
                 {
                     // apl_brand->add_action(this, "Fiery Brand");
-                    if (API.CanCast("Fiery Brand") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
+                    if (API.CanCast("Fiery Brand") && UseFieryBrand && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
                     {
                         API.CastSpell("Fiery Brand");
                         return;
