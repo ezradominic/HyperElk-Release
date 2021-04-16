@@ -63,6 +63,7 @@ namespace HyperElk.Core
         private string AoEDPSHRaid = "AOEDPS Health Raid";
         private string AoEDPSRaid = "AOEDPS Raid";
         private string Assist = "Assist";
+        private string YuLonAOE = "YuLon AOE";
 
 
         //Talents
@@ -127,6 +128,10 @@ namespace HyperElk.Core
         private int ManaTeaPercent => numbList[CombatRoutine.GetPropertyInt(ManaTea)];
         private int ChiWavePercent => numbList[CombatRoutine.GetPropertyInt(ChiWave)];
         private int ChiBurstPercent => numbList[CombatRoutine.GetPropertyInt(ChiBurst)];
+        private int YuLonNumber => numbPartyList[CombatRoutine.GetPropertyInt(YuLonAOE)];
+        private bool YuLonAoE => UnitBelowHealthPercent(YuLonPercent) >= YuLonNumber;
+        private int YuLonPercent => numbList[CombatRoutine.GetPropertyInt(Yulon)];
+
         private int DampenHarmPercent => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
         private int HealingElixirPercent => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int RefreshingJadeWindPercent => numbList[CombatRoutine.GetPropertyInt(RefreshingJadeWind)];
@@ -444,6 +449,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(AoEDPSRaid, "Number of units needed to be above DPS Health Percent to DPS in Raid ", numbRaidList, " Units above for DPS ", "DPS Heal Raid", 4);
             CombatRoutine.AddProp(AoEDPSHRaid, "Life Percent for units to be above for DPS in raid", numbList, "Health percent at which DPS" + "is used,", "DPS Heal Raid", 70);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
+            CombatRoutine.AddProp(Yulon, Yulon + " Life Percent", numbList, "Life percent at which" + Yulon + "is used when" + " XX members are at life percent, set to 0 to disable", "AOE YuLon", 50);
+            CombatRoutine.AddProp(YuLonAOE, "YuLon AoE Units ", numbList, " Number of units for YuLon AoE Healing", "AOE YuLon", 4);
 
             CombatRoutine.AddProp("SwapSpeed", "SwapSpeed", 500, "SwapSpeed", "Swap Speed");
 
@@ -577,7 +584,7 @@ namespace HyperElk.Core
                 API.CastSpell(ManaTea);
                 return;
             }
-            if (IsCooldowns && API.CanCast(Yulon) && !TalentInvokeChiJi && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && !CurrentCastEssenceFont && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal))
+            if (YuLonAoE && API.CanCast(Yulon) && !TalentInvokeChiJi && !API.PlayerCanAttackTarget && API.TargetHealthPercent > 0 && !CurrentCastEssenceFont && (API.TargetIsIncombat || !API.TargetIsIncombat && NPCHeal))
             {
                 API.CastSpell(Yulon);
                 return;
