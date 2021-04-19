@@ -749,7 +749,7 @@ namespace HyperElk.Core
                 API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                 return;
             }
-            if (API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && (API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber))
+            if (API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && (API.PlayerIsInGroup && !API.PlayerIsInRaid && UnitBelowHealthPercentParty(AoEDPSHLifePercent) >= AoEDPSNumber || API.PlayerIsInRaid && UnitBelowHealthPercentRaid(AoEDPSHRaidLifePercent) >= AoEDPSRaidNumber) || API.PlayerHasBuff(MoonkinForm) && BalanceAffinity && !API.PlayerCanAttackTarget)
             {
                 API.CastSpell(MoonkinForm);
                 return;
@@ -1095,7 +1095,7 @@ namespace HyperElk.Core
                         API.CastSpell(HeartoftheWild);
                         return;
                     }
-                    if (API.CanCast(MoonkinForm) && BalanceAffinity && !API.PlayerHasBuff(MoonkinForm) && !ChannelingCov && !ChannelingTranq && InRange && API.TargetHealthPercent > 0)
+                    if (API.PlayerCanAttackTarget && API.CanCast(MoonkinForm) && BalanceAffinity && !API.PlayerHasBuff(MoonkinForm) && !ChannelingCov && !ChannelingTranq && InRange && API.TargetHealthPercent > 0)
                     {
                         API.CastSpell(MoonkinForm);
                         return;
