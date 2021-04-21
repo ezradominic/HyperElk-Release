@@ -36,7 +36,8 @@ namespace HyperElk.Core
         private string ChaoticBlades = "Chaotic Blades";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
-
+        private string ConsumeMagic = "Consume Magic";
+            
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -184,6 +185,8 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, true, false);
         }
+        private bool ConsumeList => (API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Bramblethorn Coat") || API.TargetHasBuff("Wonder Grow") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Dark Shroud") || API.TargetHasBuff("Nourish the Forest") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Spectral Transference"));
+
         private static bool MetamorphosisUp => PlayerHasBuff("Metamorphosis") || PlayerHasBuff("Demonic Metamorphosis");
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
@@ -218,6 +221,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TheHunt, 323639, "NumPad6");
             CombatRoutine.AddSpell(fodder_to_the_flame, 329554, "NumPad6");
             CombatRoutine.AddSpell(elysian_decree, 306830, "NumPad6");
+            CombatRoutine.AddSpell(ConsumeMagic, 278326, "NumPad9");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -227,6 +231,16 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Fel_Bombardment, 337775);
             CombatRoutine.AddBuff(furious_gaze, 273232);
             CombatRoutine.AddBuff(ChaoticBlades, 337567);
+            
+            //Consume Magic Buffs
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Bramblethorn Coat", 324776);
+            CombatRoutine.AddBuff("Wonder Grow", 328015);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 317936);
+            CombatRoutine.AddBuff("Dark Shroud", 335141);
+            CombatRoutine.AddBuff("Nourish the Forest", 324914);
+            CombatRoutine.AddBuff("Stimulate Resistance", 326046);
+            CombatRoutine.AddBuff("Spectral Transference", 320272);
 
             CombatRoutine.AddDebuff(Essence_Break, 320338);
             CombatRoutine.AddDebuff(SinfulBrand, 317009);
@@ -299,6 +313,11 @@ namespace HyperElk.Core
                 {
                     API.CastSpell(Disrupt);
 
+                }
+                if (API.CanCast(ConsumeMagic) && ConsumeList && API.TargetRange <= 5)
+                {
+                    API.CastSpell(ConsumeMagic);
+                    return;
                 }
                 //API.WriteLog("lastspell " + API.LastSpellCastInGame);
                 #region Cooldowns
