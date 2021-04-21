@@ -28,6 +28,7 @@
 // v3.55 small hotfix
 // v3.6 changed name of options
 // v3.65 Battle shout fix
+// v3.7 small tweak for simps
 
 using System.Linq;
 
@@ -145,13 +146,14 @@ namespace HyperElk.Core
         private bool IsMassacre => CombatRoutine.GetPropertyBool("Massacre");
         private bool SlamBuff => CombatRoutine.GetPropertyBool("Slam Buff");
         bool CanBladestorm => !API.SpellISOnCooldown(Bladestorm) && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle;
+        bool CanAA => !API.SpellISOnCooldown(AncientAftershock) && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Night Fae" && IsCovenant;
 
 
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.65");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.7");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
@@ -369,7 +371,7 @@ namespace HyperElk.Core
                     API.CastSpell("Cancel Bladestorm");
                     return;
                 }
-                if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && !CanBladestorm && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff(Whirlwind) && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
+                if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && !CanBladestorm && !CanAA && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff(Whirlwind) && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(Whirlwind);
                     return;
@@ -522,7 +524,7 @@ namespace HyperElk.Core
                     API.CastSpell(SpearofBastion);
                     return;
                 }
-                if (API.CanCast(AncientAftershock) && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Night Fae" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(AncientAftershock) && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(AncientAftershock);
                     return;
