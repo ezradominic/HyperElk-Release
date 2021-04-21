@@ -101,7 +101,7 @@ namespace HyperElk.Core
         private bool QuakingMirrors => (API.PlayerDebuffRemainingTime(Quake) > MirrorsofTormentCastTime && PlayerHasDebuff(Quake)  || !PlayerHasDebuff(Quake));
         private bool QuakingRadiant => (API.PlayerDebuffRemainingTime(Quake) > RadiantSparkCastTime && PlayerHasDebuff(Quake)  || !PlayerHasDebuff(Quake));
         private bool QuakingDeathborne => (API.PlayerDebuffRemainingTime(Quake) > DeathborneCastTime && PlayerHasDebuff(Quake)  || !PlayerHasDebuff(Quake));
-        private bool QuakingPyro => (API.PlayerDebuffRemainingTime(Quake) > PyroBlastCastTime || API.PlayerBuffTimeRemaining(Quake) > PyroBlastCastTime) && API.PlayerHasDebuff(Quake) || API.PlayerHasBuff(Quake));
+        private bool QuakingPyro => (API.PlayerDebuffRemainingTime(Quake) > PyroBlastCastTime && PlayerHasDebuff(Quake) || !PlayerHasDebuff(Quake));
         private bool QuakingRune => (API.PlayerDebuffRemainingTime(Quake) > RuneCastTime && PlayerHasDebuff(Quake)  || !PlayerHasDebuff(Quake));
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791 && API.PlayerHasBuff(ShiftingPower);
         bool CastCombustion => API.PlayerLastSpell == "Combustion";
@@ -266,11 +266,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("Current Cast Time Remaining : " + API.PlayerCurrentCastTimeRemaining);
-            API.WriteLog("Is Player Casting (false)? " + API.PlayerIsCasting(false));
-            API.WriteLog("Fire Ball Cast Time : " + FireballCastTime);
-            API.WriteLog("Debuff Remaining Time of Hypo : " + API.PlayerDebuffRemainingTime("Hypothermia"));
-
             if (API.PlayerIsInCombat && API.CanCast("Combustion") && Level >= 29 && (!API.PlayerIsMoving || API.PlayerIsMoving) && (!API.PlayerIsCasting(true) || API.PlayerCurrentCastTimeRemaining <= 65) && API.TargetRange <= 40 && (IsCooldowns && UseCom == "With Cooldowns" || UseCom == "On Cooldown") && Level >= 29 && !API.PlayerHasBuff("Rune of Power") && (FireStarter && API.TargetHealthPercent < 90 || !FireStarter))
             {
                 API.CastSpell("Combustion");

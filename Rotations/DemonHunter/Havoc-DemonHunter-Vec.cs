@@ -36,7 +36,8 @@ namespace HyperElk.Core
         private string ChaoticBlades = "Chaotic Blades";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
-
+        private string ConsumeMagic = "Consume Magic";
+            
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -122,7 +123,7 @@ namespace HyperElk.Core
         {
             get
             {
-                if (BladeDanceWithChaosTheory >0 || BladeDanceWithChaosTheory >0)
+                if (BladeDanceWithChaosTheory >0 || BladeDanceWithoutChaosTheory >0)
                     return true;
                 return false;
             }
@@ -184,6 +185,8 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, true, false);
         }
+        private bool ConsumeList => (API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Bramblethorn Coat") || API.TargetHasBuff("Wonder Grow") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Dark Shroud") || API.TargetHasBuff("Nourish the Forest") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Spectral Transference"));
+
         private static bool MetamorphosisUp => PlayerHasBuff("Metamorphosis") || PlayerHasBuff("Demonic Metamorphosis");
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
@@ -218,6 +221,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(TheHunt, 323639, "NumPad6");
             CombatRoutine.AddSpell(fodder_to_the_flame, 329554, "NumPad6");
             CombatRoutine.AddSpell(elysian_decree, 306830, "NumPad6");
+            CombatRoutine.AddSpell(ConsumeMagic, 278326, "NumPad9");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -227,6 +231,16 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Fel_Bombardment, 337775);
             CombatRoutine.AddBuff(furious_gaze, 273232);
             CombatRoutine.AddBuff(ChaoticBlades, 337567);
+            
+            //Consume Magic Buffs
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Bramblethorn Coat", 324776);
+            CombatRoutine.AddBuff("Wonder Grow", 328015);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 317936);
+            CombatRoutine.AddBuff("Dark Shroud", 335141);
+            CombatRoutine.AddBuff("Nourish the Forest", 324914);
+            CombatRoutine.AddBuff("Stimulate Resistance", 326046);
+            CombatRoutine.AddBuff("Spectral Transference", 320272);
 
             CombatRoutine.AddDebuff(Essence_Break, 320338);
             CombatRoutine.AddDebuff(SinfulBrand, 317009);
@@ -300,6 +314,11 @@ namespace HyperElk.Core
                     API.CastSpell(Disrupt);
 
                 }
+                if (API.CanCast(ConsumeMagic) && ConsumeList && API.TargetRange <= 5)
+                {
+                    API.CastSpell(ConsumeMagic);
+                    return;
+                }
                 //API.WriteLog("lastspell " + API.LastSpellCastInGame);
                 #region Cooldowns
                 //apl_cooldown->add_action(this, "Metamorphosis", "if=!(talent.demonic.enabled|variable.pooling_for_meta)&(!covenant.venthyr.enabled|!dot.sinful_brand.ticking)|target.time_to_die<25");
@@ -358,25 +377,25 @@ namespace HyperElk.Core
 
                     }
                     //death_sweep,if= variable.blade_dance & debuff.essence_break.up
-                    else if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12  && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance  && MeleeRange)
+                    else if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12  && API.TargetHasDebuff(Essence_Break) && BladeDance  && MeleeRange)
                     {
                         API.CastSpell(Death_Sweep);
 
                     }
                     //blade_dance,if= variable.blade_dance & debuff.essence_break.up
-                    else if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12  && API.TargetHasDebuff(Essence_Break) && MetamorphosisUp && BladeDance  && MeleeRange)
+                    else if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12  && API.TargetHasDebuff(Essence_Break) && BladeDance  && MeleeRange)
                     {
                         API.CastSpell(Blade_Dance);
 
                     }
                     //annihilation,if= debuff.essence_break.up
-                    else if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
+                    else if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40  && MeleeRange)
                     {
                         API.CastSpell(Annihilation);
 
                     }
                     //chaos_strike,if= debuff.essence_break.up
-                    else if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
+                    else if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && API.TargetHasDebuff(Essence_Break) && API.PlayerFury >= 40  && MeleeRange)
                     {
                         API.CastSpell(Chaos_Strike);
 
@@ -389,7 +408,7 @@ namespace HyperElk.Core
                 {
                     //fel_rush,if= (talent.unbound_chaos.enabled & buff.unbound_chaos.up) & (charges = 2 | (raid_event.movement.in> 10 & raid_event.adds.in> 10))
                     //death_sweep,if= variable.blade_dance
-                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12  && MetamorphosisUp && BladeDance  && MeleeRange)
+                    if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12   && BladeDance  && MeleeRange)
                     {
                         API.CastSpell(Death_Sweep);
 
@@ -411,7 +430,7 @@ namespace HyperElk.Core
                     }
 
                     //blade_dance,if= variable.blade_dance & !cooldown.metamorphosis.ready & (cooldown.eye_beam.remains > (5 - azerite.revolving_blades.rank * 3))
-                    else if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12  && !MetamorphosisUp  && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
+                    else if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12  && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
                     {
                         API.CastSpell(Blade_Dance);
 
@@ -425,7 +444,7 @@ namespace HyperElk.Core
                     }
 
                     //annihilation,if= !variable.pooling_for_blade_dance
-                    else if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && !PoolingForBladeDance && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
+                    else if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && !PoolingForBladeDance && API.PlayerFury >= 40  && MeleeRange)
                     {
                         API.CastSpell(Annihilation);
 
@@ -476,7 +495,7 @@ namespace HyperElk.Core
 
                     }
                     // death_sweep,if= variable.blade_dance
-                    else if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12  && MetamorphosisUp && BladeDance  && MeleeRange)
+                    else if (API.CanCast(Death_Sweep) && API.PlayerLevel >= 12  && BladeDance  && MeleeRange)
                     {
                         API.CastSpell(Death_Sweep);
 
@@ -505,7 +524,7 @@ namespace HyperElk.Core
                     }
 
                     // blade_dance,if= variable.blade_dance
-                    else if (API.CanCast(Blade_Dance) && !MetamorphosisUp && API.PlayerLevel >= 12 && BladeDance   && MeleeRange)
+                    else if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12 && BladeDance   && MeleeRange)
                     {
                         API.CastSpell(Blade_Dance);
 
@@ -524,13 +543,13 @@ namespace HyperElk.Core
 
                     }
                     // annihilation,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30 | buff.metamorphosis.remains < 5) & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
-                    else if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30 || (API.PlayerBuffTimeRemaining(Metamorphosis) < 500 || API.PlayerBuffTimeRemaining(DemonicMetamorphosis) < 500)) && !BladeDance && !waiting_for_essence_break && API.PlayerFury >= 40 && MetamorphosisUp && MeleeRange)
+                    else if (API.CanCast(Annihilation) && API.PlayerLevel >= 14 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30 || (API.PlayerBuffTimeRemaining(Metamorphosis) < 500 || API.PlayerBuffTimeRemaining(DemonicMetamorphosis) < 500)) && !BladeDance && !waiting_for_essence_break && API.PlayerFury >= 40 && MeleeRange)
                     {
                         API.CastSpell(Annihilation);
 
                     }
                     // chaos_strike,if= (talent.demon_blades.enabled | !variable.waiting_for_momentum | fury.deficit < 30) & !variable.pooling_for_meta & !variable.pooling_for_blade_dance & !variable.waiting_for_essence_break
-                    else if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30) && !PoolingForBladeDance && !waiting_for_essence_break && !waiting_for_essence_break && API.PlayerFury >= 40 && !MetamorphosisUp && MeleeRange)
+                    else if (API.CanCast(Chaos_Strike) && API.PlayerLevel >= 8 && (Talent_DemonBlades || !waiting_for_momentum || fury_deficit < 30) && !PoolingForBladeDance && !waiting_for_essence_break && !waiting_for_essence_break && API.PlayerFury >= 40  && MeleeRange)
                     {
                         API.CastSpell(Chaos_Strike);
 

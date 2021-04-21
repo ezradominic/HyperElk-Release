@@ -10,6 +10,7 @@ namespace HyperElk.Core
     public class BrewmasterMonk : CombatRoutine
     {
         //Toggles
+        private bool Taunt => API.ToggleIsEnabled("Auto Taunt");
 
         //General
         private int PlayerLevel => API.PlayerLevel;
@@ -23,12 +24,31 @@ namespace HyperElk.Core
         //CBProperties
         private int VivifyLifePercentProc => numbList[CombatRoutine.GetPropertyInt(Vivify)];
         private int ExpelHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
-        private int CelestialBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
+        private int CelestialBrewStackProc => numbList[CombatRoutine.GetPropertyInt(CelestialBrew)];
+        private int CelestialBrewPercentProc => numbList[CombatRoutine.GetPropertyInt("CelestialBrew HP")];
+
         private int FortifyingBrewLifePercentProc => numbList[CombatRoutine.GetPropertyInt(FortifyingBrew)];
         private int HealingElixirLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int ChiWaveLifePercentProc => numbList[CombatRoutine.GetPropertyInt(HealingElixir)];
         private int DampenHarmLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DampenHarm)];
+        //Talents
+        private bool TalentEyeOfTheTiger => API.PlayerIsTalentSelected(1, 1);
+        private bool TalentChiWave => API.PlayerIsTalentSelected(1, 2);
+        private bool TalentChiBurst => API.PlayerIsTalentSelected(1, 3);
 
+        private bool TalentLightBrewing => API.PlayerIsTalentSelected(3, 1);
+        private bool TalentSpitfire => API.PlayerIsTalentSelected(3, 2);
+        private bool TalentBlackOxBrew => API.PlayerIsTalentSelected(3, 3);
+
+        private bool TalentSummonBlackOxStatue => API.PlayerIsTalentSelected(4, 2);
+
+        private bool TalentHealingElixir => API.PlayerIsTalentSelected(5, 2);
+        private bool TalentDampenHarm => API.PlayerIsTalentSelected(5, 3);
+
+        private bool TalentRushingJadeWind => API.PlayerIsTalentSelected(6, 2);
+        private bool TalentExplodingKeg => API.PlayerIsTalentSelected(6, 3);
+
+        private bool TalentBlackoutCombo => API.PlayerIsTalentSelected(7, 3);
 
         string[] InvokeNiuzaoList = new string[] { "always", "with Cooldowns", "On AOE", "Manual" };
         string[] StaggerList = new string[] { "always", "Light Stagger", "Moderate Stagger", "Heavy Stagger" };
@@ -37,6 +57,8 @@ namespace HyperElk.Core
         private string UseTouchofDeath => TouchofDeathList[CombatRoutine.GetPropertyInt(TouchofDeath)];
         private string UseStagger => StaggerList[CombatRoutine.GetPropertyInt(Stagger)];
         private int PurifyingBrewStaggerPercentProc => CombatRoutine.GetPropertyInt("PurifyingBrewStaggerPercentProc");
+        private bool OOC => (bool)CombatRoutine.GetProperty("OOC");
+
         //Kyrian
         private string UseWeaponsofOrder => WeaponsofOrderList[CombatRoutine.GetPropertyInt(WeaponsofOrder)];
         string[] WeaponsofOrderList = new string[] { "always", "with Cooldowns", "AOE" };
@@ -57,9 +79,41 @@ namespace HyperElk.Core
         private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
         string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
+        int[] CelestialBrewnumbList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        float EnergyRegen => 10f * (1f + API.PlayerGetHaste);
+        float TigerPalmMath => API.PlayerEnergy + (EnergyRegen * (API.SpellCDDuration(KegSmash) + API.SpellGCDDuration));
+        float CastTigerPalm => TigerPalmMath / 100;
+        float SpinningCraneKickMath => API.PlayerEnergy + (EnergyRegen * (API.SpellCDDuration(KegSmash) + API.TargetTimeToExec));
+        float CastSpinningCraneKick => SpinningCraneKickMath / 100;
+        bool CurrentCastSpinningCraneKick => API.CurrentCastSpellID("player") == 101546;
+        string[] DetoxList = {"Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Heaving Retch", "Goresplatter", "Slime Injection", "Gripping Infection", "Debilitating Plague", "Burning Strain", "Blightbeak", "Corroded Claws", "Wasting Blight", "Hurl Spores", "Corrosive Gunk", "Cytotoxic Slash", "Venompiercer", "Wretched Phlegm", "Bewildering Pollen", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen2", "Bramblethorn Entanglement", "Debilitating Poison", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Anguished Cries", "Wrack Soul", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom2", "Soul Corruption", "Genetic Alteration", "Withering Blight", "Decaying Blight"};
+        private static bool CanDetoxPlayer(string debuff)
+        {
+            return API.PlayerHasDebuff(debuff, false, true);
+        }
+        private bool CBFull => (bool)CombatRoutine.GetProperty("CBFull");
+        private bool FBSmart => (bool)CombatRoutine.GetProperty("FBSmart");
+        private bool DeOtherSideDefensive => API.TargetCurrentCastSpellID == 321061 || API.TargetCurrentCastSpellID == 327646 || API.TargetCurrentCastSpellID == 322736;
+        //        private bool HallsofAtonementDefensive =>
+        //        private bool MistsofTirnaScitheDefensive =>
+        private bool PlaguefallDefensive => API.TargetCurrentCastSpellID == 325552;
+        private bool SanguineDepthsDefensive => API.TargetCurrentCastSpellID == 319650 || API.TargetCurrentCastSpellID == 325254;
+        private bool SpiresofAscensionDefensive => API.TargetCurrentCastSpellID == 320966;
+        private bool TheaterofPainDefensive => API.TargetCurrentCastSpellID == 323515 || API.TargetCurrentCastSpellID == 320063 || API.TargetCurrentCastSpellID == 320644 || API.TargetCurrentCastSpellID == 324079;
+        private bool TheNecroticWakeDefensive => API.TargetCurrentCastSpellID == 320012 || API.TargetCurrentCastSpellID == 320655;
+        private bool CastleNathriaDefensive => API.TargetCurrentCastSpellID == 329774 || API.TargetCurrentCastSpellID == 334797 || API.TargetCurrentCastSpellID == 334929 || API.TargetCurrentCastSpellID == 342425 || API.TargetCurrentCastSpellID == 329181 || API.TargetCurrentCastSpellID == 328857 || API.TargetCurrentCastSpellID == 343005 || API.TargetCurrentCastSpellID == 341621;
+        private bool Xymox => API.FocusHasDebuff("Glyph of Destruction");
+        private bool Shriekwing => API.FocusBuffStacks("Exsanguinated") == 10;
+        private bool HungeringDestroyer => API.TargetCurrentCastSpellID == 329774 && API.TargetCurrentCastTimeRemaining <= 0 && !API.PlayerIsTargetTarget;
+        private bool LadyInerva => API.FocusDebuffStacks("Warped Desires") >= WarpedDesiresStacks;
+        private bool AltimortheHuntsman => API.FocusDebuffStacks("Jagged Claws") >= JaggedClawsStacks;
+        private bool TheCouncilofBlood => API.FocusDebuffStacks("Duelist's Riposte") >= DuelistsRiposteStacks;
+        private int WarpedDesiresStacks => CombatRoutine.GetPropertyInt("WarpedDesiresStacks");
+        private int JaggedClawsStacks => CombatRoutine.GetPropertyInt("JaggedClawsStacks");
+        private int DuelistsRiposteStacks => CombatRoutine.GetPropertyInt("DuelistsRiposteStacks");
 
 
-        private bool TalentDampenHarm => API.PlayerIsTalentSelected(5, 3);
+
         //Spells,Buffs,Debuffs
         private string TigerPalm = "Tiger Palm";
         private string BlackOutKick = "Blackout Kick";
@@ -97,6 +151,12 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string DampenHarm = "Dampen Harm";
         private string LegSweep = "Leg Sweep";
+        private string BlackoutCombo = "Blackout Combo";
+        private string Bloodlust = "Bloodlust";
+        private string GiftOfTheOx = "Gift of the Ox";
+        private string Paralyse = "Paralyse";
+        private string PurifiedChi = "Purified Chi";
+        private string Provoke = "Provoke";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
@@ -106,10 +166,15 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(ChiWave, "Chi Wave", numbList, "Life percent at which " + ChiWave + " is used, set to 0 to disable", "Healing", 5);
 
             CombatRoutine.AddProp(ExpelHarm, "Expel Harm", numbList, "Life percent at which " + ExpelHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 90);
-            CombatRoutine.AddProp(CelestialBrew, "Celestial Brew", numbList, "Life percent at which " + CelestialBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 50);
+            CombatRoutine.AddProp(CelestialBrew, "Celestial Brew", CelestialBrewnumbList, "Purified Chi stacks at which " + CelestialBrew + " is used", "Healing", 5);
+            CombatRoutine.AddProp("CelestialBrew HP", "Celestial Brew HP", numbList, "Life percent at wich " + CelestialBrew + " is used when at " + " Chi Stacks", "Healing", 50);
+            CombatRoutine.AddProp("CBFull", "Celestial Brew 10 stacks", true, "Should the rotation use always use Celestial Brew on 10 Stacks of Purified Chi", "Healing");
+
             CombatRoutine.AddProp(FortifyingBrew, "Fortifying Brew", numbList, "Life percent at which " + FortifyingBrew + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
+            CombatRoutine.AddProp("FBSmart", "Fortifying Brew Smart usage", true, "Fortifying Brew Smart usage, check the Discord for more Infos", "Healing");
+
             CombatRoutine.AddProp(HealingElixir, "Healing Elixir", numbList, "Life percent at which " + HealingElixir + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 80);
-            CombatRoutine.AddProp("PurifyingBrewStaggerPercentProc", "PurifyingBrew", 4, "Use PurifyingBrew, compared to max life. On 1000 HP 20% means Cast if stagger is higher than 200", "Stagger Management");
+            CombatRoutine.AddProp("PurifyingBrewStaggerPercentProc", "PurifyingBrew", 9, "Use PurifyingBrew, compared to max life.", "Stagger Management");
             CombatRoutine.AddProp(InvokeNiuzao, "Use " + InvokeNiuzao, InvokeNiuzaoList, "Use " + InvokeNiuzao + "always, with Cooldowns, On AOE", "Cooldowns", 0);
             CombatRoutine.AddProp(Stagger, "Use " + PurifyingBrew, StaggerList, "Use " + PurifyingBrew + " 2nd charge always, Light / Moderate / Heavy Stagger", "Stagger Management", 1);
             CombatRoutine.AddProp(TouchofDeath, "Use " + TouchofDeath, TouchofDeathList, "Use " + TouchofDeath + "always, with Cooldowns", "Cooldowns", 1);
@@ -129,7 +194,11 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
 
+            CombatRoutine.AddProp("OOC", "Out of Combat Healing", true, "Use Vivify Out of Combat", "Out of Combat");
 
+            CombatRoutine.AddProp("WarpedDesiresStacks", "Warped Desires Stacks", 2, "How many Stacks of Warped Desires to Provoke", "Auto Taunt");
+            CombatRoutine.AddProp("JaggedClawsStacks", "Jagged Claws Stacks", 3, "How many Stacks of Jagged Claws to Provoke", "Auto Taunt");
+            CombatRoutine.AddProp("DuelistsRiposte", "Duelists Riposte Stacks", 2, "How many Stacks of Duelists Riposte to Provoke", "Auto Taunt");
 
             //Spells
             CombatRoutine.AddSpell(TigerPalm, 100780,"D1");
@@ -143,6 +212,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(ChiBurst, 123986,"D9");
             CombatRoutine.AddSpell(RushingJadeWind, 116847,"D0");
             CombatRoutine.AddSpell(ExplodingKeg, 325153,"Oem6");
+            CombatRoutine.AddSpell(Provoke, 115546);
+            CombatRoutine.AddMacro(Provoke + " Focus Target");
 
 
             CombatRoutine.AddSpell(Vivify, 116670,"NumPad1");
@@ -167,17 +238,80 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(trinket2);
 
             //Buffs
-
-
+            CombatRoutine.AddBuff(BlackoutCombo, 196736);
+            CombatRoutine.AddBuff(WeaponsofOrder, 310454);
+            CombatRoutine.AddBuff(RushingJadeWind, 116847);
+            CombatRoutine.AddBuff(Bloodlust, 2825);
+            CombatRoutine.AddBuff(GiftOfTheOx, 124507);
+            CombatRoutine.AddBuff(PurifiedChi, 325092);
 
             //Debuffs
             CombatRoutine.AddDebuff(LightStagger, 124275);
             CombatRoutine.AddDebuff(ModerateStagger, 124274);
             CombatRoutine.AddDebuff(HeavyStagger, 124273);
-
+            CombatRoutine.AddDebuff(BreathOfFire, 123725);
+            CombatRoutine.AddDebuff(KegSmash, 121253);
+            //Debuffs / Detox
+            CombatRoutine.AddDebuff("Chilled", 328664);
+            CombatRoutine.AddDebuff("Frozen Binds", 320788);
+            CombatRoutine.AddDebuff("Clinging Darkness", 323347);
+            CombatRoutine.AddDebuff("Rasping Scream", 324293);
+            CombatRoutine.AddDebuff("Heaving Retch", 320596);
+            CombatRoutine.AddDebuff("Goresplatter", 338353);
+            CombatRoutine.AddDebuff("Slime Injection", 329110);
+            CombatRoutine.AddDebuff("Gripping Infection", 328180);
+            CombatRoutine.AddDebuff("Debilitating Plague", 324652);
+            CombatRoutine.AddDebuff("Burning Strain", 322358);
+            CombatRoutine.AddDebuff("Blightbeak", 327882);
+            CombatRoutine.AddDebuff("Corroded Claws", 320512);
+            CombatRoutine.AddDebuff("Wasting Blight", 320542);
+            CombatRoutine.AddDebuff("Hurl Spores", 328002);
+            CombatRoutine.AddDebuff("Corrosive Gunk", 319070);
+            CombatRoutine.AddDebuff("Cytotoxic Slash", 325552);
+            CombatRoutine.AddDebuff("Venompiercer", 328395);
+            CombatRoutine.AddDebuff("Wretched Phlegm", 334926);
+            CombatRoutine.AddDebuff("Bewildering Pollen", 323137);
+            CombatRoutine.AddDebuff("Repulsive Visage", 328756);
+            CombatRoutine.AddDebuff("Soul Split", 322557);
+            CombatRoutine.AddDebuff("Anima Injection", 325224);
+            CombatRoutine.AddDebuff("Bewildering Pollen2", 321968);
+            CombatRoutine.AddDebuff("Bramblethorn Entanglement", 324859);
+            CombatRoutine.AddDebuff("Debilitating Poison", 326092);
+            CombatRoutine.AddDebuff("Sinlight Visions", 339237);
+            CombatRoutine.AddDebuff("Siphon Life", 325701);
+            CombatRoutine.AddDebuff("Turn to Stone", 326607);
+            CombatRoutine.AddDebuff("Stony Veins", 326632);
+            CombatRoutine.AddDebuff("Cosmic Artifice", 325725);
+            CombatRoutine.AddDebuff("Wailing Grief", 340026);
+            CombatRoutine.AddDebuff("Shadow Word:  Pain", 332707);
+            CombatRoutine.AddDebuff("Anguished Cries", 325885);
+            CombatRoutine.AddDebuff("Wrack Soul", 321038);
+            CombatRoutine.AddDebuff("Dark Lance", 327481);
+            CombatRoutine.AddDebuff("Insidious Venom", 323636);
+            CombatRoutine.AddDebuff("Charged Anima", 338731);
+            CombatRoutine.AddDebuff("Lost Confidence", 322818);
+            CombatRoutine.AddDebuff("Burden of Knowledge", 317963);
+            CombatRoutine.AddDebuff("Internal Strife", 327648);
+            CombatRoutine.AddDebuff("Forced Confession", 328331);
+            CombatRoutine.AddDebuff("Insidious Venom2", 317661);
+            CombatRoutine.AddDebuff("Soul Corruption", 333708);
+            CombatRoutine.AddDebuff("Genetic Alteration", 320248);
+            CombatRoutine.AddDebuff("Withering Blight", 341949);
+            CombatRoutine.AddDebuff("Decaying Blight", 330700);
+            CombatRoutine.AddDebuff("Infectious Rain", 322232);
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+
+            CombatRoutine.AddToggle("Auto Taunt");
+
+            //RaidDebuffAutoTaunt
+            CombatRoutine.AddDebuff("Glyph of Destruction", 325361);
+            CombatRoutine.AddDebuff("Exsanguinating Bite", 328857);
+            CombatRoutine.AddDebuff("Jagged Claws", 334971);
+            CombatRoutine.AddDebuff("Warped Desires", 325382);
+            CombatRoutine.AddDebuff("Duelist's Riposte", 346690);
+
 
         }
 
@@ -186,6 +320,37 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.CanCast(Detox) && API.PlayerDebuffStacks("Infectious Rain") >= 3) 
+            {
+                API.CastSpell(Detox);
+                return;
+            }
+            if (API.CanCast(Detox))
+            {
+                for (int i = 0; i < DetoxList.Length; i++)
+                {
+                    if (CanDetoxPlayer(DetoxList[i]))
+                    {
+                        API.CastSpell(Detox);
+                        return;
+                    }
+                }
+            }
+            if (Taunt && !API.PlayerIsTargetTarget && (Xymox || Shriekwing || HungeringDestroyer || LadyInerva))
+            {
+                API.CastSpell(Provoke);
+                return;
+            }
+            if (Taunt && (AltimortheHuntsman || TheCouncilofBlood))
+            {
+                API.CastSpell(Provoke + " Focus Target");
+                return;
+            }
+            if (API.CanCast(FortifyingBrew) && (CastleNathriaDefensive && API.PlayerIsTargetTarget || DeOtherSideDefensive || PlaguefallDefensive || SanguineDepthsDefensive || SpiresofAscensionDefensive || TheaterofPainDefensive || TheNecroticWakeDefensive))
+            {
+                API.CanCast(FortifyingBrew);
+                return;
+            }
             if (API.PlayerItemCanUse("Healthstone") && API.PlayerItemRemainingCD("Healthstone") == 0 && API.PlayerHealthPercent <= HealthStonePercent)
             {
                 API.CastSpell("Healthstone");
@@ -213,30 +378,14 @@ namespace HyperElk.Core
                 API.CastSpell(Fleshcraft);
                 return;
             }
-            //Healing Elixir
-            if (API.PlayerHealthPercent <= HealingElixirLifePercentProc && !API.SpellISOnCooldown(HealingElixir) && API.PlayerIsTalentSelected(5, 2) && NotChanneling)
-            {
-                API.CastSpell(HealingElixir);
-                return;
-            }
-            //ChiWave
-            if (API.PlayerHealthPercent <= ChiWaveLifePercentProc && !API.SpellISOnCooldown(ChiWave) && API.PlayerIsTalentSelected(1, 2) && NotChanneling)
-            {
-                API.CastSpell(ChiWave);
-                return;
-            }
             //Expel Harm
             if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8 && NotChanneling)
             {
                 API.CastSpell(ExpelHarm);
                 return;
             }
-            //Celestial Brew
-            if (API.PlayerHealthPercent <= CelestialBrewLifePercentProc && !API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27 && NotChanneling)
-            {
-                API.CastSpell(CelestialBrew);
-                return;
-            }
+
+
             //Purifying Brew
             if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23 && PlayerLevel <= 47 && NotChanneling)
             {
@@ -290,47 +439,13 @@ namespace HyperElk.Core
                 API.CastSpell(trinket1);
             if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
                 API.CastSpell(trinket2);
-            //Covenant Kyrian
-            //WeaponsofOrder
-            if (API.CanCast(WeaponsofOrder) && IsCooldowns && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "with Cooldowns")
-            {
-                API.CastSpell(WeaponsofOrder);
-                return;
-            }
-            //Covenant Necrolord
-            //BonedustBrew
-            if (API.CanCast(BonedustBrew) && IsCooldowns && PlayerCovenantSettings == "Necrolord" && UseBonedustBrew == "with Cooldowns")
-            {
-                API.CastSpell(BonedustBrew);
-                return;
-            }
-            //Covenant Night Fae
-            //FaelineStomp
-            if (API.CanCast(FaelineStomp) && IsCooldowns && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "with Cooldowns")
-            {
-                API.CastSpell(FaelineStomp);
-                return;
-            }
-            //Covenant Venthyr
-            //Fallen Order
-            if (API.CanCast(FallenOrder) && IsCooldowns && PlayerCovenantSettings == "Venthyr" && UseFallenOrder == "with Cooldowns")
-            {
-                API.CastSpell(FallenOrder);
-                return;
-            }
-            //BlackOxBrew
-            if (API.SpellISOnCooldown(CelestialBrew) && !API.SpellISOnCooldown(BlackOxBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && API.PlayerIsTalentSelected(3, 3))
-            {
-                API.CastSpell(BlackOxBrew);
-                return;
-            }
             //Touch of Death
             if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
             {
                 API.CastSpell(TouchofDeath);
                 return;
             }
-            //KICK
+            //actions+=/spear_hand_strike,if=target.debuff.casting.react
             if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
             {
                 API.CastSpell(SpearHandStrike);
@@ -346,180 +461,205 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
-            //ROTATION AOE
-            if (IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && NotChanneling && IsMelee)
+            //# Executed every time the actor is available.
+            //actions=auto_attack
+            //actions+=/gift_of_the_ox,if=health<health.max*0.65
+
+            //actions+=/dampen_harm,if=incoming_damage_1500ms&buff.fortifying_brew.down
+            //actions+=/fortifying_brew,if=incoming_damage_1500ms&(buff.dampen_harm.down|buff.diffuse_magic.down)
+            //actions+=/use_item,name=dreadfire_vessel
+            //actions+=/potion
+            //actions+=/blood_fury
+            if (IsCooldowns && API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc")
             {
-                if (UseTrinket1 == "AOE" || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
-                    API.CastSpell(trinket1);
-                if (UseTrinket2 == "AOE" || UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
-                    API.CastSpell(trinket2);
-                //InvokeNiuzao
-                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "On AOE" || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(InvokeNiuzao);
-                    return;
-                }
-                //Covenant Kyrian
-                //WeaponsofOrder
-                if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && (UseWeaponsofOrder == "AOE" || UseWeaponsofOrder == "always"))
-                {
-                    API.CastSpell(WeaponsofOrder);
-                    return;
-                }
-                //Covenant Necrolord
-                //BonedustBrew
-                if (API.CanCast(BonedustBrew) && PlayerCovenantSettings == "Necrolord" && (UseBonedustBrew == "AOE" || UseBonedustBrew == "always"))
-                {
-                    API.CastSpell(BonedustBrew);
-                    return;
-                }
-                //Covenant Night Fae
-                //FaelineStomp
-                if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
-                {
-                    API.CastSpell(FaelineStomp);
-                    return;
-                }
-                //Covenant Venthyr
-                //Fallen Order
-                if (API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "AOE" || UseFallenOrder == "always"))
-                {
-                    API.CastSpell(FallenOrder);
-                    return;
-                }
-                //KegSmash
-                if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
-                {
-                    API.CastSpell(KegSmash);
-                    return;
-                }
-                //BlackOutKick
-                if (API.CanCast(BlackOutKick) && API.PlayerLevel >= 2)
-                {
-                    API.CastSpell(BlackOutKick);
-                    return;
-                }
-                //Breath of Fire
-                if (!API.SpellISOnCooldown(BreathOfFire) && API.PlayerLevel >= 29)
-                {
-                    API.CastSpell(BreathOfFire);
-                    return;
-                }
-                //ChiBurst
-                if (API.CanCast(ChiBurst) && API.PlayerIsTalentSelected(1, 3))
-                {
-                    API.CastSpell(ChiBurst);
-                    return;
-                }
-                //Rushing Jade Wind
-                if (API.CanCast(RushingJadeWind) && !API.SpellISOnCooldown(RushingJadeWind) && API.PlayerIsTalentSelected(6, 2))
-                {
-                    API.CastSpell(RushingJadeWind);
-                    return;
-                }
-                //Exploping Kek
-                if (API.CanCast(ExplodingKeg) && API.PlayerIsTalentSelected(6, 3))
-                {
-                    API.CastSpell(ExplodingKeg);
-                    return;
-                }
-                // Sinning Crane Kick
-                if (API.CanCast(SpinningCraneKick) && API.PlayerEnergy >= 50)
-                {
-                    API.CastSpell(SpinningCraneKick);
-                    return;
-                }
-                //Tiger Palm -> nothing else to do 
-                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40)
-                {
-                    API.CastSpell(TigerPalm);
-                    return;
-                }
+                API.CastSpell(RacialSpell1);
+                return;
             }
-            //ROTATION  SINGLE TARGET
-            if ((API.PlayerUnitInMeleeRangeCount <= AOEUnitNumber || !IsAOE) && NotChanneling && IsMelee)
+            //actions+=/berserking
+            if (IsCooldowns && API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Troll")
             {
-                if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
-                    API.CastSpell(trinket1);
-                if (UseTrinket1 == "always" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
-                    API.CastSpell(trinket2);
-                //Covenant Kyrian
-                //WeaponsofOrder
-                if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && UseWeaponsofOrder == "always")
-                {
-                    API.CastSpell(WeaponsofOrder);
-                    return;
-                }
-                //Covenant Necrolord
-                //BonedustBrew
-                if (API.CanCast(BonedustBrew) && PlayerCovenantSettings == "Necrolord" && UseBonedustBrew == "always")
-                {
-                    API.CastSpell(BonedustBrew);
-                    return;
-                }
-                //Covenant Night Fae
-                //FaelineStomp
-                if (API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "always")
-                {
-                    API.CastSpell(FaelineStomp);
-                    return;
-                }
-                //Covenant Venthyr
-                //Fallen Order
-                if (API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && UseFaelineStomp == "always")
-                {
-                    API.CastSpell(FallenOrder);
-                    return;
-                }
-                //Touch of Death
-                if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 0 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "always"))
-                {
-                    API.CastSpell(TouchofDeath);
-                    return;
-                }
-                //InvokeNiuzao
-                if (!API.SpellISOnCooldown(InvokeNiuzao) && API.PlayerLevel >= 42 && (UseInvokeNiuzao == "always" || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns))
-                {
-                    API.CastSpell(InvokeNiuzao);
-                    return;
-                }
-                //Keg Smash
-                if (!API.SpellISOnCooldown(KegSmash) && API.PlayerEnergy > 40 && API.PlayerLevel >= 21)
-                {
-                    API.CastSpell(KegSmash);
-                    return;
-                }
-                //Blackout Kick
-                if (API.CanCast(BlackOutKick) && API.PlayerLevel >= 2)
-                {
-                    API.CastSpell(BlackOutKick);
-                    return;
-                }
-                //Breath of Fire
-                if (!API.SpellISOnCooldown(BreathOfFire) && API.PlayerLevel >= 29)
-                {
-                    API.CastSpell(BreathOfFire);
-                    return;
-                }
-                //ChiBurst
-                if (API.CanCast(ChiBurst) && API.PlayerIsTalentSelected(1, 3))
-                {
-                    API.CastSpell(ChiBurst);
-                    return;
-                }
-                //Tiger Palm -> nothing else to do 
-                if (API.CanCast(TigerPalm) && API.PlayerEnergy >= 40)
-                {
-                    API.CastSpell(TigerPalm);
-                    return;
-                }
+                API.CastSpell(RacialSpell1);
+                return;
             }
-         }
+            //actions+=/lights_judgment
+            //actions+=/fireblood
+            if (IsCooldowns && API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf")
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
+            //actions+=/ancestral_call
+            if (IsCooldowns && API.CanCast(RacialSpell1) && PlayerRaceSettings == "Mag'har Orc")
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
+            //actions+=/bag_of_tricks
+            if (IsCooldowns && API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Vulpera")
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
+            //actions+=/invoke_niuzao_the_black_ox,if=target.time_to_die>25
+            if (API.CanCast(InvokeNiuzao) && (API.TargetTimeToDie > 2500 && UseInvokeNiuzao == "always" || UseInvokeNiuzao == "with Cooldowns" && IsCooldowns))
+            {
+                API.CastSpell(InvokeNiuzao);
+                return;
+            }
+            //actions+=/touch_of_death,if=target.health.pct<=15
+            if (API.CanCast(TouchofDeath) && API.TargetHealthPercent <= 15 && (UseTouchofDeath == "with Cooldowns" && IsCooldowns || UseTouchofDeath == "always"))
+            {
+                API.CastSpell(TouchofDeath);
+                return;
+            }
+            //actions+=/weapons_of_order
+            if (API.CanCast(WeaponsofOrder) && PlayerCovenantSettings == "Kyrian" && (API.TargetHealthPercent <= 15 && UseWeaponsofOrder == "with Cooldowns" && IsCooldowns || UseWeaponsofOrder == "always"))
+            {
+                API.CastSpell(WeaponsofOrder);
+                return;
+            }
+            //actions+=/fallen_order
+            if (API.CanCast(FallenOrder) && PlayerCovenantSettings == "Venthyr" && (UseFallenOrder == "always" || UseFallenOrder == "with Cooldowns" && IsCooldowns))
+            {
+                API.CastSpell(FallenOrder);
+                return;
+            }
+            //actions+=/bonedust_brew
+            if (API.CanCast(BonedustBrew) && PlayerCovenantSettings == "Necrolord" && (UseBonedustBrew == "always" || UseBonedustBrew == "with Cooldowns" && IsCooldowns))
+            {
+                API.CastSpell(BonedustBrew);
+                return;
+            }
+            //actions+=/purifying_brew
+            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc)
+            {
+                API.CastSpell(PurifyingBrew);
+                return;
+            }
+            //# Black Ox Brew is currently used to either replenish brews based on less than half a brew charge available, or low energy to enable Keg Smash
+            //actions+=/black_ox_brew,if=cooldown.purifying_brew.charges_fractional<0.5
+            if (API.CanCast(BlackOxBrew) && TalentBlackOxBrew && API.SpellCharges(PurifyingBrew) < 0.5)
+            {
+                API.CastSpell(BlackOxBrew);
+                return;
+            }
+            //actions+=/black_ox_brew,if=(energy+(energy.regen*cooldown.keg_smash.remains))<40&buff.blackout_combo.down&cooldown.keg_smash.up
+            if (API.CanCast(BlackOxBrew) && TalentBlackOxBrew && (API.PlayerEnergy + (EnergyRegen * API.SpellCDDuration(KegSmash))) < 4000 && !API.PlayerHasBuff(BlackoutCombo))
+            {
+                API.CastSpell(BlackOxBrew);
+                return;
+            }
+            //# Offensively, the APL prioritizes KS on cleave, BoS else, with energy spenders and cds sorted below
+            //actions+=/keg_smash,if=spell_targets>=2
+            if (IsAOE && API.CanCast(KegSmash) && API.PlayerUnitInMeleeRangeCount >= 2 && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(KegSmash);
+                return;
+            }
+            //actions+=/faeline_stomp,if=spell_targets>=2
+            if (IsAOE && API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && API.PlayerUnitInMeleeRangeCount >= 2 && (UseFaelineStomp == "AOE" || UseFaelineStomp == "always"))
+            {
+                API.CastSpell(FaelineStomp);
+                return;
+            }
+            //# cast KS at top prio during WoO buff
+            //actions+=/keg_smash,if=buff.weapons_of_order.up
+            if (API.CanCast(KegSmash) && API.PlayerHasBuff(WeaponsofOrder))
+            {
+                API.CastSpell(KegSmash);
+                return;
+            }
+            //# Celestial Brew priority whenever it took significant damage (adjust the health.max coefficient according to intensity of damage taken), and to dump excess charges before BoB.
+            //actions+=/celestial_brew,if=buff.blackout_combo.down&incoming_damage_1999ms>(health.max*0.1+stagger.last_tick_damage_4)&buff.elusive_brawler.stack<2
+            if (!API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27 && (API.PlayerBuffStacks(PurifiedChi) >= CelestialBrewStackProc && API.PlayerHealthPercent <= CelestialBrewPercentProc || CBFull && API.PlayerBuffStacks(PurifiedChi) == 10))
+            {
+                API.WriteLog("PurifiedChi Stacks " + API.PlayerBuffStacks(PurifiedChi));
+                API.WriteLog("Using " + CelestialBrew);
+                API.CastSpell(CelestialBrew);
+                return;
+            }
+            //actions+=/tiger_palm,if=talent.rushing_jade_wind.enabled&buff.blackout_combo.up&buff.rushing_jade_wind.up
+            if (API.CanCast(TigerPalm) && TalentRushingJadeWind && API.PlayerHasBuff(BlackoutCombo) && API.PlayerHasBuff(RushingJadeWind) && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(TigerPalm);
+                return;
+            }
+            //actions+=/breath_of_fire,if=buff.charred_passions.down&runeforge.charred_passions.equipped
+            //actions+=/blackout_kick
+            if (API.CanCast(BlackOutKick) && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(BlackOutKick);
+                return;
+            }
+            //actions+=/keg_smash
+            if (API.CanCast(KegSmash) && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(KegSmash);
+                return;
+            }
+            //actions+=/faeline_stomp
+            if (IsAOE && API.CanCast(FaelineStomp) && PlayerCovenantSettings == "Night Fae" && UseFaelineStomp == "always")
+            {
+                API.CastSpell(FaelineStomp);
+                return;
+            }
+            //actions+=/expel_harm,if=buff.gift_of_the_ox.stack>=3
+            //actions+=/touch_of_death
+            if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns" && IsCooldowns || UseTouchofDeath == "always"))
+            {
+                API.CastSpell(TouchofDeath);
+                return;
+            }
+            //actions+=/rushing_jade_wind,if=buff.rushing_jade_wind.down
+            if (API.CanCast(RushingJadeWind) && TalentRushingJadeWind && !API.PlayerHasBuff(RushingJadeWind) && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(RushingJadeWind);
+                return;
+            }
+            //actions+=/spinning_crane_kick,if=buff.charred_passions.up
+
+            //actions+=/breath_of_fire,if=buff.blackout_combo.down&(buff.bloodlust.down|(buff.bloodlust.up&dot.breath_of_fire_dot.refreshable))
+            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && (!API.PlayerHasBuff(Bloodlust) || API.PlayerHasBuff(Bloodlust) && API.TargetDebuffRemainingTime(BreathOfFire) <= 200 && API.TargetHasDebuff(KegSmash)) && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(BreathOfFire);
+                return;
+            }
+            //actions+=/chi_burst
+            if (API.CanCast(ChiBurst) && TalentChiBurst && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(ChiBurst);
+                return;
+            }
+            //actions+=/chi_wave
+            if (API.CanCast(ChiWave) && TalentChiWave && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(ChiWave);
+                return;
+            }
+            //actions+=/spinning_crane_kick,if=active_enemies>=3&cooldown.keg_smash.remains>gcd&(energy+(energy.regen*(cooldown.keg_smash.remains+execute_time)))>=65&(!talent.spitfire.enabled|!runeforge.charred_passions.equipped)
+            if (IsAOE && API.CanCast(SpinningCraneKick) && API.PlayerUnitInMeleeRangeCount >= 3 && API.SpellCDDuration(KegSmash) > API.SpellGCDDuration && CastSpinningCraneKick >= 65)
+            {
+                API.CastSpell(SpinningCraneKick);
+                return;
+            }
+            //actions+=/tiger_palm,if=!talent.blackout_combo&cooldown.keg_smash.remains>gcd&(energy+(energy.regen*(cooldown.keg_smash.remains+gcd)))>=65
+            if (API.CanCast(TigerPalm) && !TalentBlackoutCombo && API.SpellCDDuration(KegSmash) > API.SpellGCDDuration && CastTigerPalm >= 65 && !CurrentCastSpinningCraneKick)
+            {
+                API.CastSpell(TigerPalm);
+                return;
+            }
+            //actions+=/arcane_torrent,if=energy<31
+            if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Blood Elf" && API.PlayerEnergy < 31)
+            {
+                API.CastSpell(RacialSpell1);
+                return;
+            }
+            //actions+=/rushing_jade_wind
+        }
         public override void OutOfCombatPulse()
         {
-
             //Vivify
-            if (API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
+            if (OOC && API.PlayerHealthPercent <= VivifyLifePercentProc && API.CanCast(Vivify) && PlayerLevel >= 4)
             {
                 API.CastSpell(Vivify);
                 return;

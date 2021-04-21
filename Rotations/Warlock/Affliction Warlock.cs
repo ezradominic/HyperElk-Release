@@ -38,8 +38,9 @@ namespace HyperElk.Core
         private string Misdirection = "Misdirection";
         private string SoulRot = "Soul Rot";
         private string ImpendingCatastrophe = "Impending Catastrophe";
-        private string trinket1 = "trinket1";
-        private string trinket2 = "trinket2";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
+
         private string MortalCoil = "Mortal Coil";
         private string DecimatingBolt = "Decimating Bolt";
         private string ShadowEmbrace = "Shadow Embrace";
@@ -49,6 +50,7 @@ namespace HyperElk.Core
         private string InevitableDemise = "Inevitable Demise";
         private string SpellLock = "Spell Lock";
         private string UnendingResolve = "Unending Resolve";
+        private string CurseofWeakness = "Curse of Weakness";
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -81,7 +83,7 @@ namespace HyperElk.Core
         bool LastCastCorruption => API.LastSpellCastInGame == Corruption;
         bool LastCastSiphonLife => API.LastSpellCastInGame == SiphonLife;
         bool LastCastSeedOfCorruption => API.CurrentCastSpellID("player") == 27243 || API.LastSpellCastInGame == SeedofCorruption;
-        int[] numbList = new int[] { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+        int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         private int DrainLifePercentProc => numbList[CombatRoutine.GetPropertyInt(DrainLife)];
         private int HealthFunnelPercentProc => numbList[CombatRoutine.GetPropertyInt(HealthFunnel)];
         private int MortalCoilPercentProc => numbList[CombatRoutine.GetPropertyInt(MortalCoil)];
@@ -92,11 +94,16 @@ namespace HyperElk.Core
         private bool UseAG => (bool)CombatRoutine.GetProperty("UseAG");
         private bool UseCO => (bool)CombatRoutine.GetProperty("UseCO");
         private bool UseSL => (bool)CombatRoutine.GetProperty("UseSL");
+        private bool UseCoWMO => (bool)CombatRoutine.GetProperty("UseCoWMO");
 
         private int DarkPactPercentProc => numbList[CombatRoutine.GetPropertyInt(DarkPact)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        string[] TrinketList = new string[] { "never", "With Cooldowns", "On Cooldown", "on AOE", "on HP" };
+
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
+        private int Trinket1HP => numbList[CombatRoutine.GetPropertyInt("Trinket1HP")];
+        private int Trinket2HP => numbList[CombatRoutine.GetPropertyInt("Trinket2HP")];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private static bool TargetHasDebuff(string buff)
@@ -131,6 +138,7 @@ namespace HyperElk.Core
             328125,
             334625,
         };
+        bool CasterMob;
         public override void Initialize()
         {
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
@@ -154,10 +162,15 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseAG", "Use Agony", true, "Use Agony for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseCO", "Use Corruption", true, "Use Corruption for mouseover Multidots", "MultiDOTS");
             CombatRoutine.AddProp("UseSL", "Use Siphon Life", true, "Use Siphon Life for mouseover Multidots", "MultiDOTS");
-            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
-            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
-            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
-            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp("UseCoWMO", "Curse of Weakness", true, "Curse of Weakness for mouseover Multidots", "MultiDOTS");
+
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", TrinketList, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", TrinketList, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket1HP", "Trinket 1" + " Life Percent", numbList, " Life percent at which" + "Trinket 1" + " is used, set to 0 to disable", "Trinkets", 40);
+            CombatRoutine.AddProp("Trinket2HP", "Trinket 2" + " Life Percent", numbList, " Life percent at which" + "Trinket 2" + " is used, set to 0 to disable", "Trinkets", 40);
+
+            CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 4);
+            CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 4);
 
             //Spells
             CombatRoutine.AddSpell(ShadowBolt, 686, "D1");
@@ -180,13 +193,15 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FelDomination, 333889);
             CombatRoutine.AddSpell(SpellLock, 19647);
             CombatRoutine.AddSpell(UnendingResolve, 104773);
+            CombatRoutine.AddSpell(CurseofWeakness, 702);
 
             //Macro
-            CombatRoutine.AddMacro(trinket1);
-            CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro(Agony + "MO", "F1");
             CombatRoutine.AddMacro(Corruption + "MO", "F2");
             CombatRoutine.AddMacro(SiphonLife + "MO", "F3");
+            CombatRoutine.AddMacro(CurseofWeakness + "MO", "F3");
 
 
 
@@ -200,8 +215,6 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell("Summon Voidwalker", 697, "NumPad8");
             CombatRoutine.AddSpell("Summon Imp", 688, "NumPad9");
 
-            CombatRoutine.AddMacro("Trinket1", "F9");
-            CombatRoutine.AddMacro("Trinket2", "F10");
             //Buffs
             CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
             CombatRoutine.AddBuff(FelDomination, 333889);
@@ -219,6 +232,7 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(Haunt, 48181);
             CombatRoutine.AddDebuff(SoulRot, 325640);
             CombatRoutine.AddDebuff(ShadowEmbrace, 32390);
+            CombatRoutine.AddDebuff(CurseofWeakness, 702);
 
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("DarkSoul");
@@ -283,7 +297,7 @@ namespace HyperElk.Core
                 API.CastSpell(MortalCoil);
                 return;
             }
-            if (UnendingResolveList.Contains(API.TargetCurrentCastSpellID))
+            if (API.CanCast(UnendingResolve) && UnendingResolveList.Contains(API.TargetCurrentCastSpellID))
             {
                 API.CastSpell(UnendingResolve);
                 return;
@@ -310,15 +324,13 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket1 == "on HP" && API.PlayerHealthPercent <= Trinket1HP))
             {
-                API.CastSpell("Trinket1");
-                return;
+                API.CastSpell(Trinket1);
             }
-            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE))
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket2 == "on HP" && API.PlayerHealthPercent <= Trinket2HP))
             {
-                API.CastSpell("Trinket2");
-                return;
+                API.CastSpell(Trinket2);
             }
 
             //# Executed every time the actor is available.
@@ -598,15 +610,25 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony<4,target_if=!dot.agony.ticking
-                if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
+                if (API.CanCast(Agony) && TargetDebuffRemainingTime(Agony) < 400)
                 {
-                    API.CastSpell(Agony + "MO");
+                    API.CastSpell(Agony);
                     return;
                 }
                 //actions.aoe+=/agony,cycle_targets=1,if=active_dot.agony>=4,target_if=refreshable&dot.agony.ticking
                 if (IsMouseover && UseAG && !LastCastAgony && API.CanCast(Agony) && !API.MacroIsIgnored(Agony + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(Agony) <= 400 && IsRange)
                 {
                     API.CastSpell(Agony + "MO");
+                    return;
+                }
+                if (API.CanCast(CurseofWeakness) && TargetDebuffRemainingTime(CurseofWeakness) < 400)
+                {
+                    API.CastSpell(CurseofWeakness);
+                    return;
+                }
+                if (IsMouseover && UseCoWMO && API.CanCast(CurseofWeakness) && !API.MacroIsIgnored(CurseofWeakness + "MO") && API.PlayerCanAttackMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && MouseoverDebuffRemainingTime(CurseofWeakness) <= 400 && IsRange)
+                {
+                    API.CastSpell(CurseofWeakness + "MO");
                     return;
                 }
                 //actions.aoe+=/unstable_affliction,if=dot.unstable_affliction.refreshable
@@ -1650,6 +1672,7 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
+            CasterMob = false;
             //Grimoire Of Sacrifice
             if (API.PlayerHasPet && TalentGrimoireOfSacrifice && API.PlayerHasBuff("Grimoire Of Sacrifice"))
             {

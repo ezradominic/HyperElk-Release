@@ -34,6 +34,7 @@ namespace HyperElk.Core
         private string DemonMuzzle = "Demon Muzzle";
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
+        private string ConsumeMagic = "Consume Magic";
         //Misc
         private int PlayerLevel => API.PlayerLevel;
         private bool MeleeRange => API.TargetRange < 6;
@@ -63,10 +64,11 @@ namespace HyperElk.Core
         private bool Playeriscasting => API.PlayerCurrentCastTimeRemaining > 40;
         //( "variable,name=brand_build,value=talent.agonizing_flames.enabled&talent.burning_alive.enabled&talent.charred_flesh.enabled" );
         private bool brand_build => Talent_agonizing_flames&&Talent_burning_alive&&Talent_charred_flesh;
+        private bool ConsumeList => (API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Bramblethorn Coat") || API.TargetHasBuff("Wonder Grow") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Dark Shroud") || API.TargetHasBuff("Nourish the Forest") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Spectral Transference"));
 
 
-        //CBProperties
-        string[] MetamorphosisList = new string[] { "always", "with Cooldowns" };
+    //CBProperties
+    string[] MetamorphosisList = new string[] { "always", "with Cooldowns" };
         string[] Throw_GlaiveList = new string[] { "On", "Off" };
         string[] SigilofFlameList = new string[] { "On", "Off" };
         string[] InfernalStrikeList = new string[] { "On", "Off" };
@@ -89,6 +91,7 @@ namespace HyperElk.Core
         private string UseTrinket1 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket2")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
+        private bool UseFieryBrand => CombatRoutine.GetPropertyBool("FieryBrandUsage");
         private string UseMetamorphosis => MetamorphosisList[CombatRoutine.GetPropertyInt(Metamorphosis)];
         private string UseThrowGlaive => Throw_GlaiveList[CombatRoutine.GetPropertyInt(Throw_Glaive)];
         private string UseSigilofFlame => SigilofFlameList[CombatRoutine.GetPropertyInt(Sigil_of_Flame)];
@@ -136,6 +139,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(elysian_decree, 306830, "NumPad6");
             CombatRoutine.AddSpell(SigilofSilence,202137, "NumPad7");
             CombatRoutine.AddSpell(SigilofMisery,207684, "NumPad8");
+            CombatRoutine.AddSpell(ConsumeMagic, 278326, "NumPad9");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -145,7 +149,15 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Metamorphosis",187827);
             CombatRoutine.AddBuff(Fel_Bombardment, 337775);
             CombatRoutine.AddBuff(Immolation_Aura,258920);
-
+            //Consume Magic Buffs
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Bramblethorn Coat", 324776);
+            CombatRoutine.AddBuff("Wonder Grow", 328015);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 317936);
+            CombatRoutine.AddBuff("Dark Shroud", 335141);
+            CombatRoutine.AddBuff("Nourish the Forest", 324914);
+            CombatRoutine.AddBuff("Stimulate Resistance", 326046);
+            CombatRoutine.AddBuff("Spectral Transference", 320272);
             //Debuffs
             CombatRoutine.AddDebuff("Frailty", 247456);
             CombatRoutine.AddDebuff("Fiery Brand", 207771);
@@ -170,6 +182,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Bulk_Extraction, "Use " + Bulk_Extraction, BulkExtractionList, "Use " + Bulk_Extraction + "always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(SigilofSilence, SigilofSilence, true, "Enable if you want to let the rotation use" + SigilofSilence, "Generic");
             CombatRoutine.AddProp(SigilofMisery, SigilofMisery, true, "Enable if you want to let the rotation use" + SigilofMisery, "Generic");
+            CombatRoutine.AddProp("FieryBrandUsage", Fiery_Brand, true, "Fiery Brand Rotation: Use Fiery Brand" + Fiery_Brand, "Generic");
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", UseListwithHP, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", UseListwithHP, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
@@ -231,11 +244,11 @@ namespace HyperElk.Core
                     return;
                 }
                 // apl_default->add_action(this, "Consume Magic");
-                /*   if (API.CanCast("Consume Magic") && DispelWhiteList && API.TargetRange <= 5)
-   {
-       API.CastSpell("Consume Magic");
-       return;
-   }*/
+                if (API.CanCast(ConsumeMagic) && ConsumeList && API.TargetRange <= 5)
+                {
+                    API.CastSpell(ConsumeMagic);
+                    return;
+                }
                 // apl_default->add_action(this, "Throw Glaive", "if=buff.fel_bombardment.stack=5&(buff.immolation_aura.up|!buff.metamorphosis.up)");
                 if (API.CanCast("Throw Glaive") && API.PlayerBuffStacks(Fel_Bombardment) == 5 && (PlayerHasBuff(Immolation_Aura) || !PlayerHasBuff(Metamorphosis)) && API.TargetRange <= 30)
                 {
@@ -246,7 +259,7 @@ namespace HyperElk.Core
                 if (brand_build)
                 {
                     // apl_brand->add_action(this, "Fiery Brand");
-                    if (API.CanCast("Fiery Brand") && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
+                    if (API.CanCast("Fiery Brand") && UseFieryBrand && (API.PlayerUnitInMeleeRangeCount >= 1 || API.TargetRange <= 5))
                     {
                         API.CastSpell("Fiery Brand");
                         return;
