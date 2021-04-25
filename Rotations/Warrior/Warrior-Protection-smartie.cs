@@ -17,6 +17,7 @@
 // v2.45 Battle shout fix
 // v2.5 rewrite
 // v2.6 intervene problem solved and rage dump fixed
+// v2.7 shockwave options added
 
 using System.Linq;
 
@@ -85,7 +86,7 @@ namespace HyperElk.Core
         bool IsRavager => (UseRavager == "with Cooldowns" || UseRavager == "with Cooldowns or AoE" || UseRavager == "on mobcount or Cooldowns") && IsCooldowns || UseRavager == "always" || (UseRavager == "on AOE" || UseRavager == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseRavager == "on mobcount or Cooldowns" || UseRavager == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
         bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount || UseTrinket1 == "on Health" && API.PlayerHealthPercent <= TrinketLifePercent) && IsMelee;
         bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount || UseTrinket1 == "on Health" && API.PlayerHealthPercent <= TrinketLifePercent) && IsMelee;
-
+        bool IsShockwave => UseShockwave == "as 2nd kick" && API.SpellISOnCooldown(Pummel) && isInterrupt || UseShockwave == "on AOE" && API.PlayerUnitInMeleeRangeCount >= AoENumber || UseShockwave == "on mobcount" && API.PlayerUnitInMeleeRangeCount >= MobCount;
 
         //CBProperties
         int[] SpellReflectCast = { 335114, 335304, 326430, 328890, 329742, 331573, 342321, 330968, 347350, 327773, 326851, 320008, 332678, 332707, 332705, 332605, 334076, 332196, 328707, 333250, 332234, 333711, 323544, 323569, 328322, 323538, 338003, 325876, 325872, 325700, 326891, 326829, 323057, 326319, 322767, 322557, 325021, 325223, 325224, 325418, 326092, 322486, 322487, 329110, 328002, 328180, 328094, 334926, 320512, 322554, 328593, 334660, 326712, 321249, 326827, 346537, 326837, 326952, 321038, 323195, 324608, 317661, 323804, 333602, 320171, 320788, 334748, 320462, 333479, 320120, 320300, 319669, 324079, 324589, 330784, 330700, 330703, 330784, 333299, 330875, 345245, 332550, 330810, 340678, 330926, 116858, 203286};
@@ -99,6 +100,7 @@ namespace HyperElk.Core
         public new string[] CDUsage = new string[] { "Not Used", "with Cooldowns", "always" };
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns or AoE", "on mobcount", "on mobcount or Cooldowns", "always" };
         public string[] trinkets = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns or AoE", "on mobcount", "on mobcount or Cooldowns", "always", "on Health" };
+        public string[] ShockwaveUsage = new string[] { "Not Used", "as 2nd kick", "on AOE", "on mobcount"};
         private int UnitBelowHealthPercentRaid(int HealthPercent) => raidunits.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
         private int UnitBelowHealthPercentParty(int HealthPercent) => units.Count(p => API.UnitHealthPercent(p) <= HealthPercent && API.UnitHealthPercent(p) > 0);
 
@@ -112,6 +114,7 @@ namespace HyperElk.Core
         public bool UseIntervene => CombatRoutine.GetPropertyBool("UseIntervene");
         private string UseHeroicThrow => heroiclist[CombatRoutine.GetPropertyInt(HeroicThrow)];
         private int MobCount => numbRaidList[CombatRoutine.GetPropertyInt("MobCount")];
+        private string UseShockwave => ShockwaveUsage[CombatRoutine.GetPropertyInt(Shockwave)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseAvatar => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Avatar)];
         private string UseRavager => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Ravager)];
@@ -133,7 +136,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v2.6");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v2.7");
             API.WriteLog("You need the following macros");
             API.WriteLog("Heroic ThrowMO: /cast [@mouseover] Heroic Throw");
             API.WriteLog("InterveneMO: /cast [@mouseover,exists,help] Intervene");
@@ -207,6 +210,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseIntervene", "Use "+ Intervene, false, " Use " + Intervene + " mouseover", "Generic");
             CombatRoutine.AddProp(HeroicThrow, "Use Heroic Throw", heroiclist, "Use " + HeroicThrow + " ,when out of melee, only Mousover or both", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(Shockwave, "Use " + Shockwave, ShockwaveUsage, "Use " + Shockwave + " on AOE, mobcount or as 2nd kick", "Cooldowns", 0);
             CombatRoutine.AddProp(Avatar, "Use " + Avatar, CDUsageWithAOE, "Use " + Avatar + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Ravager, "Use " + Ravager, CDUsageWithAOE, "Use " + Ravager + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
@@ -228,7 +232,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Mouseover?: "+ API.MouseoverIsUnitIndex);
+            //API.WriteLog("Are we the Target?: "+ API.PlayerIsTargetTarget);
             if (!API.PlayerIsMounted)
             {
                 if (API.CanCast(BattleShout) && PlayerLevel >= 39 && API.PlayerBuffTimeRemaining(BattleShout) < 30000)
@@ -264,7 +268,7 @@ namespace HyperElk.Core
                 API.CastSpell(StormBolt);
                 return;
             }
-            if (isInterrupt && API.CanCast(Shockwave) && IsMelee && API.SpellISOnCooldown(Pummel))
+            if (API.CanCast(Shockwave) && IsMelee && IsShockwave)
             {
                 API.CastSpell(Shockwave);
                 return;
@@ -355,7 +359,7 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && !API.PlayerCanAttackMouseover && (API.MouseoverIsUnitIndex != 0 && API.MouseoverIsUnitIndex != 41) && API.MouseoverHealthPercent > 0 && API.MouseoverRange <= 25)
+            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && !API.PlayerCanAttackMouseover && API.MouseoverIsUnitIndex != 0 && API.MouseoverIsUnitIndex != 41 && API.MouseoverHealthPercent > 0 && API.MouseoverRange <= 25)
             {
                 if (API.CanCast(Intervene) && !API.MacroIsIgnored(Intervene + "MO") && UseIntervene)
                 {
