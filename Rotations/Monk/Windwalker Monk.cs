@@ -419,6 +419,11 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.cd_sef+=/storm_earth_and_fire,if=cooldown.storm_earth_and_fire.charges=2|fight_remains<20|(raid_event.adds.remains>15|!covenant.kyrian&((raid_event.adds.in>cooldown.storm_earth_and_fire.full_recharge_time|!raid_event.adds.exists)&(cooldown.invoke_xuen_the_white_tiger.remains>cooldown.storm_earth_and_fire.full_recharge_time|variable.hold_xuen))&cooldown.fists_of_fury.remains<=9&chi>=2&cooldown.whirling_dragon_punch.remains<=12)
+                    if (API.CanCast(StormEarthandFire) && API.SpellCharges(StormEarthandFire) == 2 && PlayerCovenantSettings != "Kyrian")
+                    {
+                        API.CastSpell(StormEarthandFire);
+                        return;
+                    }
                     //actions.cd_sef+=/storm_earth_and_fire,if=covenant.kyrian&(buff.weapons_of_order.up|(fight_remains<cooldown.weapons_of_order.remains|cooldown.weapons_of_order.remains>cooldown.storm_earth_and_fire.full_recharge_time)&cooldown.fists_of_fury.remains<=9&chi>=2&cooldown.whirling_dragon_punch.remains<=12)
                     if (API.CanCast(StormEarthandFire) && PlayerCovenantSettings == "Kyrian" && (API.PlayerHasBuff(StormEarthandFire) || API.TargetTimeToDie < API.SpellCDDuration(WeaponsofOrder) || API.SpellCDDuration(WeaponsofOrder) > API.SpellCDDuration(StormEarthandFire) && API.SpellCharges(StormEarthandFire) == 1) && API.SpellCDDuration(FistsofFury) <= 900 && API.PlayerCurrentChi >= 2 && API.SpellCDDuration(WhirlingDragonPunch) <= 1200 && TalentWhirlingDragonPunch)
                     {
@@ -951,7 +956,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.st+=/fists_of_fury,if=(raid_event.adds.in>cooldown.fists_of_fury.duration*0.8|raid_event.adds.up)&(energy.time_to_max>execute_time-1|chi.max-chi<=1|buff.storm_earth_and_fire.remains<execute_time+1)|fight_remains<execute_time+1
-                if (API.CanCast(FistsofFury) && API.PlayerCurrentChi >= 3) //(EnergyTimeToMax > API.TargetTimeToExec - 100 || ChiDeficit <= 1 || API.PlayerBuffTimeRemaining(StormEarthandFire) < API.TargetTimeToExec + 100))
+                if (API.CanCast(FistsofFury) && API.PlayerCurrentChi >= 3 && EnergyTimeToMax > API.TargetTimeToExec - 100 || ChiDeficit <= 1 || API.PlayerBuffTimeRemaining(StormEarthandFire) < API.TargetTimeToExec + 100)
                 {
                     API.CastSpell(FistsofFury);
                     return;
