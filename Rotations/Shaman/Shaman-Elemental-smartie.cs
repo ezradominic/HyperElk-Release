@@ -20,6 +20,7 @@
 // v2.7 fix typo
 // v2.8 stopcasting fix
 // v2.9 pet spells added
+// v3.0 some slight aoe changes
 
 using System.Diagnostics;
 
@@ -30,6 +31,7 @@ namespace HyperElk.Core
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
         private bool IsFocus => API.ToggleIsEnabled("Focus ES");
+        private bool IsForceAOE => API.ToggleIsEnabled("Force AoE");
         //Spell,Auras
         private string ChainLightning = "Chain Lightning";
         private string Earthquake = "Earthquake";
@@ -152,7 +154,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.9");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.0");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
@@ -225,6 +227,7 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("Focus ES");
+            CombatRoutine.AddToggle("Force AoE");
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -265,11 +268,13 @@ namespace HyperElk.Core
             }
             if (Masterwatch.IsRunning && API.PlayerIsMoving)
             {
+                Masterwatch.Stop();
                 Masterwatch.Reset();
                 //API.WriteLog("Resetting Masterwatch.");
             }
             if (Masterwatch.IsRunning && Masterwatch.ElapsedMilliseconds > 2500)
             {
+                Masterwatch.Stop();
                 Masterwatch.Reset();
                 //API.WriteLog("Resetting Masterwatch.");
             }
@@ -280,6 +285,7 @@ namespace HyperElk.Core
             }
             if (stormwatch.IsRunning && stormwatch.ElapsedMilliseconds > 30000)
             {
+                stormwatch.Stop();
                 stormwatch.Reset();
                 API.WriteLog("Resetting Stormwatch.");
             }
@@ -290,6 +296,7 @@ namespace HyperElk.Core
             }
             if (firewatch.IsRunning && firewatch.ElapsedMilliseconds > 30000)
             {
+                firewatch.Stop();
                 firewatch.Reset();
                 API.WriteLog("Resetting Firewatch.");
             }
@@ -300,6 +307,7 @@ namespace HyperElk.Core
             }
             if (vesperwatch.IsRunning && vesperwatch.ElapsedMilliseconds > 30000)
             {
+                vesperwatch.Stop();
                 vesperwatch.Reset();
                 API.WriteLog("Resetting Vespermwatch.");
             }
@@ -416,7 +424,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions+=/flame_shock,if=!ticking
-                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && !API.TargetHasDebuff(FlameShock))
+                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && !API.TargetHasDebuff(FlameShock) && API.TargetUnitInRangeCount < 4 && !IsForceAOE)
                 {
                     API.CastSpell(FlameShock);
                     return;
@@ -502,7 +510,7 @@ namespace HyperElk.Core
                     return;
                 }
                 // Single Target rota
-                if (API.TargetUnitInRangeCount < AOEUnitNumber || !IsAOE)
+                if (API.TargetUnitInRangeCount < AOEUnitNumber && !IsForceAOE || !IsAOE)
                 {
                     if (TalentStormElemental)
                     {
@@ -764,7 +772,7 @@ namespace HyperElk.Core
                     }
                 }
                 //AoE rota
-                if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE)
+                if (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || IsForceAOE)
                 {
                     //actions.aoe = earthquake,if= buff.echoing_shock.up
                     if (API.CanCast(Earthquake) && PlayerLevel >= 38 && API.PlayerMaelstrom >= 60 && PlayerHasBuff(EchoingShock))
@@ -785,14 +793,14 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ flame_shock,if= !active_dot.flame_shock
-                    if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.TargetDebuffRemainingTime(FlameShock) < gcd*2)
+                    if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.TargetDebuffRemainingTime(FlameShock) < gcd*2 && API.TargetUnitInRangeCount < 4 && !IsForceAOE)
                     {
                         API.CastSpell(FlameShock);
                         return;
                     }
                     if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                     {
-                        if (API.MouseoverDebuffRemainingTime(FlameShock) < gcd*2 && API.CanCast(FlameShock) && isMOinRange)
+                        if (API.MouseoverDebuffRemainingTime(FlameShock) < gcd*2 && API.CanCast(FlameShock) && isMOinRange && API.TargetUnitInRangeCount < 4 && !IsForceAOE)
                         {
                             API.CastSpell(FlameShock + "MO");
                             return;
@@ -829,7 +837,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ lava_burst,target_if = dot.flame_shock.remains,if= spell_targets.chain_lightning < 4 | buff.lava_surge.up | (talent.master_of_the_elements.enabled & !buff.master_of_the_elements.up & maelstrom >= 60)
-                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && (SaveQuake || PlayerHasBuff(LavaSurge)) && !LastCastlavaBurst && (API.PlayerBuffTimeRemaining(Stormkeeper) > 300 * gcd * API.PlayerBuffStacks(Stormkeeper) || !PlayerHasBuff(Stormkeeper)) && !PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd*2 && (API.TargetUnitInRangeCount < 4 || PlayerHasBuff(LavaSurge) || (TalentMasterofTheElements && !PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom >= 60)))
+                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && !stormwatch.IsRunning && (SaveQuake || PlayerHasBuff(LavaSurge)) && !LastCastlavaBurst && (API.PlayerBuffTimeRemaining(Stormkeeper) > 300 * gcd * API.PlayerBuffStacks(Stormkeeper) || !PlayerHasBuff(Stormkeeper)) && !PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd*2 && (API.TargetUnitInRangeCount < 4 && !IsForceAOE || PlayerHasBuff(LavaSurge) || (TalentMasterofTheElements && !PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom >= 60)))
                     {
                         API.CastSpell(LavaBurst);
                         return;
@@ -847,7 +855,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.aoe +=/ lava_burst,if= buff.lava_surge.up & spell_targets.chain_lightning < 4 & (!pet.storm_elemental.active) & dot.flame_shock.ticking
-                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && !LastCastlavaBurst && !PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd * 2 &&  PlayerHasBuff(LavaSurge) && API.TargetUnitInRangeCount < 4 && !stormwatch.IsRunning)
+                    if (API.CanCast(LavaBurst) && PlayerLevel >= 11 && !stormwatch.IsRunning && !LastCastlavaBurst && !PlayerHasBuff(MasteroftheElements) && API.PlayerMaelstrom < 90 && API.TargetDebuffRemainingTime(FlameShock) > gcd * 2 &&  PlayerHasBuff(LavaSurge) && API.TargetUnitInRangeCount < 4 && !IsForceAOE && !stormwatch.IsRunning)
                     {
                         API.CastSpell(LavaBurst);
                         return;
