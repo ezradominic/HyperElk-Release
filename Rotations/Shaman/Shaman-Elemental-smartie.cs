@@ -19,6 +19,7 @@
 // v2.65 small hotfix for mobcount
 // v2.7 fix typo
 // v2.8 stopcasting fix
+// v2.9 pet spells added
 
 using System.Diagnostics;
 
@@ -69,6 +70,9 @@ namespace HyperElk.Core
         private string Quake = "Quake";
         private string Stopcast = "Stopcast Macro";
         private string FlametongueWeapon = "Flametongue Weapon";
+        private string EyeOfTheStorm = "Eye of the Storm (Pet)";
+        private string Meteor = "Meteor (Pet)";
+        private string CallLightning = "Call Lightning";
 
         //Talents
         bool TalentEchoingShock => API.PlayerIsTalentSelected(2, 2);
@@ -137,6 +141,7 @@ namespace HyperElk.Core
         private bool WeaponEnchant => CombatRoutine.GetPropertyBool("WeaponEnchant");
 
         private static readonly Stopwatch stormwatch = new Stopwatch();
+        private static readonly Stopwatch firewatch = new Stopwatch();
         private static readonly Stopwatch vesperwatch = new Stopwatch();
         private static readonly Stopwatch Masterwatch = new Stopwatch();
         private bool LastCastlavaBurst => (API.LastSpellCastInGame == LavaBurst || API.PlayerCurrentCastSpellID == 51505);
@@ -147,7 +152,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.8");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v2.9");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
@@ -184,6 +189,9 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(FaeTransfusion, 328923, "D1");
             CombatRoutine.AddSpell(ChainHarvest, 320674, "D1");
             CombatRoutine.AddSpell(FlametongueWeapon, 318038);
+            CombatRoutine.AddSpell(EyeOfTheStorm, 157375);
+            CombatRoutine.AddSpell(Meteor, 117588);
+
 
             //Macros
             CombatRoutine.AddMacro(FlameShock + "MO", "NumPad7");
@@ -208,6 +216,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(EchoesofGreatSundering, 336217);
             CombatRoutine.AddBuff(EchoingShock, 320125);
             CombatRoutine.AddBuff(VesperTotem, 324386);
+            CombatRoutine.AddBuff(CallLightning, 157348);
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock, 188389);
@@ -273,6 +282,16 @@ namespace HyperElk.Core
             {
                 stormwatch.Reset();
                 API.WriteLog("Resetting Stormwatch.");
+            }
+            if (!firewatch.IsRunning && API.LastSpellCastInGame == FireElemental)
+            {
+                firewatch.Restart();
+                API.WriteLog("Starting Firewatch.");
+            }
+            if (firewatch.IsRunning && firewatch.ElapsedMilliseconds > 30000)
+            {
+                firewatch.Reset();
+                API.WriteLog("Resetting Firewatch.");
             }
             if (!vesperwatch.IsRunning && API.LastSpellCastInGame == VesperTotem)
             {
@@ -412,6 +431,16 @@ namespace HyperElk.Core
                 if (API.CanCast(StormElemental) && TalentStormElemental && IsStormElemental)
                 {
                     API.CastSpell(StormElemental);
+                    return;
+                }
+                if (API.CanCast(EyeOfTheStorm) && TalentStormElemental && TalentPrimalElementalist && stormwatch.IsRunning && API.PetHasBuff(CallLightning))
+                {
+                    API.CastSpell(EyeOfTheStorm);
+                    return;
+                }
+                if (API.CanCast(Meteor) && !TalentStormElemental && TalentPrimalElementalist && firewatch.IsRunning)
+                {
+                    API.CastSpell(Meteor);
                     return;
                 }
                 //actions +=/ blood_fury,if= !talent.ascendance.enabled | buff.ascendance.up | cooldown.ascendance.remains > 50
