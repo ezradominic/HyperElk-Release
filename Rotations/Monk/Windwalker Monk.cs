@@ -485,7 +485,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.cd_sef+=/ancestral_call,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-                    if (API.CanCast(RacialSpell1) && API.SpellCDDuration(InvokeXuen) > 3000 || HoldXuen || API.TargetTimeToDie < 20000)
+                    if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Mag'har Orc" && (API.SpellCDDuration(InvokeXuen) > 3000 || HoldXuen || API.TargetTimeToDie < 20000))
                     {
                         API.CastSpell(RacialSpell1);
                         return;
@@ -802,7 +802,7 @@ namespace HyperElk.Core
                 //actions.cd_sef+=/use_item,name=dreadfire_vessel,if=!variable.xuen_on_use_trinket|cooldown.invoke_xuen_the_white_tiger.remains>20|variable.hold_xuen
                 //actions.cd_sef+=/touch_of_karma,if=fight_remains>159|pet.xuen_the_white_tiger.active|variable.hold_xuen
                 //actions.cd_sef+=/blood_fury,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc" && API.SpellCDDuration(InvokeXuen) > 30000 || HoldXuen || API.TargetTimeToDie < 20000)
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Orc" && (API.SpellCDDuration(InvokeXuen) > 30000 || HoldXuen || API.TargetTimeToDie < 20000))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
@@ -826,7 +826,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cd_sef+=/ancestral_call,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<20
-                if (API.CanCast(RacialSpell1) && API.SpellCDDuration(InvokeXuen) > 3000 || HoldXuen || API.TargetTimeToDie < 20000)
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Mag'har Orc" && (API.SpellCDDuration(InvokeXuen) > 3000 || HoldXuen || API.TargetTimeToDie < 20000))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
