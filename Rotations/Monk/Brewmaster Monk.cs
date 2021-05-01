@@ -111,7 +111,9 @@ namespace HyperElk.Core
         private int WarpedDesiresStacks => CombatRoutine.GetPropertyInt("WarpedDesiresStacks");
         private int JaggedClawsStacks => CombatRoutine.GetPropertyInt("JaggedClawsStacks");
         private int DuelistsRiposteStacks => CombatRoutine.GetPropertyInt("DuelistsRiposteStacks");
+        public string[] LegendaryList = new string[] { "None", "Charred Passions" };
 
+        private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
 
 
         //Spells,Buffs,Debuffs
@@ -157,6 +159,7 @@ namespace HyperElk.Core
         private string Paralyse = "Paralyse";
         private string PurifiedChi = "Purified Chi";
         private string Provoke = "Provoke";
+        private string CharredPassions = "Charred Passions";
         public override void Initialize()
         {
             CombatRoutine.Name = "Brewmaster Monk @Mufflon12";
@@ -199,6 +202,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("WarpedDesiresStacks", "Warped Desires Stacks", 2, "How many Stacks of Warped Desires to Provoke", "Auto Taunt");
             CombatRoutine.AddProp("JaggedClawsStacks", "Jagged Claws Stacks", 3, "How many Stacks of Jagged Claws to Provoke", "Auto Taunt");
             CombatRoutine.AddProp("DuelistsRiposte", "Duelists Riposte Stacks", 2, "How many Stacks of Duelists Riposte to Provoke", "Auto Taunt");
+            CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
             //Spells
             CombatRoutine.AddSpell(TigerPalm, 100780,"D1");
@@ -244,6 +248,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Bloodlust, 2825);
             CombatRoutine.AddBuff(GiftOfTheOx, 124507);
             CombatRoutine.AddBuff(PurifiedChi, 325092);
+            CombatRoutine.AddBuff(CharredPassions, 338140);
 
             //Debuffs
             CombatRoutine.AddDebuff(LightStagger, 124275);
@@ -585,6 +590,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/breath_of_fire,if=buff.charred_passions.down&runeforge.charred_passions.equipped
+            if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(CharredPassions) && UseLeg == "Charred Passions")
+            {
+                API.CastSpell(BreathOfFire);
+                return;
+            }
             //actions+=/blackout_kick
             if (API.CanCast(BlackOutKick) && !CurrentCastSpinningCraneKick)
             {
@@ -617,7 +627,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/spinning_crane_kick,if=buff.charred_passions.up
-
+            if (API.CanCast(SpinningCraneKick) && API.PlayerHasBuff(CharredPassions))
+            {
+                API.CastSpell(SpinningCraneKick);
+                return;
+            }
             //actions+=/breath_of_fire,if=buff.blackout_combo.down&(buff.bloodlust.down|(buff.bloodlust.up&dot.breath_of_fire_dot.refreshable))
             if (API.CanCast(BreathOfFire) && !API.PlayerHasBuff(BlackoutCombo) && (!API.PlayerHasBuff(Bloodlust) || API.PlayerHasBuff(Bloodlust) && API.TargetDebuffRemainingTime(BreathOfFire) <= 200 && API.TargetHasDebuff(KegSmash)) && !CurrentCastSpinningCraneKick)
             {
