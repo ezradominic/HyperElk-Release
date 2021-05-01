@@ -169,6 +169,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(TricksoftheTrade, 59628);
             //Debuff/s
             CombatRoutine.AddDebuff(Flagellation, 323654);
+			CombatRoutine.AddDebuff(SerratedBoneSpike, 324073);
 
             //Toggle
             CombatRoutine.AddToggle("Cheap Shot");
@@ -350,7 +351,7 @@ namespace HyperElk.Core
                 return;
             }
 
-            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && IsMelee && API.TargetHasDebuff(Flagellation) && API.TargetDebuffRemainingTime(Flagellation) < 200 && API.CanCast(Flagellation) && IsMelee)
+            if (IsCooldowns && PlayerCovenantSettings == "Venthyr" && IsMelee && !API.TargetHasDebuff(Flagellation) && API.PlayerComboPoints >= MaxComboPoints - 1 && API.CanCast(Flagellation) && IsMelee)
             {
                 API.CastSpell(Flagellation);
                 return;
