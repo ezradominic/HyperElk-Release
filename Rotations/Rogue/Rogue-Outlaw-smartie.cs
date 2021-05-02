@@ -1,6 +1,6 @@
 // Changelog
 // v1.0 First release
-
+// v1.1 small hotfixes
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -176,7 +176,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.0");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.1");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -218,6 +218,11 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Shiv, 5938);
             CombatRoutine.AddSpell(TricksoftheTrade, 57934);
 
+            //Macros
+            CombatRoutine.AddMacro(SerratedBoneSpike + "MO");
+            CombatRoutine.AddMacro("Trinket1");
+            CombatRoutine.AddMacro("Trinket2");
+
             //Buffs
             CombatRoutine.AddBuff(AdrenalineRush, 13750);
             CombatRoutine.AddBuff(SliceandDice, 315496);
@@ -248,8 +253,9 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(CripplingPoison, 3408);
             CombatRoutine.AddBuff(InstantPoison, 315584);
             CombatRoutine.AddBuff(Dreadblades, 343142);
+            CombatRoutine.AddBuff(Feint, 1966);
 
-            //Debuff/s
+            //Debuffs
             CombatRoutine.AddDebuff(Flagellation, 323654);
             CombatRoutine.AddDebuff(SerratedBoneSpike, 324073);
             CombatRoutine.AddDebuff(BetweentheEyes, 315341);
