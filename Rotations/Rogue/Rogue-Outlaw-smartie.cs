@@ -3,6 +3,7 @@
 // v1.1 small hotfixes
 // v1.2 small adjustments
 // v1.3 small hotfix
+// v1.35 small sepsis change
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -67,7 +68,7 @@ namespace HyperElk.Core
         private string MasterAssassinsMark = "Master Assassin's Mark";
         private string Shiv = "Shiv";
         private string DeathlyShadows = "Deathly Shadows";
-
+        private string SepsisBuff = "Sepsis Buff";
 
         //Talents
         bool TalentQuickDraw => API.PlayerIsTalentSelected(1, 2);
@@ -83,7 +84,7 @@ namespace HyperElk.Core
         bool TalentKillingSpree => API.PlayerIsTalentSelected(7, 3);
 
         //Rotation Utilities
-        private bool IsStealth => API.PlayerHasBuff(Stealth) || API.PlayerHasBuff(Vanish);
+        private bool IsStealth => API.PlayerHasBuff(Stealth) || API.PlayerHasBuff(Vanish) || API.PlayerHasBuff(SepsisBuff);
 
         int MaxEnergy => API.PlayeMaxEnergy;
         int MaxComboPoints => TalentDeeperStratagem ? 6 : 5;
@@ -181,7 +182,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.3");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.35");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -243,6 +244,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(BuriedTreasure, 199600);
             CombatRoutine.AddBuff(TrueBearing, 193359);
             CombatRoutine.AddBuff(Sepsis, 328305);
+            CombatRoutine.AddBuff(SepsisBuff, 347037);
             CombatRoutine.AddBuff(EchoingReprimand, 323547);
             CombatRoutine.AddBuff(Flagellation, 323654);
             CombatRoutine.AddBuff(SerratedBoneSpike, 328547);
