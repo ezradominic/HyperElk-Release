@@ -100,34 +100,27 @@ namespace HyperElk.Core
         }
         //blade_dance,if=!runeforge.chaos_theory,value=talent.first_blood.enabled|spell_targets.blade_dance1>=(3-talent.trail_of_ruin.enabled)
         //blade_dance,value=                           talent.first_blood.enabled|spell_targets.blade_dance1>=(3-talent.trail_of_ruin.enabled)
-        private int BladeDanceWithoutChaosTheory
+        private bool BladeDanceWithoutChaosTheory
         {
             get
             {
                 if (!ChaosTheory_enabled && (Talent_FirstBlood || IsAOE && API.PlayerUnitInMeleeRangeCount >= 3 - (Talent_TrailofRuin ? 1 : 0)))
-                    return 1;
-                return 0;
-            }
-        }
-        //buff.chaos_theory.down|talent.first_blood.enabled&spell_targets.blade_dance1>=(2-talent.trail_of_ruin.enabled)|!talent.cycle_of_hatred.enabled&spell_targets.blade_dance1>=(4-talent.trail_of_ruin.enabled)
-        private int BladeDanceWithChaosTheory
-        {
-            get
-            {
-                if (ChaosTheory_enabled && (!PlayerHasBuff(ChaoticBlades) || Talent_FirstBlood && IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 - (Talent_TrailofRuin ? 1 : 0) ||!Talent_CycleofHatred&& IsAOE && API.PlayerUnitInMeleeRangeCount >= (4-(Talent_TrailofRuin ? 1 : 0))))
-                    return 1;
-                return 0;
-            }
-        }
-        private bool BladeDance
-        {
-            get
-            {
-                if (BladeDanceWithChaosTheory >0 || BladeDanceWithoutChaosTheory >0)
                     return true;
                 return false;
             }
         }
+        //buff.chaos_theory.down|talent.first_blood.enabled&spell_targets.blade_dance1>=(2-talent.trail_of_ruin.enabled)|!talent.cycle_of_hatred.enabled&spell_targets.blade_dance1>=(4-talent.trail_of_ruin.enabled)
+        private bool BladeDanceWithChaosTheory
+        {
+            get
+            {
+                if (ChaosTheory_enabled && (!PlayerHasBuff(ChaoticBlades) || Talent_FirstBlood && IsAOE && API.PlayerUnitInMeleeRangeCount >= 2 - (Talent_TrailofRuin ? 1 : 0) ||!Talent_CycleofHatred&& IsAOE && API.PlayerUnitInMeleeRangeCount >= (4-(Talent_TrailofRuin ? 1 : 0))))
+                    return true;
+                return false;
+            }
+        }
+        private bool BladeDance => (BladeDanceWithChaosTheory || BladeDanceWithoutChaosTheory);
+        
         //variable,name=pooling_for_blade_dance,value=variable.blade_dance&(fury<75-talent.first_blood.enabled*20)
         private bool PoolingForBladeDance
         {
@@ -430,7 +423,7 @@ namespace HyperElk.Core
                     }
 
                     //blade_dance,if= variable.blade_dance & !cooldown.metamorphosis.ready & (cooldown.eye_beam.remains > (5 - azerite.revolving_blades.rank * 3))
-                    else if (API.CanCast(Blade_Dance) && API.PlayerLevel >= 12  && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
+                    else if (API.CanCast(Blade_Dance) && BladeDance && API.PlayerLevel >= 12  && API.PlayerLevel >= 20 && API.SpellCDDuration(Eye_Beam) > (500) && MeleeRange)
                     {
                         API.CastSpell(Blade_Dance);
 
