@@ -4,6 +4,7 @@
 // v1.2 small adjustments
 // v1.3 small hotfix
 // v1.35 small sepsis change
+// v1.4 aaaaand another one xD
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -182,7 +183,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.35");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.4");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -579,7 +580,7 @@ namespace HyperElk.Core
                 }
                 //actions+=/call_action_list,name=build
                 //actions.build=sepsis
-                if (API.CanCast(Sepsis) && PlayerCovenantSettings == "Night Fae" && IsMelee && IsCovenant)
+                if (API.CanCast(Sepsis) && PlayerCovenantSettings == "Night Fae" && IsMelee && IsCovenant && API.PlayerEnergy >= 25 && ComboPointDeficit >= 1)
                 {
                     API.CastSpell(Sepsis);
                     return;
