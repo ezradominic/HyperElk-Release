@@ -1,6 +1,7 @@
 // Changelog
 // v1.0 First release
 // v1.1 small hotfixes
+// v1.2 small adjustments
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -103,6 +104,7 @@ namespace HyperElk.Core
         bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns or AoE" || UseCovenant == "on mobcount or Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseCovenant == "on mobcount or Cooldowns" || UseCovenant == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
         bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && IsMelee;
         bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && IsMelee;
+        bool isTricks => UseTricks == "always" || UseTricks == "on AoE" && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || UseTricks == "on mobcount" && API.PlayerUnitInMeleeRangeCount >= MobCount;
         //CBProperties
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
@@ -111,9 +113,11 @@ namespace HyperElk.Core
         public new string[] CDUsageWithAOE = new string[] { "Not Used", "with Cooldowns", "on AOE", "with Cooldowns or AoE", "on mobcount", "on mobcount or Cooldowns", "always" };
         public string[] Legendary = new string[] { "No Legendary", "Master Assassin's Mark", "Tiny Toxic Blade", "Celerity Loop", "Deathly Shadows" };
         public string[] Starter = new string[] { "Rota", "Cheap Shot" };
+        public string[] TricksList = new string[] { "always", "on AoE", "on mobcount" };
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] numbRaidList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 33, 35, 36, 37, 38, 39, 40 };
         private int MobCount => numbRaidList[CombatRoutine.GetPropertyInt("MobCount")];
+        private string UseTricks => TricksList[CombatRoutine.GetPropertyInt(TricksoftheTrade)];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UsePoison1 => Poison1[CombatRoutine.GetPropertyInt("First Poison")];
         private string UsePoison2 => Poison2[CombatRoutine.GetPropertyInt("Second Poison")];
@@ -176,7 +180,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.1");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.2");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -273,6 +277,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp(TricksoftheTrade, "Use " + TricksoftheTrade, TricksList, "Use " + TricksoftheTrade + " always, on AoE or mobcount", "Generic", 0);
             CombatRoutine.AddProp(KillingSpree, "Use " + KillingSpree, CDUsageWithAOE, "Use " + KillingSpree + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Dreadblades, "Use " + Dreadblades, CDUsageWithAOE, "Use " + Dreadblades + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(AdrenalineRush, "Use " + AdrenalineRush, CDUsageWithAOE, "Use " + AdrenalineRush + " always, with Cooldowns", "Cooldowns", 0);
@@ -407,7 +412,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //Focus
-                if (API.CanCast(TricksoftheTrade) && API.FocusRange < 100 && API.FocusHealthPercent != 0 && IsMelee && !API.PlayerHasBuff(TricksoftheTrade))
+                if (API.CanCast(TricksoftheTrade) && isTricks && API.FocusRange < 100 && API.FocusHealthPercent != 0 && IsMelee && !API.PlayerHasBuff(TricksoftheTrade))
                 {
                     API.CastSpell(TricksoftheTrade);
                     return;
@@ -625,11 +630,11 @@ namespace HyperElk.Core
                 return;
             }
             //actions.build+=/gouge,if=talent.dirty_tricks.enabled&combo_points.deficit>=1+buff.broadside.up
-            if (API.CanCast(Gouge) && TalentDirtyTricks && IsMelee && ComboPointDeficit >= 1 + (API.PlayerHasBuff(Broadside) ? 1 : 0))
+            /*if (API.CanCast(Gouge) && TalentDirtyTricks && IsMelee && ComboPointDeficit >= 1 + (API.PlayerHasBuff(Broadside) ? 1 : 0))
             {
                 API.CastSpell(Gouge);
                 return;
-            }
+            }*/
             //actions+=/arcane_torrent,if=energy.deficit>=15+energy.regen
             if (PlayerRaceSettings == "Bloodelf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && EnergyDefecit >= 15+EnergyRegen)
             {
