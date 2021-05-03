@@ -2,6 +2,7 @@
 // v1.0 First release
 // v1.1 small hotfixes
 // v1.2 small adjustments
+// v1.3 small hotfix
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -169,7 +170,7 @@ namespace HyperElk.Core
             return false;
         }
         //actions+=/variable,name=finish_condition,value=combo_points>=cp_max_spend-buff.broadside.up-(buff.opportunity.up*talent.quick_draw.enabled)|combo_points=animacharged_cp
-        public bool finish_conditions => API.PlayerComboPoints >= MaxComboPoints - (API.PlayerHasBuff(Broadside) ? 1 : 0) - ((API.PlayerHasBuff(Opportunity) ? 1 : 0)* (TalentQuickDraw ? 1 : 0));
+        public bool finish_conditions => API.PlayerComboPoints >= MaxComboPoints - (API.PlayerHasBuff(Broadside) ? 1 : 0) - ((API.PlayerHasBuff(Opportunity) ? 1 : 0) * (TalentQuickDraw ? 1 : 0));
         bool dotsliceanddiceerefreshable => (API.PlayerBuffTimeRemaining(SliceandDice) < 1080 && !TalentDeeperStratagem || API.PlayerBuffTimeRemaining(SliceandDice) < 1260 && TalentDeeperStratagem);
         //actions.cds+=/variable,name=killing_spree_vanish_sync,value=!runeforge.mark_of_the_master_assassin|cooldown.vanish.remains>10|master_assassin_remains>2
         bool killing_spree_vanish_sync => IsLegendary != "Master Assassin's Mark" || API.SpellCDDuration(Vanish) > 1000 || API.PlayerBuffTimeRemaining(MasterAssassinsMark) > 200;
@@ -180,7 +181,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.2");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.3");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -232,7 +233,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SliceandDice, 315496);
             CombatRoutine.AddBuff(BladeFlurry, 13877);
             CombatRoutine.AddBuff(Stealth, 1784);
-            CombatRoutine.AddBuff(Vanish, 1856);
+            CombatRoutine.AddBuff(Vanish, 11327);
             CombatRoutine.AddBuff(Opportunity, 195627);
             CombatRoutine.AddBuff(LoadedDice, 256170);
             CombatRoutine.AddBuff(RuthlessPrecision, 193357);
@@ -447,217 +448,220 @@ namespace HyperElk.Core
                     return;
                 }
             }
-            //actions+=/call_action_list,name=cds
-            //actions.cds=blade_flurry,if=spell_targets>=2&!buff.blade_flurry.up
-            if (API.CanCast(BladeFlurry) && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsMelee && !API.PlayerHasBuff(BladeFlurry))
+            if (!IsStealth)
             {
-                API.CastSpell(BladeFlurry);
-                return;
-            }
-            //actions.cds+=/vanish,if=!runeforge.mark_of_the_master_assassin&!stealthed.all&variable.ambush_condition&(!runeforge.deathly_shadows|buff.deathly_shadows.down&combo_points<=2)
-            if (API.CanCast(Vanish) && IsMelee && !IsStealth && ambush_condition() && IsVanish && IsLegendary != "Master Assassin's Mark")
-            {
-                API.CastSpell(Vanish);
-                return;
-            }
-            //actions.cds+=/vanish,if=variable.vanish_ma_condition&master_assassin_remains=0&variable.blade_flurry_sync
-            if (API.CanCast(Vanish) && IsMelee && !IsStealth && IsVanish && API.PlayerBuffTimeRemaining(MasterAssassinsMark) == 0 && vanish_ma_condition && blade_flurry_sync)
-            {
-                API.CastSpell(Vanish);
-                return;
-            }
-            //actions.cds+=/adrenaline_rush,if=!buff.adrenaline_rush.up
-            if (API.CanCast(AdrenalineRush) && IsMelee && IsAdrenalineRush && !API.PlayerHasBuff(AdrenalineRush))
-            {
-                API.CastSpell(AdrenalineRush);
-                return;
-            }
-            //actions.cds +=/ flagellation,if= !stealthed.all & (variable.finish_condition | target.time_to_die < 13)
-            if (API.CanCast(Flagellation) && IsCovenant && PlayerCovenantSettings == "Venthyr" && IsMelee && !IsStealth && (finish_conditions || API.TargetTimeToDie < 1300))
-            {
-                API.CastSpell(Flagellation);
-                return;
-            }
-            //actions.cds+=/dreadblades,if=!stealthed.all&combo_points<=2&(!covenant.venthyr|debuff.flagellation.up)
-            if (API.CanCast(Dreadblades) && IsMelee && !IsStealth && API.PlayerComboPoints <= 2 && IsDreadblades && TalentDreadblades && (PlayerCovenantSettings != "Venthyr" || API.TargetHasDebuff(Flagellation)))
-            {
-                API.CastSpell(Dreadblades);
-                return;
-            }
-            //actions.cds+=/roll_the_bones,if=master_assassin_remains=0&buff.dreadblades.down&(buff.roll_the_bones.remains<=3|variable.rtb_reroll)
-            if (API.CanCast(RolltheBones) && ShouldRolltheBones() && API.PlayerEnergy >= 25 && API.TargetRange <= 20)
-            {
-                API.CastSpell(RolltheBones);
-                return;
-            }
-            //actions.cds+=/marked_for_death,line_cd=1.5,target_if=min:target.time_to_die,if=raid_event.adds.up&(target.time_to_die<combo_points.deficit|!stealthed.rogue&combo_points.deficit>=cp_max_spend-1)
-            if (API.CanCast(MarkedforDeath) && TalentMarkedForDeath && !IsStealth && ComboPointDeficit >= MaxComboPoints - 1 && API.TargetRange <= 30)
-            {
-                API.CastSpell(MarkedforDeath);
-                return;
-            }
-            //actions.cds+=/killing_spree,if=variable.blade_flurry_sync&variable.killing_spree_vanish_sync&!stealthed.rogue&(debuff.between_the_eyes.up&buff.dreadblades.down&energy.deficit>(energy.regen*2+15)|spell_targets.blade_flurry>(2-buff.deathly_shadows.up)|master_assassin_remains>0)
-            if (API.CanCast(KillingSpree) && blade_flurry_sync && killing_spree_vanish_sync && !IsStealth && IsKillingSpree && (API.TargetHasDebuff(BetweentheEyes) && !API.PlayerHasBuff(Dreadblades) && EnergyDefecit > (EnergyRegen*2+15) || API.PlayerUnitInMeleeRangeCount >( 2- (API.PlayerHasBuff(DeathlyShadows) ? 1: 0)) || API.PlayerBuffTimeRemaining(MasterAssassinsMark) > 0))
-            {
-                API.CastSpell(KillingSpree);
-                return;
-            }
-            //actions.cds+=/blade_rush,if=variable.blade_flurry_sync&(energy.time_to_max>2&buff.dreadblades.down|energy<=30|spell_targets>2)
-            if (API.CanCast(BladeRush) && blade_flurry_sync && TalentBladeRush && (TimeUntilMaxEnergy > 200 && !API.PlayerHasBuff(Dreadblades) || API.PlayerEnergy <= 30 || API.PlayerUnitInMeleeRangeCount > 2) && IsBladeRush)
-            {
-                API.CastSpell(BladeRush);
-                return;
-            }
-            //actions.cds+=/shadowmeld,if=!stealthed.all&variable.ambush_condition
-            if (PlayerRaceSettings == "Night Elf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && !IsStealth && ambush_condition())
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.cds+=/blood_fury
-            if (PlayerRaceSettings == "Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.cds +=/ berserking
-            if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.cds +=/ fireblood
-            if (PlayerRaceSettings == "Dark Iron Dwarf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.cds +=/ ancestral_call
-            if (PlayerRaceSettings == "Mag'har Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions.cds+=/use_items,slots=trinket1,if=debuff.between_the_eyes.up|trinket.1.has_stat.any_dps|fight_remains<=20
-            if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
-            {
-                API.CastSpell("Trinket1");
-                return;
-            }
-            //actions.cds+=/use_items,slots=trinket2,if=debuff.between_the_eyes.up|trinket.2.has_stat.any_dps|fight_remains<=20
-            if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
-            {
-                API.CastSpell("Trinket2");
-                return;
-            }
-            //actions+=/run_action_list,name=finish,if=variable.finish_condition
-            if (finish_conditions)
-            {
-                //actions.finish=between_the_eyes,if=target.time_to_die>3
-                if (API.CanCast(BetweentheEyes) && API.TargetRange <= 20 && API.TargetTimeToDie > 300)
+                //actions+=/call_action_list,name=cds
+                //actions.cds=blade_flurry,if=spell_targets>=2&!buff.blade_flurry.up
+                if (API.CanCast(BladeFlurry) && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsMelee && !API.PlayerHasBuff(BladeFlurry))
                 {
-                    API.CastSpell(BetweentheEyes);
+                    API.CastSpell(BladeFlurry);
                     return;
                 }
-                //actions.finish+=/slice_and_dice,if=buff.slice_and_dice.remains<fight_remains&refreshable
-                if (API.CanCast(SliceandDice) && API.TargetRange <= 20 && dotsliceanddiceerefreshable)
+                //actions.cds+=/vanish,if=!runeforge.mark_of_the_master_assassin&!stealthed.all&variable.ambush_condition&(!runeforge.deathly_shadows|buff.deathly_shadows.down&combo_points<=2)
+                if (API.CanCast(Vanish) && IsMelee && !IsStealth && ambush_condition() && IsVanish && IsLegendary != "Master Assassin's Mark")
                 {
-                    API.CastSpell(SliceandDice);
+                    API.CastSpell(Vanish);
                     return;
                 }
-                //actions.finish+=/dispatch
-                if (API.CanCast(Dispatch) && IsMelee)
+                //actions.cds+=/vanish,if=variable.vanish_ma_condition&master_assassin_remains=0&variable.blade_flurry_sync
+                if (API.CanCast(Vanish) && IsMelee && !IsStealth && IsVanish && API.PlayerBuffTimeRemaining(MasterAssassinsMark) == 0 && vanish_ma_condition && blade_flurry_sync)
                 {
-                    API.CastSpell(Dispatch);
+                    API.CastSpell(Vanish);
                     return;
                 }
-            }
-            //actions+=/call_action_list,name=build
-            //actions.build=sepsis
-            if (API.CanCast(Sepsis) && PlayerCovenantSettings == "Night Fae" && IsMelee && IsCovenant)
-            {
-                API.CastSpell(Sepsis);
-                return;
-            }
-            //actions.build+=/ghostly_strike
-            if (API.CanCast(GhostlyStrike) && TalentGhostlyStrike && API.PlayerEnergy >= 30 && IsMelee)
-            {
-                API.CastSpell(GhostlyStrike);
-                return;
-            }
-            //actions.build+=/shiv,if=runeforge.tiny_toxic_blade
-            if (API.CanCast(Shiv) && IsLegendary == "Tiny Toxic Blade" && API.PlayerEnergy >= 20 && IsMelee)
-            {
-                API.CastSpell(Shiv);
-                return;
-            }
-            //actions.build+=/echoing_reprimand
-            if (API.CanCast(EchoingReprimand) && IsCovenant && PlayerCovenantSettings == "Kyrian" && IsMelee)
-            {
-                API.CastSpell(EchoingReprimand);
-                return;
-            }
-            //actions.build+=/serrated_bone_spike,cycle_targets=1,if=buff.slice_and_dice.up&!dot.serrated_bone_spike_dot.ticking|fight_remains<=5|cooldown.serrated_bone_spike.charges_fractional>=2.75
-            if (API.CanCast(SerratedBoneSpike) && IsCovenant && IsMelee && PlayerCovenantSettings == "Necrolord" && (API.PlayerHasBuff(SliceandDice) && !API.TargetHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
-            {
-                API.CastSpell(SerratedBoneSpike);
-                return;
-            }
-            if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
-            {
-                if (API.CanCast(SerratedBoneSpike) && !API.MacroIsIgnored(SerratedBoneSpike + "MO") && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && (API.PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                //actions.cds+=/adrenaline_rush,if=!buff.adrenaline_rush.up
+                if (API.CanCast(AdrenalineRush) && IsMelee && IsAdrenalineRush && !API.PlayerHasBuff(AdrenalineRush))
                 {
-                    API.CastSpell(SerratedBoneSpike + "MO");
+                    API.CastSpell(AdrenalineRush);
                     return;
                 }
-            }
-            //actions.build+=/pistol_shot,if=buff.opportunity.up&(energy.deficit>(energy.regen+10)|combo_points.deficit<=1+buff.broadside.up|talent.quick_draw.enabled)
-            if (API.CanCast(PistolShot) && API.PlayerEnergy >= 40 && API.TargetRange <= 20 && API.PlayerHasBuff(Opportunity) && (EnergyDefecit > (EnergyRegen+10) || ComboPointDeficit <= 1 + (API.PlayerHasBuff(Broadside) ? 1 : 0) || TalentQuickDraw))
-            {
-                API.CastSpell(PistolShot);
-                return;
-            }
-            //actions.build+=/pistol_shot,if=buff.opportunity.up&(buff.greenskins_wickers.up|buff.concealed_blunderbuss.up)
-            if (API.CanCast(PistolShot) && API.PlayerEnergy >= 40 && API.TargetRange <= 20 && API.PlayerHasBuff(Opportunity) && (API.PlayerHasBuff(GreenskinsWickers) || API.PlayerHasBuff(ConcealedBlunderbuss)))
-            {
-                API.CastSpell(PistolShot);
-                return;
-            }
-            //actions.build+=/sinister_strike
-            if (API.CanCast(SinisterStrike) && API.PlayerEnergy >= 45 && IsMelee)
-            {
-                API.CastSpell(SinisterStrike);
-                return;
-            }
-            //actions.build+=/gouge,if=talent.dirty_tricks.enabled&combo_points.deficit>=1+buff.broadside.up
-            /*if (API.CanCast(Gouge) && TalentDirtyTricks && IsMelee && ComboPointDeficit >= 1 + (API.PlayerHasBuff(Broadside) ? 1 : 0))
-            {
-                API.CastSpell(Gouge);
-                return;
-            }*/
-            //actions+=/arcane_torrent,if=energy.deficit>=15+energy.regen
-            if (PlayerRaceSettings == "Bloodelf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && EnergyDefecit >= 15+EnergyRegen)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions+=/arcane_pulse
-            if (PlayerRaceSettings == "Nightborne" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions+=/lights_judgment
-            if (PlayerRaceSettings == "Lightforged" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
-            //actions+=/bag_of_tricks
-            if (PlayerRaceSettings == "Vulpera" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
-            {
-                API.CastSpell(RacialSpell1);
-                return;
+                //actions.cds +=/ flagellation,if= !stealthed.all & (variable.finish_condition | target.time_to_die < 13)
+                if (API.CanCast(Flagellation) && IsCovenant && PlayerCovenantSettings == "Venthyr" && IsMelee && !IsStealth && (finish_conditions || API.TargetTimeToDie < 1300))
+                {
+                    API.CastSpell(Flagellation);
+                    return;
+                }
+                //actions.cds+=/dreadblades,if=!stealthed.all&combo_points<=2&(!covenant.venthyr|debuff.flagellation.up)
+                if (API.CanCast(Dreadblades) && IsMelee && !IsStealth && API.PlayerComboPoints <= 2 && IsDreadblades && TalentDreadblades && (PlayerCovenantSettings != "Venthyr" || API.TargetHasDebuff(Flagellation)))
+                {
+                    API.CastSpell(Dreadblades);
+                    return;
+                }
+                //actions.cds+=/roll_the_bones,if=master_assassin_remains=0&buff.dreadblades.down&(buff.roll_the_bones.remains<=3|variable.rtb_reroll)
+                if (API.CanCast(RolltheBones) && ShouldRolltheBones() && API.PlayerEnergy >= 25 && API.TargetRange <= 20)
+                {
+                    API.CastSpell(RolltheBones);
+                    return;
+                }
+                //actions.cds+=/marked_for_death,line_cd=1.5,target_if=min:target.time_to_die,if=raid_event.adds.up&(target.time_to_die<combo_points.deficit|!stealthed.rogue&combo_points.deficit>=cp_max_spend-1)
+                if (API.CanCast(MarkedforDeath) && TalentMarkedForDeath && !IsStealth && ComboPointDeficit >= MaxComboPoints - 1 && API.TargetRange <= 30)
+                {
+                    API.CastSpell(MarkedforDeath);
+                    return;
+                }
+                //actions.cds+=/killing_spree,if=variable.blade_flurry_sync&variable.killing_spree_vanish_sync&!stealthed.rogue&(debuff.between_the_eyes.up&buff.dreadblades.down&energy.deficit>(energy.regen*2+15)|spell_targets.blade_flurry>(2-buff.deathly_shadows.up)|master_assassin_remains>0)
+                if (API.CanCast(KillingSpree) && blade_flurry_sync && killing_spree_vanish_sync && !IsStealth && IsKillingSpree && (API.TargetHasDebuff(BetweentheEyes) && !API.PlayerHasBuff(Dreadblades) && EnergyDefecit > (EnergyRegen * 2 + 15) || API.PlayerUnitInMeleeRangeCount > (2 - (API.PlayerHasBuff(DeathlyShadows) ? 1 : 0)) || API.PlayerBuffTimeRemaining(MasterAssassinsMark) > 0))
+                {
+                    API.CastSpell(KillingSpree);
+                    return;
+                }
+                //actions.cds+=/blade_rush,if=variable.blade_flurry_sync&(energy.time_to_max>2&buff.dreadblades.down|energy<=30|spell_targets>2)
+                if (API.CanCast(BladeRush) && blade_flurry_sync && TalentBladeRush && (TimeUntilMaxEnergy > 200 && !API.PlayerHasBuff(Dreadblades) || API.PlayerEnergy <= 30 || API.PlayerUnitInMeleeRangeCount > 2) && IsBladeRush)
+                {
+                    API.CastSpell(BladeRush);
+                    return;
+                }
+                //actions.cds+=/shadowmeld,if=!stealthed.all&variable.ambush_condition
+                if (PlayerRaceSettings == "Night Elf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && !IsStealth && ambush_condition())
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.cds+=/blood_fury
+                if (PlayerRaceSettings == "Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.cds +=/ berserking
+                if (PlayerRaceSettings == "Troll" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.cds +=/ fireblood
+                if (PlayerRaceSettings == "Dark Iron Dwarf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.cds +=/ ancestral_call
+                if (PlayerRaceSettings == "Mag'har Orc" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions.cds+=/use_items,slots=trinket1,if=debuff.between_the_eyes.up|trinket.1.has_stat.any_dps|fight_remains<=20
+                if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                {
+                    API.CastSpell("Trinket1");
+                    return;
+                }
+                //actions.cds+=/use_items,slots=trinket2,if=debuff.between_the_eyes.up|trinket.2.has_stat.any_dps|fight_remains<=20
+                if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                {
+                    API.CastSpell("Trinket2");
+                    return;
+                }
+                //actions+=/run_action_list,name=finish,if=variable.finish_condition
+                if (finish_conditions)
+                {
+                    //actions.finish=between_the_eyes,if=target.time_to_die>3
+                    if (API.CanCast(BetweentheEyes) && API.TargetRange <= 20 && API.TargetTimeToDie > 300)
+                    {
+                        API.CastSpell(BetweentheEyes);
+                        return;
+                    }
+                    //actions.finish+=/slice_and_dice,if=buff.slice_and_dice.remains<fight_remains&refreshable
+                    if (API.CanCast(SliceandDice) && API.TargetRange <= 20 && dotsliceanddiceerefreshable)
+                    {
+                        API.CastSpell(SliceandDice);
+                        return;
+                    }
+                    //actions.finish+=/dispatch
+                    if (API.CanCast(Dispatch) && IsMelee)
+                    {
+                        API.CastSpell(Dispatch);
+                        return;
+                    }
+                }
+                //actions+=/call_action_list,name=build
+                //actions.build=sepsis
+                if (API.CanCast(Sepsis) && PlayerCovenantSettings == "Night Fae" && IsMelee && IsCovenant)
+                {
+                    API.CastSpell(Sepsis);
+                    return;
+                }
+                //actions.build+=/ghostly_strike
+                if (API.CanCast(GhostlyStrike) && TalentGhostlyStrike && API.PlayerEnergy >= 30 && IsMelee)
+                {
+                    API.CastSpell(GhostlyStrike);
+                    return;
+                }
+                //actions.build+=/shiv,if=runeforge.tiny_toxic_blade
+                if (API.CanCast(Shiv) && IsLegendary == "Tiny Toxic Blade" && API.PlayerEnergy >= 20 && IsMelee)
+                {
+                    API.CastSpell(Shiv);
+                    return;
+                }
+                //actions.build+=/echoing_reprimand
+                if (API.CanCast(EchoingReprimand) && IsCovenant && PlayerCovenantSettings == "Kyrian" && IsMelee)
+                {
+                    API.CastSpell(EchoingReprimand);
+                    return;
+                }
+                //actions.build+=/serrated_bone_spike,cycle_targets=1,if=buff.slice_and_dice.up&!dot.serrated_bone_spike_dot.ticking|fight_remains<=5|cooldown.serrated_bone_spike.charges_fractional>=2.75
+                if (API.CanCast(SerratedBoneSpike) && IsCovenant && IsMelee && PlayerCovenantSettings == "Necrolord" && (API.PlayerHasBuff(SliceandDice) && !API.TargetHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                {
+                    API.CastSpell(SerratedBoneSpike);
+                    return;
+                }
+                if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
+                {
+                    if (API.CanCast(SerratedBoneSpike) && !API.MacroIsIgnored(SerratedBoneSpike + "MO") && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && (API.PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                    {
+                        API.CastSpell(SerratedBoneSpike + "MO");
+                        return;
+                    }
+                }
+                //actions.build+=/pistol_shot,if=buff.opportunity.up&(energy.deficit>(energy.regen+10)|combo_points.deficit<=1+buff.broadside.up|talent.quick_draw.enabled)
+                if (API.CanCast(PistolShot) && API.PlayerEnergy >= 40 && API.TargetRange <= 20 && API.PlayerHasBuff(Opportunity) && (EnergyDefecit > (EnergyRegen + 10) || ComboPointDeficit <= 1 + (API.PlayerHasBuff(Broadside) ? 1 : 0) || TalentQuickDraw))
+                {
+                    API.CastSpell(PistolShot);
+                    return;
+                }
+                //actions.build+=/pistol_shot,if=buff.opportunity.up&(buff.greenskins_wickers.up|buff.concealed_blunderbuss.up)
+                if (API.CanCast(PistolShot) && API.PlayerEnergy >= 40 && API.TargetRange <= 20 && API.PlayerHasBuff(Opportunity) && (API.PlayerHasBuff(GreenskinsWickers) || API.PlayerHasBuff(ConcealedBlunderbuss)))
+                {
+                    API.CastSpell(PistolShot);
+                    return;
+                }
+                //actions.build+=/sinister_strike
+                if (API.CanCast(SinisterStrike) && API.PlayerEnergy >= 45 && IsMelee)
+                {
+                    API.CastSpell(SinisterStrike);
+                    return;
+                }
+                //actions.build+=/gouge,if=talent.dirty_tricks.enabled&combo_points.deficit>=1+buff.broadside.up
+                /*if (API.CanCast(Gouge) && TalentDirtyTricks && IsMelee && ComboPointDeficit >= 1 + (API.PlayerHasBuff(Broadside) ? 1 : 0))
+                {
+                    API.CastSpell(Gouge);
+                    return;
+                }*/
+                //actions+=/arcane_torrent,if=energy.deficit>=15+energy.regen
+                if (PlayerRaceSettings == "Bloodelf" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee && EnergyDefecit >= 15 + EnergyRegen)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/arcane_pulse
+                if (PlayerRaceSettings == "Nightborne" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/lights_judgment
+                if (PlayerRaceSettings == "Lightforged" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
+                //actions+=/bag_of_tricks
+                if (PlayerRaceSettings == "Vulpera" && API.CanCast(RacialSpell1) && isRacial && IsCooldowns && IsMelee)
+                {
+                    API.CastSpell(RacialSpell1);
+                    return;
+                }
             }
         }
     }
