@@ -1,6 +1,7 @@
 ﻿// Changelog
 // v1.0 First release
 // v1.1 small adjustments
+// v1.2 small adjustments
 
 
 using System.Diagnostics;
@@ -76,8 +77,11 @@ namespace HyperElk.Core
             return API.TargetHasDebuff(debuff, true, false);
         }
         int EnergyDefecit => API.PlayeMaxEnergy - API.PlayerEnergy;
+        int MaxComboPoints => TalentDeeperStratagem ? 6 : 5;
+        int ComboPointDeficit => MaxComboPoints - API.PlayerComboPoints;
         float GCD => API.SpellGCDTotalDuration;
-        float EnergyRegen => 10f * (1f + API.PlayerGetHaste);
+        float EnergyRegen => 10f * (1f + API.PlayerGetHaste) * (TalentVigor ? 1.1f : 1f);
+        float TimeUntilMaxEnergy => (API.PlayeMaxEnergy - API.PlayerEnergy) * 100f / EnergyRegen;
         private bool isMelee => API.TargetRange < 6;
         bool IsVanish => (UseVanish == "with Cooldowns" || UseVanish == "with Cooldowns or AoE" || UseVanish == "on mobcount or Cooldowns") && IsCooldowns || UseVanish == "always" || (UseVanish == "on AOE" || UseVanish == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseVanish == "on mobcount or Cooldowns" || UseVanish == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
         bool IsExsanguinate => (UseExsanguinate == "with Cooldowns" || UseExsanguinate == "with Cooldowns or AoE" || UseExsanguinate == "on mobcount or Cooldowns") && IsCooldowns || UseExsanguinate == "always" || (UseExsanguinate == "on AOE" || UseExsanguinate == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseExsanguinate == "on mobcount or Cooldowns" || UseExsanguinate == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
@@ -130,7 +134,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Assassination Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.1");
+            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.2");
             API.WriteLog("You need the following macros:");
             API.WriteLog("GarroteMO - /cast [@mouseover] Garrote");
             API.WriteLog("RuptureMO - /cast [@mouseover] Rupture");
@@ -220,7 +224,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
-            AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
+            CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Vendetta, "Use " + Vendetta, CDUsageWithAOE, "Use " + Vendetta + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Exsanguinate, "Use " + Exsanguinate, CDUsageWithAOE, "Use " + Exsanguinate + " always, with Cooldowns", "Cooldowns", 0);
@@ -251,7 +255,7 @@ namespace HyperElk.Core
                     API.CastSpell(CripplingPoison);
                     return;
                 }
-                if (API.CanCast(DeadlyPoison) && UsePoison1 == "Deadly Poison" && API.PlayerBuffTimeRemaining(DeadlyPoison) < 30000 && !API.PlayerIsMoving && API.LastSpellCastInGame != DeadlyPoison && API.PlayerCurrentCastSpellID != 2823 && API.PlayerCurrentCastSpellID != 315584)
+                if (API.CanCast(DeadlyPoison) && UsePoison1 == "Deadly Poison" && API.PlayerBuffTimeRemaining(DeadlyPoison) < 30000 && !API.PlayerIsMoving && API.LastSpellCastInGame != DeadlyPoison && API.PlayerCurrentCastSpellID != 315584)
                 {
                     API.CastSpell(DeadlyPoison);
                     return;
@@ -334,7 +338,7 @@ namespace HyperElk.Core
                     API.CastSpell(CripplingPoison);
                     return;
                 }
-                if (API.CanCast(DeadlyPoison) && UsePoison1 == "Deadly Poison" && API.PlayerBuffTimeRemaining(DeadlyPoison) < 3000 && !API.PlayerIsMoving && API.LastSpellCastInGame != DeadlyPoison && API.PlayerCurrentCastSpellID != 2823 && API.PlayerCurrentCastSpellID != 315584)
+                if (API.CanCast(DeadlyPoison) && UsePoison1 == "Deadly Poison" && API.PlayerBuffTimeRemaining(DeadlyPoison) < 3000 && !API.PlayerIsMoving && API.LastSpellCastInGame != DeadlyPoison && API.PlayerCurrentCastSpellID != 315584)
                 {
                     API.CastSpell(DeadlyPoison);
                     return;
@@ -568,7 +572,7 @@ namespace HyperElk.Core
                             API.CastSpell(Rupture + "MO");
                             return;
                         }
-                        if (API.CanCast(SerratedBoneSpike) && !API.MacroIsIgnored(SerratedBoneSpike + "MO") && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && !PlayerHasBuff(MasterAssassin) && (PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                        if (API.CanCast(SerratedBoneSpike) && API.LastSpellCastInGame != (SerratedBoneSpike) && !API.MacroIsIgnored(SerratedBoneSpike + "MO") && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && !PlayerHasBuff(MasterAssassin) && (PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
                         {
                             API.CastSpell(SerratedBoneSpike + "MO");
                             return;
@@ -576,13 +580,13 @@ namespace HyperElk.Core
                     }
                     //actions+=/call_action_list,name=direct
                     //actions.direct=envenom,if=effective_combo_points>=4+talent.deeper_stratagem.enabled&(debuff.vendetta.up|debuff.shiv.up|debuff.flagellation.up|energy.deficit<=25+variable.energy_regen_combined|!variable.single_target)&(!talent.exsanguinate.enabled|cooldown.exsanguinate.remains>2)
-                    if (API.CanCast(Envenom) && (API.PlayerComboPoints >= 4 && !TalentDeeperStratagem || TalentDeeperStratagem && API.PlayerComboPoints >= 5) && (TargetHasDebuff(Vendetta) || TargetHasDebuff(Shiv) || TargetHasDebuff(Flagellation) || EnergyDefecit <= 25 || API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && IsAOE) && (!TalentExsanguinate || API.SpellCDDuration(Exsanguinate) > 200) && API.PlayerEnergy >= 35)
+                    if (API.CanCast(Envenom) && (API.PlayerComboPoints >= 4 && !TalentDeeperStratagem || TalentDeeperStratagem && API.PlayerComboPoints >= 5) && (TargetHasDebuff(Vendetta) || TargetHasDebuff(Shiv) || TargetHasDebuff(Flagellation) || EnergyDefecit <= 25 +EnergyRegen || API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && IsAOE) && (!TalentExsanguinate || API.SpellCDDuration(Exsanguinate) > 200) && API.PlayerEnergy >= 35)
                     {
                         API.CastSpell(Envenom);
                         return;
                     }
                     //actions.direct+=/serrated_bone_spike,cycle_targets=1,if=master_assassin_remains=0&(buff.slice_and_dice.up&!dot.serrated_bone_spike_dot.ticking|fight_remains<=5|cooldown.serrated_bone_spike.charges_fractional>=2.75|soulbind.lead_by_example.enabled&!buff.lead_by_example.up)
-                    if (API.CanCast(SerratedBoneSpike) && IsCovenant && PlayerCovenantSettings == "Necrolord" && !PlayerHasBuff(MasterAssassin) && (PlayerHasBuff(SliceandDice) && !TargetHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                    if (API.CanCast(SerratedBoneSpike) && API.LastSpellCastInGame != (SerratedBoneSpike) && IsCovenant && PlayerCovenantSettings == "Necrolord" && !PlayerHasBuff(MasterAssassin) && (PlayerHasBuff(SliceandDice) && !TargetHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
                     {
                         API.CastSpell(SerratedBoneSpike);
                         return;

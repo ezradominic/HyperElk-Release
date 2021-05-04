@@ -5,6 +5,7 @@
 // v1.3 small hotfix
 // v1.35 small sepsis change
 // v1.4 aaaaand another one xD
+// v1.45 Serrated Bone Spike adjustment
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -183,7 +184,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.4");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.45");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -604,14 +605,14 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.build+=/serrated_bone_spike,cycle_targets=1,if=buff.slice_and_dice.up&!dot.serrated_bone_spike_dot.ticking|fight_remains<=5|cooldown.serrated_bone_spike.charges_fractional>=2.75
-                if (API.CanCast(SerratedBoneSpike) && IsCovenant && IsMelee && PlayerCovenantSettings == "Necrolord" && (API.PlayerHasBuff(SliceandDice) && !API.TargetHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                if (API.CanCast(SerratedBoneSpike) && API.LastSpellCastInGame != (SerratedBoneSpike) && IsCovenant && IsMelee && PlayerCovenantSettings == "Necrolord" && (API.PlayerHasBuff(SliceandDice) && !API.TargetHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
                 {
                     API.CastSpell(SerratedBoneSpike);
                     return;
                 }
                 if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0)
                 {
-                    if (API.CanCast(SerratedBoneSpike) && !API.MacroIsIgnored(SerratedBoneSpike + "MO") && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && (API.PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
+                    if (API.CanCast(SerratedBoneSpike) && API.LastSpellCastInGame != (SerratedBoneSpike) && !API.MacroIsIgnored(SerratedBoneSpike + "MO") && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.MouseoverRange < 30 && (API.PlayerHasBuff(SliceandDice) && !API.MouseoverHasDebuff(SerratedBoneSpike) || API.SpellCharges(SerratedBoneSpike) > 2.75))
                     {
                         API.CastSpell(SerratedBoneSpike + "MO");
                         return;
