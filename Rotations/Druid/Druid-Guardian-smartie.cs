@@ -13,6 +13,7 @@
 // v2.1 convoke update
 // v2.2 convoke/berserk fix
 // v2.3 auto break roots
+// v2.4 Thrash spam with leggy
 
 namespace HyperElk.Core
 {
@@ -74,7 +75,7 @@ namespace HyperElk.Core
 
         private bool isKickRange => (TalentBalanceAffinity && API.TargetRange < 17 || !TalentBalanceAffinity && API.TargetRange < 14);
         private bool isMOinRange => (TalentBalanceAffinity && API.TargetRange < 43 || !TalentBalanceAffinity && API.TargetRange < 40);
-
+        float GCD => API.SpellGCDTotalDuration;
         private bool IncaBerserk => (API.PlayerHasBuff(Incarnation) || API.PlayerHasBuff(Berserk));
         bool IsBerserk => (UseBerserk == "with Cooldowns" && IsCooldowns || UseBerserk == "always");
         bool IsIncarnation => (UseIncarnation == "with Cooldowns" && IsCooldowns || UseIncarnation == "always");
@@ -93,6 +94,7 @@ namespace HyperElk.Core
         private string UseIncarnation => CDUsage[CombatRoutine.GetPropertyInt(Incarnation)];
         private string UseBerserk => CDUsage[CombatRoutine.GetPropertyInt(Berserk)];
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
+        private bool ThrashSpam => CombatRoutine.GetPropertyBool("Thrashspam");
         private bool IsGrowl => CombatRoutine.GetPropertyBool("Growl");
         private bool AutoTravelForm => CombatRoutine.GetPropertyBool("AutoTravelForm");
         private int BarkskinLifePercent => numbList[CombatRoutine.GetPropertyInt(Barkskin)];
@@ -109,7 +111,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.35");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.4");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -184,6 +186,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsage, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Berserk, "Use " + Berserk, CDUsage, "Use " + Berserk + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp("ThrashSpam", "Spam Thrash while cds", false, " Rota will spam Thrash for the Legendary while cds are up", "Generic");
             CombatRoutine.AddProp("AutoForm", "AutoForm", true, "Will auto switch forms", "Generic");
             CombatRoutine.AddProp("Growl", "Use Growl", false, "Torghast Anima Power :-)", "Torghast");
             CombatRoutine.AddProp("AutoTravelForm", "AutoTravelForm", false, "Will auto switch to Travel Form Out of Fight and outside", "Generic");
@@ -340,13 +343,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.bear+=/berserk_bear,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
-                if (API.CanCast(Berserk) && !TalentIncarnation && API.SpellGCDDuration == 0 && isMelee && IsBerserk)
+                if (API.CanCast(Berserk) && !TalentIncarnation && (API.SpellGCDDuration == 0 && PlayerCovenantSettings == "Night Fae" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) <= GCD || PlayerCovenantSettings != "Night Fae" || !IsCovenant || API.SpellCDDuration(ConvoketheSpirits) > GCD*2) && isMelee && IsBerserk)
                 {
                     API.CastSpell(Berserk);
                     return;
                 }
                 //actions.bear+=/incarnation,if=(buff.ravenous_frenzy.up|!covenant.venthyr)
-                if (API.CanCast(Incarnation) && TalentIncarnation && API.SpellGCDDuration == 0 && isMelee && IsIncarnation)
+                if (API.CanCast(Incarnation) && TalentIncarnation && (API.SpellGCDDuration == 0 && PlayerCovenantSettings == "Night Fae" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) <= GCD || PlayerCovenantSettings != "Night Fae" || !IsCovenant || API.SpellCDDuration(ConvoketheSpirits) > GCD * 2) && isMelee && IsIncarnation)
                 {
                     API.CastSpell(Incarnation);
                     return;
@@ -364,6 +367,11 @@ namespace HyperElk.Core
                         API.CastSpell(Moonfire + "MO");
                         return;
                     }
+                }
+                if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee && ThrashSpam && IncaBerserk)
+                {
+                    API.CastSpell(Thrash);
+                    return;
                 }
                 //actions.bear+=/thrash_bear,target_if=refreshable|dot.thrash_bear.stack<3|(dot.thrash_bear.stack<4&runeforge.luffainfused_embrace.equipped)|active_enemies>=4
                 if (API.CanCast(Thrash) && PlayerLevel >= 11 && isThrashMelee && (API.TargetDebuffRemainingTime(Thrash) < 250 || API.TargetDebuffStacks(Thrash) < 3 || API.PlayerUnitInMeleeRangeCount >= 4))
