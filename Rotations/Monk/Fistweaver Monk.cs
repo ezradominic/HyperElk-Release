@@ -125,9 +125,9 @@ namespace HyperElk.Core
         private int EFAOENumber => numbPartyList[CombatRoutine.GetPropertyInt(EFAOE)];
         private int ChiBurstNumber => numbPartyList[CombatRoutine.GetPropertyInt(ChiBurstAOE)];
         private int EmergencyGroupNumb => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyGroupNumber)];
-        private int EmergencyGroupPerc => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyGroupPercent)];
-        private int EmergencyRaidNumb => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyRaidNumber)];
-        private int EmergencyRaidPerc => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyRaidPercent)];
+        private int EmergencyGroupPerc => numbList[CombatRoutine.GetPropertyInt(EmergencyGroupPercent)];
+        private int EmergencyRaidNumb => numbList[CombatRoutine.GetPropertyInt(EmergencyRaidNumber)];
+        private int EmergencyRaidPerc => numbList[CombatRoutine.GetPropertyInt(EmergencyRaidPercent)];
         private int FWHP => numbPartyList[CombatRoutine.GetPropertyInt(FW)];
 
         private int ExpelHarmtPercent => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
