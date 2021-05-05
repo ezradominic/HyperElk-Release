@@ -72,8 +72,12 @@ namespace HyperElk.Core
         private string AoEDPSRaid = "AOEDPS Raid";
         private string Assist = "Assist";
         private string AncientTeachingsOfTheMonastery = "Ancient Teachings of the Monastery";
+        private string TeachingsOfTheMonMonastery => "Teachings of the monastery";
+        private string EmergencyGroupNumber => "Emergency Group Number";
+        private string EmergencyGroupPercent => "Emergency Group Percent";
 
-
+        private string EmergencyRaidNumber => "Emergency Raid Number";
+        private string EmergencyRaidPercent => "Emergency Raid Percent";
         //Talents
         private bool TalentChiWave => API.PlayerIsTalentSelected(1, 2);
         private bool TalentChiBurst => API.PlayerIsTalentSelected(1, 3);
@@ -120,8 +124,10 @@ namespace HyperElk.Core
         private int RJWAOENumber => numbPartyList[CombatRoutine.GetPropertyInt(RJWAOE)];
         private int EFAOENumber => numbPartyList[CombatRoutine.GetPropertyInt(EFAOE)];
         private int ChiBurstNumber => numbPartyList[CombatRoutine.GetPropertyInt(ChiBurstAOE)];
-
-
+        private int EmergencyGroupNumb => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyGroupNumber)];
+        private int EmergencyGroupPerc => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyGroupPercent)];
+        private int EmergencyRaidNumb => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyRaidNumber)];
+        private int EmergencyRaidPerc => numbPartyList[CombatRoutine.GetPropertyInt(EmergencyRaidPercent)];
         private int FWHP => numbPartyList[CombatRoutine.GetPropertyInt(FW)];
 
         private int ExpelHarmtPercent => numbList[CombatRoutine.GetPropertyInt(ExpelHarm)];
@@ -129,8 +135,8 @@ namespace HyperElk.Core
         private bool YuLonAoE => UnitBelowHealthPercent(YuLonPercent) >= YuLonNumber;
         private bool ChiJiAoE => UnitBelowHealthPercent(ChiJiPercent) >= ChiJiNumber;
         private bool RevivalAoE => UnitBelowHealthPercent(RevivalPercent) >= RAOEumber;
-        private bool Fistweaving => API.PlayerIsInRaid ? UnitBelowHealthPercent(30) <= 6 : UnitBelowHealthPercent(50) <= 1;
-        private bool Healing => API.PlayerIsInRaid ? UnitBelowHealthPercent(30) >= 6 : UnitBelowHealthPercent(50) >= 1;
+        private bool Fistweaving => API.PlayerIsInRaid ? UnitBelowHealthPercent(EmergencyRaidPerc) <= EmergencyRaidNumb : UnitBelowHealthPercent(EmergencyGroupPerc) <= EmergencyGroupNumb;
+        private bool Healing => API.PlayerIsInRaid ? UnitBelowHealthPercent(EmergencyRaidPerc) >= EmergencyRaidNumb : UnitBelowHealthPercent(EmergencyGroupPerc) >= EmergencyGroupNumb;
         private bool EssenceFontAoE => UnitBelowHealthPercent(EssenceFontPercent) >= EFAOENumber;
         private bool RefreshingJadeWindAoE => UnitBelowHealthPercent(RefreshingJadeWindPercent) >= RJWAOENumber;
         private int WeaponsofOrderPercent => numbList[CombatRoutine.GetPropertyInt(WeaponsofOrderAOE)];
@@ -420,6 +426,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SoothingMist, 115175);
             CombatRoutine.AddBuff(AncientTeachingsOfTheMonastery, 347553);
             CombatRoutine.AddBuff(ChiJi, 343820);
+            CombatRoutine.AddBuff(TeachingsOfTheMonMonastery, 202090);
 
 
             //Debuffs / Detox
@@ -512,6 +519,11 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SoothingMist, SoothingMist + " Life Percent", numbList, "Life percent at which" + SoothingMist + "is, set to 0 to disable", "Range Heal", 95);
             CombatRoutine.AddProp(RenewingMist, RenewingMist + " Life Percent", numbList, "Life percent at which" + RenewingMist + "is used, set to 0 to disable", "Range Heal", 95);
 
+            CombatRoutine.AddProp(EmergencyGroupNumber, " Group Number", numbPartyList, " at which" + " We Stop Fistweaving", "Emergency Group", 1);
+            CombatRoutine.AddProp(EmergencyGroupPercent, " Health Percent", numbList, " at which" + " We Stop Fistweaving", "Emergency Group", 50);
+
+            CombatRoutine.AddProp(EmergencyRaidNumber, " Raid Number", numbList, " at which" + " We Stop Fistweaving", "Emergency Raid", 5);
+            CombatRoutine.AddProp(EmergencyRaidPercent, " Health Percent", numbList, " at which" + " We Stop Fistweaving", "Emergency Raid", 50);
 
         }
         public override void Pulse()
@@ -797,7 +809,7 @@ namespace HyperElk.Core
                     API.CastSpell(RisingSunKick);
                     return;
                 }
-                if (API.CanCast(BlackoutKick) && API.PlayerCanAttackTarget && !CurrentCastEssenceFont && API.PlayerIsInCombat)
+                if (API.CanCast(BlackoutKick) && API.PlayerBuffStacks(TeachingsOfTheMonMonastery) == 3 && API.PlayerCanAttackTarget && !CurrentCastEssenceFont && API.PlayerIsInCombat)
                 {
                     API.CastSpell(BlackoutKick);
                     return;
