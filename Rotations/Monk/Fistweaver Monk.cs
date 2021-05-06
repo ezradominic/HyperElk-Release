@@ -196,7 +196,7 @@ namespace HyperElk.Core
         private bool EssenceFontRange => RangeTracking(25) >= EFAOENumber;
         private bool RefreshingJadeWindRange => RangeTracking(10) >= RJWAOENumber;
         private bool ChiBurstRange => RangeTracking(10) >= ChiBurstNumber;
-
+        private bool IsAutoDetox => API.ToggleIsEnabled("Auto Detox");
 
         private string GetTankParty(string[] units)
         {
@@ -485,6 +485,7 @@ namespace HyperElk.Core
             CombatRoutine.AddToggle("AOE Heal");
             CombatRoutine.AddToggle("Auto Target");
             CombatRoutine.AddToggle("NPC Heal");
+            CombatRoutine.AddToggle("Auto Detox");
 
             CombatRoutine.AddProp(RefreshingJadeWind, RefreshingJadeWind + " Life Percent", numbList, "Life percent at which" + RefreshingJadeWind + "is used when three members are at life percent, set to 0 to disable", "AOE Refreshing Jade Wind", 85);
             CombatRoutine.AddProp(RJWAOE, "Refreshing Jade Wind AoE Units ", numbPartyList, " Number of units for Refreshing Jade Wind AoE Healing", "AOE Refreshing Jade Wind", 3);
@@ -528,6 +529,30 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
+            if (IsAutoDetox && API.PlayerIsInGroup && !API.PlayerIsInRaid)
+            {
+                for (int j = 0; j < DetoxList.Length; j++)
+                    for (int i = 0; i < units.Length; i++)
+                    {
+                        if (CanDetoxTarget(DetoxList[j], units[i]) && IsAutoDetox)
+                        {
+                            API.CastSpell(PlayerTargetArray[i]);
+                            return;
+                        }
+                    }
+                if (API.CanCast(Detox))
+                {
+                    for (int i = 0; i < DetoxList.Length; i++)
+                    {
+                        if (CanDetoxTarget(DetoxList[i]))
+                        {
+                            API.CastSpell(Detox);
+                            return;
+                        }
+                    }
+                }
+
+            }
             if (RangeHeal)
             {
                 if (AoEHeal && API.PlayerIsInCombat)
