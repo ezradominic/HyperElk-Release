@@ -6,6 +6,7 @@
 // v1.35 small sepsis change
 // v1.4 aaaaand another one xD
 // v1.45 Serrated Bone Spike adjustment
+// v1.5 explosive protection
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -86,8 +87,8 @@ namespace HyperElk.Core
         bool TalentKillingSpree => API.PlayerIsTalentSelected(7, 3);
 
         //Rotation Utilities
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private bool IsStealth => API.PlayerHasBuff(Stealth) || API.PlayerHasBuff(Vanish) || API.PlayerHasBuff(SepsisBuff);
-
         int MaxEnergy => API.PlayeMaxEnergy;
         int MaxComboPoints => TalentDeeperStratagem ? 6 : 5;
         int ComboPointDeficit => MaxComboPoints - API.PlayerComboPoints;
@@ -184,7 +185,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.45");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.5");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -432,7 +433,7 @@ namespace HyperElk.Core
             if (IsStealth && IsStarter == "Rota")
             {
                 //actions.stealth=dispatch,if=variable.finish_condition
-                if (API.CanCast(Dispatch) && IsMelee && finish_conditions)
+                if (API.CanCast(Dispatch) && !isExplosive && IsMelee && finish_conditions)
                 {
                     API.CastSpell(Dispatch);
                     return;
@@ -446,7 +447,7 @@ namespace HyperElk.Core
             }
             if (IsStealth && IsStarter == "Cheap Shot")
             {
-                if (API.CanCast(CheapShot) && IsMelee && (API.PlayerEnergy >= 28 && !TalentDirtyTricks || TalentDirtyTricks))
+                if (API.CanCast(CheapShot) && !isExplosive && IsMelee && (API.PlayerEnergy >= 28 && !TalentDirtyTricks || TalentDirtyTricks))
                 {
                     API.CastSpell(CheapShot);
                     return;
@@ -456,19 +457,19 @@ namespace HyperElk.Core
             {
                 //actions+=/call_action_list,name=cds
                 //actions.cds=blade_flurry,if=spell_targets>=2&!buff.blade_flurry.up
-                if (API.CanCast(BladeFlurry) && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsMelee && !API.PlayerHasBuff(BladeFlurry))
+                if (API.CanCast(BladeFlurry) && !isExplosive && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsMelee && !API.PlayerHasBuff(BladeFlurry))
                 {
                     API.CastSpell(BladeFlurry);
                     return;
                 }
                 //actions.cds+=/vanish,if=!runeforge.mark_of_the_master_assassin&!stealthed.all&variable.ambush_condition&(!runeforge.deathly_shadows|buff.deathly_shadows.down&combo_points<=2)
-                if (API.CanCast(Vanish) && IsMelee && !IsStealth && ambush_condition() && IsVanish && IsLegendary != "Master Assassin's Mark")
+                if (API.CanCast(Vanish) && !isExplosive && IsMelee && !IsStealth && ambush_condition() && IsVanish && IsLegendary != "Master Assassin's Mark")
                 {
                     API.CastSpell(Vanish);
                     return;
                 }
                 //actions.cds+=/vanish,if=variable.vanish_ma_condition&master_assassin_remains=0&variable.blade_flurry_sync
-                if (API.CanCast(Vanish) && IsMelee && !IsStealth && IsVanish && API.PlayerBuffTimeRemaining(MasterAssassinsMark) == 0 && vanish_ma_condition && blade_flurry_sync)
+                if (API.CanCast(Vanish) && !isExplosive && IsMelee && !IsStealth && IsVanish && API.PlayerBuffTimeRemaining(MasterAssassinsMark) == 0 && vanish_ma_condition && blade_flurry_sync)
                 {
                     API.CastSpell(Vanish);
                     return;
@@ -480,13 +481,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cds +=/ flagellation,if= !stealthed.all & (variable.finish_condition | target.time_to_die < 13)
-                if (API.CanCast(Flagellation) && IsCovenant && PlayerCovenantSettings == "Venthyr" && IsMelee && !IsStealth && (finish_conditions || API.TargetTimeToDie < 1300))
+                if (API.CanCast(Flagellation) && !isExplosive && IsCovenant && PlayerCovenantSettings == "Venthyr" && IsMelee && !IsStealth && (finish_conditions || API.TargetTimeToDie < 1300))
                 {
                     API.CastSpell(Flagellation);
                     return;
                 }
                 //actions.cds+=/dreadblades,if=!stealthed.all&combo_points<=2&(!covenant.venthyr|debuff.flagellation.up)
-                if (API.CanCast(Dreadblades) && IsMelee && !IsStealth && API.PlayerComboPoints <= 2 && IsDreadblades && TalentDreadblades && (PlayerCovenantSettings != "Venthyr" || API.TargetHasDebuff(Flagellation)))
+                if (API.CanCast(Dreadblades) && !isExplosive && IsMelee && !IsStealth && API.PlayerComboPoints <= 2 && IsDreadblades && TalentDreadblades && (PlayerCovenantSettings != "Venthyr" || API.TargetHasDebuff(Flagellation)))
                 {
                     API.CastSpell(Dreadblades);
                     return;
@@ -504,13 +505,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cds+=/killing_spree,if=variable.blade_flurry_sync&variable.killing_spree_vanish_sync&!stealthed.rogue&(debuff.between_the_eyes.up&buff.dreadblades.down&energy.deficit>(energy.regen*2+15)|spell_targets.blade_flurry>(2-buff.deathly_shadows.up)|master_assassin_remains>0)
-                if (API.CanCast(KillingSpree) && blade_flurry_sync && killing_spree_vanish_sync && !IsStealth && IsKillingSpree && (API.TargetHasDebuff(BetweentheEyes) && !API.PlayerHasBuff(Dreadblades) && EnergyDefecit > (EnergyRegen * 2 + 15) || API.PlayerUnitInMeleeRangeCount > (2 - (API.PlayerHasBuff(DeathlyShadows) ? 1 : 0)) || API.PlayerBuffTimeRemaining(MasterAssassinsMark) > 0))
+                if (API.CanCast(KillingSpree) && !isExplosive && blade_flurry_sync && killing_spree_vanish_sync && !IsStealth && IsKillingSpree && (API.TargetHasDebuff(BetweentheEyes) && !API.PlayerHasBuff(Dreadblades) && EnergyDefecit > (EnergyRegen * 2 + 15) || API.PlayerUnitInMeleeRangeCount > (2 - (API.PlayerHasBuff(DeathlyShadows) ? 1 : 0)) || API.PlayerBuffTimeRemaining(MasterAssassinsMark) > 0))
                 {
                     API.CastSpell(KillingSpree);
                     return;
                 }
                 //actions.cds+=/blade_rush,if=variable.blade_flurry_sync&(energy.time_to_max>2&buff.dreadblades.down|energy<=30|spell_targets>2)
-                if (API.CanCast(BladeRush) && blade_flurry_sync && TalentBladeRush && (TimeUntilMaxEnergy > 200 && !API.PlayerHasBuff(Dreadblades) || API.PlayerEnergy <= 30 || API.PlayerUnitInMeleeRangeCount > 2) && IsBladeRush)
+                if (API.CanCast(BladeRush) && !isExplosive && blade_flurry_sync && TalentBladeRush && (TimeUntilMaxEnergy > 200 && !API.PlayerHasBuff(Dreadblades) || API.PlayerEnergy <= 30 || API.PlayerUnitInMeleeRangeCount > 2) && IsBladeRush)
                 {
                     API.CastSpell(BladeRush);
                     return;
@@ -546,19 +547,19 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cds+=/use_items,slots=trinket1,if=debuff.between_the_eyes.up|trinket.1.has_stat.any_dps|fight_remains<=20
-                if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && !isExplosive && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
                     return;
                 }
                 //actions.cds+=/use_items,slots=trinket2,if=debuff.between_the_eyes.up|trinket.2.has_stat.any_dps|fight_remains<=20
-                if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && !isExplosive && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
                     return;
                 }
                 //actions+=/run_action_list,name=finish,if=variable.finish_condition
-                if (finish_conditions)
+                if (finish_conditions && !isExplosive)
                 {
                     //actions.finish=between_the_eyes,if=target.time_to_die>3
                     if (API.CanCast(BetweentheEyes) && API.TargetRange <= 20 && API.TargetTimeToDie > 300)
@@ -581,7 +582,7 @@ namespace HyperElk.Core
                 }
                 //actions+=/call_action_list,name=build
                 //actions.build=sepsis
-                if (API.CanCast(Sepsis) && PlayerCovenantSettings == "Night Fae" && IsMelee && IsCovenant && API.PlayerEnergy >= 25 && ComboPointDeficit >= 1)
+                if (API.CanCast(Sepsis) && !isExplosive && PlayerCovenantSettings == "Night Fae" && IsMelee && IsCovenant && API.PlayerEnergy >= 25 && ComboPointDeficit >= 1)
                 {
                     API.CastSpell(Sepsis);
                     return;
@@ -593,13 +594,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.build+=/shiv,if=runeforge.tiny_toxic_blade
-                if (API.CanCast(Shiv) && IsLegendary == "Tiny Toxic Blade" && API.PlayerEnergy >= 20 && IsMelee)
+                if (API.CanCast(Shiv) && !isExplosive && IsLegendary == "Tiny Toxic Blade" && API.PlayerEnergy >= 20 && IsMelee)
                 {
                     API.CastSpell(Shiv);
                     return;
                 }
                 //actions.build+=/echoing_reprimand
-                if (API.CanCast(EchoingReprimand) && IsCovenant && PlayerCovenantSettings == "Kyrian" && IsMelee)
+                if (API.CanCast(EchoingReprimand) && !isExplosive && IsCovenant && PlayerCovenantSettings == "Kyrian" && IsMelee)
                 {
                     API.CastSpell(EchoingReprimand);
                     return;

@@ -18,6 +18,7 @@
 // v2.5 rewrite
 // v2.6 intervene problem solved and rage dump fixed
 // v2.7 shockwave options added
+// v2.8 explosive protection
 
 using System.Linq;
 
@@ -78,6 +79,7 @@ namespace HyperElk.Core
         bool TalentRavager => API.PlayerIsTalentSelected(6, 3);
 
         //General
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
@@ -136,7 +138,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v2.7");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v2.8");
             API.WriteLog("You need the following macros");
             API.WriteLog("Heroic ThrowMO: /cast [@mouseover] Heroic Throw");
             API.WriteLog("InterveneMO: /cast [@mouseover,exists,help] Intervene");
@@ -405,27 +407,27 @@ namespace HyperElk.Core
                     API.CastSpell(RacialSpell1);
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && !isExplosive && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && !isExplosive && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
                     return;
                 }
-                if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !isExplosive && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(ConquerorsBanner);
                     return;
                 }
-                if (API.CanCast(SpearofBastion) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(SpearofBastion) && PlayerCovenantSettings == "Kyrian" && !isExplosive && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(SpearofBastion);
                     return;
                 }
-                if (API.CanCast(AncientAftershock) && PlayerCovenantSettings == "Night Fae" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(AncientAftershock) && PlayerCovenantSettings == "Night Fae" && !isExplosive && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(AncientAftershock);
                     return;
@@ -435,7 +437,7 @@ namespace HyperElk.Core
                     API.CastSpell(Avatar);
                     return;
                 }
-                if (API.CanCast(DemoralizingShout) && TalentBoomingVoice && API.PlayerRage < 60)
+                if (API.CanCast(DemoralizingShout) && TalentBoomingVoice && !isExplosive && API.PlayerRage < 60)
                 {
                     API.CastSpell(DemoralizingShout);
                     return;
@@ -443,13 +445,13 @@ namespace HyperElk.Core
                 if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
                 {
                     //actions.generic=ravager
-                    if (API.CanCast(Ravager) && TalentRavager && API.PlayerRage < 70 && IsRavagerOn && IsRavager)
+                    if (API.CanCast(Ravager) && !isExplosive && TalentRavager && API.PlayerRage < 70 && IsRavagerOn && IsRavager)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
                     //actions.generic+=/dragon_roar
-                    if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerRage < 80)
+                    if (API.CanCast(DragonRoar) && !isExplosive && TalentDragonRoar && API.PlayerRage < 80)
                     {
                         API.CastSpell(DragonRoar);
                         return;
@@ -511,13 +513,13 @@ namespace HyperElk.Core
                 if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
                 {
                     //actions.aoe=ravager
-                    if (API.CanCast(Ravager) && TalentRavager && API.PlayerRage < 70 && IsRavagerOn && IsRavager)
+                    if (API.CanCast(Ravager) && !isExplosive && TalentRavager && API.PlayerRage < 70 && IsRavagerOn && IsRavager)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
                     //actions.aoe+=/dragon_roar
-                    if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerRage < 80)
+                    if (API.CanCast(DragonRoar) && !isExplosive && TalentDragonRoar && API.PlayerRage < 80)
                     {
                         API.CastSpell(DragonRoar);
                         return;

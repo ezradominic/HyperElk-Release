@@ -22,6 +22,7 @@
 // v2.9 latest simc apl
 // v3.0 a few quality of life changes
 // v3.05 Battle shout fix
+// v3.1 explosive protectio
 
 using System.Linq;
 
@@ -93,6 +94,7 @@ namespace HyperElk.Core
         bool TalentRavager => API.PlayerIsTalentSelected(7, 3);
 
         //General
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
@@ -153,7 +155,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v3.05");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v3.1");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 
@@ -392,33 +394,33 @@ namespace HyperElk.Core
                     API.CastSpell(RacialSpell1);
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !isExplosive && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !isExplosive && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
                     return;
                 }
-                if (API.CanCast(ConquerorsBanner) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(ConquerorsBanner) && !isExplosive && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(ConquerorsBanner);
                     return;
                 }
-                if (API.CanCast(SpearofBastion) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(SpearofBastion) && !isExplosive && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(SpearofBastion);
                     return;
                 }
-                if (API.CanCast(AncientAftershock) && PlayerCovenantSettings == "Night Fae" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(AncientAftershock) && !isExplosive && PlayerCovenantSettings == "Night Fae" && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(AncientAftershock);
                     return;
                 }
                 //actions+=/sweeping_strikes,if=spell_targets.whirlwind>1&(cooldown.bladestorm.remains>15|talent.ravager.enabled)
-                if (API.CanCast(SweepingStrikes) && PlayerLevel >= 22 && !API.PlayerHasBuff(SweepingStrikes) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE && (API.SpellCDDuration(Bladestorm) > 1500 && IsBladestorm && BladestormToggle && !TalentRavager || !BladestormToggle || !IsBladestorm || TalentRavager)))
+                if (API.CanCast(SweepingStrikes) && !isExplosive && PlayerLevel >= 22 && !API.PlayerHasBuff(SweepingStrikes) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE && (API.SpellCDDuration(Bladestorm) > 1500 && IsBladestorm && BladestormToggle && !TalentRavager || !BladestormToggle || !IsBladestorm || TalentRavager)))
                 {
                     API.CastSpell(SweepingStrikes);
                     return;
@@ -450,25 +452,25 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.execute+=/ravager
-                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle)
+                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle && !isExplosive)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
                     //actions.execute+=/cleave,if=spell_targets.whirlwind>1&dot.deep_wounds.remains<gcd
-                    if (API.CanCast(Cleave) && TalentCleave && API.PlayerRage >= 20 && API.TargetDebuffRemainingTime(DeepWounds) < gcd && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
+                    if (API.CanCast(Cleave) && !isExplosive && TalentCleave && API.PlayerRage >= 20 && API.TargetDebuffRemainingTime(DeepWounds) < gcd && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                     {
                         API.CastSpell(Cleave);
                         return;
                     }
                     //actions.execute+=/warbreaker
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
+                    if (API.CanCast(Warbreaker) && !isExplosive && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
                     {
                         API.CastSpell(Warbreaker);
                         return;
                     }
                     //actions.execute+=/colossus_smash
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
+                    if (API.CanCast(ColossusSmash) && !isExplosive && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
@@ -492,7 +494,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.execute+=/bladestorm,if=buff.deadly_calm.down&rage<50
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && !TalentRavager && API.PlayerRage < 50 && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && !isExplosive && PlayerLevel >= 38 && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && !TalentRavager && API.PlayerRage < 50 && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
@@ -536,31 +538,31 @@ namespace HyperElk.Core
                 if ((API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && !IsExecute)
                 {
                     //actions.single_target=rend,if=remains<=duration*0.3
-                    if (API.CanCast(Rend) && API.TargetDebuffRemainingTime(Rend) <= 360 && (API.PlayerRage >= 30 || API.PlayerHasBuff(DeadlyCalm)) && TalentRend)
+                    if (API.CanCast(Rend) && !isExplosive && API.TargetDebuffRemainingTime(Rend) <= 360 && (API.PlayerRage >= 30 || API.PlayerHasBuff(DeadlyCalm)) && TalentRend)
                     {
                         API.CastSpell(Rend);
                         return;
                     }
                     //actions.single_target=avatar,if=cooldown.colossus_smash.remains<8&gcd.remains=0
-                    if (API.CanCast(Avatar) && TalentAvatar && !API.PlayerHasBuff(Avatar) && (API.SpellCDDuration(ColossusSmash) < 800 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 800 && TalentWarbreaker) && IsAvatar)
+                    if (API.CanCast(Avatar) && !isExplosive && TalentAvatar && !API.PlayerHasBuff(Avatar) && (API.SpellCDDuration(ColossusSmash) < 800 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 800 && TalentWarbreaker) && IsAvatar)
                     {
                         API.CastSpell(Avatar);
                         return;
                     }
                     //actions.single_target+=/ravager
-                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle)
+                    if (API.CanCast(Ravager) && !isExplosive && TalentRavager && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
                     //actions.single_target+=/warbreaker
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
+                    if (API.CanCast(Warbreaker) && !isExplosive && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
                     {
                         API.CastSpell(Warbreaker);
                         return;
                     }
                     //actions.single_target+=/colossus_smash
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
+                    if (API.CanCast(ColossusSmash) && !isExplosive && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
@@ -572,19 +574,19 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/mortal_strike,if=buff.overpower.stack>=2&buff.deadly_calm.down|(dot.deep_wounds.remains<=gcd&cooldown.colossus_smash.remains>gcd)
-                    if (API.CanCast(MortalStrike) && PlayerLevel >= 10 && API.PlayerRage >= 30 && (API.PlayerBuffStacks(Overpower) >= 2 && !API.PlayerHasBuff(DeadlyCalm) || (API.TargetDebuffRemainingTime(DeepWounds) < gcd && (API.SpellCDDuration(ColossusSmash) > gcd && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) > gcd))))
+                    if (API.CanCast(MortalStrike) && !isExplosive && PlayerLevel >= 10 && API.PlayerRage >= 30 && (API.PlayerBuffStacks(Overpower) >= 2 && !API.PlayerHasBuff(DeadlyCalm) || (API.TargetDebuffRemainingTime(DeepWounds) < gcd && (API.SpellCDDuration(ColossusSmash) > gcd && !TalentWarbreaker || TalentWarbreaker && API.SpellCDDuration(Warbreaker) > gcd))))
                     {
                         API.CastSpell(MortalStrike);
                         return;
                     }
                     //actions.single_target+=/bladestorm,if=buff.deadly_calm.down&(debuff.colossus_smash.up&rage<30|rage<50)
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && IsBladestorm && BladestormToggle && (!API.TargetHasDebuff(ColossusSmash) && API.PlayerRage < 50 || API.TargetHasDebuff(ColossusSmash) && API.PlayerRage < 30))
+                    if (API.CanCast(Bladestorm) && !isExplosive && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && IsBladestorm && BladestormToggle && (!API.TargetHasDebuff(ColossusSmash) && API.PlayerRage < 50 || API.TargetHasDebuff(ColossusSmash) && API.PlayerRage < 30))
                     {
                         API.CastSpell(Bladestorm);
                         return;
                     }
                     //actions.single_target+=/deadly_calm
-                    if (API.CanCast(DeadlyCalm) && TalentDeadlyCalm && IsDeadlyCalm)
+                    if (API.CanCast(DeadlyCalm) && !isExplosive && TalentDeadlyCalm && IsDeadlyCalm)
                     {
                         API.CastSpell(DeadlyCalm);
                         return;
@@ -632,7 +634,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.single_target+=/whirlwind,if=talent.fervor_of_battle.enabled&rage>60
-                    if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && TalentFevorofBattle && API.PlayerRage > 60)
+                    if (API.CanCast(Whirlwind) && !isExplosive && PlayerLevel >= 9 && TalentFevorofBattle && API.PlayerRage > 60)
                     {
                         API.CastSpell(Whirlwind);
                         return;
@@ -653,43 +655,43 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.hac+=/avatar,if=cooldown.colossus_smash.remains<1
-                    if (API.CanCast(Avatar) && TalentAvatar && !API.PlayerHasBuff(Avatar) && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
+                    if (API.CanCast(Avatar) && !isExplosive && TalentAvatar && !API.PlayerHasBuff(Avatar) && (API.SpellCDDuration(ColossusSmash) < 100 && !TalentWarbreaker || API.SpellCDDuration(Warbreaker) < 100 && TalentWarbreaker) && IsAvatar)
                     {
                         API.CastSpell(Avatar);
                         return;
                     }
                     //actions.hac+=/warbreaker
-                    if (API.CanCast(Warbreaker) && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
+                    if (API.CanCast(Warbreaker) && !isExplosive && !API.TargetHasDebuff(ColossusSmash) && TalentWarbreaker && IsWarbreaker && ColossusToggle)
                     {
                         API.CastSpell(Warbreaker);
                         return;
                     }
                     //actions.hac+=/colossus_smash
-                    if (API.CanCast(ColossusSmash) && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
+                    if (API.CanCast(ColossusSmash) && !isExplosive && PlayerLevel >= 19 && !API.TargetHasDebuff(ColossusSmash) && !TalentWarbreaker && IsColossusSmash && ColossusToggle)
                     {
                         API.CastSpell(ColossusSmash);
                         return;
                     }
                     //actions.hac+=/cleave,if=dot.deep_wounds.remains<=gcd
-                    if (API.CanCast(Cleave) && TalentCleave && API.TargetDebuffRemainingTime(DeepWounds) < gcd && (API.PlayerRage >= 20 || API.PlayerHasBuff(DeadlyCalm)))
+                    if (API.CanCast(Cleave) && !isExplosive && TalentCleave && API.TargetDebuffRemainingTime(DeepWounds) < gcd && (API.PlayerRage >= 20 || API.PlayerHasBuff(DeadlyCalm)))
                     {
                         API.CastSpell(Cleave);
                         return;
                     }
                     //actions.hac+=/bladestorm
-                    if (API.CanCast(Bladestorm) && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && IsBladestorm && BladestormToggle)
+                    if (API.CanCast(Bladestorm) && !isExplosive && PlayerLevel >= 38 && !TalentRavager && !API.PlayerHasBuff(DeadlyCalm) && !API.PlayerHasBuff(SweepingStrikes) && IsBladestorm && BladestormToggle)
                     {
                         API.CastSpell(Bladestorm);
                         return;
                     }
                     //actions.hac+=/ravager
-                    if (API.CanCast(Ravager) && TalentRavager && IsRavager && BladestormToggle)
+                    if (API.CanCast(Ravager) && !isExplosive && TalentRavager && IsRavager && BladestormToggle)
                     {
                         API.CastSpell(Ravager);
                         return;
                     }
                     //actions.hac+=/rend,if=remains<=duration*0.3&buff.sweeping_strikes.up
-                    if (API.CanCast(Rend) && API.TargetDebuffRemainingTime(Rend) <= 360 && API.PlayerHasBuff(SweepingStrikes) && (API.PlayerRage >= 30 || API.PlayerHasBuff(DeadlyCalm)) && TalentRend)
+                    if (API.CanCast(Rend) && !isExplosive && API.TargetDebuffRemainingTime(Rend) <= 360 && API.PlayerHasBuff(SweepingStrikes) && (API.PlayerRage >= 30 || API.PlayerHasBuff(DeadlyCalm)) && TalentRend)
                     {
                         API.CastSpell(Rend);
                         return;

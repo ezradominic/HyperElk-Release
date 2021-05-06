@@ -29,6 +29,8 @@
 // v3.7 mobcount fix
 // v3.8 auto break roots
 // v3.85 root break adjustment
+// v3.9 small bugfix
+// v4.0 no finisher on explosives
 
 using System.Diagnostics;
 
@@ -141,6 +143,7 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, true, false);
         }
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         bool isBloodlust => PlayerHasBuff(AncientHysteria) || PlayerHasBuff(TimeWarp) || PlayerHasBuff(Bloodlust) || PlayerHasBuff(Heroism) || PlayerHasBuff(DrumsofDeathlyFerocity);
         //actions.owlweave+=/moonkin_form,if=energy<30&dot.rip.remains>4.5&(cooldown.tigers_fury.remains>=6.5|runeforge.cateye_curio)&buff.clearcasting.stack<1&!buff.apex_predators_craving.up&!buff.bloodlust.up&!buff.bs_inc.up&(cooldown.convoke_the_spirits.remains>6.5|!covenant.night_fae)
         bool WeaveConditions => (API.PlayerEnergy < 30 && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && API.TargetDebuffRemainingTime(Rip) > 450 && (API.SpellCDDuration(TigersFury) >= 650 || IsLegendary == "Cat-eye Curio") && API.PlayerBuffStacks(Clearcasting) < 1 && !PlayerHasBuff(ApexPredatorsCraving) && !isBloodlust && !IncaBerserk && (API.SpellCDDuration(ConvoketheSpirits) >= 650 && IsCovenant || !IsCovenant || PlayerCovenantSettings != "Night Fae"));
@@ -206,7 +209,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v3.85");
+            API.WriteLog("Welcome to smartie`s Feral Druid v4.0");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -364,6 +367,7 @@ namespace HyperElk.Core
             }
             if (PlayerHasBuff(Bloodtalons) && bloodtimer.IsRunning)
             {
+                bloodtimer.Stop();
                 bloodtimer.Reset();
                 //API.WriteLog("Bloodtimer reset");
             }
@@ -395,26 +399,32 @@ namespace HyperElk.Core
             // Stopwatch stop
             if (rakewatch.IsRunning && rakewatch.ElapsedMilliseconds > 4000)
             {
+                rakewatch.Stop();
                 rakewatch.Reset();
             }
             if (thrashwatch.IsRunning && thrashwatch.ElapsedMilliseconds > 4000)
             {
+                thrashwatch.Stop();
                 thrashwatch.Reset();
             }
             if (brutalwatch.IsRunning && brutalwatch.ElapsedMilliseconds > 4000)
             {
+                brutalwatch.Stop();
                 brutalwatch.Reset();
             }
             if (moonwatch.IsRunning && moonwatch.ElapsedMilliseconds > 4000)
             {
+                moonwatch.Stop();
                 moonwatch.Reset();
             }
             if (shredwatch.IsRunning && shredwatch.ElapsedMilliseconds > 4000)
             {
+                shredwatch.Stop();
                 shredwatch.Reset();
             }
             if (swipewatch.IsRunning && swipewatch.ElapsedMilliseconds > 4000)
             {
+                swipewatch.Stop();
                 swipewatch.Reset();
             }
         }
@@ -721,7 +731,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cooldown+=/convoke_the_spirits,if=(dot.rip.remains>4&combo_points<3&dot.rake.ticking&energy.deficit>=20)|fight_remains<5
-                if ((API.PlayerUnitInMeleeRangeCount < 6 || !TalentBalanceAffinity || API.PlayerUnitInMeleeRangeCount < 9 && !TalentHeartoftheWild || !IsAutoForm || !IsOwlweave) && PlayerCovenantSettings == "Night Fae")
+                if ((API.PlayerUnitInMeleeRangeCount < 6 || !TalentBalanceAffinity || API.PlayerUnitInMeleeRangeCount < 9 && !TalentHeartoftheWild || !IsAutoForm || !IsOwlweave) && !isExplosive && PlayerCovenantSettings == "Night Fae")
                 {
                     if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant && (API.TargetDebuffRemainingTime(Rip) > 400 && TargetHasDebuff(Rake) && (API.PlayerComboPoints <= 3 && EnergyDefecit >= 20 || API.PlayerHasBuff(TigersFury) && API.PlayerBuffTimeRemaining(TigersFury) < 450)))
                     {
@@ -748,13 +758,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cooldown+=/use_items
-                if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && !isExplosive && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
                     return;
                 }
                 //actions.cooldown+=/use_items
-                if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && !isExplosive && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
                     return;
@@ -763,19 +773,19 @@ namespace HyperElk.Core
                 if (API.PlayerComboPoints > 4 && !PlayerHasBuff(Shadowmeld) && !PlayerHasBuff(Prowl))
                 {
                     //actions.finisher=savage_roar,if=buff.savage_roar.down|buff.savage_roar.remains<(combo_points*6+1)*0.3
-                    if (TalentSavageRoar && isMelee && API.CanCast(SavageRoar) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24) && (!PlayerHasBuff(SavageRoar) || API.PlayerBuffTimeRemaining(SavageRoar) < (API.PlayerComboPoints * 600 + 100) * .3))
+                    if (TalentSavageRoar && isMelee && !isExplosive && API.CanCast(SavageRoar) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 30 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 24) && (!PlayerHasBuff(SavageRoar) || API.PlayerBuffTimeRemaining(SavageRoar) < (API.PlayerComboPoints * 600 + 100) * .3))
                     {
                         API.CastSpell(SavageRoar);
                         return;
                     }
                     //actions.finisher+=/primal_wrath,if=spell_targets.primal_wrath>2
-                    if (isMelee && TalentPrimalWrath && API.CanCast(PrimalWrath) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16))
+                    if (isMelee && TalentPrimalWrath && !isExplosive && API.CanCast(PrimalWrath) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16))
                     {
                         API.CastSpell(PrimalWrath);
                         return;
                     }
                     //actions.finisher+=/rip,target_if=refreshable&druid.rip.ticks_gained_on_refresh>variable.rip_ticks&((buff.tigers_fury.up|cooldown.tigers_fury.remains>5)&(buff.bloodtalons.up|!talent.bloodtalons.enabled)&dot.rip.pmultiplier<=persistent_multiplier|!talent.sabertooth.enabled)
-                    if (isMelee && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && API.CanCast(Rip) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!TargetHasDebuff(Rip) || (API.TargetDebuffRemainingTime(Rip) + API.PlayerComboPoints * (TalentSabertooth ? 100 : 0)) < 600))
+                    if (isMelee && !isExplosive && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && API.CanCast(Rip) && (!PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 20 || PlayerHasBuff(Incarnation) && API.PlayerEnergy >= 16) && (!TargetHasDebuff(Rip) || (API.TargetDebuffRemainingTime(Rip) + API.PlayerComboPoints * (TalentSabertooth ? 100 : 0)) < 600))
                     {
                         API.CastSpell(Rip);
                         return;
@@ -789,7 +799,7 @@ namespace HyperElk.Core
                         }
                     }
                     //actions.finisher+=/ferocious_bite,max_energy=1,target_if=max:time_to_die
-                    if (isMelee && API.CanCast(FerociousBite) && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.PlayerEnergy >= 50 || PlayerHasBuff(ApexPredatorsCraving)))
+                    if (isMelee && API.CanCast(FerociousBite) && !isExplosive && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && (!TalentPrimalWrath || API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE) && (API.PlayerEnergy >= 50 || PlayerHasBuff(ApexPredatorsCraving)))
                     {
                         API.CastSpell(FerociousBite);
                         return;
@@ -853,7 +863,7 @@ namespace HyperElk.Core
                     {
                         if (API.PlayerUnitInMeleeRangeCount < AOEUnitNumber || !IsAOE)
                         {
-                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && PlayerHasBuff(ApexPredatorsCraving))
+                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !isExplosive && PlayerHasBuff(ApexPredatorsCraving))
                             {
                                 API.CastSpell(FerociousBite);
                                 return;
@@ -886,7 +896,7 @@ namespace HyperElk.Core
                         }
                         if (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE)
                         {
-                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && PlayerHasBuff(ApexPredatorsCraving))
+                            if (isMelee && PlayerLevel >= 7 && API.CanCast(FerociousBite) && !isExplosive && PlayerHasBuff(ApexPredatorsCraving))
                             {
                                 API.CastSpell(FerociousBite);
                                 return;

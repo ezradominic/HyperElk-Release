@@ -2,6 +2,7 @@
 // v1.0 First release
 // v1.1 small adjustments
 // v1.2 small adjustments
+// v1.3 explosive protection
 
 
 using System.Diagnostics;
@@ -67,6 +68,7 @@ namespace HyperElk.Core
 
 
         //General
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private int PlayerLevel => API.PlayerLevel;
         private static bool PlayerHasBuff(string buff)
         {
@@ -134,7 +136,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Assassination Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.2");
+            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.3");
             API.WriteLog("You need the following macros:");
             API.WriteLog("GarroteMO - /cast [@mouseover] Garrote");
             API.WriteLog("RuptureMO - /cast [@mouseover] Rupture");
@@ -371,7 +373,7 @@ namespace HyperElk.Core
                 if (IsStealth)
                 {
                     //actions.stealthed=crimson_tempest,if=talent.nightstalker.enabled&spell_targets>=3&combo_points>=4&target.time_to_die-remains>6
-                    if (API.CanCast(CrimsonTempest) && TalentCrimsonTempest && TalentNightStalker && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE && API.PlayerComboPoints >= 4 && API.PlayerEnergy >= 35)
+                    if (API.CanCast(CrimsonTempest) && !isExplosive && TalentCrimsonTempest && TalentNightStalker && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE && API.PlayerComboPoints >= 4 && API.PlayerEnergy >= 35)
                     {
                         API.CastSpell(CrimsonTempest);
                         return;
@@ -423,31 +425,31 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.cds+=/flagellation,if=!stealthed.rogue&(cooldown.vendetta.remains<3&effective_combo_points>=4&target.time_to_die>10|debuff.vendetta.up|fight_remains<24)
-                        if (API.CanCast(Flagellation) && PlayerCovenantSettings == "Venthyr" && IsCovenant && (API.SpellCDDuration(Vendetta) < 300 && API.PlayerComboPoints >= 4 && API.TargetTimeToDie > 1000 || TargetHasDebuff(Vendetta) || API.TargetTimeToDie < 2400))
+                        if (API.CanCast(Flagellation) && !isExplosive && PlayerCovenantSettings == "Venthyr" && IsCovenant && (API.SpellCDDuration(Vendetta) < 300 && API.PlayerComboPoints >= 4 && API.TargetTimeToDie > 1000 || TargetHasDebuff(Vendetta) || API.TargetTimeToDie < 2400))
                         {
                             API.CastSpell(Flagellation);
                             return;
                         }
                         //actions.cds+=/sepsis,if=!stealthed.rogue&(cooldown.vendetta.remains<1&target.time_to_die>10|debuff.vendetta.up|fight_remains<10)
-                        if (API.CanCast(Sepsis) && PlayerCovenantSettings == "Night Fae" && IsCovenant && !PlayerHasBuff(Stealth) && (API.SpellCDDuration(Vendetta) < 100 && API.TargetTimeToDie > 1000 || TargetHasDebuff(Vendetta) || API.TargetTimeToDie < 1000) && API.PlayerEnergy >= 25)
+                        if (API.CanCast(Sepsis) && !isExplosive && PlayerCovenantSettings == "Night Fae" && IsCovenant && !PlayerHasBuff(Stealth) && (API.SpellCDDuration(Vendetta) < 100 && API.TargetTimeToDie > 1000 || TargetHasDebuff(Vendetta) || API.TargetTimeToDie < 1000) && API.PlayerEnergy >= 25)
                         {
                             API.CastSpell(Sepsis);
                             return;
                         }
                         //actions.cds+=/vendetta,if=!stealthed.rogue&dot.rupture.ticking&!debuff.vendetta.up&variable.vendetta_nightstalker_condition&variable.vendetta_covenant_condition
-                        if (API.CanCast(Vendetta) && IsVendetta && !PlayerHasBuff(Stealth) && TargetHasDebuff(Rupture) && !TargetHasDebuff(Vendetta) && (!TalentExsanguinate || API.SpellCDDuration(Exsanguinate) < 500 && !TalentDeeperStratagem || API.SpellCDDuration(Exsanguinate) < 300 && TalentDeeperStratagem))
+                        if (API.CanCast(Vendetta) && !isExplosive && IsVendetta && !PlayerHasBuff(Stealth) && TargetHasDebuff(Rupture) && !TargetHasDebuff(Vendetta) && (!TalentExsanguinate || API.SpellCDDuration(Exsanguinate) < 500 && !TalentDeeperStratagem || API.SpellCDDuration(Exsanguinate) < 300 && TalentDeeperStratagem))
                         {
                             API.CastSpell(Vendetta);
                             return;
                         }
                         //actions.cds+=/exsanguinate,if=!stealthed.rogue&(!dot.Garrotee.refreshable&dot.rupture.remains>4+4*cp_max_spend|dot.rupture.remains*0.5>target.time_to_die)&target.time_to_die>4
-                        if (API.CanCast(Exsanguinate) && IsExsanguinate && !PlayerHasBuff(Stealth) && (!dotGarroteerefreshable && API.PlayerDebuffRemainingTime(Rupture) > 400) && API.PlayerEnergy >= 25)
+                        if (API.CanCast(Exsanguinate) && !isExplosive && IsExsanguinate && !PlayerHasBuff(Stealth) && (!dotGarroteerefreshable && API.PlayerDebuffRemainingTime(Rupture) > 400) && API.PlayerEnergy >= 25)
                         {
                             API.CastSpell(Exsanguinate);
                             return;
                         }
                         //actions.cds+=/shiv,if=dot.rupture.ticking&(!cooldown.sepsis.ready|cooldown.vendetta.remains>12)|dot.sepsis.ticking
-                        if (API.CanCast(Shiv) && (TargetHasDebuff(Rupture) && (API.SpellCDDuration(Sepsis) > GCD || API.SpellCDDuration(Vendetta) > 1200 && IsVendetta) || TargetHasDebuff(Sepsis)) && API.PlayerEnergy >= 20)
+                        if (API.CanCast(Shiv) && !isExplosive && (TargetHasDebuff(Rupture) && (API.SpellCDDuration(Sepsis) > GCD || API.SpellCDDuration(Vendetta) > 1200 && IsVendetta) || TargetHasDebuff(Sepsis)) && API.PlayerEnergy >= 20)
                         {
                             API.CastSpell(Shiv);
                             return;
@@ -477,7 +479,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.cds+=/call_action_list,name=vanish,if=!stealthed.all&master_assassin_remains=0
-                        if (API.CanCast(Vanish) && IsVanish)
+                        if (API.CanCast(Vanish) && IsVanish && !isExplosive)
                         {
                             //actions.vanish+=/vanish,if=talent.exsanguinate.enabled&talent.nightstalker.enabled&variable.nightstalker_cp_condition&cooldown.exsanguinate.remains<1
                             if (API.CanCast(Vanish) && TalentExsanguinate && TalentNightStalker && API.SpellCDDuration(Exsanguinate) < 100 && nightstalkercpcondition)
@@ -505,13 +507,13 @@ namespace HyperElk.Core
                             }
                         }
                         //actions.cds+=/use_items,slots=trinket1,if=variable.trinket_sync_slot=1&(debuff.vendetta.up|fight_remains<=20)|(variable.trinket_sync_slot=2&!trinket.2.cooldown.ready)|!variable.trinket_sync_slot
-                        if (API.PlayerTrinketIsUsable(1) && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1 && (TargetHasDebuff(Vendetta) && IsVendetta || !IsVendetta))
+                        if (API.PlayerTrinketIsUsable(1) && !isExplosive && !API.MacroIsIgnored("Trinket1") && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1 && (TargetHasDebuff(Vendetta) && IsVendetta || !IsVendetta))
                         {
                             API.CastSpell("Trinket1");
                             return;
                         }
                         //actions.cooldown+=/use_items
-                        if (API.PlayerTrinketIsUsable(2) && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2 && (TargetHasDebuff(Vendetta) && IsVendetta || !IsVendetta))
+                        if (API.PlayerTrinketIsUsable(2) && !isExplosive && !API.MacroIsIgnored("Trinket2") && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2 && (TargetHasDebuff(Vendetta) && IsVendetta || !IsVendetta))
                         {
                             API.CastSpell("Trinket2");
                             return;
@@ -524,7 +526,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions+=/envenom,if=buff.slice_and_dice.up&buff.slice_and_dice.remains<5&combo_points>=4
-                    if (API.CanCast(Envenom) && API.PlayerComboPoints >= 4 && PlayerHasBuff(SliceandDice) && API.PlayerBuffTimeRemaining(SliceandDice) < 500 && API.PlayerEnergy >= 35)
+                    if (API.CanCast(Envenom) && !isExplosive && API.PlayerComboPoints >= 4 && PlayerHasBuff(SliceandDice) && API.PlayerBuffTimeRemaining(SliceandDice) < 500 && API.PlayerEnergy >= 35)
                     {
                         API.CastSpell(Envenom);
                         return;
@@ -549,7 +551,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.dot+=/crimson_tempest,if=spell_targets>=2&remains<2+(spell_targets>=5)&effective_combo_points>=4
-                    if (API.CanCast(CrimsonTempest) && TalentCrimsonTempest && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE && dotcrimsontempestrefreshable && API.PlayerComboPoints >= 4 && API.PlayerEnergy >= 35)
+                    if (API.CanCast(CrimsonTempest) && !isExplosive && TalentCrimsonTempest && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE && dotcrimsontempestrefreshable && API.PlayerComboPoints >= 4 && API.PlayerEnergy >= 35)
                     {
                         API.CastSpell(CrimsonTempest);
                         return;
@@ -580,7 +582,7 @@ namespace HyperElk.Core
                     }
                     //actions+=/call_action_list,name=direct
                     //actions.direct=envenom,if=effective_combo_points>=4+talent.deeper_stratagem.enabled&(debuff.vendetta.up|debuff.shiv.up|debuff.flagellation.up|energy.deficit<=25+variable.energy_regen_combined|!variable.single_target)&(!talent.exsanguinate.enabled|cooldown.exsanguinate.remains>2)
-                    if (API.CanCast(Envenom) && (API.PlayerComboPoints >= 4 && !TalentDeeperStratagem || TalentDeeperStratagem && API.PlayerComboPoints >= 5) && (TargetHasDebuff(Vendetta) || TargetHasDebuff(Shiv) || TargetHasDebuff(Flagellation) || EnergyDefecit <= 25 +EnergyRegen || API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && IsAOE) && (!TalentExsanguinate || API.SpellCDDuration(Exsanguinate) > 200) && API.PlayerEnergy >= 35)
+                    if (API.CanCast(Envenom) && !isExplosive && (API.PlayerComboPoints >= 4 && !TalentDeeperStratagem || TalentDeeperStratagem && API.PlayerComboPoints >= 5) && (TargetHasDebuff(Vendetta) || TargetHasDebuff(Shiv) || TargetHasDebuff(Flagellation) || EnergyDefecit <= 25 +EnergyRegen || API.PlayerUnitInMeleeRangeCount > AOEUnitNumber && IsAOE) && (!TalentExsanguinate || API.SpellCDDuration(Exsanguinate) > 200) && API.PlayerEnergy >= 35)
                     {
                         API.CastSpell(Envenom);
                         return;
@@ -592,19 +594,19 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.direct+=/fan_of_knives,if=variable.use_filler&(buff.hidden_blades.stack>=19|(!priority_rotation&spell_targets.fan_of_knives>=4+stealthed.rogue))
-                    if (API.CanCast(FanofKnives) && usefiller && (API.PlayerBuffStacks(HiddenBlades) >= 19 || API.PlayerUnitInMeleeRangeCount >= 4 && IsAOE) && API.PlayerEnergy >= 35)
+                    if (API.CanCast(FanofKnives) && !isExplosive && usefiller && (API.PlayerBuffStacks(HiddenBlades) >= 19 || API.PlayerUnitInMeleeRangeCount >= 4 && IsAOE) && API.PlayerEnergy >= 35)
                     {
                         API.CastSpell(FanofKnives);
                         return;
                     }
                     //actions.direct+=/fan_of_knives,target_if=!dot.deadly_poison_dot.ticking,if=variable.use_filler&spell_targets.fan_of_knives>=3
-                    if (API.CanCast(FanofKnives) && !TargetHasDebuff(DeadlyPoison) && usefiller && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE && API.PlayerEnergy >= 35)
+                    if (API.CanCast(FanofKnives) && !isExplosive && !TargetHasDebuff(DeadlyPoison) && usefiller && API.PlayerUnitInMeleeRangeCount >= 3 && IsAOE && API.PlayerEnergy >= 35)
                     {
                         API.CastSpell(FanofKnives);
                         return;
                     }
                     //actions.direct+=/echoing_reprimand,if=variable.use_filler&cooldown.vendetta.remains>10
-                    if (API.CanCast(EchoingReprimand) && IsCovenant && PlayerCovenantSettings == "Kyrian" && usefiller && (API.SpellCDDuration(Vendetta) > 1000 && IsVendetta || !IsVendetta) && API.PlayerEnergy >= 10)
+                    if (API.CanCast(EchoingReprimand) && !isExplosive && IsCovenant && PlayerCovenantSettings == "Kyrian" && usefiller && (API.SpellCDDuration(Vendetta) > 1000 && IsVendetta || !IsVendetta) && API.PlayerEnergy >= 10)
                     {
                         API.CastSpell(EchoingReprimand);
                         return;

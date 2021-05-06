@@ -29,6 +29,7 @@
 // v3.6 changed name of options
 // v3.65 Battle shout fix
 // v3.7 small tweak for simps
+// v3.8 explosive protection
 
 using System.Linq;
 
@@ -92,6 +93,7 @@ namespace HyperElk.Core
         bool TalentSiegebreaker => API.PlayerIsTalentSelected(7, 3);
 
         //General
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
@@ -144,7 +146,6 @@ namespace HyperElk.Core
         private int IgnorePainLifePercent => numbList[CombatRoutine.GetPropertyInt(IgnorePain)];
         private bool UsePiercingHowl => CombatRoutine.GetPropertyBool(PiercingHowl);
         private bool IsMassacre => CombatRoutine.GetPropertyBool("Massacre");
-        private bool SlamBuff => CombatRoutine.GetPropertyBool("Slam Buff");
         bool CanBladestorm => !API.SpellISOnCooldown(Bladestorm) && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle;
         bool CanAA => !API.SpellISOnCooldown(AncientAftershock) && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Night Fae" && IsCovenant;
 
@@ -153,7 +154,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.7");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.8");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 
@@ -249,7 +250,6 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(RallyingCry, RallyingCry + "Life Percent", numbList, "Life percent at which" + RallyingCry + " is used, set to 0 to disable", "Rallying", 50);
             CombatRoutine.AddProp(PiercingHowl, "Use PiercingHowl", false, " Good to use when Anima Power for shouts is active", "Torghast");
             CombatRoutine.AddProp("Massacre", "Got Massacre Anima ?", false, " Activate when you get the Massacre Anima Power", "Torghast");
-            CombatRoutine.AddProp("Slam Buff", "Use Slam", false, " Use Slam when 40x Anima Power and cds enabled", "Torghast");
         }
         public override void Pulse()
         {
@@ -275,11 +275,6 @@ namespace HyperElk.Core
             if (API.CanCast(PiercingHowl) && IsMelee && UsePiercingHowl)
             {
                 API.CastSpell(PiercingHowl);
-                return;
-            }
-            if (API.CanCast(Slam) && IsMelee && API.PlayerRage >= 20 && SlamBuff && API.PlayerBuffStacks(Slambuff) >= 40 && IsCooldowns)
-            {
-                API.CastSpell(Slam);
                 return;
             }
             if (isInterrupt && API.CanCast(StormBolt) && API.TargetRange <= 20 && TalentStormBolt && (API.SpellISOnCooldown(Pummel) || !IsMelee))
@@ -356,7 +351,7 @@ namespace HyperElk.Core
             if (IsMelee)
             {
                 //actions+=/rampage,if=cooldown.recklessness.remains<3&talent.reckless_abandon.enabled
-                if (API.CanCast(Rampage) && PlayerLevel >= 19 && WWup && IsRecklessness && API.SpellCDDuration(Recklessness) < 300 && TalentRecklessAbandon && API.PlayerRage >= 80)
+                if (API.CanCast(Rampage) && !isExplosive && PlayerLevel >= 19 && WWup && IsRecklessness && API.SpellCDDuration(Recklessness) < 300 && TalentRecklessAbandon && API.PlayerRage >= 80)
                 {
                     API.CastSpell(Rampage);
                     return;
@@ -371,7 +366,7 @@ namespace HyperElk.Core
                     API.CastSpell("Cancel Bladestorm");
                     return;
                 }
-                if (API.CanCast(Whirlwind) && PlayerLevel >= 9 && !CanBladestorm && !CanAA && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff(Whirlwind) && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
+                if (API.CanCast(Whirlwind) && !isExplosive && PlayerLevel >= 9 && !CanBladestorm && !CanAA && (PlayerLevel < 22 && API.PlayerRage >= 30 || PlayerLevel >= 22) && (!API.PlayerHasBuff(Whirlwind) && PlayerLevel >= 37 || PlayerLevel < 37) && (API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE))
                 {
                     API.CastSpell(Whirlwind);
                     return;
@@ -412,12 +407,12 @@ namespace HyperElk.Core
                     API.CastSpell(RacialSpell1);
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !isExplosive && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !isExplosive && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
                     return;
@@ -435,7 +430,7 @@ namespace HyperElk.Core
                     API.CastSpell(CrushingBlow);
                     return;
                 }
-                if (API.CanCast(Bladestorm) && API.PlayerBuffTimeRemaining(Enrage) > gcd*2.5 && API.PlayerUnitInMeleeRangeCount >= AoENumber && IsAOE && TalentBladestorm && IsBladestorm && BladestormToggle)
+                if (API.CanCast(Bladestorm) && !isExplosive && API.PlayerBuffTimeRemaining(Enrage) > gcd*2.5 && API.PlayerUnitInMeleeRangeCount >= AoENumber && IsAOE && TalentBladestorm && IsBladestorm && BladestormToggle)
                 {
                     API.CastSpell(Bladestorm);
                     return;
@@ -455,18 +450,18 @@ namespace HyperElk.Core
                     }
                 }
                 //actions.single_target+=/siegebreaker,if=spell_targets.whirlwind>1|raid_event.adds.in>15
-                if (API.CanCast(Siegebreaker) && WWup && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
+                if (API.CanCast(Siegebreaker) && !isExplosive && WWup && TalentSiegebreaker && (IsLineUp && API.SpellCDDuration(Recklessness) > 3000 || !IsLineUp || UseRecklessness == "with Cooldowns" && !IsCooldowns) && IsSiegebreaker)
                 {
                     API.CastSpell(Siegebreaker);
                     return;
                 }
                 //actions.single_target+=/rampage,if=buff.recklessness.up|(buff.enrage.remains<gcd|rage>90)|buff.frenzy.remains<1.5
-                if (API.CanCast(Rampage) && WWup && PlayerLevel >= 19 && API.PlayerRage >= 80 && ((API.PlayerHasBuff(Recklessness) || API.PlayerBuffTimeRemaining(Enrage) < gcd || API.PlayerRage > 90) || API.PlayerHasBuff(Frenzy) && API.PlayerBuffTimeRemaining(Frenzy) < 150))
+                if (API.CanCast(Rampage) && !isExplosive && WWup && PlayerLevel >= 19 && API.PlayerRage >= 80 && ((API.PlayerHasBuff(Recklessness) || API.PlayerBuffTimeRemaining(Enrage) < gcd || API.PlayerRage > 90) || API.PlayerHasBuff(Frenzy) && API.PlayerBuffTimeRemaining(Frenzy) < 150))
                 {
                     API.CastSpell(Rampage);
                     return;
                 }
-                if (API.CanCast(ConquerorsBanner) && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(ConquerorsBanner) && !isExplosive && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Necrolord" && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(ConquerorsBanner);
                     return;
@@ -519,18 +514,18 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-                if (API.CanCast(SpearofBastion) && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && IsCovenant)
+                if (API.CanCast(SpearofBastion) && !isExplosive && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Kyrian" && !API.PlayerIsMoving && IsCovenant)
                 {
                     API.CastSpell(SpearofBastion);
                     return;
                 }
-                if (API.CanCast(AncientAftershock) && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                if (API.CanCast(AncientAftershock) && !isExplosive && API.PlayerHasBuff(Enrage) && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(AncientAftershock);
                     return;
                 }
                 //actions.single_target+=/bladestorm,if=buff.enrage.up&(spell_targets.whirlwind>1|raid_event.adds.in>45)
-                if (API.CanCast(Bladestorm) && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle)
+                if (API.CanCast(Bladestorm) && !isExplosive && API.PlayerHasBuff(Enrage) && TalentBladestorm && IsBladestorm && BladestormToggle)
                 {
                     API.CastSpell(Bladestorm);
                     return;
@@ -548,7 +543,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single_target +=/ dragon_roar,if= buff.enrage.up & (spell_targets.whirlwind > 1 | raid_event.adds.in> 15)
-                if (API.CanCast(DragonRoar) && TalentDragonRoar && API.PlayerHasBuff(Enrage) && IsDragonRoar)
+                if (API.CanCast(DragonRoar) && !isExplosive && TalentDragonRoar && API.PlayerHasBuff(Enrage) && IsDragonRoar)
                 {
                     API.CastSpell(DragonRoar);
                     return;

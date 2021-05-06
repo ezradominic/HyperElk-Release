@@ -14,6 +14,7 @@
 // v2.2 convoke/berserk fix
 // v2.3 auto break roots
 // v2.4 Thrash spam with leggy
+// v2.45 explosive check
 
 namespace HyperElk.Core
 {
@@ -68,6 +69,7 @@ namespace HyperElk.Core
         bool TalentRendandTear => API.PlayerIsTalentSelected(7, 1);
 
         //General
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private int PlayerLevel => API.PlayerLevel;
         private bool isMelee => (TalentBalanceAffinity && API.TargetRange < 9 || !TalentBalanceAffinity && API.TargetRange < 6);
 
@@ -111,7 +113,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.4");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.45");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -320,24 +322,24 @@ namespace HyperElk.Core
                     API.CastSpell(RacialSpell1);
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !isExplosive && IsTrinkets1)
                 {
                     API.CastSpell("Trinket1");
                     return;
                 }
-                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !isExplosive && IsTrinkets2)
                 {
                     API.CastSpell("Trinket2");
                     return;
                 }
                 //actions.bear+=/ravenous_frenzy
-                if (API.CanCast(RavenousFrenzy) && isMelee && PlayerCovenantSettings == "Venthyr" && IsCovenant && IncaBerserk)
+                if (API.CanCast(RavenousFrenzy) && isMelee && PlayerCovenantSettings == "Venthyr" && !isExplosive && IsCovenant && IncaBerserk)
                 {
                     API.CastSpell(RavenousFrenzy);
                     return;
                 }
                 //actions.bear+=/convoke_the_spirits,if=!druid.catweave_bear&!druid.owlweave_bear
-                if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                if (API.CanCast(ConvoketheSpirits) && isMelee && PlayerCovenantSettings == "Night Fae" && !isExplosive && IsCovenant)
                 {
                     API.CastSpell(ConvoketheSpirits);
                     return;
@@ -355,7 +357,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.bear+=/adaptive_swarm,if=(!dot.adaptive_swarm_damage.ticking&!action.adaptive_swarm_damage.in_flight&(!dot.adaptive_swarm_heal.ticking|dot.adaptive_swarm_heal.remains>3)|dot.adaptive_swarm_damage.stack<3&dot.adaptive_swarm_damage.remains<5&dot.adaptive_swarm_damage.ticking)
-                if (API.CanCast(AdaptiveSwarm) && isMelee && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))
+                if (API.CanCast(AdaptiveSwarm) && isMelee && !isExplosive && PlayerCovenantSettings == "Necrolord" && IsCovenant && !API.TargetHasDebuff(AdaptiveSwarm))
                 {
                     API.CastSpell(AdaptiveSwarm);
                     return;

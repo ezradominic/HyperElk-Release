@@ -16,6 +16,7 @@
 // v2.35 small ghostwolf change
 // v2.4 earthshield fix
 // v2.5 new simc apl and new settings options
+// v2.6 explosive protection
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -81,6 +82,7 @@ namespace HyperElk.Core
         bool TalentAscendance => API.PlayerIsTalentSelected(7, 3);
 
         //General
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private int PlayerLevel => API.PlayerLevel;
         private bool isMelee => API.TargetRange < 6;
         private bool isinrange => API.TargetRange < 41;
@@ -132,7 +134,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.5");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.6");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For Earthshield on Focus: /cast [@focus,help] Earth shield");
 
@@ -245,14 +247,17 @@ namespace HyperElk.Core
             }
             if (movingwatch.IsRunning && !API.PlayerIsMoving)
             {
+                movingwatch.Stop();
                 movingwatch.Reset();
             }
             if (movingwatch.IsRunning && !API.PlayerIsInCombat)
             {
+                movingwatch.Stop();
                 movingwatch.Reset();
             }
             if (vesperwatch.IsRunning && vesperwatch.ElapsedMilliseconds > 30000)
             {
+                vesperwatch.Stop();
                 vesperwatch.Reset();
                 API.WriteLog("Resetting Vespermwatch.");
             }
@@ -412,12 +417,12 @@ namespace HyperElk.Core
                 API.CastSpell(RacialSpell1);
                 return;
             }
-            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && !isExplosive && IsTrinkets1)
             {
                 API.CastSpell("Trinket1");
                 return;
             }
-            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && !isExplosive && IsTrinkets2)
             {
                 API.CastSpell("Trinket2");
                 return;
@@ -433,13 +438,13 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/feral_spirit
-            if (API.CanCast(FeralSpirit) && PlayerLevel >= 34 && isMelee && IsFeralSpirit)
+            if (API.CanCast(FeralSpirit) && PlayerLevel >= 34 && isMelee && !isExplosive && IsFeralSpirit)
             {
                 API.CastSpell(FeralSpirit);
                 return;
             }
             //actions+=/ascendance,if=raid_event.adds.in>=90|active_enemies>1
-            if (API.CanCast(Ascendance) && isMelee && TalentAscendance && IsAscendance)
+            if (API.CanCast(Ascendance) && isMelee && TalentAscendance && !API.PlayerHasBuff(Ascendance) && !isExplosive && IsAscendance)
             {
                 API.CastSpell(Ascendance);
                 return;
@@ -460,7 +465,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/primordial_wave,if=!buff.primordial_wave.up
-                if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && !API.PlayerHasBuff(PrimordialWave) && isinrange)
+                if (API.CanCast(PrimordialWave) && IsCovenant && !isExplosive && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && !API.PlayerHasBuff(PrimordialWave) && isinrange)
                 {
                     API.CastSpell(PrimordialWave);
                     return;
@@ -490,7 +495,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/vesper_totem
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
+                if (API.CanCast(VesperTotem) && !isExplosive && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
                     return;
@@ -508,7 +513,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/fae_transfusion
-                if (API.CanCast(FaeTransfusion) && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                if (API.CanCast(FaeTransfusion) && !isExplosive && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(FaeTransfusion);
                     return;
@@ -520,13 +525,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/elemental_blast,if=buff.maelstrom_weapon.stack>=5
-                if (API.CanCast(ElementalBlast) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 3 && TalentElementalBlast)
+                if (API.CanCast(ElementalBlast) && !isExplosive && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 3 && TalentElementalBlast)
                 {
                     API.CastSpell(ElementalBlast);
                     return;
                 }
                 //actions.single+=/chain_harvest,if=buff.maelstrom_weapon.stack>=5
-                if (API.CanCast(ChainHarvest) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                if (API.CanCast(ChainHarvest) && !isExplosive && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
                 {
                     API.CastSpell(ChainHarvest);
                     return;
@@ -562,7 +567,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/flame_shock,target_if=refreshable
-                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 500 && isinrange)
+                if (API.CanCast(FlameShock) && !isExplosive && PlayerLevel >= 3 && API.PlayerMana >= 2 && API.TargetDebuffRemainingTime(FlameShock) < 500 && isinrange)
                 {
                     API.CastSpell(FlameShock);
                     return;
@@ -592,13 +597,13 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/sundering,if=raid_event.adds.in>=40
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
+                if (API.CanCast(Sundering) && !isExplosive && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
                 }
                 //actions.single+=/fire_nova,if=active_dot.flame_shock
-                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
+                if (API.CanCast(FireNova) && !isExplosive && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
                 {
                     API.CastSpell(FireNova);
                     return;
@@ -610,7 +615,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.single+=/earth_elemental
-                if (API.CanCast(EarthElemental) && isMelee && PlayerLevel >= 37 && IsEarthElemental)
+                if (API.CanCast(EarthElemental) && !isExplosive && isMelee && PlayerLevel >= 37 && IsEarthElemental)
                 {
                     API.CastSpell(EarthElemental);
                     return;
@@ -649,31 +654,31 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/sundering
-                if (API.CanCast(Sundering) && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
+                if (API.CanCast(Sundering) && !isExplosive && API.PlayerMana >= 6 && SunderingToggle && isMelee && TalentSundering && IsSundering)
                 {
                     API.CastSpell(Sundering);
                     return;
                 }
                 //actions.aoe+=/flame_shock,target_if=refreshable,cycle_targets=1,if=talent.fire_nova.enabled|talent.lashing_flames.enabled|covenant.necrolord
-                if (API.CanCast(FlameShock) && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange && (TalentFireNova || TalentLashingFlames || PlayerCovenantSettings == "Necrolord"))
+                if (API.CanCast(FlameShock) && !isExplosive && PlayerLevel >= 3 && API.PlayerMana >= 2 && !API.TargetHasDebuff(FlameShock) && isinrange && (TalentFireNova || TalentLashingFlames || PlayerCovenantSettings == "Necrolord"))
                 {
                     API.CastSpell(FlameShock);
                     return;
                 }
                 //actions.aoe+=/primordial_wave,target_if=min:dot.flame_shock.remains,cycle_targets=1,if=!buff.primordial_wave.up
-                if (API.CanCast(PrimordialWave) && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && API.TargetHasDebuff(FlameShock) && !API.PlayerHasBuff(PrimordialWave) && isinrange)
+                if (API.CanCast(PrimordialWave) && !isExplosive && IsCovenant && PlayerCovenantSettings == "Necrolord" && API.PlayerMana >= 3 && API.TargetHasDebuff(FlameShock) && !API.PlayerHasBuff(PrimordialWave) && isinrange)
                 {
                     API.CastSpell(PrimordialWave);
                     return;
                 }
                 //actions.aoe+=/fire_nova,if=active_dot.flame_shock>=3
-                if (API.CanCast(FireNova) && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
+                if (API.CanCast(FireNova) && !isExplosive && isMelee && API.PlayerMana >= 6 && TalentFireNova && API.TargetHasDebuff(FlameShock) && IsFireNova)
                 {
                     API.CastSpell(FireNova);
                     return;
                 }
                 //actions.aoe+=/vesper_totem
-                if (API.CanCast(VesperTotem) && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
+                if (API.CanCast(VesperTotem) && !isExplosive && PlayerCovenantSettings == "Kyrian" && IsCovenant && !API.PlayerIsMoving && API.PlayerMana >= 10 && isMelee && !vesperwatch.IsRunning)
                 {
                     API.CastSpell(VesperTotem);
                     return;
@@ -721,7 +726,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/chain_harvest,if=buff.maelstrom_weapon.stack>=5
-                if (API.CanCast(ChainHarvest) && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
+                if (API.CanCast(ChainHarvest) && !isExplosive && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && API.PlayerMana >= 10 && PlayerCovenantSettings == "Venthyr" && IsCovenant)
                 {
                     API.CastSpell(ChainHarvest);
                     return;
@@ -733,7 +738,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/stormkeeper,if=buff.maelstrom_weapon.stack>=5
-                if (API.CanCast(StormKeeper) && !API.PlayerIsMoving && IsStormKeeper && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && TalentStormkeeper)
+                if (API.CanCast(StormKeeper) && !isExplosive && !API.PlayerIsMoving && IsStormKeeper && API.PlayerBuffStacks(MaelstromWeapon) >= 5 && isinrange && TalentStormkeeper)
                 {
                     API.CastSpell(StormKeeper);
                     return;
@@ -769,7 +774,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.aoe+=/fae_transfusion
-                if (API.CanCast(FaeTransfusion) && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
+                if (API.CanCast(FaeTransfusion) && !isExplosive && isMelee && !API.PlayerIsMoving && API.PlayerMana >= 8 && PlayerCovenantSettings == "Night Fae" && IsCovenant)
                 {
                     API.CastSpell(FaeTransfusion);
                     return;
