@@ -31,6 +31,7 @@
 // v3.85 root break adjustment
 // v3.9 small bugfix
 // v4.0 no finisher on explosives
+// v4.05 conduit fix
 
 using System.Diagnostics;
 
@@ -209,7 +210,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v4.0");
+            API.WriteLog("Welcome to smartie`s Feral Druid v4.05");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -325,7 +326,7 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Conduit
-            CombatRoutine.AddConduit(TasteforBlood);
+            CombatRoutine.AddConduit(TasteforBlood, 340682);
 
             //Prop
             CombatRoutine.AddProp("Rootbreaker", "Break roots", false, "Break roots with shapeshift", "Generic");
@@ -356,7 +357,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("Conduit: " + API.PlayerIsConduitSelected(TasteforBlood));
+            //API.WriteLog("Conduit1: " + API.PlayerIsConduitSelected(TasteforBlood));
             //API.WriteLog("Channeling? : " + API.PlayerIsChanneling);
             //API.WriteLog("save: " + SaveEnergy);
             //API.WriteLog("Lastspell: " + API.LastSpellCastInGame);
