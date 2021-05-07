@@ -42,7 +42,7 @@
 // v4.7 auto break roots
 // v4.75 root break adjustment
 // v4.8 explosive killer and some aoe adjustment for cds
-
+// v4.85 AOE cd fix
 using System.Diagnostics;
 
 namespace HyperElk.Core
@@ -188,16 +188,16 @@ namespace HyperElk.Core
         }
         bool covlegy1 => PlayerCovenantSettings == "Night Fae" && IsLegendary == "Balance of all things" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) <= GCD;
         bool covlegy2 => PlayerCovenantSettings != "Night Fae" || IsLegendary != "Balance of all things" || PlayerCovenantSettings == "Night Fae" && IsLegendary == "Balance of all things" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) > GCD;
-        bool incarntrigger1 => API.CanCast(Incarnation) && API.PlayerAstral <= 30 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.TargetTimeToDie < 1350) && TalentIncarnation;
-        bool incarntrigger2 => API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.TargetTimeToDie < 1350) && TalentIncarnation;
-        bool celesttrigger1 => API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral <= 30 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.TargetTimeToDie < 1350) && !TalentIncarnation;
-        bool celesttrigger2 => API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral >= 90 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsAOE || API.TargetTimeToDie < 1350) && !TalentIncarnation;
+        bool incarntrigger1 => API.CanCast(Incarnation) && API.PlayerAstral <= 30 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || HardAoE && IsAOE && TargetHasDebuff(Sunfire) || API.TargetTimeToDie < 1350) && TalentIncarnation;
+        bool incarntrigger2 => API.CanCast(Incarnation) && API.PlayerAstral >= 90 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || HardAoE && IsAOE && TargetHasDebuff(Sunfire) || API.TargetTimeToDie < 1350) && TalentIncarnation;
+        bool celesttrigger1 => API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral <= 30 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || HardAoE && IsAOE && TargetHasDebuff(Sunfire) || API.TargetTimeToDie < 1350) && !TalentIncarnation;
+        bool celesttrigger2 => API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral >= 90 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || HardAoE && IsAOE && TargetHasDebuff(Sunfire) || API.TargetTimeToDie < 1350) && !TalentIncarnation;
         bool incarcelerdy => (covlegy1 && (incarntrigger1 || celesttrigger1) || covlegy2 && (incarntrigger2 || celesttrigger2));
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v4.8");
+            API.WriteLog("Welcome to smartie`s Balance Druid v4.85");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
