@@ -448,7 +448,7 @@ namespace HyperElk.Core
                         API.CastSpell(Kill_Shot);
                         return;
                     }
-                    else if (!API.SpellISOnCooldown(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent < 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                    else if (!API.SpellISOnCooldown(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && (API.MouseoverHealthPercent < 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot + "MO");
                         return;
@@ -596,7 +596,7 @@ namespace HyperElk.Core
                         API.CastSpell(Kill_Shot);
                         return;
                     }
-                    else if (!API.SpellISOnCooldown(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && (API.MouseoverHealthPercent < 20 || PlayerHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
+                    else if (!API.SpellISOnCooldown(Kill_Shot) && (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && API.MouseoverHealthPercent > 0 && (API.MouseoverHealthPercent < 20 || API.MouseoverHasBuff(FlayersMark))) && API.PlayerFocus >= 10 && PlayerLevel >= 42)
                     {
                         API.CastSpell(Kill_Shot + "MO");
                         return;
