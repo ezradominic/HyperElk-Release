@@ -10,8 +10,7 @@ namespace HyperElk.Core
     public class BrewmasterMonk : CombatRoutine
     {
         //Toggles
-        private bool Taunt => API.ToggleIsEnabled("Auto Taunt");
-
+ 
         //General
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
@@ -102,15 +101,7 @@ namespace HyperElk.Core
         private bool TheaterofPainDefensive => API.TargetCurrentCastSpellID == 323515 || API.TargetCurrentCastSpellID == 320063 || API.TargetCurrentCastSpellID == 320644 || API.TargetCurrentCastSpellID == 324079;
         private bool TheNecroticWakeDefensive => API.TargetCurrentCastSpellID == 320012 || API.TargetCurrentCastSpellID == 320655;
         private bool CastleNathriaDefensive => API.TargetCurrentCastSpellID == 329774 || API.TargetCurrentCastSpellID == 334797 || API.TargetCurrentCastSpellID == 334929 || API.TargetCurrentCastSpellID == 342425 || API.TargetCurrentCastSpellID == 329181 || API.TargetCurrentCastSpellID == 328857 || API.TargetCurrentCastSpellID == 343005 || API.TargetCurrentCastSpellID == 341621;
-        private bool Xymox => API.FocusHasDebuff("Glyph of Destruction");
-        private bool Shriekwing => API.FocusBuffStacks("Exsanguinated") == 10;
-        private bool HungeringDestroyer => API.TargetCurrentCastSpellID == 329774 && API.TargetCurrentCastTimeRemaining <= 0 && !API.PlayerIsTargetTarget;
-        private bool LadyInerva => API.FocusDebuffStacks("Warped Desires") >= WarpedDesiresStacks;
-        private bool AltimortheHuntsman => API.FocusDebuffStacks("Jagged Claws") >= JaggedClawsStacks;
-        private bool TheCouncilofBlood => API.FocusDebuffStacks("Duelist's Riposte") >= DuelistsRiposteStacks;
-        private int WarpedDesiresStacks => CombatRoutine.GetPropertyInt("WarpedDesiresStacks");
-        private int JaggedClawsStacks => CombatRoutine.GetPropertyInt("JaggedClawsStacks");
-        private int DuelistsRiposteStacks => CombatRoutine.GetPropertyInt("DuelistsRiposteStacks");
+
         public string[] LegendaryList = new string[] { "None", "Charred Passions" };
 
         private string UseLeg => LegendaryList[CombatRoutine.GetPropertyInt("Legendary")];
@@ -199,9 +190,7 @@ namespace HyperElk.Core
 
             CombatRoutine.AddProp("OOC", "Out of Combat Healing", true, "Use Vivify Out of Combat", "Out of Combat");
 
-            CombatRoutine.AddProp("WarpedDesiresStacks", "Warped Desires Stacks", 2, "How many Stacks of Warped Desires to Provoke", "Auto Taunt");
-            CombatRoutine.AddProp("JaggedClawsStacks", "Jagged Claws Stacks", 3, "How many Stacks of Jagged Claws to Provoke", "Auto Taunt");
-            CombatRoutine.AddProp("DuelistsRiposte", "Duelists Riposte Stacks", 2, "How many Stacks of Duelists Riposte to Provoke", "Auto Taunt");
+
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
 
             //Spells
@@ -308,14 +297,6 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
-            CombatRoutine.AddToggle("Auto Taunt");
-
-            //RaidDebuffAutoTaunt
-            CombatRoutine.AddDebuff("Glyph of Destruction", 325361);
-            CombatRoutine.AddDebuff("Exsanguinating Bite", 328857);
-            CombatRoutine.AddDebuff("Jagged Claws", 334971);
-            CombatRoutine.AddDebuff("Warped Desires", 325382);
-            CombatRoutine.AddDebuff("Duelist's Riposte", 346690);
 
 
         }
@@ -340,16 +321,6 @@ namespace HyperElk.Core
                         return;
                     }
                 }
-            }
-            if (Taunt && !API.PlayerIsTargetTarget && (Xymox || Shriekwing || HungeringDestroyer || LadyInerva))
-            {
-                API.CastSpell(Provoke);
-                return;
-            }
-            if (Taunt && (AltimortheHuntsman || TheCouncilofBlood))
-            {
-                API.CastSpell(Provoke + " Focus Target");
-                return;
             }
             if (API.CanCast(FortifyingBrew) && (CastleNathriaDefensive && API.PlayerIsTargetTarget || DeOtherSideDefensive || PlaguefallDefensive || SanguineDepthsDefensive || SpiresofAscensionDefensive || TheaterofPainDefensive || TheNecroticWakeDefensive))
             {
