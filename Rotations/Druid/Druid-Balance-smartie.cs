@@ -44,6 +44,7 @@
 // v4.8 explosive killer and some aoe adjustment for cds
 // v4.85 AOE cd fix
 // v4.9 aoe adjustment
+// v4.95 additional small change
 
 using System.Diagnostics;
 
@@ -199,7 +200,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v4.9");
+            API.WriteLog("Welcome to smartie`s Balance Druid v4.95");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -378,7 +379,7 @@ namespace HyperElk.Core
                 API.CastSpell(Stopcast);
                 return;
             }
-            if ((API.PlayerCurrentCastTimeRemaining > 40 && Eclipses || !Eclipses && API.PlayerCurrentCastTimeRemaining > 0) || API.PlayerSpellonCursor)
+            if ((API.PlayerCurrentCastTimeRemaining > 40 && Eclipses || !Eclipses && API.PlayerCurrentCastTimeRemaining > 0 || HardAoE && API.PlayerCurrentCastTimeRemaining > 40) || API.PlayerSpellonCursor)
                 return;
             if (!API.PlayerIsMounted && !PlayerHasBuff(TravelForm))
             {
@@ -776,7 +777,7 @@ namespace HyperElk.Core
                                         return;
                                     }
                                 }
-                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && !Eclipses && Solarwatch.IsRunning)
+                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && !Eclipses && (Solarwatch.IsRunning || !Solarwatch.IsRunning && !Lunarwatch.IsRunning))
                                 {
                                     API.CastSpell(Wrath);
                                     return;
