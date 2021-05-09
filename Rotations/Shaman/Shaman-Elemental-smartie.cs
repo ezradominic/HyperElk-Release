@@ -22,6 +22,7 @@
 // v2.9 pet spells added
 // v3.0 some slight aoe changes
 // v3.1 explosive killer
+// v3.15 typo 
 
 using System.Diagnostics;
 
@@ -156,7 +157,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.1");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.15");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
@@ -252,7 +253,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("EarthShield", "EarthShield", true, "Put" + EarthShield + "on ourselfs", "Generic");
             CombatRoutine.AddProp("AutoWolf", "AutoWolf", true, "Will auto switch forms out of Fight", "Generic");
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancle casts on Quaking", "Generic");
-            CombatRoutine.AddProp("EchoLeggy", "Echoes of Great StormElemental Legendary", false, "Enable if you have the Legendary", "Generic");
+            CombatRoutine.AddProp("EchoLeggy", "Echoes of Great Sundering Legendary", false, "Enable if you have the Legendary", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", numbList, "Life percent at which" + AstralShift + "is used, set to 0 to disable", "Defense", 40);
