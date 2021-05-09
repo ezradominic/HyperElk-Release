@@ -81,6 +81,8 @@ namespace HyperElk.Core
         private string PurifySpirit = "Purify Spirit";
         private string SwapSpeed = "Target Swap Speed";
         private string SpiritWalkersTidalTotem = "Spiritwalker's Tidal Totem";
+        private string Innervate = "Innervate";
+
 
         //Talents
         bool TorrentTalent => API.PlayerIsTalentSelected(1, 1);
@@ -227,6 +229,8 @@ namespace HyperElk.Core
         string[] DispellList = { "Chilled", "Frozen Binds", "Clinging Darkness", "Rasping Scream", "Slime Injection", "Gripping Infection", "Repulsive Visage", "Soul Split", "Anima Injection", "Bewildering Pollen", "Bramblethorn Entanglement", "Dying Breath", "Sinlight Visions", "Siphon Life", "Turn to Stone", "Stony Veins", "Curse of Stone", "Turned to Stone", "Curse of Obliteration", "Cosmic Artifice", "Wailing Grief", "Shadow Word:  Pain", "Soporific Shimmerdust", "Soporific Shimmerdust 2", "Anguished Cries", "Wrack Soul", "Sintouched Anima", "Curse of Suppression", "Explosive Anger", "Dark Lance", "Insidious Venom", "Charged Anima", "Lost Confidence", "Burden of Knowledge", "Internal Strife", "Forced Confession", "Insidious Venom 2", "Soul Corruption", "Spectral Reach", "Death Grasp", "Shadow Vulnerability", "Curse of Desolation", "Hex", "Burst" };
         public string[] LegendaryList = new string[] { "None", "Spiritwalker's Tidal Totem" };
         public string[] EarthTarget = new string[] { "Tank", "DPS", "Healer" };
+        string[] FightSelection = { "Shade on Barghast", "Sun King" };
+        private string FightNPC => FightSelection[CombatRoutine.GetPropertyInt("Fight Selection")];
         string[] units = { "player", "party1", "party2", "party3", "party4" };
         string[] raidunits = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8", "raid9", "raid8", "raid9", "raid10", "raid11", "raid12", "raid13", "raid14", "raid16", "raid17", "raid18", "raid19", "raid20", "raid21", "raid22", "raid23", "raid24", "raid25", "raid26", "raid27", "raid28", "raid29", "raid30", "raid31", "raid32", "raid33", "raid34", "raid35", "raid36", "raid37", "raid38", "raid39", "raid40" };
         private string UseEarth => EarthTarget[CombatRoutine.GetPropertyInt("Use Earth Shield")];
@@ -314,6 +318,7 @@ namespace HyperElk.Core
         private bool SpiritLinkCheck => API.CanCast(SpiritLinkTotem) && SpiritLinkAoE;
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         private bool IsAutoSwap => API.ToggleIsEnabled("Auto Target");
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
         private bool IsOOC => API.ToggleIsEnabled("OOC");
         private bool IsDPS => API.ToggleIsEnabled("DPS Auto Target");
         private bool InRange => IsMouseover ? API.MouseoverRange <= 40 : API.TargetRange <= 40;
@@ -324,8 +329,8 @@ namespace HyperElk.Core
         private bool IsDispell => API.ToggleIsEnabled("Dispel");
         private bool IsHealingRain => API.ToggleIsEnabled("Healing Rain");
         private bool IsNpC => API.ToggleIsEnabled("NPC");
-        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && TrinketAoE);
-        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && TrinketAoE);
+        bool IsTrinkets1 => (UseTrinket1 == "With Cooldowns" && IsCooldowns  || UseTrinket1 == "On Cooldown" && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket1 == "on AOE" && TrinketAoE);
+        bool IsTrinkets2 => (UseTrinket2 == "With Cooldowns" && IsCooldowns  || UseTrinket2 == "On Cooldown" && API.TargetHealthPercent <= TrinketLifePercent || UseTrinket2 == "on AOE" && TrinketAoE);
         private bool AutoWolf => CombatRoutine.GetPropertyBool("AutoWolf");
         //Quaking
         private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
@@ -409,15 +414,15 @@ namespace HyperElk.Core
         {
             CombatRoutine.Name = "Resto Shaman by Ryu";
             API.WriteLog("Welcome to Resto Shaman v2.0 by Ryu");
-            API.WriteLog("BETA ROTATION : Some things are still missing. Please post feedback in Shaman Channel.");
             API.WriteLog("If you wish to use my AoE Logic with the Health Percent Setting for Ascendance, please use On Cooldown. If not, With Cooldowns will use the toggle.");
             API.WriteLog("Mouseover Support is added. Please create /cast [@mouseover] xx whereas xx is your spell and assign it the binds with MO on it in keybinds.");
             API.WriteLog("For all ground spells, either use @Cursor or when it is time to place it, the Bot will pause until you've placed it. If you'd perfer to use your own logic for them, please place them on ignore in the spellbook.");
             API.WriteLog("For the Quaking helper you just need to create an ingame macro with /stopcasting and bind it under the Macros Tab in Elk :-)");
             API.WriteLog("There are two different settings for AoE Numbers. AoE Cooldowns referes to Sprirt Link Totem and Healing Tide Totem. All others use the AoE Healing Number or AoE Raid Healing Number.");
-            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Assist Target and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it to swap, friendly or enemy. UNDER TESTING : It can swap back to an enemy, but YOU WILL NEED TO ASSIGN YOUR ASSIST TARGET KEY IT WILL NOT WORK IF YOU DONT DO THIS. If you DO NOT want it to do target enemy swapping, please IGNORE Assist Macro in the Spellbook. This works for both raid and party, however, you must set up the binds. Please watch video in the Discord");
+            API.WriteLog("If you wish to use Auto Target, please set your WoW keybinds in the keybinds => Targeting for Self, Party, and Assist Target and then match them to the Macro's's in the spell book. Enable it the Toggles. You must at least have a target for it to swap, friendly or enemy. Please watch video in the Discord");
             API.WriteLog("The settings in the Targeting Section have been tested to work well. Change them at your risk and ONLY if you understand them.");
             API.WriteLog("Racial's are controled via the Cooldown Toggle and True/False Setting");
+            API.WriteLog("IF YOU USE THE NPC TOGGLE, IT WILL CHANGE THE ROTATION THE NPC HEALING LOGIC (For Shade and Sun King) IT WILL IGNORE ALL OTHER THINGS EXPECT COOLDOWNS, PLEASE TURN IT OFF ONCE YOU HAVE FINISHED HEALING THE NPC - TARGETING ONLY");
             API.WriteLog("Special Thanks to Jom for testing");
 
             //Buff
@@ -435,6 +440,8 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Quake, 240447);
             CombatRoutine.AddBuff(SpiritWalkersTidalTotem, 335891);
             CombatRoutine.AddBuff("Gluttonous Miasma", 329298);
+            CombatRoutine.AddBuff(Innervate, 29166);
+
 
             //Debuff
             CombatRoutine.AddDebuff(FlameShock, 188389);
@@ -526,14 +533,15 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Wellspring, 197995);
             CombatRoutine.AddSpell(PurifySpirit, 77130);
 
-
-            //Toggle
-            CombatRoutine.AddToggle("Auto Target");
+           //Toggle
+           CombatRoutine.AddToggle("Auto Target");
             CombatRoutine.AddToggle("DPS Auto Target");
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("OOC");
             CombatRoutine.AddToggle("Dispel");
             CombatRoutine.AddToggle("Healing Rain");
+            CombatRoutine.AddToggle("NPC");
+
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
@@ -657,6 +665,9 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(DungeonCD, "Number of units for Cooldowns Healing in 5-man ", numbPartyList, " Units for Cooldowns Healing", "Healing", 2);
             CombatRoutine.AddProp(RaidCD, "Number of units for Cooldowns Healing in raid ", numbRaidList, " Units for Cooldowns Healing in raid", "Healing", 6);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
+
+            CombatRoutine.AddProp("Fight Selection", "Select your NPC Fight", FightSelection, "Select Your NPC Fight", "NPC Rotation");
+
             CombatRoutine.AddProp(Trinket, Trinket + " Life Percent", numbList, "Life percent at which " + "Trinkets" + " should be used, set to 0 to disable", "Healing", 55);
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
@@ -688,6 +699,15 @@ namespace HyperElk.Core
             }
             if (!API.PlayerIsMounted && !API.PlayerSpellonCursor && (IsOOC || API.PlayerIsInCombat) && !ChannelingFae && NotChanneling && !ChannelingFlesh && (!TargetHasDebuff("Gluttonous Miasma") || !MouseoverHasDebuff("Gluttonous Miasma") && IsMouseover))
             {
+                if (isExplosive)
+                {
+                    if (API.CanCast(FrostShock) && InRange)
+                    {
+                        API.CastSpell(FrostShock);
+                        API.WriteLog("Explosive killer");
+                        return;
+                    }
+                }
                 if (SpiritWalker && API.CanCast(SpiritWalkersGrace) && API.PlayerIsMoving)
                 {
                     API.CastSpell(SpiritWalkersGrace);
@@ -708,8 +728,55 @@ namespace HyperElk.Core
                     API.CastSpell(Ascendance);
                     return;
                 }
-                #region Dispell
-                if (IsDispell)
+                if (IsNpC && FightNPC == "Sun King" && InRange)
+                {
+                    if (!API.TargetHasBuff(EarthShield, true, true) && API.CanCast(EarthShield) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(EarthShield);
+                        return;
+                    }
+                    if (PlayerCovenantSettings == "Necrolord" && API.CanCast(PrimordialWave)  && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(PrimordialWave);
+                        return;
+                    }
+                    if (API.CanCast(Riptide) && !API.TargetHasBuff(Riptide, true, true) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Riptide);
+                        return;
+                    }
+                    if (API.CanCast(HealingSurge) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(Innervate))
+                    {
+                        API.CastSpell(HealingSurge);
+                        return;
+                    }
+                    if (API.CanCast(HealingWave) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(HealingWave);
+                        return;
+                    }
+                    
+                }
+                if (IsNpC && FightNPC == "Shade on Barghast" && InRange)
+                {
+                    if (API.CanCast(Riptide) && !API.TargetHasBuff(Riptide, true, true) && InRange && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(Riptide);
+                        return;
+                    }
+                    if (API.CanCast(HealingSurge) && API.TargetHealthPercent > 0 && API.PlayerHasBuff(Innervate))
+                    {
+                        API.CastSpell(HealingSurge);
+                        return;
+                    }
+                    if (API.CanCast(HealingWave) && API.TargetHealthPercent > 0)
+                    {
+                        API.CastSpell(HealingWave);
+                        return;
+                    }
+                }
+                    #region Dispell
+                    if (IsDispell)
                 {
                     if (API.CanCast(PurifySpirit) && !ChannelingFae && NotChanneling)
                     {
@@ -735,7 +802,7 @@ namespace HyperElk.Core
                     }
                 }
                 #endregion
-                if (API.CanCast(ManaTideTotem) && ManaAoE && InRange || API.CanCast(ManaTideTotem) && SpirtWalkersTotemAoE && UseLeg == SpiritWalkersTidalTotem)
+                if (API.CanCast(ManaTideTotem) && ManaAoE && InRange && API.PlayerIsInCombat || API.CanCast(ManaTideTotem) && SpirtWalkersTotemAoE && UseLeg == SpiritWalkersTidalTotem)
                 {
                     API.CastSpell(ManaTideTotem);
                     return;
@@ -903,7 +970,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //DPS
-                if (API.PlayerIsInCombat)
+                if (API.PlayerIsInCombat && !isExplosive)
                 {
                     if (API.CanCast(FlameShock) && InRange && (!API.TargetHasDebuff(FlameShock) || API.TargetDebuffRemainingTime(FlameShock) < 600) && API.PlayerCanAttackTarget && API.TargetHealthPercent > 0)
                     {
@@ -951,7 +1018,7 @@ namespace HyperElk.Core
                 {
                     if (!API.PlayerIsInGroup && !API.PlayerIsInRaid)
                     {
-                        if (API.PlayerHealthPercent >= PlayerHP)
+                        if (API.PlayerHealthPercent <= PlayerHP)
                         {
                             API.CastSpell(Player);
                             return;
@@ -959,20 +1026,20 @@ namespace HyperElk.Core
                     }
                     if (API.PlayerIsInGroup && !API.PlayerIsInRaid)
                         {
+                        if (API.PlayerHealthPercent <= PlayerHP && API.TargetIsUnit() != "player")
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
                             for (int j = 0; j < DispellList.Length; j++)
                             for (int i = 0; i < units.Length; i++)
                             {
-                                if (API.PlayerHealthPercent <= PlayerHP && API.TargetIsUnit() != "player")
-                                {
-                                    API.CastSpell(Player);
-                                    return;
-                                }
                                 if (UnitHasDispellAble(DispellList[j], units[i]) && IsDispell && !API.SpellISOnCooldown(PurifySpirit) && API.TargetIsUnit() != units[i])
                                 {
                                     API.CastSpell(PlayerTargetArray[i]);
                                     return;
                                 }
-                                if (API.UnitHealthPercent(units[i]) <= 10 && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && API.TargetIsUnit() != units[i])
+                                if (API.UnitHealthPercent(units[i]) <= 20 && API.UnitHealthPercent(units[i]) > 0 && API.UnitRange(units[i]) <= 40 && API.TargetIsUnit() != units[i])
                                 {
                                     API.CastSpell(PlayerTargetArray[i]);
                                     return;
@@ -1004,13 +1071,13 @@ namespace HyperElk.Core
                         }
                     if (API.PlayerIsInRaid)
                     {
+                        if (API.PlayerHealthPercent <= PlayerHP)
+                        {
+                            API.CastSpell(Player);
+                            return;
+                        }
                         for (int i = 0; i < raidunits.Length; i++)
                         {
-                            if (API.PlayerHealthPercent <= PlayerHP)
-                            {
-                                API.CastSpell(Player);
-                                return;
-                            }
                             if (API.UnitHealthPercent(raidunits[i]) <= 10 && API.UnitHealthPercent(raidunits[i]) > 0 && API.UnitRange(raidunits[i]) <= 40 && !UnitHasDebuff("Gluttonous Miasma", raidunits[i]) && API.TargetIsUnit() != raidunits[i])
                             {
                                 API.CastSpell(RaidTargetArray[i]);
