@@ -510,6 +510,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //bos_ticking->add_action("arcane_torrent,if=runic_power.deficit>50");
+                return;
 
             }
             if (TalentObliteration && API.PlayerHasBuff(PillarofFrost, false, false))
