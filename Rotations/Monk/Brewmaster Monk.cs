@@ -134,8 +134,8 @@ namespace HyperElk.Core
         private string FaelineStomp = "FaelineStomp";
         private string FallenOrder = "Fallen Order";
         private string Detox = "Detox";
-        private string trinket1 = "trinket1";
-        private string trinket2 = "trinket2";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
         private string LightStagger = "Light Stagger";
         private string ModerateStagger = "Moderate Stagger";
         private string HeavyStagger = "Heavy Stagger";
@@ -229,8 +229,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DampenHarm, 122278, "F1");
             CombatRoutine.AddSpell(LegSweep, 119381);
             //Macro
-            CombatRoutine.AddMacro(trinket1);
-            CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
 
             //Buffs
             CombatRoutine.AddBuff(BlackoutCombo, 196736);
@@ -416,11 +416,11 @@ namespace HyperElk.Core
             //COOLDOWNN
             if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket1 == "on HP" && API.PlayerHealthPercent <= Trinket1HP))
             {
-                API.CastSpell("Trinket1");
+                API.CastSpell(Trinket1);
             }
             if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket2 == "on HP" && API.PlayerHealthPercent <= Trinket2HP))
             {
-                API.CastSpell("Trinket2");
+                API.CastSpell(Trinket2);
             }
             //Touch of Death
             if (IsCooldowns && API.CanCast(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
