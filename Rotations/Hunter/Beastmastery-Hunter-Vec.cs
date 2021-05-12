@@ -6,6 +6,7 @@ namespace HyperElk.Core
     public class BMHunter : CombatRoutine
     {
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool IsFocus => API.ToggleIsEnabled("Focus");
         private bool SmallCDs => API.ToggleIsEnabled("Small CDs");
         //stopwatch
         private readonly Stopwatch pullwatch = new Stopwatch();
@@ -121,6 +122,7 @@ namespace HyperElk.Core
         private int AspectoftheTurtleLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Aspect_of_the_Turtle)];
         private int FeignDeathLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Feign_Death)];
         private int MendPetLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Mend_Pet)];
+        private int FocusCounterShotPercent => numbList[CombatRoutine.GetPropertyInt("CounterShotFocus")];
         private string UseMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private string UseAspectoftheWild => AspectoftheWildList[CombatRoutine.GetPropertyInt(Aspect_of_the_Wild)];
         private string UseBestialWrath => AlwaysCooldownsList[CombatRoutine.GetPropertyInt(Bestial_Wrath)];
@@ -187,6 +189,7 @@ namespace HyperElk.Core
 
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
+            CombatRoutine.AddMacro(Counter_Shot + " Focus", "NumPad8");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -233,6 +236,7 @@ namespace HyperElk.Core
             //Toggle
             CombatRoutine.AddToggle("Small CDs");
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Focus");
             AddProp("MouseoverInCombat", "Only Mouseover in combat", true, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             //Settings
             CombatRoutine.AddProp(Misdirection, "Use Misdirection", MisdirectionList, "Use " + Misdirection + "Off, On AOE, On", "Generic", 0);
@@ -251,6 +255,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket1", "Use " + "Use Trinket 1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp(Exhilaration, "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used, set to 0 to disable", "Defense", 6);
+            CombatRoutine.AddProp("CounterShotFocus", "Use " + Counter_Shot + " at Focus:", numbList, "% cast at which " + Counter_Shot + " is used on focus", "Interrupt", 90);
             CombatRoutine.AddProp(Exhilaration + "PET", "Use " + Exhilaration + " below:", percentListProp, "Life percent at which " + Exhilaration + " is used to heal your pet, set to 0 to disable", "Pet", 2);
             CombatRoutine.AddProp(Aspect_of_the_Turtle, "Use " + Aspect_of_the_Turtle + " below:", percentListProp, "Life percent at which " + Aspect_of_the_Turtle + " is used, set to 0 to disable", "Defense", 6);
             CombatRoutine.AddProp(Feign_Death, "Use " + Feign_Death + " below:", percentListProp, "Life percent at which " + Feign_Death + " is used, set to 0 to disable", "Defense", 2);
@@ -355,6 +360,11 @@ namespace HyperElk.Core
                 if (API.CanCast(Counter_Shot) && isInterrupt && InRange)
                 {
                     API.CastSpell(Counter_Shot);
+                    return;
+                }
+                if (!API.MacroIsIgnored(Counter_Shot + " Focus") && IsFocus && API.FocusCanInterrupted && API.FocusElapsedCastTimePercent >= FocusCounterShotPercent && API.FocusRange <= 40 && API.CanCast(Counter_Shot))
+                {
+                    API.CastSpell(Counter_Shot + " Focus");
                     return;
                 }
                 if (API.CanCast(Intimidation) && !API.CanCast(Counter_Shot) && UseIntimidation && isInterrupt && InRange)

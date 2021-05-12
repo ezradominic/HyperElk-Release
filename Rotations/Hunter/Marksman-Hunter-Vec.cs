@@ -10,6 +10,7 @@ namespace HyperElk.Core
         private readonly Stopwatch CallPetTimer = new Stopwatch();
 
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
+        private bool IsFocus => API.ToggleIsEnabled("Focus");
         //Spells,Buffs,Debuffs
         private string Steady_Shot = "Steady Shot";
         private string Arcane_Shot = "Arcane Shot";
@@ -99,6 +100,7 @@ namespace HyperElk.Core
         private int AspectoftheTurtleLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Aspect_of_the_Turtle)];
         private int FeignDeathLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Feign_Death)];
         private int MendPetLifePercent => percentListProp[CombatRoutine.GetPropertyInt(Mend_Pet)];
+        private int FocusCounterShotPercent => numbList[CombatRoutine.GetPropertyInt("CounterShotFocus")];
         private string UseMisdirection => MisdirectionList[CombatRoutine.GetPropertyInt(Misdirection)];
         private string UseDoubleTap => DoubleTapList[CombatRoutine.GetPropertyInt(Double_Tap)];
         private string UseTrueshot => TrueshotList[CombatRoutine.GetPropertyInt(Trueshot)];
@@ -116,12 +118,14 @@ namespace HyperElk.Core
         private bool AOESwitch_enabled => CombatRoutine.GetPropertyBool("AOE_Switch");
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
         private string UseTrinket2 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket2")];
-        private bool CanuseASinST => API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && API.PlayerCurrentCastSpellID != 19434 && (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) && (!PlayerHasBuff(Precise_Shots) || (PlayerHasBuff(Trueshot) || FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime) && (!Talent_Chimaera_Shot || (!UseCleaveRotation && API.TargetUnitInRangeCount < 2)) || API.PlayerBuffTimeRemaining(Trick_Shots) > AimedShotCastTime && (UseCleaveRotation || API.TargetUnitInRangeCount > 1));
-        private bool CanuseArcaneinST => (API.CanCast(Arcane_Shot) && (API.SpellCDDuration(Rapid_Fire) > gcd || PlayerHasBuff(Double_Tap)) && InRange && (PlayerHasBuff(Precise_Shots) || API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)));
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private bool ConcussiveShot_enabled => CombatRoutine.GetPropertyBool(ConcussiveShot);
+
+
+        private bool CanuseASinST => API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && API.PlayerCurrentCastSpellID != 19434 && (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) && (!PlayerHasBuff(Precise_Shots) || (PlayerHasBuff(Trueshot) || FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime) && (!Talent_Chimaera_Shot || (!UseCleaveRotation && API.TargetUnitInRangeCount < 2)) || API.PlayerBuffTimeRemaining(Trick_Shots) > AimedShotCastTime && (UseCleaveRotation || API.TargetUnitInRangeCount > 1));
+        private bool CanuseArcaneinST => (API.CanCast(Arcane_Shot) && (API.SpellCDDuration(Rapid_Fire) > gcd || PlayerHasBuff(Double_Tap)) && InRange && (PlayerHasBuff(Precise_Shots) || API.PlayerFocus > 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)));
 
         private bool LastSpell(string spellname, int spellid)
         {
@@ -238,12 +242,14 @@ namespace HyperElk.Core
             //Macros
             CombatRoutine.AddMacro(Kill_Shot + "MO", "NumPad7");
             CombatRoutine.AddMacro("Call Pet", "H");
-
+            CombatRoutine.AddMacro(Counter_Shot + " Focus", "NumPad8");
+            //items
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Toggle
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddToggle("Focus");
             AddProp("MouseoverInCombat", "Only Mouseover in combat", true, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
 
             //Settings
@@ -263,7 +269,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp("SurgingShots", "Surging Shots", false, "Enable if you have Surging Shots", "Legendary");
             CombatRoutine.AddProp(ConcussiveShot, ConcussiveShot, false, "Enable if you want to use ConcussiveShot", "Misc");
-
+            CombatRoutine.AddProp("CounterShotFocus", "Use " + Counter_Shot + " at Focus:", numbList, "% cast at which " + Counter_Shot + " is used on focus", "Interrupt", 90);
             CombatRoutine.AddProp("eagletalons_true_focus", "eagletalons true focus", false, "Enable if you have eagletalons true focus", "Legendary");
 
             CombatRoutine.AddProp("TranquilizingShot", "Tranquilizing Shot", false, "Enable if you want to use Tranquilizing Shot", "Generic");
@@ -351,6 +357,11 @@ namespace HyperElk.Core
                 if (isInterrupt && API.CanCast(Counter_Shot) && InRange && PlayerLevel >= 18)
                 {
                     API.CastSpell(Counter_Shot);
+                    return;
+                }
+                if (!API.MacroIsIgnored(Counter_Shot + " Focus") && IsFocus && API.FocusCanInterrupted && API.FocusElapsedCastTimePercent >= FocusCounterShotPercent && API.FocusRange <= 40 && API.CanCast(Counter_Shot))
+                {
+                    API.CastSpell(Counter_Shot + " Focus");
                     return;
                 }
                 if (API.CanCast(TranquilizingShot) && DispellList && UseTranqShot && InRange && PlayerLevel >= 18)
@@ -550,7 +561,7 @@ namespace HyperElk.Core
                     if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                     {
                         API.CastSpell(Steady_Shot);
-                        API.WriteLog("ST: SS:1 ");
+                        //API.WriteLog("ST: SS:1 ");
                         return;
                     }
                     else if ((API.TargetHealthPercent <= 20 || PlayerHasBuff(FlayersMark)) && API.CanCast(Kill_Shot) && InRange && PlayerLevel >= 42 && API.PlayerFocus >= 10)
@@ -586,7 +597,7 @@ namespace HyperElk.Core
                     else if (API.CanCast(Steady_Shot) && InRange && API.PlayerFocus + (10 + (SteadyShot_CastTime / 100) * FocusRegen) < 120 && (!API.CanCast(Rapid_Fire) || PlayerHasBuff(Double_Tap)) && (!PlayerHasBuff(Precise_Shots) || PlayerHasBuff(Precise_Shots) && API.PlayerFocus < 20) && (FullRechargeTime(Aimed_Shot, AimedShotCooldown) > SteadyShot_CastTime || API.PlayerFocus < (PlayerHasBuff(Lock_and_Load) ? 0 : 35) || API.PlayerIsMoving))
                     {
                         API.CastSpell(Steady_Shot);
-                        API.WriteLog("st: SS:2 ");
+                       // API.WriteLog("st: SS:2 ");
                         return;
                     }
                 }
@@ -614,7 +625,7 @@ namespace HyperElk.Core
                     if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                     {
                         API.CastSpell(Steady_Shot);
-                        API.WriteLog("st: SS:3 ");
+                        //API.WriteLog("st: SS:3 ");
                         return;
                     }
                     //actions.st +=/ kill_shot
@@ -639,7 +650,7 @@ namespace HyperElk.Core
                     else if (Talent_Steady_Focus && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID != 56641 && !PlayerHasBuff(Steady_Focus) && InRange)
                     {
                         API.CastSpell(Steady_Shot);
-                        API.WriteLog("st: SS:4 ");
+                        //API.WriteLog("st: SS:4 ");
                         return;
                     }
                     //actions.st +=/ flare,if= tar_trap.up & runeforge.soulforge_embers
@@ -753,7 +764,7 @@ namespace HyperElk.Core
                     else if (API.CanCast(Steady_Shot) && InRange && !CanuseASinST && !API.CanCast(Rapid_Fire) && !CanuseArcaneinST)
                     {
                         API.CastSpell(Steady_Shot);
-                        API.WriteLog("st: SS:5 ");
+                        //API.WriteLog("st: SS:5 ");
                         return;
                     }
                 }
@@ -772,7 +783,7 @@ namespace HyperElk.Core
                 if (Talent_Steady_Focus && !PlayerHasBuff(Trueshot) && !VolleyTrickShots && API.CanCast(Steady_Shot) && API.LastSpellCastInGame != Steady_Shot && API.PlayerCurrentCastSpellID == 56641 && API.PlayerBuffTimeRemaining(Steady_Focus) < 500 && InRange)
                 {
                     API.CastSpell(Steady_Shot);
-                    API.WriteLog("AOE: SS:1 ");
+                   // API.WriteLog("AOE: SS:1 ");
                     return;
                 }
                 //actions.trickshots +=/ double_tap,if= covenant.kyrian & cooldown.resonating_arrow.remains < gcd | !covenant.kyrian & !covenant.night_fae | covenant.night_fae & (cooldown.wild_spirits.remains < gcd | cooldown.trueshot.remains > 55) | target.time_to_die < 10
@@ -902,7 +913,7 @@ namespace HyperElk.Core
                 else if (API.CanCast(Steady_Shot) && ((!API.CanCast(Aimed_Shot) || API.PlayerIsMoving) && !API.CanCast(Rapid_Fire) || (!PlayerHasBuff(Trick_Shots) && !VolleyTrickShots)) && (API.PlayerFocus < 20 + (PlayerHasBuff(Lock_and_Load) ? 0 : 35)) && InRange)
                 {
                     API.CastSpell(Steady_Shot);
-                    API.WriteLog("AOE: SS:2 ");
+                    //API.WriteLog("AOE: SS:2 ");
                     return;
                 }
                 //actions.trickshots +=/ steady_shot
