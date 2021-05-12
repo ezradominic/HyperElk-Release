@@ -3,6 +3,7 @@
 // v1.1 small adjustments
 // v1.2 small adjustments
 // v1.3 explosive protection
+// v1.35 shiv fix
 
 
 using System.Diagnostics;
@@ -136,7 +137,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Assassination Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.3");
+            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.35");
             API.WriteLog("You need the following macros:");
             API.WriteLog("GarroteMO - /cast [@mouseover] Garrote");
             API.WriteLog("RuptureMO - /cast [@mouseover] Rupture");
@@ -449,7 +450,7 @@ namespace HyperElk.Core
                             return;
                         }
                         //actions.cds+=/shiv,if=dot.rupture.ticking&(!cooldown.sepsis.ready|cooldown.vendetta.remains>12)|dot.sepsis.ticking
-                        if (API.CanCast(Shiv) && !isExplosive && (TargetHasDebuff(Rupture) && (API.SpellCDDuration(Sepsis) > GCD || API.SpellCDDuration(Vendetta) > 1200 && IsVendetta) || TargetHasDebuff(Sepsis)) && API.PlayerEnergy >= 20)
+                        if (API.CanCast(Shiv) && !isExplosive && (TargetHasDebuff(Rupture) && (API.SpellCDDuration(Sepsis) > GCD || (API.SpellCDDuration(Vendetta) > 1200 && IsVendetta || !IsVendetta)) || TargetHasDebuff(Sepsis)) && API.PlayerEnergy >= 20)
                         {
                             API.CastSpell(Shiv);
                             return;
