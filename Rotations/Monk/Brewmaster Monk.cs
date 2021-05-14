@@ -71,12 +71,12 @@ namespace HyperElk.Core
         //Venthyr 
         string[] FallenOrderList = new string[] { "always", "with Cooldowns", "AOE" };
         private string UseFallenOrder => FallenOrderList[CombatRoutine.GetPropertyInt(FallenOrder)];
-        //Trinket1
-        private string UseTrinket1 => TrinketList1[CombatRoutine.GetPropertyInt(trinket1)];
-        string[] TrinketList1 = new string[] { "always", "Cooldowns", "AOE", "never" };
-        //Trinket2
-        private string UseTrinket2 => TrinketList2[CombatRoutine.GetPropertyInt(trinket2)];
-        string[] TrinketList2 = new string[] { "always", "Cooldowns", "AOE", "never" };
+        string[] UseListwithHP = new string[] { "never", "With Cooldowns", "On Cooldown", "on AOE", "on HP" };
+
+        private string UseTrinket1 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket1")];
+        private string UseTrinket2 => UseListwithHP[CombatRoutine.GetPropertyInt("Trinket2")];
+        private int Trinket1HP => numbList[CombatRoutine.GetPropertyInt("Trinket1HP")];
+        private int Trinket2HP => numbList[CombatRoutine.GetPropertyInt("Trinket2HP")];
         int[] numbList = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 };
         int[] CelestialBrewnumbList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         float EnergyRegen => 10f * (1f + API.PlayerGetHaste);
@@ -134,8 +134,8 @@ namespace HyperElk.Core
         private string FaelineStomp = "FaelineStomp";
         private string FallenOrder = "Fallen Order";
         private string Detox = "Detox";
-        private string trinket1 = "trinket1";
-        private string trinket2 = "trinket2";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
         private string LightStagger = "Light Stagger";
         private string ModerateStagger = "Moderate Stagger";
         private string HeavyStagger = "Heavy Stagger";
@@ -147,7 +147,7 @@ namespace HyperElk.Core
         private string BlackoutCombo = "Blackout Combo";
         private string Bloodlust = "Bloodlust";
         private string GiftOfTheOx = "Gift of the Ox";
-        private string Paralyse = "Paralyse";
+
         private string PurifiedChi = "Purified Chi";
         private string Provoke = "Provoke";
         private string CharredPassions = "Charred Passions";
@@ -182,8 +182,10 @@ namespace HyperElk.Core
             //Venthyr 
             CombatRoutine.AddProp(FallenOrder, "Use " + FallenOrder, FallenOrderList, "How to use Fallen Order", "Covenant Venthyr", 0);
 
-            CombatRoutine.AddProp("Trinket1", "Trinket1 usage", TrinketList1, "When should trinket1 be used", "Trinket", 3);
-            CombatRoutine.AddProp("Trinket2", "Trinket2 usage", TrinketList2, "When should trinket1 be used", "Trinket", 3);
+            CombatRoutine.AddProp("Trinket1", "Use " + "Trinket 1", UseListwithHP, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", UseListwithHP, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
+            CombatRoutine.AddProp("Trinket1HP", "Trinket 1" + " Life Percent", numbList, " Life percent at which" + "Trinket 1" + " is used, set to 0 to disable", "Trinkets", 40);
+            CombatRoutine.AddProp("Trinket2HP", "Trinket 2" + " Life Percent", numbList, " Life percent at which" + "Trinket 2" + " is used, set to 0 to disable", "Trinkets", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(DampenHarm, "Dampen Harm", numbList, "Life percent at which " + DampenHarm + " is used, set to 0 to disable set 100 to use it everytime", "Healing", 40);
@@ -227,8 +229,8 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(DampenHarm, 122278, "F1");
             CombatRoutine.AddSpell(LegSweep, 119381);
             //Macro
-            CombatRoutine.AddMacro(trinket1);
-            CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
 
             //Buffs
             CombatRoutine.AddBuff(BlackoutCombo, 196736);
@@ -303,6 +305,7 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
+            API.WriteLog("expel " + API.CanCast(FortifyingBrew));
         }
         public override void CombatPulse()
         {
@@ -343,7 +346,7 @@ namespace HyperElk.Core
                 API.CastSpell(SpiritualHealingPotion);
                 return;
             }
-            if (API.PlayerHealthPercent <= DampenHarmLifePercentProc && !API.SpellISOnCooldown(DampenHarm) && !API.PlayerIsMounted && TalentDampenHarm && NotChanneling)
+            if (API.PlayerHealthPercent <= DampenHarmLifePercentProc && API.CanCast(DampenHarm) && !API.PlayerIsMounted && TalentDampenHarm && NotChanneling)
             {
                 API.CastSpell(DampenHarm);
                 return;
@@ -355,7 +358,7 @@ namespace HyperElk.Core
                 return;
             }
             //Expel Harm
-            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && !API.SpellISOnCooldown(ExpelHarm) && !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8 && NotChanneling)
+            if (API.PlayerHealthPercent <= ExpelHarmLifePercentProc && API.CanCast(ExpelHarm) && !API.PlayerIsMounted && API.PlayerEnergy > 30 && PlayerLevel >= 8 && NotChanneling)
             {
                 API.CastSpell(ExpelHarm);
                 return;
@@ -363,43 +366,43 @@ namespace HyperElk.Core
 
 
             //Purifying Brew
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23 && PlayerLevel <= 47 && NotChanneling)
+            if (API.CanCast(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 23 && PlayerLevel <= 47 && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && API.SpellCharges(PurifyingBrew) >= 2 && NotChanneling)
+            if (API.CanCast(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && API.SpellCharges(PurifyingBrew) >= 2 && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "always") && NotChanneling)
+            if (API.CanCast(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "always") && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge Light stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Light Stagger") && API.PlayerHasDebuff(LightStagger) && NotChanneling)
+            if (API.CanCast(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Light Stagger") && API.PlayerHasDebuff(LightStagger) && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge Moderate stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Moderate Stagger") && API.PlayerHasDebuff(ModerateStagger) && NotChanneling)
+            if (API.CanCast(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Moderate Stagger") && API.PlayerHasDebuff(ModerateStagger) && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Purifying Brew 2nd Charge Heavy stagger
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Heavy Stagger") && API.PlayerHasDebuff(HeavyStagger) && NotChanneling)
+            if (API.CanCast(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc && PlayerLevel >= 47 && (UseStagger == "Heavy Stagger") && API.PlayerHasDebuff(HeavyStagger) && NotChanneling)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
             }
             //Fortifying Brew
-            if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && !API.SpellISOnCooldown(FortifyingBrew) && PlayerLevel >= 28 && NotChanneling)
+            if (API.PlayerHealthPercent <= FortifyingBrewLifePercentProc && API.CanCast(FortifyingBrew) && PlayerLevel >= 28 && NotChanneling)
             {
                 API.CastSpell(FortifyingBrew);
                 return;
@@ -411,23 +414,27 @@ namespace HyperElk.Core
                 return;
             }
             //COOLDOWNN
-            if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
-                API.CastSpell(trinket1);
-            if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
-                API.CastSpell(trinket2);
+            if (API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0 && (UseTrinket1 == "With Cooldowns" && IsCooldowns || UseTrinket1 == "On Cooldown" || UseTrinket1 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket1 == "on HP" && API.PlayerHealthPercent <= Trinket1HP))
+            {
+                API.CastSpell(Trinket1);
+            }
+            if (API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0 && (UseTrinket2 == "With Cooldowns" && IsCooldowns || UseTrinket2 == "On Cooldown" || UseTrinket2 == "on AOE" && API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || UseTrinket2 == "on HP" && API.PlayerHealthPercent <= Trinket2HP))
+            {
+                API.CastSpell(Trinket2);
+            }
             //Touch of Death
-            if (IsCooldowns && !API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
+            if (IsCooldowns && API.CanCast(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns"))
             {
                 API.CastSpell(TouchofDeath);
                 return;
             }
             //actions+=/spear_hand_strike,if=target.debuff.casting.react
-            if (isInterrupt && !API.SpellISOnCooldown(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
+            if (isInterrupt && API.CanCast(SpearHandStrike) && IsMelee && PlayerLevel >= 18)
             {
                 API.CastSpell(SpearHandStrike);
                 return;
             }
-            if (isInterrupt && API.SpellISOnCooldown(SpearHandStrike) && API.CanCast(LegSweep) && IsMelee && PlayerLevel >= 18)
+            if (isInterrupt && API.CanCast(SpearHandStrike) && API.CanCast(LegSweep) && IsMelee && PlayerLevel >= 18)
             {
                 API.CastSpell(LegSweep);
                 return;
@@ -507,7 +514,7 @@ namespace HyperElk.Core
                 return;
             }
             //actions+=/purifying_brew
-            if (!API.SpellISOnCooldown(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc)
+            if (API.CanCast(PurifyingBrew) && API.PlayerStaggerPercent >= PurifyingBrewStaggerPercentProc)
             {
                 API.CastSpell(PurifyingBrew);
                 return;
@@ -547,7 +554,7 @@ namespace HyperElk.Core
             }
             //# Celestial Brew priority whenever it took significant damage (adjust the health.max coefficient according to intensity of damage taken), and to dump excess charges before BoB.
             //actions+=/celestial_brew,if=buff.blackout_combo.down&incoming_damage_1999ms>(health.max*0.1+stagger.last_tick_damage_4)&buff.elusive_brawler.stack<2
-            if (!API.SpellISOnCooldown(CelestialBrew) && PlayerLevel >= 27 && (API.PlayerBuffStacks(PurifiedChi) >= CelestialBrewStackProc && API.PlayerHealthPercent <= CelestialBrewPercentProc || CBFull && API.PlayerBuffStacks(PurifiedChi) == 10))
+            if (API.CanCast(CelestialBrew) && PlayerLevel >= 27 && (API.PlayerBuffStacks(PurifiedChi) >= CelestialBrewStackProc && API.PlayerHealthPercent <= CelestialBrewPercentProc || CBFull && API.PlayerBuffStacks(PurifiedChi) == 10))
             {
                 API.WriteLog("PurifiedChi Stacks " + API.PlayerBuffStacks(PurifiedChi));
                 API.WriteLog("Using " + CelestialBrew);
@@ -586,7 +593,7 @@ namespace HyperElk.Core
             }
             //actions+=/expel_harm,if=buff.gift_of_the_ox.stack>=3
             //actions+=/touch_of_death
-            if (!API.SpellISOnCooldown(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns" && IsCooldowns || UseTouchofDeath == "always"))
+            if (API.CanCast(TouchofDeath) && API.TargetHealthPercent >= 50 && API.TargetMaxHealth < API.PlayerMaxHealth && PlayerLevel >= 10 && (UseTouchofDeath == "with Cooldowns" && IsCooldowns || UseTouchofDeath == "always"))
             {
                 API.CastSpell(TouchofDeath);
                 return;
