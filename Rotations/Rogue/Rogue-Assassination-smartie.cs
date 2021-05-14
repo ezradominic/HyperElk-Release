@@ -4,6 +4,7 @@
 // v1.2 small adjustments
 // v1.3 explosive protection
 // v1.35 shiv fix
+// v1.4 hot
 
 
 using System.Diagnostics;
@@ -69,7 +70,7 @@ namespace HyperElk.Core
 
 
         //General
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private int PlayerLevel => API.PlayerLevel;
         private static bool PlayerHasBuff(string buff)
         {
@@ -137,7 +138,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Assassination Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.35");
+            API.WriteLog("Welcome to smartie`s Assassination Rogue v1.4");
             API.WriteLog("You need the following macros:");
             API.WriteLog("GarroteMO - /cast [@mouseover] Garrote");
             API.WriteLog("RuptureMO - /cast [@mouseover] Rupture");

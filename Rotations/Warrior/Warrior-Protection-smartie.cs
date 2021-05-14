@@ -19,6 +19,7 @@
 // v2.6 intervene problem solved and rage dump fixed
 // v2.7 shockwave options added
 // v2.8 explosive protection
+// v2.9 hotfix
 
 using System.Linq;
 
@@ -79,7 +80,7 @@ namespace HyperElk.Core
         bool TalentRavager => API.PlayerIsTalentSelected(6, 3);
 
         //General
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
@@ -138,7 +139,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Protection Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Protection Warrior v2.8");
+            API.WriteLog("Welcome to smartie`s Protection Warrior v2.9");
             API.WriteLog("You need the following macros");
             API.WriteLog("Heroic ThrowMO: /cast [@mouseover] Heroic Throw");
             API.WriteLog("InterveneMO: /cast [@mouseover,exists,help] Intervene");

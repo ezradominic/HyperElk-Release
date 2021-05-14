@@ -7,6 +7,7 @@
 // v1.4 aaaaand another one xD
 // v1.45 Serrated Bone Spike adjustment
 // v1.5 explosive protection
+// v1.6 hotfix
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -87,7 +88,7 @@ namespace HyperElk.Core
         bool TalentKillingSpree => API.PlayerIsTalentSelected(7, 3);
 
         //Rotation Utilities
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private bool IsStealth => API.PlayerHasBuff(Stealth) || API.PlayerHasBuff(Vanish) || API.PlayerHasBuff(SepsisBuff);
         int MaxEnergy => API.PlayeMaxEnergy;
         int MaxComboPoints => TalentDeeperStratagem ? 6 : 5;
@@ -185,7 +186,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.5");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.6");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");

@@ -30,6 +30,7 @@
 // v3.65 Battle shout fix
 // v3.7 small tweak for simps
 // v3.8 explosive protection
+// v3.9 hotfix
 
 using System.Linq;
 
@@ -93,7 +94,7 @@ namespace HyperElk.Core
         bool TalentSiegebreaker => API.PlayerIsTalentSelected(7, 3);
 
         //General
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
@@ -154,7 +155,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Fury Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Fury Warrior v3.8");
+            API.WriteLog("Welcome to smartie`s Fury Warrior v3.9");
             API.WriteLog("For the Signet Legendary you need a macro to cancel Bladestorm");
             API.WriteLog("- /cancelaura Bladestorm - is the macro for that");
 

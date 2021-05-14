@@ -46,6 +46,7 @@
 // v4.9 aoe adjustment
 // v4.95 additional small change
 // v5.0 precast change for hardaoe
+// v5.1 trinket adjustment and small hotfix
 
 using System.Diagnostics;
 
@@ -127,7 +128,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch Lunarwatch = new Stopwatch();
         private static readonly Stopwatch movingwatch = new Stopwatch();
         private int PlayerLevel => API.PlayerLevel;
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private bool HardAoE => API.TargetUnitInRangeCount >= 5;
         private bool isinRange => API.TargetRange <= 45;
         private bool isMOinRange => API.MouseoverRange < 45;
@@ -139,8 +140,8 @@ namespace HyperElk.Core
         bool IsForceofNature => (UseForceofNature == "with Cooldowns" || UseForceofNature == "with Cooldowns or AoE" || UseForceofNature == "on mobcount or Cooldowns") && IsCooldowns || UseForceofNature == "always" || (UseForceofNature == "on AOE" || UseForceofNature == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseForceofNature == "on mobcount or Cooldowns" || UseForceofNature == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
         bool IsFuryofElune => (UseFuryofElune == "with Cooldowns" || UseFuryofElune == "with Cooldowns or AoE" || UseFuryofElune == "on mobcount or Cooldowns") && IsCooldowns || UseFuryofElune == "always" || (UseFuryofElune == "on AOE" || UseFuryofElune == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseFuryofElune == "on mobcount or Cooldowns" || UseFuryofElune == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
         bool IsCovenant => (UseCovenant == "with Cooldowns" || UseCovenant == "with Cooldowns or AoE" || UseCovenant == "on mobcount or Cooldowns") && IsCooldowns || UseCovenant == "always" || (UseCovenant == "on AOE" || UseCovenant == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseCovenant == "on mobcount or Cooldowns" || UseCovenant == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount;
-        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns && IncaCelestial || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isinRange;
-        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns && IncaCelestial || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isinRange;
+        bool IsTrinkets1 => ((UseTrinket1 == "with Cooldowns" || UseTrinket1 == "with Cooldowns or AoE" || UseTrinket1 == "on mobcount or Cooldowns") && IsCooldowns && (IncaCelestial || TalentIncarnation && API.SpellCDDuration(Incarnation) > 9000 || !TalentIncarnation && API.SpellCDDuration(CelestialAlignment) > 9000) || UseTrinket1 == "always" || (UseTrinket1 == "on AOE" || UseTrinket1 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket1 == "on mobcount or Cooldowns" || UseTrinket1 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isinRange;
+        bool IsTrinkets2 => ((UseTrinket2 == "with Cooldowns" || UseTrinket2 == "with Cooldowns or AoE" || UseTrinket2 == "on mobcount or Cooldowns") && IsCooldowns && (IncaCelestial || TalentIncarnation && API.SpellCDDuration(Incarnation) > 9000 || !TalentIncarnation && API.SpellCDDuration(CelestialAlignment) > 9000) || UseTrinket2 == "always" || (UseTrinket2 == "on AOE" || UseTrinket2 == "with Cooldowns or AoE") && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber || (UseTrinket2 == "on mobcount or Cooldowns" || UseTrinket2 == "on mobcount") && API.PlayerUnitInMeleeRangeCount >= MobCount) && isinRange;
 
         //CBProperties
         private string UseTrinket1 => CDUsageWithAOE[CombatRoutine.GetPropertyInt("Trinket1")];
@@ -201,7 +202,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v5.0");
+            API.WriteLog("Welcome to smartie`s Balance Druid v5.1");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");

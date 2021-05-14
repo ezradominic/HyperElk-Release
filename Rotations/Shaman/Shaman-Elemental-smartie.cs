@@ -23,6 +23,7 @@
 // v3.0 some slight aoe changes
 // v3.1 explosive killer
 // v3.15 typo 
+// v3.2 low level fix
 
 using System.Diagnostics;
 
@@ -107,7 +108,7 @@ namespace HyperElk.Core
         private bool IsInRange => API.TargetRange < 41;
         private bool isMOinRange => API.MouseoverRange < 41;
         private bool IsInKickRange => API.TargetRange < 31;
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         bool IsAscendance => (UseAscendance == "with Cooldowns" || UseAscendance == "with Cooldowns or AoE" || UseAscendance == "on mobcount or Cooldowns") && IsCooldowns || UseAscendance == "always" || (UseAscendance == "on AOE" || UseAscendance == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseAscendance == "on mobcount or Cooldowns" || UseAscendance == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
         bool IsEarthElemental => (UseEarthElemental == "with Cooldowns" || UseEarthElemental == "with Cooldowns or AoE" || UseEarthElemental == "on mobcount or Cooldowns") && IsCooldowns || UseEarthElemental == "always" || (UseEarthElemental == "on AOE" || UseEarthElemental == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseEarthElemental == "on mobcount or Cooldowns" || UseEarthElemental == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
         bool IsStormElemental => (UseStormElemental == "with Cooldowns" || UseStormElemental == "with Cooldowns or AoE" || UseStormElemental == "on mobcount or Cooldowns") && IsCooldowns || UseStormElemental == "always" || (UseStormElemental == "on AOE" || UseStormElemental == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseStormElemental == "on mobcount or Cooldowns" || UseStormElemental == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
@@ -157,7 +158,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.15");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.2");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");

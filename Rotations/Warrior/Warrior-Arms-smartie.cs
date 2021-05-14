@@ -22,7 +22,8 @@
 // v2.9 latest simc apl
 // v3.0 a few quality of life changes
 // v3.05 Battle shout fix
-// v3.1 explosive protectio
+// v3.1 explosive protection
+// v3.2 hotfix
 
 using System.Linq;
 
@@ -94,7 +95,7 @@ namespace HyperElk.Core
         bool TalentRavager => API.PlayerIsTalentSelected(7, 3);
 
         //General
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private int PlayerLevel => API.PlayerLevel;
         private bool IsMelee => API.TargetRange < 6;
         private float gcd => API.SpellGCDTotalDuration;
@@ -155,7 +156,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Arms Warrior by smartie";
-            API.WriteLog("Welcome to smartie`s Arms Warrior v3.1");
+            API.WriteLog("Welcome to smartie`s Arms Warrior v3.2");
             API.WriteLog("The Bladestorm toggle will also toggle Ravager");
             API.WriteLog("The Colossus Smash toggle will also toggle Warbreaker");
 

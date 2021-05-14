@@ -15,6 +15,7 @@
 // v2.3 auto break roots
 // v2.4 Thrash spam with leggy
 // v2.45 explosive check
+// v2.5 hotfix
 
 namespace HyperElk.Core
 {
@@ -69,7 +70,7 @@ namespace HyperElk.Core
         bool TalentRendandTear => API.PlayerIsTalentSelected(7, 1);
 
         //General
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private int PlayerLevel => API.PlayerLevel;
         private bool isMelee => (TalentBalanceAffinity && API.TargetRange < 9 || !TalentBalanceAffinity && API.TargetRange < 6);
 
@@ -113,7 +114,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.45");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.5");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");

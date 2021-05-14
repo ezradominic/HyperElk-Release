@@ -32,6 +32,7 @@
 // v3.9 small bugfix
 // v4.0 no finisher on explosives
 // v4.05 conduit fix
+// v4.1 hotfix
 
 using System.Diagnostics;
 
@@ -144,7 +145,7 @@ namespace HyperElk.Core
         {
             return API.TargetHasDebuff(debuff, true, false);
         }
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         bool isBloodlust => PlayerHasBuff(AncientHysteria) || PlayerHasBuff(TimeWarp) || PlayerHasBuff(Bloodlust) || PlayerHasBuff(Heroism) || PlayerHasBuff(DrumsofDeathlyFerocity);
         //actions.owlweave+=/moonkin_form,if=energy<30&dot.rip.remains>4.5&(cooldown.tigers_fury.remains>=6.5|runeforge.cateye_curio)&buff.clearcasting.stack<1&!buff.apex_predators_craving.up&!buff.bloodlust.up&!buff.bs_inc.up&(cooldown.convoke_the_spirits.remains>6.5|!covenant.night_fae)
         bool WeaveConditions => (API.PlayerEnergy < 30 && (PlayerHasBuff(Bloodtalons) || !TalentBloodtalons) && API.TargetDebuffRemainingTime(Rip) > 450 && (API.SpellCDDuration(TigersFury) >= 650 || IsLegendary == "Cat-eye Curio") && API.PlayerBuffStacks(Clearcasting) < 1 && !PlayerHasBuff(ApexPredatorsCraving) && !isBloodlust && !IncaBerserk && (API.SpellCDDuration(ConvoketheSpirits) >= 650 && IsCovenant || !IsCovenant || PlayerCovenantSettings != "Night Fae"));
@@ -210,7 +211,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v4.05");
+            API.WriteLog("Welcome to smartie`s Feral Druid v4.1");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");

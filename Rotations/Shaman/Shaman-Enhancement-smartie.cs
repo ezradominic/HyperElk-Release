@@ -17,6 +17,7 @@
 // v2.4 earthshield fix
 // v2.5 new simc apl and new settings options
 // v2.6 explosive protection
+// v2.7 hotfix
 
 using System.Diagnostics;
 namespace HyperElk.Core
@@ -82,7 +83,7 @@ namespace HyperElk.Core
         bool TalentAscendance => API.PlayerIsTalentSelected(7, 3);
 
         //General
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         private int PlayerLevel => API.PlayerLevel;
         private bool isMelee => API.TargetRange < 6;
         private bool isinrange => API.TargetRange < 41;
@@ -134,7 +135,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Enhancement Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.6");
+            API.WriteLog("Welcome to smartie`s Enhancement Shaman v2.7");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For Earthshield on Focus: /cast [@focus,help] Earth shield");
 
