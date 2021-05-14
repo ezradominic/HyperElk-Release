@@ -57,6 +57,8 @@ namespace HyperElk.Core
         private string Spellsteal = "Spellsteal";
         private string RemoveCurse = "Remove Curse";
         private string Quake = "Quake";
+        private string IceLance1 = "Ice Lance 1";
+        private string IceLance2 = "Ice Lance 2";
 
         //Talents
         bool LonelyWinter => API.PlayerIsTalentSelected(1, 2);
@@ -101,6 +103,8 @@ namespace HyperElk.Core
         private bool IsFO => API.ToggleIsEnabled("Frozen Orb");
         private bool IsForceAOE => API.ToggleIsEnabled("Force AOE");
         private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
+        private bool AlwaysInt => CombatRoutine.GetPropertyBool("Always Interupt");
+
         bool CastFlurry => API.PlayerLastSpell == Flurry;
         bool CastShifting => API.PlayerLastSpell == ShiftingPower;
         bool CastIV => API.PlayerLastSpell == IV;
@@ -156,6 +160,7 @@ namespace HyperElk.Core
             CombatRoutine.Name = "Frost Mage by Ryu";
             API.WriteLog("Welcome to Frost Mage by Ryu");
             API.WriteLog("Create the following cursor macro for Blizzard");
+            API.WriteLog("Please bind Ice Lance 1 and 2 to normal Ice Lance -- It is used to track the number of Ice Lances being uses during Shatter");
             API.WriteLog("Blizzard -- /cast [@cursor] Blizzard -- Or you may go ahead and not use @cursor, the program will pause until you place it yourself");
             API.WriteLog("Please use the Frozen Orb toggle if you wish for it be used on CD. Otherwise, toggle it on/off when you would like to hold it for AoE Pulls and such.");
             API.WriteLog("Create Macro /cast [@Player] Arcane Intellect to buff Arcane Intellect so you don't require a target");
@@ -233,6 +238,8 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
             //Macro
+            CombatRoutine.AddMacro(IceLance1);
+            CombatRoutine.AddMacro(IceLance2);
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro(RemoveCurse + "MO");
@@ -259,6 +266,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(IV, "Use " + IV, CDUsage, "Use " + IV + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
 
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
+            CombatRoutine.AddProp("Always Interupt", "Always Interupt", false, "Will always Interupt even if currently casting", "Generic");
+
 
             CombatRoutine.AddProp("Trinket1", "Trinket1 usage", CDUsageWithAOE, "When should trinket1 be used", "Trinket", 0);
             CombatRoutine.AddProp("Trinket2", "Trinket2 usage", CDUsageWithAOE, "When should trinket2 be used", "Trinket", 0);
@@ -279,6 +288,7 @@ namespace HyperElk.Core
             if (API.PlayerHasBuff(BrainFreeze))
             {
                 FlurryWatch.Restart();
+                FBWatch.Stop();
             }
             if (!API.PlayerHasBuff(BrainFreeze))
             {
@@ -291,6 +301,14 @@ namespace HyperElk.Core
             if (RuneWatch.ElapsedMilliseconds >= 12000)
             {
                 RuneWatch.Stop();
+            }
+            if (API.PlayerLastSpell == IceLance1)
+            {
+                IceWatch1.Stop();
+            }
+            if (API.PlayerLastSpell == IceLance2)
+            {
+                IceWatch2.Stop();
             }
             if (IceWatch1.ElapsedMilliseconds >= API.SpellGCDTotalDuration *10)
             {
@@ -324,12 +342,12 @@ namespace HyperElk.Core
             }
             if (!ChannelingShift && NotChanneling && !ChannelingRoF)
             {
-                if (isInterrupt && API.CanCast(Counterspell) && Level >= 7 && API.PlayerIsCasting(false) && !ChannelingShift && NotChanneling && !ChannelingRoF)
+                if (isInterrupt && API.CanCast(Counterspell) && Level >= 7 && (API.PlayerIsCasting(false) || AlwaysInt) && !ChannelingShift && NotChanneling && !ChannelingRoF)
                 {
                     API.CastSpell(Counterspell);
                     return;
                 }
-                if (API.CanCast(Counterspell) && CombatRoutine.GetPropertyBool("KICK") && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay) && API.PlayerIsCasting(false) && !ChannelingShift && NotChanneling && !ChannelingRoF) 
+                if (API.CanCast(Counterspell) && CombatRoutine.GetPropertyBool("KICK") && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay) && (API.PlayerIsCasting(false) || AlwaysInt) && !ChannelingShift && NotChanneling && !ChannelingRoF) 
                 {
                     API.CastSpell(Counterspell + "Focus");
                     return;
@@ -490,9 +508,9 @@ namespace HyperElk.Core
                     return;
                 }
                 // actions.st+=/ice_lance,if=remaining_winters_chill&remaining_winters_chill>buff.fingers_of_frost.react&debuff.winters_chill.remains>travel_time
-                if (API.CanCast(IL) && Level >= 10 && !CastIL && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && !API.PlayerIsCasting(true) && IceWatch1.IsRunning)
+                if (API.CanCast(IL) && !API.PlayerIsCasting() && Level >= 10 && !CastIL && API.PlayerLastSpell != IceLance1 && API.PlayerLastSpell != IceLance2 && API.TargetRange <= 40 && API.TargetHasDebuff(WC))
                 {
-                    API.CastSpell(IL);
+                    API.CastSpell(IceLance1);
                     API.WriteLog("First Ice Lance in Shatter Combo");
                     return;
                 }
@@ -508,38 +526,46 @@ namespace HyperElk.Core
                     API.CastSpell(GS);
                     return;
                 }
-                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC) && IceWatch2.IsRunning && !API.PlayerIsCasting(true))
+                if (API.CanCast(IL) && !API.PlayerIsCasting() && API.PlayerLastSpell != IceLance2 && Level >= 10 && API.TargetRange <= 40 && API.TargetHasDebuff(WC))
                 {
-                    API.CastSpell(IL);
+                    API.CastSpell(IceLance2);
                     IceWatch1.Stop();
                     IceWatch2.Stop();
                     API.WriteLog("Second Ice Lance in Shatter Combo");
                     return;
                 }
             }
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor)
+            {
+                if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40)
+                {
+                    API.CastSpell(IL);
+                    API.WriteLog("Ice Lance w/ FoF Buff");
+                    return;
+                }
+            }
             if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(BrainFreeze) && !API.PlayerSpellonCursor)
             {
-                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingHelper || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry && (API.PlayerLastSpell != Frostbolt || !CastFB) && !CastEB && !API.TargetHasDebuff(WC) && !FBWatch.IsRunning && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)))
+                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && (!QuakingHelper || QuakingFB && QuakingHelper) && API.PlayerLastSpell != Flurry && (API.PlayerLastSpell != Frostbolt || !CastFB) && !CastEB && !FBWatch.IsRunning && !API.TargetHasDebuff(WC) && !PlayerHasBuff(FoF) && !API.PlayerIsCasting(true))
                 {
                     API.CastSpell(Frostbolt);
                     API.WriteLog("Frostbolt Hard Cast To Start Shatter Combo");
                     FBWatch.Restart();
                     return;
                 }
-                if (API.CanCast(Flurry) && !API.PlayerIsCasting(true) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
+                if (API.CanCast(Flurry) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
                 {
                     API.CastSpell(Flurry);
                     return;
                 }
-                if (API.CanCast(Flurry) && !API.PlayerIsCasting(true) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
+                if (API.CanCast(Flurry) && (API.LastSpellCastInGame == Frostbolt || API.PlayerLastSpell == Trinket1 || API.PlayerLastSpell == Trinket2) && Level >= 19 && API.TargetRange <= 40 && API.LastSpellCastInGame != Flurry && (CastEB || API.LastSpellCastInGame == EB) && Ebonbolt && (!PlayerHasBuff(FoF) || PlayerHasBuff(FoF)) && !API.TargetHasDebuff(WC) && FlurryWatch.IsRunning)
                 {
                     API.CastSpell(Flurry);
                     return;
                 }
             }
-                // actions.st+=/ice_lance,if=buff.fingers_of_frost.react|debuff.frozen.remains>travel_time
-                if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor)
-            // && (API.TargetHasDebuff(WC) || !API.TargetHasDebuff(WC))
+            // actions.st+=/ice_lance,if=buff.fingers_of_frost.react|debuff.frozen.remains>travel_time
+            if (!ChannelingShift && NotChanneling && !ChannelingRoF && PlayerHasBuff(FoF) && !API.PlayerSpellonCursor)
             {
                 if (API.CanCast(IL) && Level >= 10 && API.TargetRange <= 40)
                 {

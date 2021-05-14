@@ -120,6 +120,8 @@ namespace HyperElk.Core
         private bool CastPF => API.PlayerLastSpell == "Phoenix Flames";
         private bool CastScorch => API.PlayerLastSpell == "Scorch";
         private bool CastFire => API.PlayerLastSpell == "Fireball";
+        private bool AlwaysInt => CombatRoutine.GetPropertyBool("Always Interupt");
+
         bool CastingFireball => API.CurrentCastSpellID("player") == 133;
         int FBTime => FlameOn ? 900 : 1200;
         float FBRecharge => FlameOn ? 900f : 1200f / (1f + API.PlayerGetHaste);
@@ -260,6 +262,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket1", CDUsageWithAOE, "Use " + "Trinket 1" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
+            CombatRoutine.AddProp("Always Interupt", "Always Interupt", false, "Will always Interupt even if currently casting", "Generic");
 
 
         }
@@ -362,12 +365,12 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && !API.PlayerIsCasting(true) && NotChanneling && !ChannelingShift)
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7 && (API.PlayerIsCasting(false) || AlwaysInt) && NotChanneling && !ChannelingShift)
             {
                 API.CastSpell("Counterspell");
                 return;
             }
-            if (API.CanCast(Counterspell) && CombatRoutine.GetPropertyBool("KICK") && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay))
+            if (API.CanCast(Counterspell) && CombatRoutine.GetPropertyBool("KICK") && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay) && (API.PlayerIsCasting(false) || AlwaysInt))
             {
                 API.CastSpell(Counterspell + "Focus");
                 return;
