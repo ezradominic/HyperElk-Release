@@ -88,7 +88,7 @@ namespace HyperElk.Core
         bool TalentKillingSpree => API.PlayerIsTalentSelected(7, 3);
 
         //Rotation Utilities
-        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
+        private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && API.PlayerLevel == 60;
         private bool IsStealth => API.PlayerHasBuff(Stealth) || API.PlayerHasBuff(Vanish) || API.PlayerHasBuff(SepsisBuff);
         int MaxEnergy => API.PlayeMaxEnergy;
         int MaxComboPoints => TalentDeeperStratagem ? 6 : 5;
