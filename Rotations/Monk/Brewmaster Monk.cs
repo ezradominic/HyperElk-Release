@@ -305,7 +305,6 @@ namespace HyperElk.Core
 
         public override void Pulse()
         {
-            API.WriteLog("expel " + API.CanCast(FortifyingBrew));
         }
         public override void CombatPulse()
         {
