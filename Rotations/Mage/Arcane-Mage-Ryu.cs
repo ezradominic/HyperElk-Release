@@ -82,7 +82,9 @@ namespace HyperElk.Core
         private bool Burn => API.PlayerMana >= 10;
         private bool Conserve => API.PlayerMana <= 59 && API.SpellISOnCooldown("Evocation");
         private int Mana => API.PlayerMana;
-       // bool !ChannelingShift => API.PlayerLastSpell == ShiftingPower;
+        private bool AlwaysInt => CombatRoutine.GetPropertyBool("Always Interupt");
+
+        // bool !ChannelingShift => API.PlayerLastSpell == ShiftingPower;
         bool CastArcanePower => API.PlayerLastSpell == "Arcane Power";
         bool CastRoP => API.PlayerLastSpell == "Rune of Power";
         bool ChannelingShift => API.CurrentCastSpellID("player") == 314791;
@@ -218,6 +220,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Rune of Power", "Use " + "Rune of Power", CDUsage, "Use " + "Rune of Power" + "On Cooldown, With Cooldowns or Not Used", "Cooldowns", 0);
             CombatRoutine.AddProp("Legendary", "Select your Legendary", LegendaryList, "Select Your Legendary", "Legendary");
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancel casts on Quaking", "Generic");
+            CombatRoutine.AddProp("Always Interupt", "Always Interupt", false, "Will always Interupt even if currently casting", "Generic");
             CombatRoutine.AddProp("Trinket1", "Use " + "Trinket1", CDUsageWithAOE, "Use " + "Trinket 1" + " On Cooldown, With Cooldown, On AOEs or Not Used", "Trinkets", 0);
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket2", CDUsageWithAOE, "Use " + "Trinket 2" + "On Cooldown, With Cooldown, On AOEs or Not Used", "Trinkets", 0);
 
@@ -244,12 +247,12 @@ namespace HyperElk.Core
                 API.WriteLog("Debuff Time Remaining for Quake : " + API.PlayerDebuffRemainingTime(Quake));
                 return;
             }
-            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7  && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && API.PlayerIsCasting(false))
+            if (isInterrupt && API.CanCast("Counterspell") && Level >= 7  && !ChannelingShift && !ChannelingEvo && !ChannelingMissile && NotChanneling && (API.PlayerIsCasting(false) || AlwaysInt))
             {
                 API.CastSpell("Counterspell");
                 return;
             }
-            if (API.CanCast(Counterspell) && CombatRoutine.GetPropertyBool("KICK") && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay))
+            if (API.CanCast(Counterspell) && CombatRoutine.GetPropertyBool("KICK") && API.FocusCanInterrupted && API.FocusIsCasting() && (API.FocusIsChanneling ? API.FocusElapsedCastTimePercent >= interruptDelay : API.FocusCurrentCastTimeRemaining <= interruptDelay) && (API.PlayerIsCasting(false) || AlwaysInt))
             {
                 API.CastSpell(Counterspell + "Focus");
                 return;

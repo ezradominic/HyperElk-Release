@@ -46,9 +46,10 @@ namespace HyperElk.Core
         private string PhialofSerenity = "Phial of Serenity";
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string FelDomination = "Fel Domination";
-        private string trinket1 = "trinket1";
-        private string trinket2 = "trinket2";
+        private string Trinket1 = "Trinket1";
+        private string Trinket2 = "Trinket2";
         private string SpellLock = "Spell Lock";
+        private string Healthstone = "Healtstone";
 
         //Talents
         private bool TalentFlashover => API.PlayerIsTalentSelected(1, 1);
@@ -146,7 +147,6 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Lead By Example", "Lead By Example", false, " Activate with Lead By Example Soulbind", "Soulbinds");
             CombatRoutine.AddProp("ImmolateMO", "Use Immolate", true, "Use Immolate mouseover ", "Mouseover");
 
-
             //Spells
             CombatRoutine.AddSpell("Switch Target", "Tab");
 
@@ -195,10 +195,10 @@ namespace HyperElk.Core
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
 
 
-            CombatRoutine.AddMacro(trinket1);
-            CombatRoutine.AddMacro(trinket2);
+            CombatRoutine.AddMacro(Trinket1);
+            CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro(Immolate + "MO");
-
+            CombatRoutine.AddItem("HealthstoneFix", 5512);
             CombatRoutine.AddToggle("Mouseover");
 
         }
@@ -246,8 +246,8 @@ namespace HyperElk.Core
                 API.CastSpell(FelDomination);
                 return;
             }
-        }
 
+        }
         public override void CombatPulse()
         {
             if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
