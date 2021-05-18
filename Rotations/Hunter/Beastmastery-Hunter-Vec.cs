@@ -142,6 +142,8 @@ namespace HyperElk.Core
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private int SurvivaloftheSfittestLifePercent => numbList[CombatRoutine.GetPropertyInt(SurvivaloftheFittest)];
         private bool ConcussiveShot_enabled => CombatRoutine.GetPropertyBool(ConcussiveShot);
+        private bool KickAlways => CombatRoutine.GetPropertyBool("alwayskick");
+
 
         public override void Initialize()
         {
@@ -264,7 +266,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SurvivaloftheFittest, SurvivaloftheFittest + " Life Percent", numbList, " Life percent at which" + SurvivaloftheFittest + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(ConcussiveShot, ConcussiveShot, false, "Enable if you want to use ConcussiveShot", "Misc");
-
+            CombatRoutine.AddProp("alwayskick", "Kick always", false, "Enable if you want to kick even if casting", "Interrupt");
 
         }
 
@@ -348,6 +350,16 @@ namespace HyperElk.Core
             if (API.CanCast(ConcussiveShot) && ConcussiveShot_enabled && InRange && !API.TargetHasDebuff(ConcussiveShot))
             {
                 API.CastSpell(ConcussiveShot);
+                return;
+            }
+            if (API.CanCast(Counter_Shot) && KickAlways && isInterrupt && InRange)
+            {
+                API.CastSpell(Counter_Shot);
+                return;
+            }
+            if (!API.MacroIsIgnored(Counter_Shot + " Focus") && KickAlways && IsFocus && API.FocusCanInterrupted && API.FocusElapsedCastTimePercent >= FocusCounterShotPercent && API.FocusRange <= 40 && API.CanCast(Counter_Shot))
+            {
+                API.CastSpell(Counter_Shot + " Focus");
                 return;
             }
             if (API.PetHealthPercent >= 1 && !API.PlayerIsMounted && !Playeriscasting && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death))
