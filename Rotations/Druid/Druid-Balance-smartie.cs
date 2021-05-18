@@ -47,6 +47,8 @@
 // v4.95 additional small change
 // v5.0 precast change for hardaoe
 // v5.1 trinket adjustment and small hotfix
+// v5.2 hard aoe cd fix
+// v5.3 rewrite of some things
 
 using System.Diagnostics;
 
@@ -107,6 +109,7 @@ namespace HyperElk.Core
         private string Stopcast = "Stopcast Macro";
         private string BalanceofallThings = "Balance of all Things";
         private string BalanceofallThings2 = "Balance of all Things2";
+        private string Potion = "Potion of Spectral Intellect";
 
         //Talents
         bool TalentNatureBalance => API.PlayerIsTalentSelected(1, 1);
@@ -160,6 +163,7 @@ namespace HyperElk.Core
         private string UseFuryofElune => CDUsageWithAOE[CombatRoutine.GetPropertyInt(FuryofElune)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
+        public bool UseDPSPotion => CombatRoutine.GetPropertyBool("UseDPSPotion");
         private string IsLegendary => Legendary[CombatRoutine.GetPropertyInt("Legendary")];
         private bool AutoForm => CombatRoutine.GetPropertyBool("AutoForm");
         private bool SpamDots => CombatRoutine.GetPropertyBool("SpamDots");
@@ -198,11 +202,15 @@ namespace HyperElk.Core
         bool celesttrigger1 => API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral <= 30 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || HardAoE && IsAOE && TargetHasDebuff(Sunfire) || API.TargetTimeToDie < 1350) && !TalentIncarnation;
         bool celesttrigger2 => API.CanCast(CelestialAlignment) && !IncaCelestial && IsCelestialAlignment && API.PlayerAstral >= 90 && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || HardAoE && IsAOE && TargetHasDebuff(Sunfire) || API.TargetTimeToDie < 1350) && !TalentIncarnation;
         bool incarcelerdy => (covlegy1 && (incarntrigger1 || celesttrigger1) || covlegy2 && (incarntrigger2 || celesttrigger2));
+        bool SolarEclipseNext => !Eclipses && Lunarwatch.IsRunning;
+        bool LunarEclipseNext => !Eclipses && Solarwatch.IsRunning;
+        bool AnyEclipseNext => !Eclipses && !Lunarwatch.IsRunning && !Solarwatch.IsRunning;
+        bool ChannelingConvoke => API.CurrentCastSpellID("player") == 323764;
 
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v5.1");
+            API.WriteLog("Welcome to smartie`s Balance Druid v5.3");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -294,6 +302,7 @@ namespace HyperElk.Core
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+            CombatRoutine.AddItem(Potion, 171273);
 
             //Prop
             CombatRoutine.AddProp("MobCount", "Mobcount to use Cooldowns ", numbRaidList, " Mobcount to use Cooldowns", "Cooldowns", 3);
@@ -301,6 +310,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("MouseoverInCombat", "Only Mouseover in combat", false, "Only Attack mouseover in combat to avoid stupid pulls", "Generic");
             CombatRoutine.AddProp("Rootbreaker", "Break roots", false, "Break roots with shapeshift", "Generic");
+            CombatRoutine.AddProp("UseDPSPotion", "Use DPS Potion", false, "Will use DPS potion with cds", "Cooldowns");
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(Incarnation, "Use " + Incarnation, CDUsageWithAOE, "Use " + Incarnation + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(CelestialAlignment, "Use " + CelestialAlignment, CDUsageWithAOE, "Use " + CelestialAlignment + " always, with Cooldowns", "Cooldowns", 0);
@@ -323,7 +333,7 @@ namespace HyperElk.Core
         }
         public override void Pulse()
         {
-            //API.WriteLog("GCD: " + API.SpellGCDDuration);
+            //API.WriteLog("eclipse cd: " + API.PlayerBuffTimeRemaining(EclipseSolar));
             if (!Lunarwatch.IsRunning && PlayerHasBuff(EclipseLunar) && !PlayerHasBuff(EclipseSolar))
             {
                 Solarwatch.Stop();
@@ -381,7 +391,7 @@ namespace HyperElk.Core
                 API.CastSpell(Stopcast);
                 return;
             }
-            if ((API.PlayerCurrentCastTimeRemaining > 40 && Eclipses || !Eclipses && API.PlayerCurrentCastTimeRemaining > 0 || HardAoE && !Eclipses && Lunarwatch.IsRunning && API.PlayerCurrentCastTimeRemaining > 40) || API.PlayerSpellonCursor)
+            if ((ChannelingConvoke && API.PlayerCurrentCastTimeRemaining > 0 || API.PlayerCurrentCastTimeRemaining > 40 && Eclipses && !ChannelingConvoke || !Eclipses && API.PlayerCurrentCastTimeRemaining > 0 || HardAoE && IsAOE && !Eclipses && !ChannelingConvoke && Lunarwatch.IsRunning && API.PlayerCurrentCastTimeRemaining > 40) || API.PlayerSpellonCursor)
                 return;
             if (!API.PlayerIsMounted && !PlayerHasBuff(TravelForm))
             {
@@ -513,6 +523,11 @@ namespace HyperElk.Core
                         API.CastSpell("Trinket2");
                         return;
                     }
+                    if (!API.MacroIsIgnored(Potion) && UseDPSPotion && API.PlayerItemCanUse(Potion) && API.PlayerItemRemainingCD(Potion) == 0 && IncaCelestial)
+                    {
+                        API.CastSpell(Potion);
+                        return;
+                    }
                     if (PlayerCovenantSettings == "Night Fae" && IsLegendary == "Balance of all things" && IsCovenant && API.SpellCDDuration(ConvoketheSpirits) <= GCD && API.SpellGCDDuration == 0)
                     {
                         if (API.CanCast(Incarnation) && API.PlayerAstral <= 30 && !IncaCelestial && IsIncarnation && (API.TargetDebuffRemainingTime(Moonfire) > 300 && API.TargetDebuffRemainingTime(Sunfire) > 300 && (TalentStellarFlare && API.TargetDebuffRemainingTime(StellarFlare) > 300 || (API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347) || !TalentStellarFlare) || HardAoE && IsAOE && TargetHasDebuff(Sunfire) || API.TargetTimeToDie < 1350) && TalentIncarnation)
@@ -600,12 +615,12 @@ namespace HyperElk.Core
                                 API.CastSpell(Starsurge);
                                 return;
                             }
-                            if (API.CanCast(Starsurge) && !SaveAP && IsLegendary == "Balance of all things" && API.PlayerAstral >= 70 && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 400 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 400) && UseStarlord)
+                            if (API.CanCast(Starsurge) && !SaveAP && IsLegendary == "Balance of all things" && API.PlayerAstral >= 80 && (API.PlayerBuffTimeRemaining(EclipseSolar) >= 400 || API.PlayerBuffTimeRemaining(EclipseLunar) >= 400) && UseStarlord)
                             {
                                 API.CastSpell(Starsurge);
                                 return;
                             }
-                            if (API.CanCast(Starsurge) && !SaveAP && IsLegendary == "Balance of all things" && API.PlayerAstral >= 30 && API.PlayerAstral < 40 && (IsCelestialAlignment && API.CanCast(CelestialAlignment) && !TalentIncarnation || IsIncarnation && API.CanCast(Incarnation) && TalentIncarnation) && UseStarlord)
+                            if (API.CanCast(Starsurge) && !SaveAP && IsLegendary == "Balance of all things" && API.PlayerAstral >= 30 && API.PlayerAstral < 60 && API.TargetHasDebuff(Moonfire) && API.TargetHasDebuff(Sunfire) && (IsCelestialAlignment && API.CanCast(CelestialAlignment) && !TalentIncarnation || IsIncarnation && API.CanCast(Incarnation) && TalentIncarnation) && UseStarlord)
                             {
                                 API.CastSpell(Starsurge);
                                 return;
@@ -702,42 +717,14 @@ namespace HyperElk.Core
                                 API.CastSpell(NewMoon);
                                 return;
                             }
-                            if (API.CanCast(Starfire) && PlayerLevel >= 10 && PlayerHasBuff(WarriorofElune))
+                            //actions.boat+=/starfire,if=eclipse.in_lunar|eclipse.solar_next|eclipse.any_next|buff.warrior_of_elune.up&buff.eclipse_lunar.up|(buff.ca_inc.remains<action.wrath.execute_time&buff.ca_inc.up)
+                            if (API.CanCast(Starfire) && SaveQuake && (PlayerHasBuff(EclipseLunar) && !IncaCelestial || SolarEclipseNext || AnyEclipseNext && !IncaCelestial && (IsCelestialAlignment && !TalentIncarnation && !API.CanCast(CelestialAlignment) || IsIncarnation && TalentIncarnation && !API.CanCast(Incarnation)) || PlayerHasBuff(WarriorofElune) && PlayerHasBuff(EclipseLunar) || (PlayerHasBuff(EclipseSolar) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && PlayerHasBuff(EclipseLunar) && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)))
                             {
                                 API.CastSpell(Starfire);
                                 return;
                             }
-                            if (API.CanCast(Wrath) && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && SaveQuake && IncaCelestial && API.PlayerBuffTimeRemaining(EclipseSolar) >= 200 && API.PlayerBuffTimeRemaining(EclipseLunar) >= 200)
-                            {
-                                API.CastSpell(Wrath);
-                                return;
-                            }
-                            if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning && (TalentIncarnation && API.SpellCDDuration(Incarnation) < GCD * 2 && IsIncarnation || !TalentIncarnation && API.SpellCDDuration(CelestialAlignment) < GCD * 2 && IsCelestialAlignment))
-                            {
-                                API.CastSpell(Wrath);
-                                return;
-                            }
-                            if (API.CanCast(Starfire) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)
-                            {
-                                API.CastSpell(Starfire);
-                                return;
-                            }
-                            if (API.CanCast(Starfire) && PlayerLevel >= 10 && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
-                            {
-                                API.CastSpell(Starfire);
-                                return;
-                            }
-                            if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
-                            {
-                                API.CastSpell(Wrath);
-                                return;
-                            }
-                            if (API.CanCast(Starfire) && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && PlayerHasBuff(EclipseLunar))
-                            {
-                                API.CastSpell(Starfire);
-                                return;
-                            }
-                            if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift))
+                            //actions.boat+=/wrath
+                            if (API.CanCast(Wrath) && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && SaveQuake)
                             {
                                 API.CastSpell(Wrath);
                                 return;
@@ -766,7 +753,12 @@ namespace HyperElk.Core
                                         return;
                                     }
                                 }
-                                if (API.CanCast(Sunfire) && PlayerLevel >= 23 && (Eclipses || HardAoE) && !DontDOT && API.TargetDebuffRemainingTime(Sunfire) < 300)
+                                if (API.CanCast(Starsurge) && !SaveAP && API.PlayerAstral >= 30 && API.TargetHasDebuff(Sunfire) && (IsCelestialAlignment && API.CanCast(CelestialAlignment) && !TalentIncarnation || IsIncarnation && API.CanCast(Incarnation) && TalentIncarnation) && UseStarlord)
+                                {
+                                    API.CastSpell(Starsurge);
+                                    return;
+                                }
+                                if (API.CanCast(Sunfire) && PlayerLevel >= 23 && !DontDOT && API.TargetDebuffRemainingTime(Sunfire) < 300)
                                 {
                                     API.CastSpell(Sunfire);
                                     return;
@@ -779,12 +771,12 @@ namespace HyperElk.Core
                                         return;
                                     }
                                 }
-                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && !Eclipses && (Solarwatch.IsRunning || !Solarwatch.IsRunning && !Lunarwatch.IsRunning))
+                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && (LunarEclipseNext || AnyEclipseNext && !IncaCelestial && (IsCelestialAlignment && !TalentIncarnation && !API.CanCast(CelestialAlignment) || IsIncarnation && TalentIncarnation && !API.CanCast(Incarnation)) || (PlayerHasBuff(EclipseSolar) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && PlayerHasBuff(EclipseLunar) && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)))
                                 {
                                     API.CastSpell(Wrath);
                                     return;
                                 }
-                                if ((!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift || PlayerHasBuff(WarriorofElune)) && HardAoE)
+                                if ((!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift || PlayerHasBuff(WarriorofElune)) && SaveQuake)
                                 {
                                     if (API.CanCast(Starfire))
                                     {
@@ -802,7 +794,7 @@ namespace HyperElk.Core
                                         API.CastSpell(Starfall);
                                         return;
                                     }
-                                    if (API.CanCast(Starsurge) && !SaveAP && (API.PlayerAstral >= 80 || API.PlayerAstral > 30 && API.TargetHasDebuff(Moonfire) && API.TargetHasDebuff(Sunfire) && (IsCelestialAlignment && API.CanCast(CelestialAlignment) && !TalentIncarnation || IsIncarnation && API.CanCast(Incarnation) && TalentIncarnation)) && UseStarlord)
+                                    if (API.CanCast(Starsurge) && !SaveAP && (API.PlayerAstral >= 80 || API.PlayerAstral >= 50 && BOAT && API.PlayerBuffTimeRemaining(Starfall) >= 600 || API.PlayerAstral >= 30 && API.TargetHasDebuff(Moonfire) && API.TargetHasDebuff(Sunfire) && (IsCelestialAlignment && API.CanCast(CelestialAlignment) && !TalentIncarnation || IsIncarnation && API.CanCast(Incarnation) && TalentIncarnation)) && UseStarlord)
                                     {
                                         API.CastSpell(Starsurge);
                                         return;
@@ -826,7 +818,7 @@ namespace HyperElk.Core
                                     API.CastSpell(Sunfire);
                                     return;
                                 }
-                                if (API.CanCast(Moonfire) && PlayerLevel >= 2 && Eclipses && !DontDOT && (API.PlayerUnitInMeleeRangeCount < 4 || PlayerHasBuff(EclipseSolar)) && API.TargetDebuffRemainingTime(Moonfire) < 300 && API.TargetTimeToDie >= 1350)
+                                if (API.CanCast(Moonfire) && PlayerLevel >= 2 && Eclipses && !DontDOT && PlayerHasBuff(EclipseSolar) && API.TargetDebuffRemainingTime(Moonfire) < 300 && API.TargetTimeToDie >= 1350)
                                 {
                                     API.CastSpell(Moonfire);
                                     return;
@@ -853,7 +845,7 @@ namespace HyperElk.Core
                                         API.CastSpell(Sunfire + "MO");
                                         return;
                                     }
-                                    if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && Eclipses && (API.PlayerUnitInMeleeRangeCount < 4 || PlayerHasBuff(EclipseSolar)) && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
+                                    if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && Eclipses && PlayerHasBuff(EclipseSolar) && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
                                     {
                                         API.CastSpell(Moonfire + "MO");
                                         return;
@@ -874,37 +866,14 @@ namespace HyperElk.Core
                                     API.CastSpell(NewMoon);
                                     return;
                                 }
-                                if (API.CanCast(Starfire) && PlayerLevel >= 10 && PlayerHasBuff(WarriorofElune))
-                                {
-                                    API.CastSpell(Starfire);
-                                    return;
-                                }
-                                if (API.CanCast(Starfire) && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && SaveQuake && IncaCelestial && API.PlayerBuffTimeRemaining(EclipseSolar) >= 200 && API.PlayerBuffTimeRemaining(EclipseLunar) >= 200)
-                                {
-                                    API.CastSpell(Starfire);
-                                    return;
-                                }
-                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)
+                                //actions.aoe+=/wrath,if=(eclipse.lunar_next|eclipse.any_next&variable.is_cleave)&(target.time_to_die>4|eclipse.lunar_in_2|fight_remains<10)|buff.eclipse_solar.remains<action.starfire.execute_time&buff.eclipse_solar.up|eclipse.in_solar&!variable.starfire_in_solar|buff.ca_inc.remains<action.starfire.execute_time&!variable.is_cleave&buff.ca_inc.remains<execute_time&buff.ca_inc.up|buff.ravenous_frenzy.up&spell_haste>0.6&(spell_targets<=3|!talent.soul_of_the_forest.enabled)|!variable.is_cleave&buff.ca_inc.remains>execute_time
+                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && (PlayerHasBuff(EclipseSolar) && !IncaCelestial || LunarEclipseNext || AnyEclipseNext && !IncaCelestial && (IsCelestialAlignment && !TalentIncarnation && !API.CanCast(CelestialAlignment) || IsIncarnation && TalentIncarnation && !API.CanCast(Incarnation)) || (PlayerHasBuff(EclipseSolar) && API.PlayerBuffTimeRemaining(EclipseSolar) < 200 && PlayerHasBuff(EclipseLunar) && API.PlayerBuffTimeRemaining(EclipseLunar) < 200 && !Solarwatch.IsRunning && !Lunarwatch.IsRunning)))
                                 {
                                     API.CastSpell(Wrath);
                                     return;
                                 }
-                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Solarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
-                                {
-                                    API.CastSpell(Wrath);
-                                    return;
-                                }
-                                if (API.CanCast(Starfire) && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && Lunarwatch.IsRunning && !PlayerHasBuff(EclipseSolar) && !PlayerHasBuff(EclipseLunar))
-                                {
-                                    API.CastSpell(Starfire);
-                                    return;
-                                }
-                                if (API.CanCast(Wrath) && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift) && PlayerHasBuff(EclipseSolar))
-                                {
-                                    API.CastSpell(Wrath);
-                                    return;
-                                }
-                                if (API.CanCast(Starfire) && SaveQuake && PlayerLevel >= 10 && (!API.PlayerIsMoving || PlayerHasBuff(Starfall) && TalentStellarDrift))
+                                //actions.aoe+=/starfire
+                                if (API.CanCast(Starfire) && SaveQuake)
                                 {
                                     API.CastSpell(Starfire);
                                     return;
