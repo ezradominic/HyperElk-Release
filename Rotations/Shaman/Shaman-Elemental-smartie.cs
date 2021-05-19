@@ -24,6 +24,7 @@
 // v3.1 explosive killer
 // v3.15 typo 
 // v3.2 low level fix
+// v3.3 low level fix
 
 using System.Diagnostics;
 
@@ -158,7 +159,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.2");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.3");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
@@ -863,6 +864,11 @@ namespace HyperElk.Core
                             API.CastSpell(Earthquake);
                             return;
                         }
+                        if (API.CanCast(EarthShock) && PlayerLevel >= 10 && PlayerLevel < 38 && API.PlayerMaelstrom >= 60)
+                        {
+                            API.CastSpell(EarthShock);
+                            return;
+                        }
                         //actions.aoe +=/ chain_lightning,if= buff.stormkeeper.remains < 3 * gcd * buff.stormkeeper.stack
                         if (API.CanCast(ChainLightning) && PlayerLevel >= 24 && API.PlayerBuffTimeRemaining(Stormkeeper) < 300 * gcd * API.PlayerBuffStacks(Stormkeeper) && API.PlayerMaelstrom < 90)
                         {
@@ -891,6 +897,11 @@ namespace HyperElk.Core
                         if (API.CanCast(ChainLightning) && API.PlayerMaelstrom < 90 && MasterUP && PlayerLevel >= 24 && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(SpiritwalkersGrace)))
                         {
                             API.CastSpell(ChainLightning);
+                            return;
+                        }
+                        if (API.CanCast(LightningBolt) && API.PlayerMaelstrom < 90 && PlayerLevel < 24 && SaveQuake && (!API.PlayerIsMoving || PlayerHasBuff(SpiritwalkersGrace)))
+                        {
+                            API.CastSpell(LightningBolt);
                             return;
                         }
                         //actions.aoe +=/ flame_shock,moving = 1,target_if = refreshable
