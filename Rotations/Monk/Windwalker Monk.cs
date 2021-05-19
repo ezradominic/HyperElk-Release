@@ -252,11 +252,6 @@ namespace HyperElk.Core
                 FocusHelper++;
                 return;
             }
-            if (API.PlayerIsCC(CCList.STUN) && PlayerRaceSettings == "Human" && API.CanCast(RacialSpell1))
-            {
-                API.CastSpell(RacialSpell1);
-                return;
-            }
             if (IsCooldowns && UseTrinket1 == "Cooldowns" && API.PlayerTrinketIsUsable(1) && API.PlayerTrinketRemainingCD(1) == 0)
                 API.CastSpell(trinket1);
             if (IsCooldowns && UseTrinket2 == "Cooldowns" && API.PlayerTrinketIsUsable(2) && API.PlayerTrinketRemainingCD(2) == 0)
@@ -721,19 +716,19 @@ namespace HyperElk.Core
                 }
             }
             //actions+=/fist_of_the_white_tiger,target_if=min:debuff.mark_of_the_crane.remains,if=chi.max-chi>=3&(energy.time_to_max<1|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3 && (EnergyTimeToMax <100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200) && PlayerRaceSettings == "Kyrian")
+            if (API.CanCast(FistsoftheWhiteTiger) && TalentFistoftheWhiteTiger && ChiDeficit >= 3 && (EnergyTimeToMax <100 || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(FistsoftheWhiteTiger);
                 return;
             }
             //actions+=/expel_harm,if=chi.max-chi>=1&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (API.CanCast(ExpelHarm) && ChiDeficit >= 1 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200 && PlayerRaceSettings == "Kyrian"))
+            if (API.CanCast(ExpelHarm) && ChiDeficit >= 1 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(ExpelHarm);
                 return;
             }
             //actions+=/tiger_palm,target_if=min:debuff.mark_of_the_crane.remains,if=combo_strike&chi.max-chi>=2&(energy.time_to_max<1|cooldown.serenity.remains<2|energy.time_to_max<4&cooldown.fists_of_fury.remains<1.5|cooldown.weapons_of_order.remains<2)
-            if (API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200 && PlayerRaceSettings == "Kyrian"))
+            if (API.CanCast(TigerPalm) && !LastCastTigerPalm && ChiDeficit >= 2 && (EnergyTimeToMax < 100 || API.SpellCDDuration(Serenity) < 200 && TalentSerenty || EnergyTimeToMax < 400 && API.SpellCDDuration(FistsofFury) < 150 || API.SpellCDDuration(WeaponsofOrder) < 200))
             {
                 API.CastSpell(TigerPalm);
                 return;
@@ -820,7 +815,7 @@ namespace HyperElk.Core
                     return;
                 }
                 //actions.cd_sef+=/fireblood,if=cooldown.invoke_xuen_the_white_tiger.remains>30|variable.hold_xuen|fight_remains<10
-                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf" && API.SpellCDDuration(InvokeXuen) > 3000)
+                if (API.CanCast(RacialSpell1) && isRacial && PlayerRaceSettings == "Dark Iron Dwarf" && (HoldXuen || API.SpellCDDuration(InvokeXuen) > 3000))
                 {
                     API.CastSpell(RacialSpell1);
                     return;
