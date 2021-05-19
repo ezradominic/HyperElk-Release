@@ -49,6 +49,7 @@
 // v5.1 trinket adjustment and small hotfix
 // v5.2 hard aoe cd fix
 // v5.3 rewrite of some things
+// v5.4 small adjustment
 
 using System.Diagnostics;
 
@@ -210,7 +211,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v5.3");
+            API.WriteLog("Welcome to smartie`s Balance Druid v5.4");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -818,12 +819,12 @@ namespace HyperElk.Core
                                     API.CastSpell(Sunfire);
                                     return;
                                 }
-                                if (API.CanCast(Moonfire) && PlayerLevel >= 2 && Eclipses && !DontDOT && PlayerHasBuff(EclipseSolar) && API.TargetDebuffRemainingTime(Moonfire) < 300 && API.TargetTimeToDie >= 1350)
+                                if (API.CanCast(Moonfire) && PlayerLevel >= 2 && Eclipses && !DontDOT && API.TargetDebuffRemainingTime(Moonfire) < 300 && API.TargetTimeToDie >= 1350)
                                 {
                                     API.CastSpell(Moonfire);
                                     return;
                                 }
-                                if (API.CanCast(StellarFlare) && Eclipses && API.PlayerUnitInMeleeRangeCount < 4 && TalentStellarFlare && !API.PlayerIsMoving && SaveQuake && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.TargetTimeToDie >= 1600 && !(API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347))
+                                if (API.CanCast(StellarFlare) && Eclipses && TalentStellarFlare && !API.PlayerIsMoving && SaveQuake && !DontDOT && API.TargetDebuffRemainingTime(StellarFlare) < 300 && API.TargetTimeToDie >= 1600 && !(API.LastSpellCastInGame == StellarFlare || API.PlayerCurrentCastSpellID == 202347))
                                 {
                                     API.CastSpell(StellarFlare);
                                     return;
