@@ -122,6 +122,7 @@ namespace HyperElk.Core
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private bool ConcussiveShot_enabled => CombatRoutine.GetPropertyBool(ConcussiveShot);
+        private bool KickAlways => CombatRoutine.GetPropertyBool("alwayskick");
 
 
         private bool CanuseASinST => API.CanCast(Aimed_Shot) && InRange && (PlayerHasBuff(Lock_and_Load) || !API.PlayerIsMoving) && API.PlayerFocus >= (PlayerHasBuff(Lock_and_Load) ? 0 : 35) && API.PlayerCurrentCastSpellID != 19434 && (API.TargetDebuffRemainingTime(Serpent_Sting) > 200 || !Talent_Serpent_Sting) && (!PlayerHasBuff(Precise_Shots) || (PlayerHasBuff(Trueshot) || FullRechargeTime(Aimed_Shot, AimedShotCooldown) < gcd + AimedShotCastTime) && (!Talent_Chimaera_Shot || (!UseCleaveRotation && API.TargetUnitInRangeCount < 2)) || API.PlayerBuffTimeRemaining(Trick_Shots) > AimedShotCastTime && (UseCleaveRotation || API.TargetUnitInRangeCount > 1));
@@ -282,6 +283,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(Feign_Death, "Use " + Feign_Death + " below:", percentListProp, "Life percent at which " + Feign_Death + " is used, set to 0 to disable", "Defense", 2);
             CombatRoutine.AddProp(Mend_Pet, "Use " + Mend_Pet + " below:", percentListProp, "Life percent at which " + Mend_Pet + " is used, set to 0 to disable", "Pet", 6);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
+            CombatRoutine.AddProp("alwayskick", "Kick always", false, "Enable if you want to kick even if casting", "Interrupt");
+
         }
 
         public override void Pulse()
@@ -350,6 +353,16 @@ namespace HyperElk.Core
             if (API.CanCast(Feign_Death) && API.PlayerHealthPercent <= FeignDeathLifePercent && PlayerLevel >= 6)
             {
                 API.CastSpell(Feign_Death);
+                return;
+            }
+            if (isInterrupt && KickAlways && API.CanCast(Counter_Shot) && InRange && PlayerLevel >= 18)
+            {
+                API.CastSpell(Counter_Shot);
+                return;
+            }
+            if (!API.MacroIsIgnored(Counter_Shot + " Focus") && KickAlways && IsFocus && API.FocusCanInterrupted && API.FocusElapsedCastTimePercent >= FocusCounterShotPercent && API.FocusRange <= 40 && API.CanCast(Counter_Shot))
+            {
+                API.CastSpell(Counter_Shot + " Focus");
                 return;
             }
             if (!Playeriscasting && !API.PlayerIsChanneling && !API.PlayerIsMounted && !PlayerHasBuff(Aspect_of_the_Turtle) && !PlayerHasBuff(Feign_Death) && !API.PlayerSpellonCursor)
