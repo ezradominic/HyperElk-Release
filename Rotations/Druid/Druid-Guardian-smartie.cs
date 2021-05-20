@@ -18,6 +18,7 @@
 // v2.5 hotfix
 // v2.6 trinket life %
 // v2.7 sooth list
+// v2.8 small adjustment
 
 namespace HyperElk.Core
 {
@@ -117,10 +118,11 @@ namespace HyperElk.Core
         public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
         private int TrinketLifePercent => numbList[CombatRoutine.GetPropertyInt("TrinketLife")];
         public bool SootheList => API.TargetHasBuff("Enrage") || API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
+        bool ChannelingConvoke => API.CurrentCastSpellID("player") == 323764;
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.6");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.8");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -236,7 +238,7 @@ namespace HyperElk.Core
         public override void CombatPulse()
         {
             //API.WriteLog("Targets: "+ API.PlayerUnitInMeleeRangeCount);
-            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
+            if ((ChannelingConvoke && API.PlayerCurrentCastTimeRemaining > 0 || API.PlayerCurrentCastTimeRemaining > 40) || API.PlayerSpellonCursor)
                 return;
             if (!API.PlayerIsMounted && !API.PlayerHasBuff(TravelForm))
             {

@@ -34,6 +34,7 @@
 // v4.05 conduit fix
 // v4.1 hotfix
 // v4.2 sooth list
+// v4.3 small change
 
 using System.Diagnostics;
 
@@ -211,11 +212,11 @@ namespace HyperElk.Core
         public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
 
         public bool SootheList => API.TargetHasBuff("Enrage") || API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
-
+        bool ChannelingConvoke => API.CurrentCastSpellID("player") == 323764;
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v4.2");
+            API.WriteLog("Welcome to smartie`s Feral Druid v4.3");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -455,7 +456,7 @@ namespace HyperElk.Core
         }
         public override void OutOfCombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
+            if ((ChannelingConvoke && API.PlayerCurrentCastTimeRemaining > 0 || API.PlayerCurrentCastTimeRemaining > 40) || API.PlayerSpellonCursor)
                 return;
             if (ProwlOOC && API.CanCast(Prowl) && PlayerLevel >= 17 && !PlayerHasBuff(Prowl) && !API.PlayerIsMounted && !PlayerHasBuff(TravelForm))
             {
@@ -475,7 +476,7 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
-            if (API.PlayerCurrentCastTimeRemaining > 40 || API.PlayerSpellonCursor)
+            if ((ChannelingConvoke && API.PlayerCurrentCastTimeRemaining > 0 || API.PlayerCurrentCastTimeRemaining > 40) || API.PlayerSpellonCursor)
                 return;
             if (DontAttackRoots && (TargetHasDebuff(EntanglingRoots) || TargetHasDebuff(MassEntanglement)))
                 return;

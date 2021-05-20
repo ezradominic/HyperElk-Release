@@ -51,6 +51,7 @@
 // v5.3 rewrite of some things
 // v5.4 small adjustment
 // v5.5 sooth
+// v5.6 small adjustment
 
 using System.Diagnostics;
 
@@ -214,7 +215,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v5.4");
+            API.WriteLog("Welcome to smartie`s Balance Druid v5.6");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -873,7 +874,7 @@ namespace HyperElk.Core
                                         API.CastSpell(Sunfire + "MO");
                                         return;
                                     }
-                                    if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && Eclipses && PlayerHasBuff(EclipseSolar) && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
+                                    if (API.MouseoverDebuffRemainingTime(Moonfire) <= 300 && Eclipses && !API.MacroIsIgnored(Moonfire + "MO") && API.CanCast(Moonfire) && isMOinRange)
                                     {
                                         API.CastSpell(Moonfire + "MO");
                                         return;
