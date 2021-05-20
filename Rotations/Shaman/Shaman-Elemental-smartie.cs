@@ -25,6 +25,7 @@
 // v3.15 typo 
 // v3.2 low level fix
 // v3.3 low level fix
+// v3.4 Healing surge our of combat added
 
 using System.Diagnostics;
 
@@ -143,6 +144,7 @@ namespace HyperElk.Core
         private int AstralShiftLifePercent => numbList[CombatRoutine.GetPropertyInt(AstralShift)];
         private int HealingStreamTotemLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingStreamTotem)];
         private int HealingSurgeLifePercent => numbList[CombatRoutine.GetPropertyInt(HealingSurge)];
+        private int HealingSurgeLifePercentOOC => numbList[CombatRoutine.GetPropertyInt("HealingSurgeOOC")];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         private bool WeaponEnchant => CombatRoutine.GetPropertyBool("WeaponEnchant");
@@ -159,7 +161,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Elemental Shaman by smartie";
-            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.3");
+            API.WriteLog("Welcome to smartie`s Elemental Shaman v3.4");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("For Earthquake (optional but recommended): /cast [@cursor] Earthquake");
@@ -260,7 +262,8 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(AstralShift, AstralShift + " Life Percent", numbList, "Life percent at which" + AstralShift + "is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(HealingStreamTotem, HealingStreamTotem + " Life Percent", numbList, "Life percent at which" + HealingStreamTotem + "is used, set to 0 to disable", "Defense", 20);
-            CombatRoutine.AddProp(HealingSurge, HealingSurge + " Life Percent", numbList, "Life percent at which" + HealingSurge + "is used, set to 0 to disable", "Defense", 0);
+            CombatRoutine.AddProp(HealingSurge, HealingSurge + " Life Percent", numbList, "Life percent at which" + HealingSurge + "is used, set to 0 to disable", "Defense", 40);
+            CombatRoutine.AddProp("HealingSurgeOOC", "Healing Surge out of Combat" + " Life Percent", numbList, "Life percent at which" + HealingSurge + "is used out of combat - set to 0 to disable", "Defense", 60);
         }
         public override void Pulse()
         {
@@ -416,6 +419,11 @@ namespace HyperElk.Core
             if (API.CanCast(FlametongueWeapon) && WeaponEnchant && API.LastSpellCastInGame != (FlametongueWeapon) && API.PlayerWeaponBuffDuration(true) < 30000)
             {
                 API.CastSpell(FlametongueWeapon);
+                return;
+            }
+            if (API.CanCast(HealingSurge) && SaveQuake && PlayerLevel >= 4 && API.PlayerMana >= 24 && !API.PlayerIsMoving && API.PlayerHealthPercent <= HealingSurgeLifePercentOOC)
+            {
+                API.CastSpell(HealingSurge);
                 return;
             }
         }

@@ -8,6 +8,7 @@
 // v1.45 Serrated Bone Spike adjustment
 // v1.5 explosive protection
 // v1.6 hotfix
+// v1.7 soothlist added
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -141,6 +142,8 @@ namespace HyperElk.Core
         private int FeintLifePercent => numbList[CombatRoutine.GetPropertyInt(Feint)];
         private int PhialofSerenityLifePercent => numbList[CombatRoutine.GetPropertyInt(PhialofSerenity)];
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
+
+        public bool SootheList => API.TargetHasBuff("Enrage") || API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
         //actions+=/variable,name=rtb_reroll,value=rtb_buffs<2&(!buff.true_bearing.up&!buff.broadside.up)
         public bool ShouldRolltheBones()
         {
@@ -186,7 +189,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.6");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.7");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -265,6 +268,24 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(InstantPoison, 315584);
             CombatRoutine.AddBuff(Dreadblades, 343142);
             CombatRoutine.AddBuff(Feint, 1966);
+
+            //Soothe
+            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Unholy Frenzy", 320012);
+            CombatRoutine.AddBuff("Renew", 135953);
+            CombatRoutine.AddBuff("Additional Treads", 965900);
+            CombatRoutine.AddBuff("Slime Coated", 3459153);
+            CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
+            CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
+            CombatRoutine.AddBuff("Unholy Fervor", 2576093);
+            CombatRoutine.AddBuff("Loyal Beasts", 326450);
+            CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
+            CombatRoutine.AddBuff("Dark Shroud", 2576096);
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Enrage", 324085);
+            CombatRoutine.AddBuff("Raging Tantrum", 333241);
+            CombatRoutine.AddBuff("Seething Rage", 320703);
 
             //Debuffs
             CombatRoutine.AddDebuff(Flagellation, 323654);
@@ -456,6 +477,11 @@ namespace HyperElk.Core
             }
             if (!IsStealth)
             {
+                if (API.CanCast(Shiv) && !isExplosive && SootheList && IsLegendary != "Tiny Toxic Blade" && API.PlayerEnergy >= 20 && IsMelee)
+                {
+                    API.CastSpell(Shiv);
+                    return;
+                }
                 //actions+=/call_action_list,name=cds
                 //actions.cds=blade_flurry,if=spell_targets>=2&!buff.blade_flurry.up
                 if (API.CanCast(BladeFlurry) && !isExplosive && IsAOE && API.PlayerUnitInMeleeRangeCount >= AOEUnitNumber && IsMelee && !API.PlayerHasBuff(BladeFlurry))

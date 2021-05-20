@@ -50,6 +50,7 @@
 // v5.2 hard aoe cd fix
 // v5.3 rewrite of some things
 // v5.4 small adjustment
+// v5.5 sooth
 
 using System.Diagnostics;
 
@@ -111,6 +112,7 @@ namespace HyperElk.Core
         private string BalanceofallThings = "Balance of all Things";
         private string BalanceofallThings2 = "Balance of all Things2";
         private string Potion = "Potion of Spectral Intellect";
+        private string Soothe = "Soothe";
 
         //Talents
         bool TalentNatureBalance => API.PlayerIsTalentSelected(1, 1);
@@ -207,6 +209,7 @@ namespace HyperElk.Core
         bool LunarEclipseNext => !Eclipses && Solarwatch.IsRunning;
         bool AnyEclipseNext => !Eclipses && !Lunarwatch.IsRunning && !Solarwatch.IsRunning;
         bool ChannelingConvoke => API.CurrentCastSpellID("player") == 323764;
+        public bool SootheList => API.TargetHasBuff("Enrage") || API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
 
         public override void Initialize()
         {
@@ -254,6 +257,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(AdaptiveSwarm, 325727, "D1");
             CombatRoutine.AddSpell(LoneEmpowerment, 338142, "D1");
             CombatRoutine.AddSpell(EmpowerBond, "D1");
+            CombatRoutine.AddSpell(Soothe,2908, "D1");
 
             //Macros
             CombatRoutine.AddMacro(Moonfire + "MO", "NumPad7");
@@ -285,6 +289,24 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(KindredSpirits, 326967);
             CombatRoutine.AddBuff(BalanceofallThings, 339946);
             CombatRoutine.AddBuff(BalanceofallThings2, 339943);
+
+            //Soothe
+            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Unholy Frenzy", 320012);
+            CombatRoutine.AddBuff("Renew", 135953);
+            CombatRoutine.AddBuff("Additional Treads", 965900);
+            CombatRoutine.AddBuff("Slime Coated", 3459153);
+            CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
+            CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
+            CombatRoutine.AddBuff("Unholy Fervor", 2576093);
+            CombatRoutine.AddBuff("Loyal Beasts", 326450);
+            CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
+            CombatRoutine.AddBuff("Dark Shroud", 2576096);
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Enrage", 324085);
+            CombatRoutine.AddBuff("Raging Tantrum", 333241);
+            CombatRoutine.AddBuff("Seething Rage", 320703);
 
             //Debuff
             CombatRoutine.AddDebuff(Moonfire, 164812);
@@ -459,6 +481,11 @@ namespace HyperElk.Core
                 if (API.PlayerHealthPercent > BearFormLifePercent && BearFormLifePercent != 0 && API.CanCast(MoonkinForm) && PlayerHasBuff(BearForm) && AutoForm)
                 {
                     API.CastSpell(MoonkinForm);
+                    return;
+                }
+                if (API.CanCast(Soothe) && API.TargetRange < 45 && SootheList)
+                {
+                    API.CastSpell(Soothe);
                     return;
                 }
                 rotation();

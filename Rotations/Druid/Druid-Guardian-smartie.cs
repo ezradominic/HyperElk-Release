@@ -17,6 +17,7 @@
 // v2.45 explosive check
 // v2.5 hotfix
 // v2.6 trinket life %
+// v2.7 sooth list
 
 namespace HyperElk.Core
 {
@@ -57,6 +58,7 @@ namespace HyperElk.Core
         private string SpiritualHealingPotion = "Spiritual Healing Potion";
         private string SavageCombatant = "Savage Combatant";
         private string Growl = "Growl";
+        private string Soothe = "Soothe";
 
 
         //Talents
@@ -114,6 +116,7 @@ namespace HyperElk.Core
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
         private int TrinketLifePercent => numbList[CombatRoutine.GetPropertyInt("TrinketLife")];
+        public bool SootheList => API.TargetHasBuff("Enrage") || API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
@@ -145,6 +148,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(AdaptiveSwarm, 325727, "D1");
             CombatRoutine.AddSpell(LoneProtection, 338018, "D1");
             CombatRoutine.AddSpell(Growl, 6795, "D1");
+            CombatRoutine.AddSpell(Soothe, 2908, "D1");
 
             CombatRoutine.AddMacro("Trinket1", "F9");
             CombatRoutine.AddMacro("Trinket2", "F10");
@@ -167,6 +171,24 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(LoneSpirit, 338041);
             CombatRoutine.AddBuff(Soulshape, 310143);
             CombatRoutine.AddBuff(SavageCombatant, 340613);
+
+            //Soothe
+            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Unholy Frenzy", 320012);
+            CombatRoutine.AddBuff("Renew", 135953);
+            CombatRoutine.AddBuff("Additional Treads", 965900);
+            CombatRoutine.AddBuff("Slime Coated", 3459153);
+            CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
+            CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
+            CombatRoutine.AddBuff("Unholy Fervor", 2576093);
+            CombatRoutine.AddBuff("Loyal Beasts", 326450);
+            CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
+            CombatRoutine.AddBuff("Dark Shroud", 2576096);
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Enrage", 324085);
+            CombatRoutine.AddBuff("Raging Tantrum", 333241);
+            CombatRoutine.AddBuff("Seething Rage", 320703);
 
             //Debuff
             CombatRoutine.AddDebuff(Thrash, 192090);
@@ -291,6 +313,11 @@ namespace HyperElk.Core
                 if (API.CanCast(BearForm) && API.PlayerIsCC(CCList.ROOT) && !API.PlayerHasDebuff("Frozen Binds") && AutoForm && rootbreaker)
                 {
                     API.CastSpell(BearForm);
+                    return;
+                }
+                if (API.CanCast(Soothe) && API.TargetRange < 45 && SootheList)
+                {
+                    API.CastSpell(Soothe);
                     return;
                 }
                 rotation();

@@ -33,6 +33,7 @@
 // v4.0 no finisher on explosives
 // v4.05 conduit fix
 // v4.1 hotfix
+// v4.2 sooth list
 
 using System.Diagnostics;
 
@@ -108,6 +109,7 @@ namespace HyperElk.Core
         private string Bloodlust = "Bloodlust";
         private string Heroism = "Heroism";
         private string DrumsofDeathlyFerocity = "Drums of Deathly Ferocity";
+        private string Soothe = "Soothe";
 
         //Talents
         bool TalentLunarInspiration => API.PlayerIsTalentSelected(1, 3);
@@ -208,10 +210,12 @@ namespace HyperElk.Core
         private int SpiritualHealingPotionLifePercent => numbList[CombatRoutine.GetPropertyInt(SpiritualHealingPotion)];
         public bool rootbreaker => CombatRoutine.GetPropertyBool("Rootbreaker");
 
+        public bool SootheList => API.TargetHasBuff("Enrage") || API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v4.1");
+            API.WriteLog("Welcome to smartie`s Feral Druid v4.2");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -263,6 +267,7 @@ namespace HyperElk.Core
             CombatRoutine.AddSpell(Starfire, 197628, "D1");
             CombatRoutine.AddSpell(EntanglingRoots, 339, "D1");
             CombatRoutine.AddSpell(MassEntanglement, 102359, "D1");
+            CombatRoutine.AddSpell(Soothe, 2908, "D1");
 
 
             //Macros
@@ -303,6 +308,24 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Bloodlust, 2825);
             CombatRoutine.AddBuff(Heroism, 32182);
             CombatRoutine.AddBuff(DrumsofDeathlyFerocity, 172233);
+
+            //Soothe
+            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Unholy Frenzy", 320012);
+            CombatRoutine.AddBuff("Renew", 135953);
+            CombatRoutine.AddBuff("Additional Treads", 965900);
+            CombatRoutine.AddBuff("Slime Coated", 3459153);
+            CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
+            CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
+            CombatRoutine.AddBuff("Unholy Fervor", 2576093);
+            CombatRoutine.AddBuff("Loyal Beasts", 326450);
+            CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
+            CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
+            CombatRoutine.AddBuff("Dark Shroud", 2576096);
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Enrage", 324085);
+            CombatRoutine.AddBuff("Raging Tantrum", 333241);
+            CombatRoutine.AddBuff("Seething Rage", 320703);
 
             //Debuff
             CombatRoutine.AddDebuff(Rip, 1079);
@@ -536,6 +559,11 @@ namespace HyperElk.Core
                 if (API.CanCast(CatForm) && API.PlayerIsCC(CCList.ROOT) && !API.PlayerHasDebuff("Frozen Binds") && IsAutoForm && rootbreaker)
                 {
                     API.CastSpell(CatForm);
+                    return;
+                }
+                if (API.CanCast(Soothe) && API.TargetRange < 45 && SootheList)
+                {
+                    API.CastSpell(Soothe);
                     return;
                 }
                 rotation();
