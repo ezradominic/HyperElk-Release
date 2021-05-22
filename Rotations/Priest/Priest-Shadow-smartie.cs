@@ -6,6 +6,7 @@
 // v1.15 another small adjustment
 // v1.2 another small update
 // v1.3 last one for today i promise ^^
+// v1.4 pet fix and Dissonant Echoes added
 
 
 using System.Diagnostics;
@@ -160,7 +161,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.3");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.4");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -482,13 +483,13 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/shadow_word_death,if=pet.fiend.active&runeforge.shadowflame_prism.equipped&pet.fiend.remains<=gcd
-                    if (API.CanCast(SWDeath) && IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration <= gcd)
+                    if (API.CanCast(SWDeath) && IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration <= gcd && API.PlayerTotemPetDuration != 0)
                     {
                         API.CastSpell(SWDeath);
                         return;
                     }
                     //actions.main+=/mind_blast,if=(cooldown.mind_blast.charges>1&(debuff.hungering_void.up|!talent.hungering_void.enabled)|pet.fiend.remains<=cast_time+gcd)&pet.fiend.active&runeforge.shadowflame_prism.equipped&pet.fiend.remains>=cast_time
-                    if (API.CanCast(MindBlast) && (!API.PlayerIsMoving || PlayerHasBuff(DarkThoughts)) && ((API.SpellCharges(MindBlast) > 1 && (TargetHasDebuff(HungeringVoid) || !TalentHungeringVoid) || API.PlayerTotemPetDuration <= gcd*2) && IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration >= gcd*2))
+                    if (API.CanCast(MindBlast) && (!API.PlayerIsMoving || PlayerHasBuff(DarkThoughts)) && ((API.SpellCharges(MindBlast) > 1 && (TargetHasDebuff(HungeringVoid) || !TalentHungeringVoid) || API.PlayerTotemPetDuration <= gcd* 2 && API.PlayerTotemPetDuration != 0) && IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration >= gcd*2))
                     {
                         API.CastSpell(MindBlast);
                         return;
@@ -500,7 +501,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/void_bolt,if=insanity<=85&talent.hungering_void.enabled&talent.searing_nightmare.enabled&spell_targets.mind_sear<=6|((talent.hungering_void.enabled&!talent.searing_nightmare.enabled)|spell_targets.mind_sear=1)
-                    if (API.CanCast(VoidBolt) && PlayerHasBuff(Voidform) && (API.PlayerInsanity <= 85 && TalentHungeringVoid && TalentSearingNightmare && (API.TargetUnitInRangeCount <= 6 || !IsAOE) || ((TalentHungeringVoid && !TalentSearingNightmare) || API.TargetUnitInRangeCount == 1)))
+                    if (API.CanCast(VoidBolt) && (PlayerHasBuff(Voidform) || PlayerHasBuff(DissonantEchoes)) && (API.PlayerInsanity <= 85 && TalentHungeringVoid && TalentSearingNightmare && (API.TargetUnitInRangeCount <= 6 || !IsAOE) || ((TalentHungeringVoid && !TalentSearingNightmare) || API.TargetUnitInRangeCount == 1)))
                     {
                         API.CastSpell(VoidBolt);
                         return;
@@ -512,13 +513,13 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/void_bolt,if=spell_targets.mind_sear<(4+conduit.dissonant_echoes.enabled)&insanity<=85&talent.searing_nightmare.enabled|!talent.searing_nightmare.enabled
-                    if (API.CanCast(VoidBolt) && PlayerHasBuff(Voidform) && (API.TargetUnitInRangeCount < 4 || !IsAOE) && (API.PlayerInsanity <= 85 && TalentSearingNightmare || !TalentSearingNightmare))
+                    if (API.CanCast(VoidBolt) && (PlayerHasBuff(Voidform) || PlayerHasBuff(DissonantEchoes)) && (API.TargetUnitInRangeCount < 4 || !IsAOE) && (API.PlayerInsanity <= 85 && TalentSearingNightmare || !TalentSearingNightmare))
                     {
                         API.CastSpell(VoidBolt);
                         return;
                     }
                     //actions.main+=/shadow_word_death,target_if=(target.health.pct<20&spell_targets.mind_sear<4)|(pet.fiend.active&runeforge.shadowflame_prism.equipped)
-                    if (API.CanCast(SWDeath) && (API.TargetHealthPercent < 20 && (API.TargetUnitInRangeCount < 4 && !IsForceAOE || !IsAOE) || (IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration > gcd*2)))
+                    if (API.CanCast(SWDeath) && (API.TargetHealthPercent < 20 && (API.TargetUnitInRangeCount < 4 && !IsForceAOE || !IsAOE) || (IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration >= gcd*2)))
                     {
                         API.CastSpell(SWDeath);
                         return;
