@@ -1,6 +1,7 @@
 ﻿// Changelog
 // v0.5 Beta
 // v1.0 first release
+// v1.05 small change
 
 
 using System.Diagnostics;
@@ -152,7 +153,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.0");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.05");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -257,6 +258,24 @@ namespace HyperElk.Core
         public override void Pulse()
         {
             //API.WriteLog("Pet: " + API.PlayerTotemPetDuration);
+            if (!API.PlayerIsMounted)
+            {
+                if (API.CanCast(Shadowform) && !PlayerHasBuff(Shadowform) && !PlayerHasBuff(Voidform))
+                {
+                    API.CastSpell(Shadowform);
+                    return;
+                }
+                if (API.CanCast(PWFortitude) && API.PlayerBuffTimeRemaining(PWFortitude) < 30000)
+                {
+                    API.CastSpell(PWFortitude);
+                    return;
+                }
+                if (API.CanCast(PWShield) && PwShieldMove && TalentBodyandSoul && API.PlayerIsMoving && !PlayerHasDebuff(WeakenedSoul))
+                {
+                    API.CastSpell(PWShield);
+                    return;
+                }
+            }
         }
         public override void CombatPulse()
         {
@@ -327,21 +346,6 @@ namespace HyperElk.Core
             //OOC Stuff
             if (!API.PlayerIsMounted)
             {
-                if (API.CanCast(Shadowform) && !API.PlayerHasBuff(Shadowform) && !API.PlayerHasBuff(Voidform))
-                {
-                    API.CastSpell(Shadowform);
-                    return;
-                }
-                if (API.CanCast(PWFortitude)&& API.PlayerBuffTimeRemaining(PWFortitude) < 30000)
-                {
-                    API.CastSpell(PWFortitude);
-                    return;
-                }
-                if (API.CanCast(PWShield) && PwShieldMove && TalentBodyandSoul && API.PlayerIsMoving && !PlayerHasDebuff(WeakenedSoul))
-                {
-                    API.CastSpell(PWShield);
-                    return;
-                }
                 if (API.CanCast(ShadowMend) && SaveQuake && API.PlayerHealthPercent <= ShadowMendLifePercentOOC && !API.PlayerIsMoving)
                 {
                     API.CastSpell(ShadowMend);
@@ -363,21 +367,6 @@ namespace HyperElk.Core
             }
             if (!isExplosive)
             {
-                if (API.CanCast(Shadowform) && !PlayerHasBuff(Shadowform) && !PlayerHasBuff(Voidform))
-                {
-                    API.CastSpell(Shadowform);
-                    return;
-                }
-                if (API.CanCast(PWFortitude) && API.PlayerBuffTimeRemaining(PWFortitude) < 30000)
-                {
-                    API.CastSpell(PWFortitude);
-                    return;
-                }
-                if (API.CanCast(PWShield) && PwShieldMove && TalentBodyandSoul && API.PlayerIsMoving && !PlayerHasDebuff(WeakenedSoul))
-                {
-                    API.CastSpell(PWShield);
-                    return;
-                }
                 if (IsInRange)
                 {
                     //actions+=/fireblood,if=buff.voidform.up
