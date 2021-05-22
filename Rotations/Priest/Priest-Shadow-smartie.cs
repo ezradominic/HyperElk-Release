@@ -9,7 +9,7 @@
 // v1.4 pet fix and Dissonant Echoes added
 // v1.45 potential Voidbolt fix
 // v1.5 IsForceAOE adjustment + dot fix
-
+// v1.55 really goind to bed now
 
 using System.Diagnostics;
 using System.Linq;
@@ -163,7 +163,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.5");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.55");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -568,7 +568,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/mind_blast,if=variable.dots_up&raid_event.movement.in>cast_time+0.5&spell_targets.mind_sear<(4+2*talent.misery.enabled+active_dot.vampiric_touch*talent.psychic_link.enabled+(spell_targets.mind_sear>?5)*(pet.fiend.active&runeforge.shadowflame_prism.equipped))&(!runeforge.shadowflame_prism.equipped|!cooldown.fiend.up&runeforge.shadowflame_prism.equipped|active_dot.vampiric_touch==spell_targets.vampiric_touch)
-                    if (API.CanCast(MindBlast) && (!API.PlayerIsMoving || PlayerHasBuff(DarkThoughts)) && dots_up && API.TargetUnitInRangeCount < 4)
+                    if (API.CanCast(MindBlast) && (!API.PlayerIsMoving || PlayerHasBuff(DarkThoughts)) && dots_up && API.TargetUnitInRangeCount < 4 && !IsForceAOE)
                     {
                         API.CastSpell(MindBlast);
                         return;
