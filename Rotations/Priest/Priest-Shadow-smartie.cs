@@ -2,6 +2,7 @@
 // v0.5 Beta
 // v1.0 first release
 // v1.05 small change
+// v1.1 few changes to aoe
 
 
 using System.Diagnostics;
@@ -91,18 +92,19 @@ namespace HyperElk.Core
         bool ChannelingMindSear => API.CurrentCastSpellID("player") == 48045;
         bool CastingVT => API.CurrentCastSpellID("player") == 34914;
         //actions+=/variable,name=dots_up,op=set,value=dot.shadow_word_pain.ticking&dot.vampiric_touch.ticking
-        bool dots_up => TargetHasDebuff(SWPain) && TargetHasDebuff(VampiricTouch);
+        bool dots_up => TargetHasDebuff(SWPain) && (TargetHasDebuff(VampiricTouch) && PlayerLevel >= 15 || PlayerLevel <15);
         //actions+=/variable,name=all_dots_up,op=set,value=dot.shadow_word_pain.ticking&dot.vampiric_touch.ticking&dot.devouring_plague.ticking
-        bool all_dots_up => TargetHasDebuff(SWPain) && TargetHasDebuff(VampiricTouch) && TargetHasDebuff(DevouringPlague);
+        bool all_dots_up => TargetHasDebuff(SWPain) && (TargetHasDebuff(VampiricTouch) && PlayerLevel >= 15 || PlayerLevel < 15) && (TargetHasDebuff(DevouringPlague) && PlayerLevel >= 12 || PlayerLevel < 12);
         //actions+=/variable,name=searing_nightmare_cutoff,op=set,value=spell_targets.mind_sear>2+buff.voidform.up
         bool searing_nightmare_cutoff => API.TargetUnitInRangeCount > 2 + (API.PlayerHasBuff(Voidform) ? 1 : 0);
         private float gcd => API.SpellGCDTotalDuration;
         private int PlayerLevel => API.PlayerLevel;
         private bool IsInRange => API.TargetRange < 41;
         private bool isMOinRange => API.MouseoverRange < 41;
-        private bool IsInKickRange => API.TargetRange < 31;
+        private bool IsInKickRange => PlayerLevel< 56 && API.TargetRange < 31 || PlayerLevel >= 56 && API.TargetRange < 41;
         private bool isExplosive => API.TargetMaxHealth <= 600 && API.TargetMaxHealth != 0 && PlayerLevel == 60;
         bool IsVoidEruption => (UseVoidEruption == "with Cooldowns" || UseVoidEruption == "with Cooldowns or AoE" || UseVoidEruption == "on mobcount or Cooldowns") && IsCooldowns || UseVoidEruption == "always" || (UseVoidEruption == "on AOE" || UseVoidEruption == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseVoidEruption == "on mobcount or Cooldowns" || UseVoidEruption == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
+        bool IsShadowCrash => (UseShadowCrash == "with Cooldowns" || UseShadowCrash == "with Cooldowns or AoE" || UseShadowCrash == "on mobcount or Cooldowns") && IsCooldowns || UseShadowCrash == "always" || (UseShadowCrash == "on AOE" || UseShadowCrash == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseShadowCrash == "on mobcount or Cooldowns" || UseShadowCrash == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
         bool IsMindbender => (UseMindbender == "with Cooldowns" || UseMindbender == "with Cooldowns or AoE" || UseMindbender == "on mobcount or Cooldowns") && IsCooldowns || UseMindbender == "always" || (UseMindbender == "on AOE" || UseMindbender == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseMindbender == "on mobcount or Cooldowns" || UseMindbender == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
         bool IsShadowfiend => (UseShadowfiend == "with Cooldowns" || UseShadowfiend == "with Cooldowns or AoE" || UseShadowfiend == "on mobcount or Cooldowns") && IsCooldowns || UseShadowfiend == "always" || (UseShadowfiend == "on AOE" || UseShadowfiend == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseShadowfiend == "on mobcount or Cooldowns" || UseShadowfiend == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
         bool IsDamnation => (UseDamnation == "with Cooldowns" || UseDamnation == "with Cooldowns or AoE" || UseDamnation == "on mobcount or Cooldowns") && IsCooldowns || UseDamnation == "always" || (UseDamnation == "on AOE" || UseDamnation == "with Cooldowns or AoE") && API.TargetUnitInRangeCount >= AOEUnitNumber || (UseDamnation == "on mobcount or Cooldowns" || UseDamnation == "on mobcount") && API.TargetUnitInRangeCount >= MobCount;
@@ -133,6 +135,7 @@ namespace HyperElk.Core
         private int MobCount => numbRaidList[CombatRoutine.GetPropertyInt("MobCount")];
         private string UseCovenant => CDUsageWithAOE[CombatRoutine.GetPropertyInt("UseCovenant")];
         private string UseVoidEruption => CDUsageWithAOE[CombatRoutine.GetPropertyInt(VoidEruption)];
+        private string UseShadowCrash => CDUsageWithAOE[CombatRoutine.GetPropertyInt(ShadowCrash)];
         private string UseShadowfiend => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Shadowfiend)];
         private string UseMindbender => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Mindbender)];
         private string UseDamnation => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Damnation)];
@@ -153,7 +156,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.05");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.1");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -237,6 +240,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp("Trinket2", "Use " + "Trinket 2", CDUsageWithAOE, "Use " + "Trinket 2" + " always, with Cooldowns", "Trinkets", 0);
             CombatRoutine.AddProp("UseCovenant", "Use " + "Covenant Ability", CDUsageWithAOE, "Use " + "Covenant" + " always, with Cooldowns", "Covenant", 0);
             CombatRoutine.AddProp(VoidEruption, "Use " + VoidEruption, CDUsageWithAOE, "Use " + VoidEruption + " always, with Cooldowns", "Cooldowns", 0);
+            CombatRoutine.AddProp(ShadowCrash, "Use " + ShadowCrash, CDUsageWithAOE, "Use " + ShadowCrash + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Shadowfiend, "Use " + Shadowfiend, CDUsageWithAOE, "Use " + Shadowfiend + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Mindbender, "Use " + Mindbender, CDUsageWithAOE, "Use " + Mindbender + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp(Damnation, "Use " + Damnation, CDUsageWithAOE, "Use " + Damnation + " always, with Cooldowns", "Cooldowns", 0);
@@ -437,13 +441,13 @@ namespace HyperElk.Core
                     }
                     //actions+=/call_action_list,name=cwc
                     //actions.cwc=searing_nightmare,use_while_casting=1,target_if=(variable.searing_nightmare_cutoff&!variable.pool_for_cds)|(dot.shadow_word_pain.refreshable&spell_targets.mind_sear>1)
-                    if (API.CanCast(SearingNightmare) && ChannelingMindSear && TalentSearingNightmare && (searing_nightmare_cutoff || API.TargetDebuffRemainingTime(SWPain) <= 360 && (API.TargetUnitInRangeCount > 1 || IsForceAOE) && (IsAOE || IsForceAOE)))
+                    if (API.CanCast(SearingNightmare) && API.PlayerInsanity >= 30 && ChannelingMindSear && TalentSearingNightmare && (searing_nightmare_cutoff || API.TargetDebuffRemainingTime(SWPain) <= 360 && (API.TargetUnitInRangeCount > 1 || IsForceAOE) && (IsAOE || IsForceAOE)))
                     {
                         API.CastSpell(SearingNightmare);
                         return;
                     }
                     //actions.cwc+=/searing_nightmare,use_while_casting=1,target_if=talent.searing_nightmare.enabled&dot.shadow_word_pain.refreshable&spell_targets.mind_sear>2
-                    if (API.CanCast(SearingNightmare) && ChannelingMindSear && TalentSearingNightmare && API.TargetDebuffRemainingTime(SWPain) <= 360 && (API.TargetUnitInRangeCount > 2 || IsForceAOE) && (IsAOE || IsForceAOE))
+                    if (API.CanCast(SearingNightmare) && API.PlayerInsanity >= 30 && ChannelingMindSear && TalentSearingNightmare && (API.TargetDebuffRemainingTime(SWPain) <= 360 || (API.TargetUnitInRangeCount > 3 || IsForceAOE)) && (API.TargetUnitInRangeCount > 2 || IsForceAOE) && (IsAOE || IsForceAOE))
                     {
                         API.CastSpell(SearingNightmare);
                         return;
@@ -498,7 +502,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/devouring_plague,if=(refreshable|insanity>75)&(!variable.pool_for_cds|insanity>=85)&(!talent.searing_nightmare.enabled|(talent.searing_nightmare.enabled&!variable.searing_nightmare_cutoff))
-                    if (API.CanCast(DevouringPlague) && (API.TargetDebuffRemainingTime(DevouringPlague) <= 180 || API.PlayerInsanity > 75) && (!TalentSearingNightmare || (TalentSearingNightmare && !searing_nightmare_cutoff && !IsForceAOE || API.PlayerInsanity >= 85)))
+                    if (API.CanCast(DevouringPlague) && (API.TargetDebuffRemainingTime(DevouringPlague) <= 180 || API.PlayerInsanity > 75) && (!TalentSearingNightmare || (TalentSearingNightmare && !searing_nightmare_cutoff && !IsForceAOE || API.PlayerInsanity >= 85 && API.TargetUnitInRangeCount <= 3 && !IsForceAOE)))
                     {
                         API.CastSpell(DevouringPlague);
                         return;
@@ -534,7 +538,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/shadow_crash,if=raid_event.adds.in>10
-                    if (API.CanCast(ShadowCrash) && TalentShadowCrash && (API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || IsForceAOE))
+                    if (API.CanCast(ShadowCrash) && IsShadowCrash && TalentShadowCrash)
                     {
                         API.CastSpell(ShadowCrash);
                         return;
@@ -600,7 +604,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/mind_flay,chain=1,interrupt_immediate=1,interrupt_if=ticks>=2&cooldown.void_bolt.up
-                    if (API.CanCast(MindFlay) && !API.PlayerIsCasting(true) && !IsForceAOE && !API.PlayerIsMoving)
+                    if (API.CanCast(MindFlay) && !API.PlayerIsCasting(true) && (PlayerLevel < 26 || API.TargetUnitInRangeCount < AoENumber || !IsAOE) && !IsForceAOE && !API.PlayerIsMoving)
                     {
                         API.CastSpell(MindFlay);
                         return;
