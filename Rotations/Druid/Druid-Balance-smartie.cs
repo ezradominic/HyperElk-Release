@@ -52,6 +52,7 @@
 // v5.4 small adjustment
 // v5.5 sooth
 // v5.6 small adjustment
+// v5.7 raging fix
 
 using System.Diagnostics;
 
@@ -215,7 +216,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Balance Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Balance Druid v5.6");
+            API.WriteLog("Welcome to smartie`s Balance Druid v5.7");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("MoonfireMO - /cast [@mouseover] Moonfire");
             API.WriteLog("SunfireMO - /cast [@mouseover] Sunfire");
@@ -292,7 +293,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(BalanceofallThings2, 339943);
 
             //Soothe
-            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Raging", 228318);
             CombatRoutine.AddBuff("Unholy Frenzy", 320012);
             CombatRoutine.AddBuff("Renew", 135953);
             CombatRoutine.AddBuff("Additional Treads", 965900);

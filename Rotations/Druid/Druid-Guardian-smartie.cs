@@ -19,6 +19,7 @@
 // v2.6 trinket life %
 // v2.7 sooth list
 // v2.8 small adjustment
+// v2.9 raging fix
 
 namespace HyperElk.Core
 {
@@ -122,7 +123,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Guardian Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Guardian Druid v2.8");
+            API.WriteLog("Welcome to smartie`s Guardian Druid v2.9");
 
             //Spells
             CombatRoutine.AddSpell(Moonfire, 8921, "D3");
@@ -175,7 +176,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(SavageCombatant, 340613);
 
             //Soothe
-            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Raging", 228318);
             CombatRoutine.AddBuff("Unholy Frenzy", 320012);
             CombatRoutine.AddBuff("Renew", 135953);
             CombatRoutine.AddBuff("Additional Treads", 965900);

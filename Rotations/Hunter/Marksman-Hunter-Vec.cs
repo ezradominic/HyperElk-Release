@@ -65,7 +65,7 @@ namespace HyperElk.Core
         private bool isMOinRange => API.MouseoverRange <= 40;
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
         public bool NoCovReady => (API.SpellCDDuration(Wild_Spirits) >= gcd || API.SpellCDDuration(Wild_Spirits) == 0) && (API.SpellCDDuration(Flayed_Shot) >= gcd || API.SpellCDDuration(Flayed_Shot) == 0) && (API.SpellCDDuration(Death_Chakram) >= gcd || API.SpellCDDuration(Death_Chakram) == 0) && (API.SpellCDDuration(Resonating_Arrow) >= gcd || API.SpellCDDuration(Death_Chakram) == 0);
-        public bool DispellList => API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
+        public bool DispellList => API.TargetHasBuff("Enrage") || API.TargetHasBuff("Undying Rage") || API.TargetHasBuff("Raging") || API.TargetHasBuff("Unholy Frenzy") || API.TargetHasBuff("Renew") || API.TargetHasBuff("Additional Treads") || API.TargetHasBuff("Slime Coated") || API.TargetHasBuff("Stimulate Resistance") || API.TargetHasBuff("Unholy Fervor") || API.TargetHasBuff("Raging Tantrum") || API.TargetHasBuff("Loyal Beasts") || API.TargetHasBuff("Motivational Clubbing") || API.TargetHasBuff("Forsworn Doctrine") || API.TargetHasBuff("Seething Rage") || API.TargetHasBuff("Dark Shroud");
         //Talents
         private bool Talent_A_Murder_of_Crows => API.PlayerIsTalentSelected(1, 3);
         private bool Talent_Serpent_Sting => API.PlayerIsTalentSelected(1, 2);
@@ -218,20 +218,22 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(FlayersMark, 324156);
             CombatRoutine.AddBuff(Volley, 260243);
             //dispell
-            CombatRoutine.AddBuff("Raging", 132117);
-            CombatRoutine.AddBuff("Unholy Frenzy", 136224);
+            CombatRoutine.AddBuff("Raging", 228318);
+            CombatRoutine.AddBuff("Unholy Frenzy", 320012);
             CombatRoutine.AddBuff("Renew", 135953);
             CombatRoutine.AddBuff("Additional Treads", 965900);
             CombatRoutine.AddBuff("Slime Coated", 3459153);
             CombatRoutine.AddBuff("Stimulate Resistance", 1769069);
             CombatRoutine.AddBuff("Stimulate Regeneration", 136079);
             CombatRoutine.AddBuff("Unholy Fervor", 2576093);
-            CombatRoutine.AddBuff("Raging Tantrum", 132126);
-            CombatRoutine.AddBuff("Loyal Beasts", 458967);
+            CombatRoutine.AddBuff("Loyal Beasts", 326450);
             CombatRoutine.AddBuff("Motivational Clubbing", 3554193);
             CombatRoutine.AddBuff("Forsworn Doctrine", 3528444);
-            CombatRoutine.AddBuff("Seething Rage", 136225);
             CombatRoutine.AddBuff("Dark Shroud", 2576096);
+            CombatRoutine.AddBuff("Undying Rage", 333227);
+            CombatRoutine.AddBuff("Enrage", 324085);
+            CombatRoutine.AddBuff("Raging Tantrum", 333241);
+            CombatRoutine.AddBuff("Seething Rage", 320703);
             //Debuffs
 
             CombatRoutine.AddDebuff(Serpent_Sting, 271788);

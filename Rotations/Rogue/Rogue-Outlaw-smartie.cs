@@ -9,6 +9,7 @@
 // v1.5 explosive protection
 // v1.6 hotfix
 // v1.7 soothlist added
+// v1.8 raging fix
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -189,7 +190,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.7");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.8");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -270,7 +271,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Feint, 1966);
 
             //Soothe
-            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Raging", 228318);
             CombatRoutine.AddBuff("Unholy Frenzy", 320012);
             CombatRoutine.AddBuff("Renew", 135953);
             CombatRoutine.AddBuff("Additional Treads", 965900);

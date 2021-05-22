@@ -35,6 +35,7 @@
 // v4.1 hotfix
 // v4.2 sooth list
 // v4.3 small change
+// v4.4 raging fix
 
 using System.Diagnostics;
 
@@ -216,7 +217,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Feral Druid by smartie";
-            API.WriteLog("Welcome to smartie`s Feral Druid v4.3");
+            API.WriteLog("Welcome to smartie`s Feral Druid v4.4");
             API.WriteLog("Create the following mouseover macros and assigned to the bind:");
             API.WriteLog("RakeMO - /cast [@mouseover] Rake");
             API.WriteLog("ThrashMO - /cast [@mouseover] Thrash");
@@ -311,7 +312,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(DrumsofDeathlyFerocity, 172233);
 
             //Soothe
-            CombatRoutine.AddBuff("Raging", 132345);
+            CombatRoutine.AddBuff("Raging", 228318);
             CombatRoutine.AddBuff("Unholy Frenzy", 320012);
             CombatRoutine.AddBuff("Renew", 135953);
             CombatRoutine.AddBuff("Additional Treads", 965900);
