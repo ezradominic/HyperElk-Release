@@ -5,6 +5,7 @@
 // v1.1 few changes to aoe
 // v1.15 another small adjustment
 // v1.2 another small update
+// v1.3 last one for today i promise ^^
 
 
 using System.Diagnostics;
@@ -159,7 +160,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.2");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.3");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -400,48 +401,6 @@ namespace HyperElk.Core
                         API.CastSpell(RacialSpell1);
                         return;
                     }
-                    //actions.cds=power_infusion,if=priest.self_power_infusion&(buff.voidform.up|!soulbind.combat_meditation.enabled&cooldown.void_eruption.remains>=10|fight_remains<cooldown.void_eruption.remains)&(fight_remains>=cooldown.void_eruption.remains+15&cooldown.void_eruption.remains<=gcd*4|fight_remains>cooldown.power_infusion.duration|fight_remains<cooldown.void_eruption.remains+15|covenant.kyrian|buff.bloodlust.up)
-                    if (API.CanCast(PowerInfusion) && IsPowerInfusion && API.PlayerHasBuff(Voidform))
-                    {
-                        API.CastSpell(PowerInfusion);
-                        return;
-                    }
-                    //actions.cds+=/fae_guardians,if=!buff.voidform.up&(!cooldown.void_torrent.up|!talent.void_torrent.enabled)&(variable.dots_up&spell_targets.vampiric_touch==1|active_dot.vampiric_touch==spell_targets.vampiric_touch&spell_targets.vampiric_touch>1)|buff.voidform.up&(soulbind.grove_invigoration.enabled|soulbind.field_of_blossoms.enabled)
-                    if (API.CanCast(FaeGuardians) && IsCovenant && !isExplosive && SaveQuake && PlayerCovenantSettings == "Night Fae" && (!API.PlayerHasBuff(Voidform) && (API.SpellCDDuration(VoidTorrent) > gcd || !TalentVoidTorrent) && dots_up))
-                    {
-                        API.CastSpell(FaeGuardians);
-                        return;
-                    }
-                    //actions.cds+=/mindgames,target_if=insanity<90&((variable.all_dots_up&(!cooldown.void_eruption.up|!talent.hungering_void.enabled))|buff.voidform.up)&(!talent.hungering_void.enabled|debuff.hungering_void.up|!buff.voidform.up)&(!talent.searing_nightmare.enabled|spell_targets.mind_sear<5)
-                    if (API.CanCast(Mindgames) && PlayerCovenantSettings == "Venthyr" && !isExplosive && SaveQuake && IsCovenant && (API.PlayerInsanity < 90 && ((all_dots_up && (API.SpellCDDuration(VoidEruption) > gcd || !TalentHungeringVoid)) || PlayerHasBuff(Voidform)) && (!TalentHungeringVoid || TargetHasDebuff(HungeringVoid) || !PlayerHasBuff(Voidform)) && (!TalentSearingNightmare || API.TargetUnitInRangeCount <5)))
-                    {
-                        API.CastSpell(Mindgames);
-                        return;
-                    }
-                    //actions.cds+=/boon_of_the_ascended,if=!buff.voidform.up&!cooldown.void_eruption.up&spell_targets.mind_sear>1&!talent.searing_nightmare.enabled|(buff.voidform.up&spell_targets.mind_sear<2&!talent.searing_nightmare.enabled&(prev_gcd.1.void_bolt&(!equipped.empyreal_ordnance|!talent.hungering_void.enabled)|equipped.empyreal_ordnance&trinket.empyreal_ordnance.cooldown.remains<=162&debuff.hungering_void.up))|(buff.voidform.up&talent.searing_nightmare.enabled)
-                    if (API.CanCast(BoonOfTheAscended) && IsCovenant && PlayerCovenantSettings == "Kyrian" && (!PlayerHasBuff(Voidform) && API.SpellCDDuration(VoidEruption) > gcd && API.TargetUnitInRangeCount > 1 && (IsAOE || IsForceAOE) && !TalentSearingNightmare || (PlayerHasBuff(Voidform) && API.TargetUnitInRangeCount < 2 && !TalentSearingNightmare) || (PlayerHasBuff(Voidform) && TalentSearingNightmare)))
-                    {
-                        API.CastSpell(BoonOfTheAscended);
-                        return;
-                    }
-                    //actions.cds+=/unholy_nova,if=((!raid_event.adds.up&raid_event.adds.in>20)|raid_event.adds.remains>=15|raid_event.adds.duration<15)&(buff.power_infusion.up|cooldown.power_infusion.remains>=10|!priest.self_power_infusion)&(!talent.hungering_void.enabled|debuff.hungering_void.up|!buff.voidform.up)
-                    if (API.CanCast(UnholyNova) && IsCovenant && PlayerCovenantSettings == "Necrolord" && (PlayerHasBuff(PowerInfusion) || API.SpellCDDuration(PowerInfusion) >= 1000 && !IsPowerInfusion || !IsPowerInfusion) && (!TalentHungeringVoid || TargetHasDebuff(HungeringVoid) || !PlayerHasBuff(Voidform)))
-                    {
-                        API.CastSpell(UnholyNova);
-                        return;
-                    }
-                    //actions.trinkets+=/use_items,if=buff.voidform.up|buff.power_infusion.up|cooldown.void_eruption.remains>10
-                    if (API.PlayerTrinketIsUsable(1) && !isExplosive && !API.MacroIsIgnored("Trinket1") && (PlayerHasBuff(Voidform) || PlayerHasBuff(PowerInfusion) || API.SpellCDDuration(VoidEruption) > 1000) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
-                    {
-                        API.CastSpell("Trinket1");
-                        return;
-                    }
-                    //actions.cds+=/use_items,slots=trinket2,if=debuff.between_the_eyes.up|trinket.2.has_stat.any_dps|fight_remains<=20
-                    if (API.PlayerTrinketIsUsable(2) && !isExplosive && !API.MacroIsIgnored("Trinket2") && (PlayerHasBuff(Voidform) || PlayerHasBuff(PowerInfusion) || API.SpellCDDuration(VoidEruption) > 1000) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
-                    {
-                        API.CastSpell("Trinket2");
-                        return;
-                    }
                     //actions+=/call_action_list,name=cwc
                     //actions.cwc=searing_nightmare,use_while_casting=1,target_if=(variable.searing_nightmare_cutoff&!variable.pool_for_cds)|(dot.shadow_word_pain.refreshable&spell_targets.mind_sear>1)
                     if (API.CanCast(SearingNightmare) && API.PlayerInsanity >= 30 && ChannelingMindSear && TalentSearingNightmare && (searing_nightmare_cutoff || API.TargetDebuffRemainingTime(SWPain) <= 360 && (API.TargetUnitInRangeCount > 1 || IsForceAOE) && (IsAOE || IsForceAOE)))
@@ -472,6 +431,48 @@ namespace HyperElk.Core
                     if (API.CanCast(SWPain) && PlayerHasBuff(FaeGuardians) && !TargetHasDebuff(WrathfulFaerie) && (API.TargetUnitInRangeCount < 4 || !IsAOE))
                     {
                         API.CastSpell(SWPain);
+                        return;
+                    }
+                    //actions.cds=power_infusion,if=priest.self_power_infusion&(buff.voidform.up|!soulbind.combat_meditation.enabled&cooldown.void_eruption.remains>=10|fight_remains<cooldown.void_eruption.remains)&(fight_remains>=cooldown.void_eruption.remains+15&cooldown.void_eruption.remains<=gcd*4|fight_remains>cooldown.power_infusion.duration|fight_remains<cooldown.void_eruption.remains+15|covenant.kyrian|buff.bloodlust.up)
+                    if (API.CanCast(PowerInfusion) && IsPowerInfusion && API.PlayerHasBuff(Voidform))
+                    {
+                        API.CastSpell(PowerInfusion);
+                        return;
+                    }
+                    //actions.cds+=/fae_guardians,if=!buff.voidform.up&(!cooldown.void_torrent.up|!talent.void_torrent.enabled)&(variable.dots_up&spell_targets.vampiric_touch==1|active_dot.vampiric_touch==spell_targets.vampiric_touch&spell_targets.vampiric_touch>1)|buff.voidform.up&(soulbind.grove_invigoration.enabled|soulbind.field_of_blossoms.enabled)
+                    if (API.CanCast(FaeGuardians) && IsCovenant && !isExplosive && SaveQuake && PlayerCovenantSettings == "Night Fae" && (!API.PlayerHasBuff(Voidform) && (API.SpellCDDuration(VoidTorrent) > gcd || !TalentVoidTorrent) && dots_up))
+                    {
+                        API.CastSpell(FaeGuardians);
+                        return;
+                    }
+                    //actions.cds+=/mindgames,target_if=insanity<90&((variable.all_dots_up&(!cooldown.void_eruption.up|!talent.hungering_void.enabled))|buff.voidform.up)&(!talent.hungering_void.enabled|debuff.hungering_void.up|!buff.voidform.up)&(!talent.searing_nightmare.enabled|spell_targets.mind_sear<5)
+                    if (API.CanCast(Mindgames) && PlayerCovenantSettings == "Venthyr" && !isExplosive && SaveQuake && IsCovenant && (API.PlayerInsanity < 90 && ((all_dots_up && (API.SpellCDDuration(VoidEruption) > gcd || !TalentHungeringVoid)) || PlayerHasBuff(Voidform)) && (!TalentHungeringVoid || TargetHasDebuff(HungeringVoid) || !PlayerHasBuff(Voidform)) && (!TalentSearingNightmare || API.TargetUnitInRangeCount < 5)))
+                    {
+                        API.CastSpell(Mindgames);
+                        return;
+                    }
+                    //actions.cds+=/boon_of_the_ascended,if=!buff.voidform.up&!cooldown.void_eruption.up&spell_targets.mind_sear>1&!talent.searing_nightmare.enabled|(buff.voidform.up&spell_targets.mind_sear<2&!talent.searing_nightmare.enabled&(prev_gcd.1.void_bolt&(!equipped.empyreal_ordnance|!talent.hungering_void.enabled)|equipped.empyreal_ordnance&trinket.empyreal_ordnance.cooldown.remains<=162&debuff.hungering_void.up))|(buff.voidform.up&talent.searing_nightmare.enabled)
+                    if (API.CanCast(BoonOfTheAscended) && IsCovenant && PlayerCovenantSettings == "Kyrian" && (!PlayerHasBuff(Voidform) && API.SpellCDDuration(VoidEruption) > gcd && API.TargetUnitInRangeCount > 1 && (IsAOE || IsForceAOE) && !TalentSearingNightmare || (PlayerHasBuff(Voidform) && API.TargetUnitInRangeCount < 2 && !TalentSearingNightmare) || (PlayerHasBuff(Voidform) && TalentSearingNightmare)))
+                    {
+                        API.CastSpell(BoonOfTheAscended);
+                        return;
+                    }
+                    //actions.cds+=/unholy_nova,if=((!raid_event.adds.up&raid_event.adds.in>20)|raid_event.adds.remains>=15|raid_event.adds.duration<15)&(buff.power_infusion.up|cooldown.power_infusion.remains>=10|!priest.self_power_infusion)&(!talent.hungering_void.enabled|debuff.hungering_void.up|!buff.voidform.up)
+                    if (API.CanCast(UnholyNova) && IsCovenant && PlayerCovenantSettings == "Necrolord" && (PlayerHasBuff(PowerInfusion) || API.SpellCDDuration(PowerInfusion) >= 1000 && !IsPowerInfusion || !IsPowerInfusion) && (!TalentHungeringVoid || TargetHasDebuff(HungeringVoid) || !PlayerHasBuff(Voidform)))
+                    {
+                        API.CastSpell(UnholyNova);
+                        return;
+                    }
+                    //actions.trinkets+=/use_items,if=buff.voidform.up|buff.power_infusion.up|cooldown.void_eruption.remains>10
+                    if (API.PlayerTrinketIsUsable(1) && !isExplosive && !API.MacroIsIgnored("Trinket1") && (PlayerHasBuff(Voidform) || PlayerHasBuff(PowerInfusion) || API.SpellCDDuration(VoidEruption) > 1000) && API.PlayerTrinketRemainingCD(1) == 0 && IsTrinkets1)
+                    {
+                        API.CastSpell("Trinket1");
+                        return;
+                    }
+                    //actions.cds+=/use_items,slots=trinket2,if=debuff.between_the_eyes.up|trinket.2.has_stat.any_dps|fight_remains<=20
+                    if (API.PlayerTrinketIsUsable(2) && !isExplosive && !API.MacroIsIgnored("Trinket2") && (PlayerHasBuff(Voidform) || PlayerHasBuff(PowerInfusion) || API.SpellCDDuration(VoidEruption) > 1000) && API.PlayerTrinketRemainingCD(2) == 0 && IsTrinkets2)
+                    {
+                        API.CastSpell("Trinket2");
                         return;
                     }
                     //actions.main+=/damnation,target_if=!variable.all_dots_up
@@ -538,6 +539,11 @@ namespace HyperElk.Core
                     if (API.CanCast(Mindbender) && TalentMindbender && IsMindbender && TargetHasDebuff(VampiricTouch) && (TalentSearingNightmare && API.TargetUnitInRangeCount > 2 || TargetHasDebuff(SWPain)))
                     {
                         API.CastSpell(Mindbender);
+                        return;
+                    }
+                    if (API.CanCast(Shadowfiend) && !TalentMindbender && IsShadowfiend && TargetHasDebuff(VampiricTouch) && (TalentSearingNightmare && API.TargetUnitInRangeCount > 2 || TargetHasDebuff(SWPain)))
+                    {
+                        API.CastSpell(Shadowfiend);
                         return;
                     }
                     //actions.main+=/shadow_crash,if=raid_event.adds.in>10
