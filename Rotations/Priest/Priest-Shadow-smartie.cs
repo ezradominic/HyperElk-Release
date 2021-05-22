@@ -3,6 +3,7 @@
 // v1.0 first release
 // v1.05 small change
 // v1.1 few changes to aoe
+// v1.15 another smal adjustment
 
 
 using System.Diagnostics;
@@ -156,7 +157,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.1");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.15");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -556,7 +557,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/mind_blast,if=variable.dots_up&raid_event.movement.in>cast_time+0.5&spell_targets.mind_sear<(4+2*talent.misery.enabled+active_dot.vampiric_touch*talent.psychic_link.enabled+(spell_targets.mind_sear>?5)*(pet.fiend.active&runeforge.shadowflame_prism.equipped))&(!runeforge.shadowflame_prism.equipped|!cooldown.fiend.up&runeforge.shadowflame_prism.equipped|active_dot.vampiric_touch==spell_targets.vampiric_touch)
-                    if (API.CanCast(MindBlast) && (!API.PlayerIsMoving || PlayerHasBuff(DarkThoughts)) && dots_up && API.TargetUnitInRangeCount < 6)
+                    if (API.CanCast(MindBlast) && (!API.PlayerIsMoving || PlayerHasBuff(DarkThoughts)) && dots_up && API.TargetUnitInRangeCount < 4)
                     {
                         API.CastSpell(MindBlast);
                         return;
@@ -574,7 +575,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/shadow_word_pain,target_if=refreshable&target.time_to_die>4&!talent.misery.enabled&!(talent.searing_nightmare.enabled&spell_targets.mind_sear>variable.mind_sear_cutoff)&(!talent.psychic_link.enabled|(talent.psychic_link.enabled&spell_targets.mind_sear<=2))
-                    if (API.CanCast(SWPain) && API.TargetDebuffRemainingTime(SWPain) < 360 && !TalentMisery && (!TalentSearingNightmare || TalentSearingNightmare && (API.TargetUnitInRangeCount < 2 && !IsForceAOE)) && (!TalentPsychicLink || TalentPsychicLink && API.TargetUnitInRangeCount <= 2 && !IsForceAOE))
+                    if (API.CanCast(SWPain) && API.TargetDebuffRemainingTime(SWPain) < 360 && !TalentMisery && (!TalentSearingNightmare || TalentSearingNightmare && !IsAOE || TalentSearingNightmare && (API.TargetUnitInRangeCount < 2 && !IsForceAOE)) && (!TalentPsychicLink || TalentPsychicLink && API.TargetUnitInRangeCount <= 2 && !IsForceAOE))
                     {
                         API.CastSpell(SWPain);
                         return;
@@ -591,7 +592,7 @@ namespace HyperElk.Core
                             API.CastSpell(SWPain + "MO");
                             return;
                         }
-                        if (API.CanCast(SWPain) && !API.MacroIsIgnored(SWPain + "MO") && API.MouseoverDebuffRemainingTime(SWPain) < 360 && !TalentMisery && (!TalentSearingNightmare || TalentSearingNightmare && API.TargetUnitInRangeCount < 2 && !IsForceAOE) && (!TalentPsychicLink || TalentPsychicLink && API.TargetUnitInRangeCount <= 2 && !IsForceAOE))
+                        if (API.CanCast(SWPain) && !API.MacroIsIgnored(SWPain + "MO") && API.MouseoverDebuffRemainingTime(SWPain) < 360 && !TalentMisery && (!TalentSearingNightmare || TalentSearingNightmare && !IsAOE || TalentSearingNightmare && API.TargetUnitInRangeCount < 2 && !IsForceAOE) && (!TalentPsychicLink || TalentPsychicLink && API.TargetUnitInRangeCount <= 2 && !IsForceAOE))
                         {
                             API.CastSpell(SWPain + "MO");
                             return;
