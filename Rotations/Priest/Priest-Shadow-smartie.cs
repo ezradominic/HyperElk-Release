@@ -3,7 +3,8 @@
 // v1.0 first release
 // v1.05 small change
 // v1.1 few changes to aoe
-// v1.15 another smal adjustment
+// v1.15 another small adjustment
+// v1.2 another small update
 
 
 using System.Diagnostics;
@@ -91,7 +92,8 @@ namespace HyperElk.Core
         }
         bool ChannelingMindFlay => API.CurrentCastSpellID("player") == 15407;
         bool ChannelingMindSear => API.CurrentCastSpellID("player") == 48045;
-        bool CastingVT => API.CurrentCastSpellID("player") == 34914;
+        bool CastingVT => API.CurrentCastSpellID("player") == 263165;
+        bool VampircTouchLast => API.LastSpellCastInGame == VampiricTouch || API.CurrentCastSpellID("player") == 34914;
         //actions+=/variable,name=dots_up,op=set,value=dot.shadow_word_pain.ticking&dot.vampiric_touch.ticking
         bool dots_up => TargetHasDebuff(SWPain) && (TargetHasDebuff(VampiricTouch) && PlayerLevel >= 15 || PlayerLevel <15);
         //actions+=/variable,name=all_dots_up,op=set,value=dot.shadow_word_pain.ticking&dot.vampiric_touch.ticking&dot.devouring_plague.ticking
@@ -157,7 +159,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.15");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.2");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (which is important): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -515,7 +517,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/shadow_word_death,target_if=(target.health.pct<20&spell_targets.mind_sear<4)|(pet.fiend.active&runeforge.shadowflame_prism.equipped)
-                    if (API.CanCast(SWDeath) && (API.TargetHealthPercent < 20 && (API.TargetUnitInRangeCount < 4 || !IsAOE) || (IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration > gcd*2)))
+                    if (API.CanCast(SWDeath) && (API.TargetHealthPercent < 20 && (API.TargetUnitInRangeCount < 4 && !IsForceAOE || !IsAOE) || (IsLegendary == "Shadowflame Prism" && API.PlayerTotemPetDuration > gcd*2)))
                     {
                         API.CastSpell(SWDeath);
                         return;
@@ -563,7 +565,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/vampiric_touch,target_if=refreshable&target.time_to_die>6|(talent.misery.enabled&dot.shadow_word_pain.refreshable)|buff.unfurling_darkness.up
-                    if (API.CanCast(VampiricTouch) && !API.PlayerIsMoving && !(API.LastSpellCastInGame == VampiricTouch || API.PlayerCurrentCastSpellID == 34914) && (API.TargetDebuffRemainingTime(VampiricTouch) < 630 || (TalentMisery && API.TargetDebuffRemainingTime(SWPain) < 360) || PlayerHasBuff(UnfurlingDarkness)))
+                    if (API.CanCast(VampiricTouch) && !API.PlayerIsMoving && !VampircTouchLast && (API.TargetDebuffRemainingTime(VampiricTouch) < 630 || (TalentMisery && API.TargetDebuffRemainingTime(SWPain) < 360) || PlayerHasBuff(UnfurlingDarkness)))
                     {
                         API.CastSpell(VampiricTouch);
                         return;
@@ -582,7 +584,7 @@ namespace HyperElk.Core
                     }
                     if (IsMouseover && (!isMouseoverInCombat || API.MouseoverIsIncombat) && API.PlayerCanAttackMouseover && isMOinRange && API.MouseoverHealthPercent > 0)
                     {
-                        if (API.CanCast(VampiricTouch) && !API.PlayerIsMoving && !API.MacroIsIgnored(VampiricTouch + "MO") && !(API.LastSpellCastInGame == VampiricTouch || API.PlayerCurrentCastSpellID == 34914) && (API.MouseoverDebuffRemainingTime(VampiricTouch) < 630 || (TalentMisery && API.MouseoverDebuffRemainingTime(SWPain) < 360) || PlayerHasBuff(UnfurlingDarkness)))
+                        if (API.CanCast(VampiricTouch) && !API.PlayerIsMoving && !API.MacroIsIgnored(VampiricTouch + "MO") && !VampircTouchLast && (API.MouseoverDebuffRemainingTime(VampiricTouch) < 630 || (TalentMisery && API.MouseoverDebuffRemainingTime(SWPain) < 360) || PlayerHasBuff(UnfurlingDarkness)))
                         {
                             API.CastSpell(VampiricTouch + "MO");
                             return;
@@ -608,12 +610,6 @@ namespace HyperElk.Core
                     if (API.CanCast(MindFlay) && !API.PlayerIsCasting(true) && (PlayerLevel < 26 || API.TargetUnitInRangeCount < AoENumber || !IsAOE) && !IsForceAOE && !API.PlayerIsMoving)
                     {
                         API.CastSpell(MindFlay);
-                        return;
-                    }
-                    //actions.main+=/shadow_word_death
-                    if (API.CanCast(SWDeath) && API.PlayerIsMoving)
-                    {
-                        API.CastSpell(SWDeath);
                         return;
                     }
                     //actions.main+=/shadow_word_pain
