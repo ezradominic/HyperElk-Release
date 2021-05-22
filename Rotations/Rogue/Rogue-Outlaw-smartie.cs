@@ -10,6 +10,7 @@
 // v1.6 hotfix
 // v1.7 soothlist added
 // v1.8 raging fix
+// v1.85 additional small fix
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -190,7 +191,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Outlaw Rogue by smartie";
-            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.8");
+            API.WriteLog("Welcome to smartie`s Outlaw Rogue v1.85");
             API.WriteLog("You need the following macros:");
             API.WriteLog("Serrated Bone SpikeMO - /cast [@mouseover] Serrated Bone Spike");
             API.WriteLog("Tricks - /cast [@focus,help][help] Tricks of the Trade");
@@ -478,7 +479,7 @@ namespace HyperElk.Core
             }
             if (!IsStealth)
             {
-                if (API.CanCast(Shiv) && !isExplosive && SootheList && IsLegendary != "Tiny Toxic Blade" && API.PlayerEnergy >= 20 && IsMelee)
+                if (API.CanCast(Shiv) && !isExplosive && SootheList && API.PlayerHasBuff(NumbingPoison) && IsLegendary != "Tiny Toxic Blade" && API.PlayerEnergy >= 20 && IsMelee)
                 {
                     API.CastSpell(Shiv);
                     return;
