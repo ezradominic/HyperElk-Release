@@ -48,8 +48,8 @@ namespace HyperElk.Core
         private string FelDomination = "Fel Domination";
         private string Trinket1 = "Trinket1";
         private string Trinket2 = "Trinket2";
-        private string SpellLock = "Spell Lock";
-        private string Healthstone = "Healtstone";
+        private string SpellLock = "Spell Lock"; 
+        private string Quake = "Quake";
 
         //Talents
         private bool TalentFlashover => API.PlayerIsTalentSelected(1, 1);
@@ -183,12 +183,14 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(Backdraft, 196406);
             CombatRoutine.AddBuff(darkSoulInstability, 113858);
             CombatRoutine.AddBuff(FelDomination, 333889);
+            CombatRoutine.AddBuff(Quake, 240447);
 
             //Debuffs
             CombatRoutine.AddDebuff(Immolate, 157736);
             CombatRoutine.AddDebuff(Havoc, 80240);
             CombatRoutine.AddDebuff(Eradication, 196412);
             CombatRoutine.AddDebuff(RoaringBlaze, 205184);
+            CombatRoutine.AddDebuff(Quake, 240447);
 
             //Item
             CombatRoutine.AddItem(PhialofSerenity, 177278);
@@ -200,6 +202,7 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(Immolate + "MO");
             CombatRoutine.AddItem("HealthstoneFix", 5512);
             CombatRoutine.AddToggle("Mouseover");
+            CombatRoutine.AddMacro("Stopcast", "F10");
 
         }
 
@@ -212,6 +215,11 @@ namespace HyperElk.Core
             if (API.LastSpellCastInGame == SummonInfernal && !InfernalWatch.IsRunning)
             {
                 InfernalWatch.Start();
+            }
+            if (API.PlayerHasDebuff(Quake) && API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake))
+            {
+                API.CastSpell("Stopcast");
+                return;
             }
             //Summon Imp
             if (API.PlayerHasBuff(FelDomination) && API.PlayerIsInCombat && !TalentGrimoireOfSacrifice && API.CanCast(SummonImp) && !API.PlayerHasPet && (isMisdirection == "Imp") && NotMoving && PlayerLevel >= 22)
