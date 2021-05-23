@@ -10,6 +10,7 @@
 // v1.45 potential Voidbolt fix
 // v1.5 IsForceAOE adjustment + dot fix
 // v1.55 really goind to bed now
+// v1.6 SWPain movement check
 
 using System.Diagnostics;
 using System.Linq;
@@ -148,6 +149,7 @@ namespace HyperElk.Core
         private string UseDamnation => CDUsageWithAOE[CombatRoutine.GetPropertyInt(Damnation)];
         private string UsePowerInfusion => CDUsageWithAOE[CombatRoutine.GetPropertyInt(PowerInfusion)];
         public bool isMouseoverInCombat => CombatRoutine.GetPropertyBool("MouseoverInCombat");
+        public bool SWPainMove => CombatRoutine.GetPropertyBool("SWPainMove");
         private bool PwShieldMove => CombatRoutine.GetPropertyBool("PwShieldMove");
         private bool QuakingHelper => CombatRoutine.GetPropertyBool("QuakingHelper");
         private int ShadowMendLifePercent => numbList[CombatRoutine.GetPropertyInt(ShadowMend)];
@@ -163,9 +165,9 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.55");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.6");
             API.WriteLog("For this rota you need to following macros");
-            API.WriteLog("For stopcasting (which is important): /stopcasting");
+            API.WriteLog("For stopcasting (needed for quaking helper): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
             API.WriteLog("VampiricTouchMO - /cast [@mouseover] Vampiric Touch");
 
@@ -254,6 +256,7 @@ namespace HyperElk.Core
             CombatRoutine.AddProp(PowerInfusion, "Use " + PowerInfusion, CDUsageWithAOE, "Use " + PowerInfusion + " always, with Cooldowns", "Cooldowns", 0);
             CombatRoutine.AddProp("PwShieldMove", "PW Shield while moving", true, "Will use" + PWShield + " while moving when Talented into Body and Sould", "Generic");
             CombatRoutine.AddProp("QuakingHelper", "Quaking Helper", false, "Will cancle casts on Quaking", "Generic");
+            CombatRoutine.AddProp("SWPainMove", "SWPain while moving", false, "Will spam SWPain while moving", "Generic");
             CombatRoutine.AddProp(PhialofSerenity, PhialofSerenity + " Life Percent", numbList, " Life percent at which" + PhialofSerenity + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(SpiritualHealingPotion, SpiritualHealingPotion + " Life Percent", numbList, " Life percent at which" + SpiritualHealingPotion + " is used, set to 0 to disable", "Defense", 40);
             CombatRoutine.AddProp(ShadowMend, ShadowMend + " Life Percent", numbList, "Life percent at which" + ShadowMend + "is used, set to 0 to disable", "Defense", 40);
@@ -622,7 +625,7 @@ namespace HyperElk.Core
                         return;
                     }
                     //actions.main+=/shadow_word_pain
-                    if (API.CanCast(SWPain) && API.PlayerIsMoving)
+                    if (API.CanCast(SWPain) && SWPainMove && API.PlayerIsMoving)
                     {
                         API.CastSpell(SWPain);
                         return;
