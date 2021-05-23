@@ -51,6 +51,7 @@ namespace HyperElk.Core
         private string SpellLock = "Spell Lock";
         private string UnendingResolve = "Unending Resolve";
         private string CurseofWeakness = "Curse of Weakness";
+        private string Quake = "Quake";
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -219,7 +220,7 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff("Grimoire Of Sacrifice", 108503);
             CombatRoutine.AddBuff(FelDomination, 333889);
             CombatRoutine.AddBuff(InevitableDemise, 334320);
-
+            CombatRoutine.AddBuff(Quake, 240447);
             //Debuffs
             CombatRoutine.AddDebuff(ImpendingCatastrophe, 321792);
             CombatRoutine.AddDebuff(Corruption, 146739);
@@ -233,17 +234,23 @@ namespace HyperElk.Core
             CombatRoutine.AddDebuff(SoulRot, 325640);
             CombatRoutine.AddDebuff(ShadowEmbrace, 32390);
             CombatRoutine.AddDebuff(CurseofWeakness, 702);
-
+            CombatRoutine.AddDebuff(Quake, 240447);
             CombatRoutine.AddToggle("Mouseover");
             CombatRoutine.AddToggle("DarkSoul");
 
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
+            CombatRoutine.AddMacro("Stopcast", "F10");
         }
 
 
         public override void Pulse()
         {
+            if (API.PlayerHasDebuff(Quake) && API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake))
+            {
+                API.CastSpell("Stopcast");
+                return;
+            }
         }
         public override void CombatPulse()
         {

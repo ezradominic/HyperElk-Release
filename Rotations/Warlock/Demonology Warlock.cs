@@ -42,7 +42,7 @@ namespace HyperElk.Core
         private string FelDomination = "Fel Domination";
         private string SpellLock = "Spell Lock";
         private string Healthstone = "Healthstone";
-
+        private string Quake = "Quake";
 
 
 
@@ -132,10 +132,12 @@ namespace HyperElk.Core
             CombatRoutine.AddBuff(DemonicCore, 264173);
             CombatRoutine.AddBuff(DemonicPower, 265273);
             CombatRoutine.AddBuff(FelDomination, 333889);
+            CombatRoutine.AddBuff(Quake, 240447);
 
             //Debuffs
             CombatRoutine.AddDebuff(Doom, 603);
-
+            CombatRoutine.AddDebuff(Quake, 240447);
+            CombatRoutine.AddMacro("Stopcast", "F10");
         }
 
 
@@ -152,6 +154,11 @@ namespace HyperElk.Core
             if (TyrantWatch.IsRunning && TyrantWatch.ElapsedMilliseconds >= 15000)
             {
                 TyrantWatch.Reset();
+            }
+            if (API.PlayerHasDebuff(Quake) && API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake))
+            {
+                API.CastSpell("Stopcast");
+                return;
             }
         }
 
