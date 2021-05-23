@@ -12,6 +12,7 @@
 // v1.55 really goind to bed now
 // v1.6 SWPain movement check
 // v1.65 small adjustment
+// v1.7 small adjustment to void erruption
 
 using System.Diagnostics;
 using System.Linq;
@@ -166,7 +167,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.65");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.7");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (needed for quaking helper): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -429,7 +430,7 @@ namespace HyperElk.Core
                     }
                     //actions+=/run_action_list,name=main
                     //actions.main=void_eruption,if=variable.pool_for_cds&(insanity>=40|pet.fiend.active&runeforge.shadowflame_prism.equipped&!cooldown.mind_blast.up&!cooldown.shadow_word_death.up)&(insanity<=85|talent.searing_nightmare.enabled&variable.searing_nightmare_cutoff)&!cooldown.fiend.up&(!cooldown.mind_blast.up|spell_targets.mind_sear>2)
-                    if (API.CanCast(VoidEruption) && IsVoidEruption && !API.PlayerIsMoving && (API.PlayerInsanity >= 40 || API.PlayerTotemPetDuration > gcd*2 && IsLegendary == "Shadowflame Prism" && API.SpellCDDuration(MindBlast) > gcd && API.SpellCDDuration(SWDeath) > gcd) && (API.PlayerInsanity <= 85 || TalentSearingNightmare && searing_nightmare_cutoff) && (API.SpellCDDuration(Shadowfiend) > gcd && !TalentMindbender && IsShadowfiend || !IsShadowfiend && !TalentMindbender || TalentMindbender && IsMindbender && API.SpellCDDuration(Mindbender) > gcd || TalentMindbender && !IsMindbender))
+                    if (API.CanCast(VoidEruption) && IsVoidEruption && !API.PlayerIsMoving && (API.PlayerInsanity >= 40 && (IsLegendary != "Shadowflame Prism" ||API.PlayerTotemPetDuration == 0 && IsLegendary == "Shadowflame Prism") || API.PlayerTotemPetDuration > gcd*2 && IsLegendary == "Shadowflame Prism" && API.SpellCDDuration(MindBlast) > gcd && API.SpellCDDuration(SWDeath) > gcd) && (API.PlayerInsanity <= 85 || TalentSearingNightmare && searing_nightmare_cutoff) && (API.SpellCDDuration(Shadowfiend) > gcd && !TalentMindbender && IsShadowfiend || !IsShadowfiend && !TalentMindbender || TalentMindbender && IsMindbender && API.SpellCDDuration(Mindbender) > gcd || TalentMindbender && !IsMindbender))
                     {
                         API.CastSpell(VoidEruption);
                         return;
