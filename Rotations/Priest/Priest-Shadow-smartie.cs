@@ -11,6 +11,7 @@
 // v1.5 IsForceAOE adjustment + dot fix
 // v1.55 really goind to bed now
 // v1.6 SWPain movement check
+// v1.65 small adjustment
 
 using System.Diagnostics;
 using System.Linq;
@@ -165,7 +166,7 @@ namespace HyperElk.Core
         public override void Initialize()
         {
             CombatRoutine.Name = "Shadow Priest by smartie";
-            API.WriteLog("Welcome to smartie`s Shadow Priest v1.6");
+            API.WriteLog("Welcome to smartie`s Shadow Priest v1.65");
             API.WriteLog("For this rota you need to following macros");
             API.WriteLog("For stopcasting (needed for quaking helper): /stopcasting");
             API.WriteLog("Shadow Word: PainMO - /cast [@mouseover] Shadow Word: Pain");
@@ -407,6 +408,12 @@ namespace HyperElk.Core
                         API.CastSpell(RacialSpell1);
                         return;
                     }
+                    //actions.cwc+=/mind_blast,only_cwc=1
+                    if (API.CanCast(MindBlast) && PlayerHasBuff(DarkThoughts) && (ChannelingMindSear || ChannelingMindFlay))
+                    {
+                        API.CastSpell(MindBlast);
+                        return;
+                    }
                     //actions+=/call_action_list,name=cwc
                     //actions.cwc=searing_nightmare,use_while_casting=1,target_if=(variable.searing_nightmare_cutoff&!variable.pool_for_cds)|(dot.shadow_word_pain.refreshable&spell_targets.mind_sear>1)
                     if (API.CanCast(SearingNightmare) && API.PlayerInsanity >= 30 && ChannelingMindSear && TalentSearingNightmare && (searing_nightmare_cutoff || API.TargetDebuffRemainingTime(SWPain) <= 360 && (API.TargetUnitInRangeCount > 1 || IsForceAOE) && (IsAOE || IsForceAOE)))
@@ -418,12 +425,6 @@ namespace HyperElk.Core
                     if (API.CanCast(SearingNightmare) && API.PlayerInsanity >= 30 && ChannelingMindSear && TalentSearingNightmare && (API.TargetDebuffRemainingTime(SWPain) <= 360 || (API.TargetUnitInRangeCount > 3 || IsForceAOE)) && (API.TargetUnitInRangeCount > 2 || IsForceAOE) && (IsAOE || IsForceAOE))
                     {
                         API.CastSpell(SearingNightmare);
-                        return;
-                    }
-                    //actions.cwc+=/mind_blast,only_cwc=1
-                    if (API.CanCast(MindBlast) && PlayerHasBuff(DarkThoughts) && (ChannelingMindSear || ChannelingMindFlay))
-                    {
-                        API.CastSpell(MindBlast);
                         return;
                     }
                     //actions+=/run_action_list,name=main
