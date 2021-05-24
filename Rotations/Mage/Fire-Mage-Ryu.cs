@@ -710,16 +710,22 @@ namespace HyperElk.Core
                 if (BlastWave && API.CanCast("Blast Wave") && !API.PlayerIsCasting(true) && API.TargetUnitInRangeCount >= 3 && API.TargetRange <= 8 && (IsAOE || IsForceAOE) && !API.PlayerHasBuff("Combustion"))
                 {
                     API.CastSpell("Blast Wave");
-                    API.WriteLog("Blast Wave Targets :" + API.TargetUnitInRangeCount);
+                    API.WriteLog("Blast Wave Targets : " + API.TargetUnitInRangeCount);
                     return;
                 }
                 if (API.CanCast("Dragon's Breath") && !API.PlayerIsCasting(true) && (API.PlayerIsInRaid ? API.TargetUnitInRangeCount >= 3 && !AlexstraszaFury : API.TargetUnitInRangeCount >= AOEUnitNumber && IsAOE || IsForceAOE) && API.TargetRange <= 8 && (!API.PlayerHasBuff("Combustion") && AlexstraszaFury || AlexstraszaFury && API.PlayerHasBuff("Combustion") && API.PlayerBuffTimeRemaining("Combustion") <= 100))
                 {
                     API.CastSpell("Dragon's Breath");
-                    API.WriteLog("Dragon's Breath Targets :" + API.TargetUnitInRangeCount);
+                    API.WriteLog("Dragon's Breath Targets : " + API.TargetUnitInRangeCount);
                     return;
                 }
-                if (API.CanCast("Scorch") && Level >= 19 && InRange && !API.PlayerIsCasting(true) && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) && (!API.PlayerHasBuff("Combustion") && SearingTouch && API.TargetHealthPercent <= 30 && API.TargetHealthPercent > 0 || API.PlayerHasBuff("Combustion") && API.SpellCharges("Fire Blast") < 1 && API.SpellCharges("Phoenix Flames") < 1) && (!QuakingHelper || QuakingScorch && QuakingHelper) && !ScorchWatch.IsRunning && (IsForceAOE || !IsForceAOE))
+                if (API.CanCast("Scorch") && Level >= 19 && InRange && API.PlayerIsCasting(false) && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) &&  API.PlayerHasBuff("Combustion") && API.SpellCharges("Fire Blast") < 1 && API.SpellCharges("Phoenix Flames") < 1 && (!QuakingHelper || QuakingScorch && QuakingHelper) && !ScorchWatch.IsRunning && (IsForceAOE || !IsForceAOE))
+                {
+                    API.CastSpell("Scorch");
+                    API.WriteLog("Scorch during Combust /w No FB/PF Charges");
+                    return;
+                }
+                if (API.CanCast("Scorch") && !API.PlayerHasBuff("Combustion") && Level >= 19 && InRange && API.PlayerIsCasting(false) && (!API.PlayerHasBuff("Heating Up") || API.PlayerHasBuff("Heating Up") && !API.PlayerHasBuff("Hot Streak!")) && !API.PlayerHasBuff(Firestorm) && SearingTouch && API.TargetHealthPercent <= 30 && (!QuakingHelper || QuakingScorch && QuakingHelper) && !ScorchWatch.IsRunning && (IsForceAOE || !IsForceAOE))
                 {
                     API.CastSpell("Scorch");
                     API.WriteLog("Scorch during Combust /w No FB/PF Charges or below 30 Percent with Searing Touch");
@@ -732,7 +738,7 @@ namespace HyperElk.Core
                     ScorchWatch.Stop();
                     return;
                 }
-                if (API.PlayerIsMoving && API.CanCast("Scorch") && !API.PlayerIsCasting(true) && InRange && Level >= 19 && !API.PlayerHasBuff(Firestorm) && (!QuakingHelper || QuakingScorch && QuakingHelper) && (IsAOE || !IsAOE) && (SearingTouch && API.TargetHealthPercent > 30 || !SearingTouch) && (IsForceAOE || !IsForceAOE))
+                if (API.PlayerIsMoving && API.CanCast("Scorch") && InRange && Level >= 19 && !API.PlayerHasBuff(Firestorm) && (!QuakingHelper || QuakingScorch && QuakingHelper) && (IsAOE || !IsAOE) && (SearingTouch && API.TargetHealthPercent > 30 || !SearingTouch) && (IsForceAOE || !IsForceAOE))
                 {
                     API.CastSpell("Scorch");
                     API.WriteLog("Scorch while moving");
