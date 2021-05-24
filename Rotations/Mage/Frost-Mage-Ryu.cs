@@ -621,7 +621,7 @@ namespace HyperElk.Core
                     API.CastSpell(CoC);
                     return;
                 }
-                if (!FlurryWatch.IsRunning && API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && !PlayerHasBuff(FoF) && !PlayerHasBuff(BrainFreeze) && !API.TargetHasDebuff(WC) && (!QuakingHelper || QuakingFB && QuakingHelper) && (API.PlayerLastSpell != Flurry || API.LastSpellCastInGame != Flurry) && (API.PlayerTrinketRemainingCD(1) > 0 || API.PlayerTrinketRemainingCD(2) > 0 || !API.PlayerTrinketIsUsable(1) || !API.PlayerTrinketIsUsable(2)))
+                if (API.CanCast(Frostbolt) && Level >= 1 && API.TargetRange <= 40 && (!API.PlayerIsMoving || API.PlayerIsMoving && PlayerHasBuff(IF)) && !PlayerHasBuff(FoF) && !PlayerHasBuff(BrainFreeze) && !API.TargetHasDebuff(WC) && (!QuakingHelper || QuakingFB && QuakingHelper) && (API.PlayerLastSpell != Flurry || API.LastSpellCastInGame != Flurry) && (API.PlayerTrinketRemainingCD(1) > 0 || API.PlayerTrinketRemainingCD(2) > 0 || !API.PlayerTrinketIsUsable(1) || !API.PlayerTrinketIsUsable(2)))
                 {
                     API.CastSpell(Frostbolt);
                     return;
