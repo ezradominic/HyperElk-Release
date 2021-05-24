@@ -52,6 +52,8 @@ namespace HyperElk.Core
         private string UnendingResolve = "Unending Resolve";
         private string CurseofWeakness = "Curse of Weakness";
         private string Quake = "Quake";
+        private string Stopcast = "Stopcast Macro";
+
         //Talents
         private bool TalentDrainSoul => API.PlayerIsTalentSelected(1, 3);
         private bool TalentSiphonLife => API.PlayerIsTalentSelected(2, 3);
@@ -139,7 +141,8 @@ namespace HyperElk.Core
             328125,
             334625,
         };
-        bool CasterMob;
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Affliction Warlock @Mufflon12";
@@ -240,15 +243,15 @@ namespace HyperElk.Core
 
             CombatRoutine.AddItem(PhialofSerenity, 177278);
             CombatRoutine.AddItem(SpiritualHealingPotion, 171267);
-            CombatRoutine.AddMacro("Stopcast", "F10");
+            CombatRoutine.AddMacro(Stopcast, "F10");
         }
 
 
         public override void Pulse()
         {
-            if (API.PlayerHasDebuff(Quake) && API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake))
+            if (API.PlayerCurrentCastTimeRemaining > 40 && !API.MacroIsIgnored(Stopcast) && Quaking)
             {
-                API.CastSpell("Stopcast");
+                API.CastSpell(Stopcast);
                 return;
             }
         }
@@ -1679,7 +1682,6 @@ namespace HyperElk.Core
 
         public override void OutOfCombatPulse()
         {
-            CasterMob = false;
             //Grimoire Of Sacrifice
             if (API.PlayerHasPet && TalentGrimoireOfSacrifice && API.PlayerHasBuff("Grimoire Of Sacrifice"))
             {

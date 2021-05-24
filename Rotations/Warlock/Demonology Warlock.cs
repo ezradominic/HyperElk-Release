@@ -43,6 +43,7 @@ namespace HyperElk.Core
         private string SpellLock = "Spell Lock";
         private string Healthstone = "Healthstone";
         private string Quake = "Quake";
+        private string Stopcast = "Stopcast Macro";
 
 
 
@@ -82,6 +83,8 @@ namespace HyperElk.Core
         private static readonly Stopwatch TyrantWatch = new Stopwatch();
         private static readonly Stopwatch VilefiendWatch = new Stopwatch();
         private static readonly Stopwatch GrimoireFelguardWatch = new Stopwatch();
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+
         public override void Initialize()
         {
             CombatRoutine.Name = "Demonology Warlock @Mufflon12";
@@ -137,7 +140,7 @@ namespace HyperElk.Core
             //Debuffs
             CombatRoutine.AddDebuff(Doom, 603);
             CombatRoutine.AddDebuff(Quake, 240447);
-            CombatRoutine.AddMacro("Stopcast", "F10");
+            CombatRoutine.AddMacro(Stopcast, "F10");
         }
 
 
@@ -155,9 +158,9 @@ namespace HyperElk.Core
             {
                 TyrantWatch.Reset();
             }
-            if (API.PlayerHasDebuff(Quake) && API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake))
+            if (API.PlayerCurrentCastTimeRemaining > 40 && !API.MacroIsIgnored(Stopcast) && Quaking)
             {
-                API.CastSpell("Stopcast");
+                API.CastSpell(Stopcast);
                 return;
             }
         }

@@ -50,6 +50,7 @@ namespace HyperElk.Core
         private string Trinket2 = "Trinket2";
         private string SpellLock = "Spell Lock"; 
         private string Quake = "Quake";
+        private string Stopcast = "Stopcast Macro";
 
         //Talents
         private bool TalentFlashover => API.PlayerIsTalentSelected(1, 1);
@@ -116,6 +117,7 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
 
         private bool UseImmolateMO => (bool)CombatRoutine.GetProperty("ImmolateMO");
+        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
 
         public override void Initialize()
         {
@@ -200,9 +202,8 @@ namespace HyperElk.Core
             CombatRoutine.AddMacro(Trinket1);
             CombatRoutine.AddMacro(Trinket2);
             CombatRoutine.AddMacro(Immolate + "MO");
-            CombatRoutine.AddItem("HealthstoneFix", 5512);
             CombatRoutine.AddToggle("Mouseover");
-            CombatRoutine.AddMacro("Stopcast", "F10");
+            CombatRoutine.AddMacro(Stopcast, "F10");
 
         }
 
@@ -216,9 +217,9 @@ namespace HyperElk.Core
             {
                 InfernalWatch.Start();
             }
-            if (API.PlayerHasDebuff(Quake) && API.PlayerCurrentCastTimeRemaining > API.PlayerDebuffRemainingTime(Quake))
+            if (API.PlayerCurrentCastTimeRemaining > 40 && !API.MacroIsIgnored(Stopcast)  && Quaking)
             {
-                API.CastSpell("Stopcast");
+                API.CastSpell(Stopcast);
                 return;
             }
             //Summon Imp
