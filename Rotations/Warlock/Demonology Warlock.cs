@@ -83,7 +83,7 @@ namespace HyperElk.Core
         private static readonly Stopwatch TyrantWatch = new Stopwatch();
         private static readonly Stopwatch VilefiendWatch = new Stopwatch();
         private static readonly Stopwatch GrimoireFelguardWatch = new Stopwatch();
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && API.PlayerHasDebuff(Quake);
 
         public override void Initialize()
         {
@@ -221,6 +221,8 @@ namespace HyperElk.Core
         }
         private void rotation()
         {
+            if (API.PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) < 200)
+                return;
             if (NotMoving && IsRange && NotChanneling && !API.PlayerIsCasting(true))
             {
                 if (!TyrantWatch.IsRunning && ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 8000 || TyrantWatch.IsRunning && ImpWatch.IsRunning && ImpWatch.ElapsedMilliseconds >= 25000)

@@ -141,7 +141,7 @@ namespace HyperElk.Core
             328125,
             334625,
         };
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && API.PlayerHasDebuff(Quake);
 
         public override void Initialize()
         {
@@ -257,6 +257,8 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) < 200)
+                return;
             if ((!API.PlayerHasPet || API.PlayerHasPet && API.PetHealthPercent <= 0) && (isMisdirection == "Felhunter" || isMisdirection == "Succubus" || isMisdirection == "Voidwalker" || isMisdirection == "Imp") && API.CanCast(FelDomination))
             {
                 API.CastSpell(FelDomination);

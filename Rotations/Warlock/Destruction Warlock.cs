@@ -117,7 +117,7 @@ namespace HyperElk.Core
         private bool IsMouseover => API.ToggleIsEnabled("Mouseover");
 
         private bool UseImmolateMO => (bool)CombatRoutine.GetProperty("ImmolateMO");
-        private bool Quaking => ((API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200) && API.PlayerHasDebuff(Quake);
+        private bool Quaking => (API.PlayerCurrentCastTimeRemaining >= 200 || API.PlayerIsChanneling) && API.PlayerDebuffRemainingTime(Quake) < 200 && API.PlayerHasDebuff(Quake);
 
         public override void Initialize()
         {
@@ -217,7 +217,7 @@ namespace HyperElk.Core
             {
                 InfernalWatch.Start();
             }
-            if (API.PlayerCurrentCastTimeRemaining > 40 && !API.MacroIsIgnored(Stopcast)  && Quaking)
+            if (API.PlayerCurrentCastTimeRemaining > 40 && !API.MacroIsIgnored(Stopcast) && Quaking)
             {
                 API.CastSpell(Stopcast);
                 return;
@@ -259,6 +259,8 @@ namespace HyperElk.Core
         }
         public override void CombatPulse()
         {
+            if (API.PlayerHasDebuff(Quake) && API.PlayerDebuffRemainingTime(Quake) < 200)
+                return;
             if (isInterrupt && API.CanCast(SpellLock) && API.PlayerHasPet && isMisdirection == "Felhunter")
             {
                 API.CastSpell(SpellLock);
